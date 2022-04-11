@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# sets a screen session for the current project
+
+# sets the current window's name
+screen -X title "notebooks"
+screen -X stuff "cd ../^M"
+screen -X number 0
+
+# uncomment below to make the tabs only run those commands
+# but note that restarting will lose that tab
+
+screen -X dynamictitle off
+screen -X defdynamictitle off
+
+screen -t "ijsUtils"
+screen -p ijsUtils -X stuff "cd ../jupyter-ijavascript-utils^M"
+screen -t "jsUtils"
+screen -p jsUtils -X stuff "cd ../jupyterJsUtils^M"
+screen -t "scratchpad"
+screen -p scratchpad -X stuff "cd ../jupyterScratchpad^M"
+
+screen -t lint
+screen -p lint -X stuff "npm run lint:watch^M"
+screen -t test
+screen -p test -X stuff "npm run test:watch^M"
+screen -t debug
+
+screen -t "server" 10
+screen -p server -X stuff "cd ../^Mjupyter lab"
+screen -t plantuml 11
+screen -p plantuml -X stuff "plantuml -picoweb"
+screen -t codeserver 12
+screen -p codeserver -X stuff "code-server .."
+
+screen -X select 0
+
+# create layouts
+
+screen -X layout new default
+screen -X select ijsUtils
+
+screen -X layout new dev
+#screen -X select micro
+#screen -X split -h
+#screen -X resize 70%
+#screen -X focus
+screen -X select lint
+screen -X split -v
+screen -X focus
+screen -X select test
+
+screen -X layout new test
+screen -X select test
+screen -X split -h
+screen -X resize 60%
+screen -X focus
+screen -X select lint
+
+screen -X layout new server
+screen -X select server
+screen -X split -v
+screen -X focus right
+screen -X select plantuml
+
+screen -X layout select default
+
+# key bindings
+
+# screen -X bindkey -k k1 layout select 0
+# screen -X bindkey -k k2 layout select 1
+# screen -X bindkey -k k3 layout select 2
+

@@ -1,0 +1,57 @@
+{
+  "name": "jupyter-ijavascript-utils",
+  "version": "1.6.5",
+  "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
+  "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "esw src",
+    "lint:watch": "npm run lint -- --watch",
+    "test": "TZ=UTC jest src",
+    "test:watch": "TZ=UTC npm run test -- --watch",
+    "test:debug": "TZ=UTC node --inspect-brk node_modules/jest/bin/jest.js --runInBand",
+    "test:coverage": "TZ=UTC jest src --collectCoverage",
+    "test:watch:coverage": "TZ=UTC jest src --watch --collectCoverage",
+    "doc": "npm run prep:docdash && node_modules/.bin/jsdoc -c ./jsdoc.json -u ./tutorials ./DOCS.md",
+    "prep:docdash": "cp docResources/docdash/layout.tmpl node_modules/docdash/tmpl/layout.tmpl",
+    "open:coverage": "open ./coverage/lcov-report/index.html",
+    "open:docs": "open ./docs/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:paulroth3d/jupyter-ijavascript-utils.git"
+  },
+  "keywords": [
+    "ijavascript",
+    "jupyter"
+  ],
+  "author": "Paul Roth",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "docdash": "^1.2.0",
+    "eslint": "^7.29.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-watch": "^7.0.0",
+    "jest": "^27.0.6",
+    "jsdoc": "^3.6.10",
+    "sinon": "^11.1.1"
+  },
+  "dependencies": {
+    "@svgdotjs/svg.js": "^3.1.2",
+    "fs-extra": "^10.0.1",
+    "generate-schema": "^2.6.0",
+    "node-fetch": "^2.6.5",
+    "pino": "^6.12.0",
+    "pino-pretty": "^5.1.2",
+    "plantuml-encoder": "^1.4.0",
+    "promise-sequential": "^1.1.1",
+    "svgdom": "^0.1.10",
+    "uuid": "^8.3.2",
+    "vega": "^5.22.0",
+    "vega-datasets": "^2.3.0",
+    "vega-lite": "^5.2.0",
+    "vega-lite-api": "^5.0.0"
+  }
+}

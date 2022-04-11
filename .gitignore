@@ -1,0 +1,6 @@
+node_modules
+docs
+.DS_Store
+coverage
+tmp
+.ipynb_checkpoints

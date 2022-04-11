@@ -1,0 +1,15 @@
+node_modules
+docs
+.DS_Store
+coverage
+tmp
+.ipynb_checkpoints
+
+.screenrc
+.vscode
+TODO.md
+src/__mocks__
+src/__testHelper__
+src/__tests__
+docResources
+tutorials

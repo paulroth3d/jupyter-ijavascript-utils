@@ -1,0 +1,65 @@
+{
+
+    "tags": {
+        "allowUnknownTags": false
+    },
+    "source": {
+        "include": "./src",
+        "includePattern": "\\.js$",
+        "excludePattern": "(__tests__|__mocks__)"
+    },
+    "plugins": [
+        "plugins/markdown"
+    ],
+    "opts": {
+        "template": "node_modules/docdash",
+        "encoding": "utf8",
+        "destination": "docs/",
+        "recurse": true,
+        "verbose": true
+    },
+    "templates": {
+        "default":{
+          "outputSourceFiles":false,
+          "staticFiles": {
+            "paths": ["./docResources/"]
+        }
+        },
+        "cleverLinks": false,
+        "monospaceLinks": false
+    },
+    "docdash": {
+        "search": true,
+        "static": true,
+        "sectionOrder": [
+            "Tutorials",
+            "Modules",
+            "Classes",
+            "Namespaces",
+            "Externals",
+            "Events",
+            "Mixins",
+            "Interfaces"
+       ],
+       "menu": {
+            "npm": {
+                "href":"https://www.npmjs.com/package/jupyter-ijavascript-utils",
+                "target":"_blank",
+                "class":"menu-item",
+                "id":"npm_link"
+            }
+        },
+        "openGraph": {
+            "title": "Jupyter-IJavaScript-Utils",
+            "type": "website",
+            "image": "",
+            "site_name": "Jupyter IJavaScript Utils",
+            "url": "https://jupyter-ijavascript-utils.onrender.com/"
+        },
+        "meta": {
+            "title": "jupyter-ijavascript-utils",
+            "description": "Library for working with NodeJS in Jupyter through the iJavaScript kernel",
+            "keyword": "jupyter ijavascript node npm"
+        }
+    }
+}

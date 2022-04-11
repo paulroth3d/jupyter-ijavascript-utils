@@ -1,0 +1,24 @@
+{
+    "vegaLite1": {
+        "title": "Vega-Lite",
+        "children": ["vega_choroplethLong", "vega_choroplethShort"]
+    },
+    "howToUse": {
+        "title": "How to Use"
+    },
+    "exampleWalkthrough": {
+        "title": "Example Walkthrough"
+    },
+    "htmlScript": {
+        "title": "Html Script"
+    },
+    "noiseVisualization": {
+        "title": "Noise Visualization"
+    },
+    "vega_choroplethLong": {
+        "title": "Let's make a Data Driven Map: Details"
+    },
+    "vega_choroplethShort": {
+        "title": "Let's make a Data Driven Map"
+    }
+}
