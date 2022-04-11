@@ -166,7 +166,7 @@ utils.vega.svg((vl) => vl.markPoint()
 
 Or try your hand at the [Vega Lite Examples](https://vega.github.io/vega-lite/examples/)
 
-![Screenshot of Vega-Lite Examples](https://jupyter-ijavascript-utils.onrender.com/img/vegaLiteExamples.png)
+![Screenshot of Vega-Lite Examples](https://jupyter-ijavascript-utils.onrender.com/img/vegaLiteExamplesSm.png)
 
 ## Create a Data Driven Map
 

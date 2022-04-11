@@ -1,5 +1,4 @@
 {
-
     "tags": {
         "allowUnknownTags": false
     },
@@ -47,6 +46,12 @@
                 "target":"_blank",
                 "class":"menu-item",
                 "id":"npm_link"
+            },
+            "github": {
+				"href": "https://github.com/paulroth3d/jupyter-ijavascript-utils",
+				"target": "_blank",
+				"class": "menu-item",
+				"id": "github_link"
             }
         },
         "openGraph": {
