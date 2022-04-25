@@ -389,6 +389,36 @@ global.describe('format', () => {
     });
   });
 
+  global.describe('clampDomain', () => {
+  	global.it('clamps if the value is less than mimimum', () => {
+  		const val = -1;
+  		const min = 0;
+  		const max = 1;
+  		const expected = 0;
+  		const result = FormatUtils.clampDomain(val, [min, max]);
+
+  		global.expect(result).toBeCloseTo(expected, 5);
+  	});
+  	global.it('clamps if the value is greater than the maximum', () => {
+  		const val = 2;
+  		const min = 0;
+  		const max = 1;
+  		const expected = 1;
+  		const result = FormatUtils.clampDomain(val, [min, max]);
+
+  		global.expect(result).toBeCloseTo(expected, 5);
+  	});
+  	global.it('does not clamp if in the domain', () => {
+  		const val = 0.5;
+  		const min = 0;
+  		const max = 1;
+  		const expected = 0.5;
+  		const result = FormatUtils.clampDomain(val, [min, max]);
+
+  		global.expect(result).toBeCloseTo(expected, 5);
+  	});
+  });
+
   global.describe('timePeriod', () => {
     global.describe('can mock time', () => {
       global.it('can mock a fake time', () => {

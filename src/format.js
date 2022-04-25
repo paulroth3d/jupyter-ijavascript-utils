@@ -321,6 +321,7 @@ module.exports.ellipsify = function ellipsify(str, maxLen = 50) {
  * @param {Array} range.rangeMin - minimum output value
  * @param {Array} range.rangeMax - maximum output value
  * @returns Number
+ * @see {@link module:format.clampDomain|clampDomain(value, [min, max])}
  * @example
  * 
  * format.mapDomain(-2, [0, 10], [0, 1])
@@ -333,8 +334,8 @@ module.exports.ellipsify = function ellipsify(str, maxLen = 50) {
  * // 1   - since it is above the maximum value
  * 
  * format.mapDomain(0.5, [0, 1], [0, 10])
- * // 5 - since it is half of 0-1, and half of 1-10
  * format.mapDomain(0.5, [0, 1], [0, Math.PI + Math.PI])
+ * // 5 - since it is half of 0-1, and half of 1-10
  * // 3.1415 or Math.PI - since it is half of 2 PI
  */
 module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rangeMin = 0, rangeMax = 1]) {
@@ -423,4 +424,33 @@ module.exports.timePeriod = function mapTime(millisecondPeriod, timeMilli = null
  */
 module.exports.timePeriodPercent = function mapEpochInPeriod(millisecondPeriod, timeEpoch = new Date().getTime()) {
   return (timeEpoch % millisecondPeriod) / millisecondPeriod;
+};
+
+/**
+ * Clamps (restircts) a value to a specific domain.
+ * 
+ * Meaning if value is less than minimum, then the minimum is returned.
+ * If the value is greater than the maximum, then the maximum is returned.
+ * 
+ * NOTE: null or undefined are not treated specially when comparing to maximum or minimum values.
+ * 
+ * @param {Number} value - the value that will be modified if less than min or max
+ * @param {Array} domain - Domain of min and max values
+ * @param {Number} domain.min - the minimum value allowable
+ * @param {Number} domain.max - the maximum value allowable
+ * @returns {Number} - minimum if value is less than minimum, maximum if more, value otherwise.
+ * 
+ * @see {@link module:format.mapDomain|mapDomain(value, [min, max], [newMin, newMax])}
+ * @example
+ * format.clampDomain( -1, [0, 1]); // 0
+ * format.clampDomain( 2, [0, 1]); // 1
+ * format.clampDomain( 0.5, [0, 1]); // 0.5
+ **/
+module.exports.clampDomain = function clampDomain(value, [minimum, maximum]) {
+  if (value < minimum) {
+    return minimum;
+  } else if (value > maximum) {
+    return maximum;
+  }
+  return value;
 };

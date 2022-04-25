@@ -1182,23 +1182,19 @@ utils.svg.embed({
         const lines = lib.size(yCount)
             .map(() => lib.size(xCount, () => el.line()));
         
-        const [ requestAnimationFrame, cancelAnimationFrame ] = lib.animationFrameCalls();
+        const anim = lib.animationFrameCalls();
         
-        //-- note that cancel is not supported in all cases
-        //-- see https://caniuse.com/?search=animationFrame
-        //-- and manual stop below
-        
-        if (window.currentAnimation) {
-            cancelAnimationFrame(window.currentAnimation);
-            window.currentAnimation = null;
-        }
+        anim.stopOtherAnimations();
         
         const renderLines = () => {
             //-- render line
-            let zX = lib.mapTime(new Date().getTime(), data.timePeriod);
-            let zY = lib.mapTime(new Date().getTime() + data.timeOffset, data.timePeriod);
+            const nowMilli = Date.now();
+            let zX = lib.timePeriod(data.timePeriod, nowMilli);
+            let zY = lib.timePeriod(data.timePeriod, nowMilli + data.timeOffset);
+            
             lines.forEach((row, rowIndex) => {
                 row.forEach((line, colIndex) => {
+                    //-- we are moving through the zPlane (x, y, z) - based on time
                     const forceX = noise.simplex3(
                         colIndex * xRangeInc,
                         rowIndex * yRangeInc,
@@ -1225,43 +1221,27 @@ utils.svg.embed({
             });
             
             //-- stop the animation
-            if (window.stopAnimation == true) {
-                console.log('animation noticed stop');
-                window.currentAnimation = null;
-            } else {
-                window.currentAnimation = window.requestAnimationFrame(renderLines);
+            if (anim.checkAnimationsAllowed()) {
+                anim.nextAnimationFrame(renderLines);
             }
         };
+        
         renderLines();
     },
     utilityFunctions: {
-        animationFrameCalls: () => {
-            const requestAnimationFrame = window.requestAnimationFrame
-                || window.mozRequestAnimationFrame
-                || window.webkitRequestAnimationFrame
-                || window.msRequestAnimationFrame;
-            const cancelAnimationFrame = window.cancelAnimationFrame
-                || window.mozCancelAnimationFrame;
-            
-            return [requestAnimationFrame, cancelAnimationFrame];
+        animationFrameCalls: utils.svg.utilityFunctions.animationFrameCalls,
+        size: utils.array.size,
+        mapDomain: utils.format.mapDomain,
+        timePeriod: utils.format.timePeriod,
+        clamp: (val, min, max) => {
+            if (val < min) {
+                return min;
+            } else if (val > max) {
+                return max;
+            }
+            return val;
         },
-        size: function size(length, defaultValue) {
-          if (typeof defaultValue === 'function') {
-            return new Array(length).fill(null).map((_, index) => defaultValue(index));
-          }
-          return  new Array(length).fill(defaultValue);
-        },
-        mapDomain: (val, [origMin, origMax], [newMin, newMax]) => {
-            // origMin / val / origMax = newMin / result / newMax
-            // (val - origMin) / (origMax - origMin) = (result - newMin) / (newMax - newMin)
-            // (val - origMin) * (newMax - newMin) / (origMax - origMin) = result - newMin;
-            // (val - origMin) * (newMax - newMin) / (origMax - origMin) + newMin = result
-            return (val - origMin) * (newMax - newMin) / (origMax - origMin) + newMin;
-        },
-        mapTime: (t, period) => {
-            return t / period;
-            // return (t.getTime() % period) / period;
-        },
+        
         plotLine: (line, xInc, yInc, x, y, forceX, forceY) => {
             const xOff = xInc * x;
             const yOff = yInc * y;
@@ -1281,14 +1261,194 @@ utils.svg.embed({
             });
         }
     }
-})
+});
 ```
 
 ![svg](img/noiseVisualization_wavesDark.svg)
 
 ![Screenshot of dark animation](img/svgAnimation2Dark.gif)
 
-(If stopped, run the cell above again, see the section on stopping the animations for more)
+# Alternative Using Canvas
+
+Depending on the number of instances we want to run, using the canvas can be much faster.
+
+(Modifying the dom through setAttribute on SVG can cause Garbage Collection to occur - leading to periodic jutters in the animations).
+
+This also shows how simple it is to extend the ijs.htmlScript to support other libraries,
+and the simplest example to understand.
+
+```javascript
+//-- could just as use utils.ijs.htmlScript
+//-- (as this is how utils.svg.embed is done)
+
+//-- https://jupyter-ijavascript-utils.onrender.com/tutorial-htmlScript.html
+
+utils.ijs.htmlScript({
+    debug: true,
+    
+    //-- note: width and height can also be set here
+    
+    //-- use Canvas instead for the main element
+    html: `<canvas />`,
+
+    scripts: [
+        'https://cdn.rawgit.com/josephg/noisejs/master/perlin.js',
+        //-- we are only using the svg library for the colorRange linear interpolation
+        'https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0.0/dist/svg.min.js'
+    ],
+    
+    //-- data to prepare the document
+    data: {
+        canvasWidth: 720,
+        canvasHeight: 360,
+        
+        //-- number of indicators along x and y axis
+        xCount: 48,
+        yCount: 24,
+        //-- background color
+        backgroundColor: '#000',
+        //-- color range: 0: startingColor, 1: ending color
+        initialColor: '#F0F',
+        finalColor: '#0FF',
+        //-- how fast or slow the period resets, simplex provides 1 cycle per period
+        timePeriod: 10000,
+        //-- how closely related the direction and length are in time
+        timeOffset: 5000,
+        //-- the minimum / maximum lengths of the indicators
+        minLength: 10,
+        maxLength: 50,
+        //-- opacity and width of line
+        width: 4,
+        // opacity: 0.2, //-- not used
+    },
+    
+    onReady: ({ rootEl, data, options, utilityFunctions: lib }) => {
+        
+        const canvas = rootEl.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        //-- width and height are converted to px (ex: ``${width}px`)
+        const width = data.canvasWidth;
+        const height = data.canvasHeight;
+        
+        //-- make the background black
+        canvas.setAttribute('style', `background-color: ${data.backgroundColor}`);
+        canvas.width = width;
+        canvas.height = height;
+        
+        //-- number of inidcators to show
+        const xCount = data.xCount;
+        const yCount = data.yCount;
+        
+        //-- x-y position between 0-1
+        const xRangeInc = 1 / xCount;
+        const yRangeInc = 1 / yCount;
+        
+        //-- how much to increment for each column / row
+        const xInc = width / xCount;
+        const yInc = height / yCount;
+        
+        //-- catch the special case that min and max are the same
+        const minMaxMatch = data.min === data.max;
+        
+        const colorRange = new SVG.Color(data.initialColor).to(data.finalColor);
+        
+        const lengthRange = data.maxLength - data.minLength;
+        
+        //-- initialize lines
+        const lines = lib.size(yCount, (yIndex) =>
+            lib.size(xCount, (xIndex) => ({
+                xPos: xIndex * xInc,
+                xNoise: xIndex * xRangeInc,
+                yPos: yIndex * yInc,
+                yNoise: yIndex * yRangeInc
+            })))
+            .flat();
+        
+        const anim = lib.animationFrameCalls();
+        
+        anim.stopOtherAnimations();
+        
+        const renderLines = () => {
+            //-- render line
+            const nowMilli = Date.now();
+            let zX     = lib.timePeriod(data.timePeriod, nowMilli);
+            let zY     = lib.timePeriod(data.timePeriod, nowMilli + data.timeOffset);
+            let zColor = lib.timePeriod(data.timePeriod, nowMilli + data.timeOffset + data.timeOffset);
+
+            //-- clear the canvas between frames
+            ctx.fillStyle = data.backgroundColor;
+            ctx.fillRect(0, 0, width, height);
+            
+            for (let lineObj of lines) {
+                //-- we are moving through the zPlane (x, y, z) - based on time
+                
+                //-- [0 <= x <= 1], [0 <= y <= 1], timePeriod
+                const forceX = noise.simplex3(
+                  lineObj.xNoise,
+                  lineObj.yNoise,
+                  zX
+                );
+                //-- [0 <= x <= 1], [0 <= y <= 1], timePeriod + shift
+                const forceY = noise.simplex3(
+                  lineObj.xNoise,
+                  lineObj.yNoise,
+                  zY
+                );
+                //-- [0 <= x <= 1], [0 <= y <= 1], timePeriod + shift
+                const noiseColor = noise.simplex3(
+                  lineObj.xNoise,
+                  lineObj.yNoise,
+                  zColor
+                );
+
+                //-- use shortcut to avoid Math.sqrt
+                // const length = Math.sqrt(forceX * forceX + forceY * forceY);
+                let length = ( Math.abs(forceX) + Math.abs(forceY) ) / 2;
+                if (length > 1) length = 1;
+
+                const mappedLength = lib.mapDomain(length, [0, 1], [data.minLength, data.maxLength]);
+
+                const rotatedX = Math.cos(forceX * Math.PI) * mappedLength;
+                const rotatedY = Math.sin(forceY * Math.PI) * mappedLength;
+
+                //-- map the color to a place on the colorRange
+                const colorVal = lib.mapDomain(noiseColor, [-1, 1], [0, 1]);
+                const color = colorRange.at(colorVal);
+                //-- note length is used for the alpha
+                const colorStr = `rgb(${color.r},${color.g},${color.b},${length})`;
+
+                ctx.strokeStyle = colorStr;
+                ctx.lineWidth = minMaxMatch ? data.width : data.width * length;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lineObj.xPos, lineObj.yPos);
+                ctx.lineTo(lineObj.xPos + rotatedX, lineObj.yPos + rotatedY);
+                // ctx.closePath();
+                ctx.stroke();
+            }
+            
+            //-- stop the animation
+            if (anim.checkAnimationsAllowed()) {
+                anim.nextAnimationFrame(renderLines);
+            }
+        };
+        
+        renderLines();
+    },
+    utilityFunctions: {
+        animationFrameCalls: utils.svg.utilityFunctions.animationFrameCalls,
+        size: utils.array.size,
+        mapDomain: utils.format.mapDomain,
+        timePeriod: utils.format.timePeriod,
+        clamp: utils.format.clampDomain
+    }
+});
+```
+
+![svg](img/noiseVisualization_wavesDark.svg)
+
+![Screenshot of dark animation](img/svgAnimation2Dark.gif)
 
 # Test with Vega
 
