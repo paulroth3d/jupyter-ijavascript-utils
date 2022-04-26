@@ -9,9 +9,13 @@ Both ultimately provide a value for a given coordinate, say (x,y) and a given se
 
 ![Screenshot of chart](img/noiseVisualization_dotChart.svg)
 
-However, Simplex provides values at higher dimensions much more easily: `O(N^2)`, and provides a smoother gradient among values:
+However, Simplex provides values at higher dimensions much more easily: `O(N^2)`, and pure gradients between areas (meaning it has smooth transitions between negative and positive areas)
 
-![Screenshot of the light animation](img/svgAnimation2Light.gif)
+![Screenshot of animation for 1d](img/noise1d.gif)
+
+This is made a bit clearer if we put a 'spin' where counter clockwise / red is negative, and clock-wise / green is positive values - shown on a 2d grid as we move up and down the z-plane.
+
+![Screenshot of animation for 2d](img/noise2d.gif)
 
 # Libraries Used
 
