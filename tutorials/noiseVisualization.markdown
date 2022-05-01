@@ -5,17 +5,38 @@
 Here we'll try to understand what [Perlin Noise](https://en.wikipedia.org/wiki/Perlin_noise)
 and the newer [Simplex Noise](https://en.wikipedia.org/wiki/Simplex_noise).
 
-Both ultimately provide a value for a given coordinate, say (x,y) and a given seed.
+For further detail on the mathematics, I would suggest:
+* [Adrian B: Understanding Perlin Noise](https://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf)
+* [Stefan Gustavson's Paper: Understanding Simplex Noise](https://weber.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf)
+* [Jasper Flick's writeups on PseudoRandom Noise](https://catlikecoding.com/unity/tutorials/pseudorandom-noise/simplex-noise/)
+
+Both Simplex and Perlin noise are pseudo-random functions that provide a [-1, 1] range values.
+
+(Ultimately the values appear random, but because it is deterministic - if you provide the same input values, you'll get the same values back - it isn't really random)
+
+Simplex provides values at higher dimensions much more easily: `O(N^2)`, and provides a smoother gradient among values.
 
 ![Screenshot of chart](img/noiseVisualization_dotChart.svg)
 
-However, Simplex provides values at higher dimensions much more easily: `O(N^2)`, and pure gradients between areas (meaning it has smooth transitions between negative and positive areas)
+In this document, we'll be showing the values as they change along the z-axis in an animation, as we move along it based on a function of time - receiving some value between -1 and +1.
+
+fn(x, y, time) => []-1 ... 1]
+
+![Screenshot of Chart](img/noiseAxis.png)
+
+So instead of creating static noise values, we can animate.
 
 ![Screenshot of animation for 1d](img/noise1d.gif)
 
 This is made a bit clearer if we put a 'spin' where counter clockwise / red is negative, and clock-wise / green is positive values - shown on a 2d grid as we move up and down the z-plane.
 
 ![Screenshot of animation for 2d](img/noise2d.gif)
+
+Playing around with these values, you can create some very simple but elegant graphics.
+
+![Screenshot of the light animation](img/svgAnimation2Light.gif)
+
+[See here for a full screen demo](https://paulroth3d.github.io/drift)
 
 # Libraries Used
 
@@ -791,6 +812,20 @@ utils.vega.svgFromSpec({
 
 ![svg](img/noiseVisualization_axisChart.svg)
 
+# Animating to show the value
+
+Moving along the Z-Axis, we can show how these values play over time.
+
+In our case, we'll always have the screen corners be between 0-1 at each of the corners.
+
+We'll call 'density' the number of pixels between each of the indicators.
+
+The number of points will still be evenly distributed based on the number of pixels betwen 'indicators'
+
+![Screenshot of animation for 1d](../img/noise1d.gif)
+
+[Link to animation](https://paulroth3d.github.io/drift/v6/?offset=0&width=30&density=20&initial=F00&final=0F0&min=1&max=1&period=7000)
+
 # Animation showing the value
 
 Lets try using the current time to calculate two random values:
@@ -1453,6 +1488,208 @@ utils.ijs.htmlScript({
 ![svg](img/noiseVisualization_wavesDark.svg)
 
 ![Screenshot of dark animation](img/svgAnimation2Dark.gif)
+
+# Final Version
+
+* Gradients
+* greater opacity near occlusion
+* other updates
+
+```javascript
+//-- could just as use utils.ijs.htmlScript
+//-- (as this is how utils.svg.embed is done)
+
+//-- https://jupyter-ijavascript-utils.onrender.com/tutorial-htmlScript.html
+
+utils.ijs.htmlScript({
+    debug: true,
+    
+    //-- note: width and height can also be set here
+    width: 720,
+    height: 360,
+    
+    //-- use Canvas instead for the main element
+    html: `<canvas />`,
+
+    scripts: [
+        'https://cdn.rawgit.com/josephg/noisejs/master/perlin.js',
+        //-- we are only using the svg library for the colorRange linear interpolation
+        'https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0.0/dist/svg.min.js'
+    ],
+    
+    //-- data to prepare the document
+    data: {
+        // canvasWidth: 720,
+        // canvasHeight: 360,
+        
+        //-- number of pixels between indicators
+        density: 20,
+        //-- background color
+        backgroundColor: '#000000',
+        //-- color range: 0: startingColor, 1: ending color
+        initialColor: '#FF00FF',
+        finalColor: '#00FFFF',
+        //-- how fast or slow the period resets, simplex provides 1 cycle per period
+        timePeriod: 10000,
+        //-- how closely related the direction and length are in time
+        timeOffset: 5000,
+        //-- the minimum / maximum lengths of the indicators
+        minLength: 10,
+        maxLength: 100,
+        //-- opacity and width of line
+        width: 10
+    },
+    
+    onReady: ({ rootEl, data, options, utilityFunctions: lib }) => {
+        
+        const canvas = rootEl.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        //-- width and height are converted to px (ex: ``${width}px`)
+        const width = Number.parseInt(options.width);// data.canvasWidth;
+        const height = Number.parseInt(options.height);// data.canvasHeight;
+        
+        //-- make the background black
+        canvas.setAttribute('style', `background-color: ${data.backgroundColor}`);
+        canvas.width = width;
+        canvas.height = height;
+        
+        //-- number of inidcators to show
+        const xCount = width / data.density;
+        const yCount = height / data.density;
+        
+        //-- choose the greater of the densities
+        const rangeInc = width <= height
+            ? 1 / xCount
+            : 1 / yCount;
+
+        const xInc = width / xCount;
+        const yInc = height / yCount;
+        
+        //-- catch the special case that min and max are the same
+        const minMaxMatch = data.minLength === data.maxLength;
+        
+        const colorRange = new SVG.Color(data.initialColor).to(data.finalColor);
+        
+        //-- initialize lines
+        const lines = lib.size(yCount, (yIndex) =>
+            lib.size(xCount, (xIndex) => ({
+                xPos: xIndex * xInc,
+                xNoise: xIndex * rangeInc,
+                yPos: yIndex * yInc,
+                yNoise: yIndex * rangeInc
+            })))
+            .flat();
+        
+        const anim = lib.animationFrameCalls();
+        
+        anim.stopOtherAnimations();
+        
+        const renderLines = () => {
+            //-- render line
+            const nowTime = Date.now();
+            let zX     = lib.timePeriod(data.timePeriod, nowTime);
+            let zY     = lib.timePeriod(data.timePeriod, nowTime + data.timeOffset);
+            let zColor = lib.timePeriod(data.timePeriod, nowTime + data.timeOffset + data.timeOffset);
+
+            //-- clear the canvas between frames
+            ctx.fillStyle = data.backgroundColor;
+            ctx.fillRect(0, 0, width, height);
+            
+            for (let lineObj of lines) {
+                //-- we are moving through the zPlane (x, y, z) - based on time
+                
+                //-- [0 <= x <= 1], [0 <= y <= 1], timePeriod
+                const forceX = noise.simplex3(
+                  lineObj.xNoise,
+                  lineObj.yNoise,
+                  zX
+                );
+                //-- [0 <= x <= 1], [0 <= y <= 1], timePeriod + shift
+                const forceY = noise.simplex3(
+                  lineObj.xNoise,
+                  lineObj.yNoise,
+                  zY
+                );
+                //-- [0 <= x <= 1], [0 <= y <= 1], timePeriod + shift
+                const noiseColor = noise.simplex3(
+                  lineObj.xNoise,
+                  lineObj.yNoise,
+                  zColor
+                );
+
+                //-- use shortcut to avoid Math.sqrt
+                // const forceLength = Math.sqrt(forceX * forceX + forceY * forceY);
+                let forceLength = ( Math.abs(forceX) + Math.abs(forceY) ) / 2;
+                if (forceLength > 1) forceLength = 1;
+
+                const mappedLength = lib.mapDomain(forceLength, [0, 1], [data.minLength, data.maxLength]);
+        
+                const rotatedX = Math.cos(forceX * Math.PI) * mappedLength;
+                const rotatedY = Math.sin(forceY * Math.PI) * mappedLength;
+
+                let rotatedLength = (Math.abs(rotatedX) + Math.abs(rotatedY)) / 2;
+
+                let initialTransparency;
+                if (minMaxMatch) {
+                  //-- we want to see full color circles / no gradient
+                  initialTransparency = 1;
+                } else {
+                  //-- make the gradient appear more opaque if closer to 0
+                  //-- as it appears more 'overhead'
+                  initialTransparency = lib.mapDomain(
+                    rotatedLength,
+                    [ 0, data.minLength ],
+                    [ 1, 0 ]
+                  );
+                }
+
+                //-- map the color to a place on the colorRange
+                const colorVal = lib.mapDomain(noiseColor, [-1, 1], [0, 1]);
+                const color = colorRange.at(colorVal);
+                //-- note length is used for the alpha
+                // const colorStr = `rgb(${color.r},${color.g},${color.b})`;
+
+                //-- direction of the gradient (x1, y1, x2, y2)
+                //-- as it is in the center of the circle
+                const gradient = ctx.createLinearGradient(
+                    lineObj.xPos, lineObj.yPos,
+                    lineObj.xPos + rotatedX, lineObj.yPos + rotatedY
+                );
+                gradient.addColorStop(0, `rgba(${color.r},${color.g},${color.b},${initialTransparency})`);
+                gradient.addColorStop(1, `rgba(${color.r},${color.g},${color.b},1)`);
+
+                        ctx.strokeStyle = gradient;
+                ctx.lineWidth = data.width;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lineObj.xPos, lineObj.yPos);
+                ctx.lineTo(lineObj.xPos + rotatedX, lineObj.yPos + rotatedY);
+                // ctx.closePath();
+                ctx.stroke();
+            }
+            
+            //-- stop the animation
+            if (anim.checkAnimationsAllowed()) {
+                // anim.nextAnimationFrame(renderLines);
+            }
+        };
+        
+        renderLines();
+    },
+    utilityFunctions: {
+        animationFrameCalls: utils.svg.utilityFunctions.animationFrameCalls,
+        size: utils.array.size,
+        mapDomain: utils.format.mapDomain,
+        timePeriod: utils.format.timePeriod,
+        clampDomain: utils.format.clampDomain
+    }
+});
+```
+
+![svg](img/noiseFinal.jpg)
+
+![Screenshot of dark animation](img/noiseFinal.gif)
 
 # Test with Vega
 
