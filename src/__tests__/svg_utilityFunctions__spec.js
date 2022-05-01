@@ -92,6 +92,12 @@ global.describe('svg_utilityFunctions', () => {
         result.allowAnimations(true);
         global.expect(global.window.stopAnimation).toBe(true);
       });
+      global.it('can allow animations by default', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        global.window.stopAnimation = false;
+        result.allowAnimations();
+        global.expect(global.window.stopAnimation).toBe(true);
+      });
       global.it('can disallow animations', () => {
         const result = UtilFunctions.animationFrameCalls();
         global.window.stopAnimation = true;
@@ -100,12 +106,44 @@ global.describe('svg_utilityFunctions', () => {
       });
     });
     global.describe('nextAnimationFrame', () => {
+      beforeEach(() => {
+        jest.spyOn(global.window, 'requestAnimationFrame').mockImplementation((callToRun) => {
+          callToRun();
+          return 100;
+        });
+      });
+      afterEach(() => {
+        global.window.requestAnimationFrame.mockRestore();
+      });
+
       global.it('can set a next animation frame', () => {
         const result =  UtilFunctions.animationFrameCalls();
         global.window.animation = null;
         const fn = () => {};
         result.nextAnimationFrame(fn);
         global.expect(global.window.animation).toBeTruthy();
+      });
+      global.it('runs the animation if the element is still attached', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        
+        const domEl = global.window.document.createElement('div');
+        global.window.document.body.appendChild(domEl);
+
+        const fn = jest.fn();
+        result.nextAnimationFrame(fn, domEl);
+
+        global.expect(fn).toHaveBeenCalled();
+      });
+      global.it('halts the animation if the element is not on DOM anymore', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        
+        const domEl = global.window.document.createElement('div');
+        // global.window.document.body.appendChild(domEl);
+
+        const fn = jest.fn();
+        result.nextAnimationFrame(fn, domEl);
+
+        global.expect(fn).not.toHaveBeenCalled();
       });
     });
     global.describe('can check if animations are allowed', () => {
@@ -120,6 +158,85 @@ global.describe('svg_utilityFunctions', () => {
         global.window.stopAnimation = true;
         const isAllowed = result.checkAnimationsAllowed();
         global.expect(isAllowed).toBe(false);
+      });
+    });
+  });
+
+  global.describe('different browsers', () => {
+    global.describe('legacy mozilla', () => {
+      const originalRequest = global.window.requestAnimationFrame;
+      const originalCancel = global.window.cancelAnimationFrame;
+
+      global.beforeAll(() => {
+        global.window.requestAnimationFrame = null;
+        global.window.cancelAnimationFrame = null;
+
+        global.window.mozRequestAnimationFrame = jest.fn();
+        global.window.mozCancelAnimationFrame = jest.fn();
+      });
+      global.afterAll(() => {
+        global.window.requestAnimationFrame = originalRequest;
+        global.window.cancelAnimationFrame = originalCancel;
+
+        global.window.mozRequestAnimationFrame = null;
+        global.window.mozCancelAnimationFrame = null;
+      });
+      global.it('with request animation', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        
+        const fn = jest.fn();
+
+        result.nextAnimationFrame(fn);
+
+        global.expect(global.window.mozRequestAnimationFrame).toHaveBeenCalled();
+      });
+      global.it('with cancel animation', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        
+        // const fn = jest.fn();
+
+        global.window.animation = 100;
+        result.stopOtherAnimations();
+
+        global.expect(global.window.mozCancelAnimationFrame).toHaveBeenCalled();
+      });
+    });
+    global.describe('webkit', () => {
+      const originalRequest = global.window.requestAnimationFrame;
+      const originalCancel = global.window.cancelAnimationFrame;
+
+      global.beforeAll(() => {
+        global.window.requestAnimationFrame = null;
+        global.window.cancelAnimationFrame = null;
+
+        global.window.webkitRequestAnimationFrame = jest.fn();
+        global.window.mozCancelAnimationFrame = jest.fn();
+      });
+      global.afterAll(() => {
+        global.window.requestAnimationFrame = originalRequest;
+        global.window.cancelAnimationFrame = originalCancel;
+
+        global.window.webkitRequestAnimationFrame = null;
+        global.window.mozCancelAnimationFrame = null;
+      });
+      global.it('with request animation', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        
+        const fn = jest.fn();
+
+        result.nextAnimationFrame(fn);
+
+        global.expect(global.window.webkitRequestAnimationFrame).toHaveBeenCalled();
+      });
+      global.it('with cancel animation', () => {
+        const result = UtilFunctions.animationFrameCalls();
+        
+        // const fn = jest.fn();
+
+        global.window.animation = 100;
+        result.stopOtherAnimations();
+
+        global.expect(global.window.mozCancelAnimationFrame).toHaveBeenCalled();
       });
     });
   });

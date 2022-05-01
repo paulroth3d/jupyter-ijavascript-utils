@@ -318,11 +318,13 @@ Renders an SVG through a browser side instance of [SVG.js](https://svgjs.dev/)
  * @param {Object} options - options to use for drawing - or an onReady function
  * @param {Function} options.onReady - the function to call to generate the SVG
  * @param {Element} options.onReady.el - the SVG.js primed element to use for drawing
+ * @param {Object} options.onReady.data - the data object passed - now in javascript
  * @param {any} options.onReady.SVG - the SVG.js library instance
  * @param {Number} options.onReady.width - the options.width value passed, for positioning
  * @param {Number} options.onReady.height - the options.height value passed, for positioning
  * @param {Object} options.onReady.utilityFunctions - the options.utilityFunctions object
  * @param {Object} options.onReady.options - the options object passed
+ * @param {Object} options.onReady.animate - alias to requestAnimationFrame with additional checks to avoid leaks
  * @param {boolean} options.debug - default: false - whether to print the svg result text
  * @param {Number} options.width - default: 400 - the width of the svg to generate
  * @param {Number} options.height - default 200 - ... height
@@ -366,7 +368,7 @@ const width = ${width};
 const height = ${height};
 el.size(width, height);
 
-(${onReady.toString()})({ rootEl, el, SVG, data, width, height, utilityFunctions, options });
+(${onReady.toString()})({ rootEl, el, SVG, data, width, height, utilityFunctions, options, animate });
 `
   });
 };

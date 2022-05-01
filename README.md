@@ -18,6 +18,7 @@ See documentation at: [https://jupyter-ijavascript-utils.onrender.com/](https://
 
 # What's New
 
+* 1.7 - revamp of `animation` method to htmlScript
 * 1.6 - add SVG support for rendering SVGs and animations
 * 1.5 - Add Latex support for rendering Math formulas and PlantUML support for Diagrams
 * 1.4 - Add in vega embed, vega mimetypes and example choropleth tutorial

@@ -363,6 +363,9 @@ module.exports.listStatic = function listStatic(target) {
  * @param {String | Function} options.onReady - JavaScript to run once all files have loaded
  * @param {Element} options.onReady.rootEl - results div container
  * @param {any} [options.onReady.data] - the options.data parameter
+ * @param {Object} options.onReady.utilityFunctions - the options.utilityFunctions object
+ * @param {Object} options.onReady.options - the options object passed
+ * @param {Object} options.onReady.animate - alias to requestAnimationFrame with additional checks to avoid leaks
  * @param {String[]} [options.scripts = []] - Array of JavaScript file addresses to load
  * @param {String[]} [options.css = []] - Array of CSS file addresses to load
  * @param {any} [options.data = undefined] - any nodejs data you would like available in javaScript
@@ -450,7 +453,7 @@ module.exports.htmlScript = function htmlScripts(
   if (!onReadyCode) {
     throw Error('ijsUtils.htmlScript: onReadyCode is required');
   } else if (typeof onReadyCode === 'function') {
-    onReadyCode = `(${onReadyCode.toString()})({rootEl, data, utilityFunctions, options})`;
+    onReadyCode = `(${onReadyCode.toString()})({rootEl, data, utilityFunctions, options, animate})`;
   } else if (typeof onReadyCode === 'string') {
     onReadyCode = onReadyCode.trim();
     if (!onReadyCode.endsWith(';')) {
@@ -508,6 +511,16 @@ module.exports.htmlScript = function htmlScripts(
           scripts: ${JSON.stringify(scriptAddresses)},
           css: ${JSON.stringify(scriptAddresses)},
         };
+
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
 
         //-- ijsUtils.htmlScipt options.data
         const data = ${JSON.stringify(data)};

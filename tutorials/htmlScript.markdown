@@ -258,6 +258,95 @@ onReady: ({rootEl, data, options}) => {
 }});
 ```
 
+# Animations
+
+Working with Animations is fairly simple with htmlScript.
+
+There is an `animation` function passed to onReady that works essentially the same as [requestAnimationFrame](),
+although with a few checks to avoid leaks (such as if the cell is re-run)
+
+```javascript
+utils.ijs.htmlScript({
+    //-- automatically include a debugger statement
+    debug: true,
+
+    //-- initialize the root element with the following html
+    html: '<canvas />',
+    
+    //-- size of the cell output size / html body (inner elements still need to be sized)
+    width: 400,
+    height: 300,
+    
+    //-- parameterization
+    data: {
+        period: 5000,
+        boxSize: 40
+    },
+    onReady: ({ rootEl, options, data, utilityFunctions: lib, animate }) => {
+        const canvas = rootEl.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        //-- width and height are converted to px (ex: ``${width}px`)
+        const width = Number.parseInt(options.width);
+        const height = Number.parseInt(options.height);
+        
+        //-- set the height of the canvas
+        canvas.width = width;
+        canvas.height = height;
+        
+        const PI2 = Math.PI + Math.PI;
+        const midX = width / 2;
+        const midY = height / 2;
+        
+        const draw = () => {
+            const timeEpoch = Date.now();
+            
+            //-- use the node function in javascript
+            //-- [0-1] every data.period milliseconds;
+            
+            //-- see https://jupyter-ijavascript-utils.onrender.com/module-format.html#.timePeriodPercent
+            // const periodPercent = (Date.now() % data.period) / data.period;
+            const periodPercent = lib.timePeriodPercent(data.period, timeEpoch);
+            
+            //-- phase along [0 - 2 PI];
+            const periodPi = periodPercent * PI2;
+            
+            //-- amount we can move up or down
+            const boxRange = (height - data.boxSize) / 2;
+            
+            const newY = Math.sin(periodPi) * boxRange;
+            
+            //-- x, y, width, height
+            const newRect = [
+                midX,
+                boxRange + newY,
+                data.boxSize,
+                data.boxSize
+            ];
+            
+            //-- clear the canvas
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            
+            //-- draw the box
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(newRect[0], newRect[1], newRect[2], newRect[3]);
+            
+            //-- same as requestAnimationFrame
+            //-- automatically detect if the rootEl is no longer detached
+            animate(draw);
+        }
+        draw();
+    },
+    //-- pass functions from node to be available in javaScript
+    utilityFunctions: {
+        timePeriodPercent: utils.format.timePeriodPercent
+    }
+})
+```
+
+![Screenshot of animation](img/htmlScriptAnimation.gif)
+
 # Extending HtmlScript
 
 Since `onReady` is serialized and sent to JavaScript,

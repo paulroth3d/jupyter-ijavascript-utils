@@ -110,6 +110,16 @@ global.describe('codeBlockHelper', () => {
           css: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.1.0/leaflet-providers.js"],
         };
 
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
+
         //-- ijsUtils.htmlScipt options.data
         const data = undefined;
 
@@ -202,6 +212,16 @@ global.describe('codeBlockHelper', () => {
           scripts: ["https://www.google.com/testScript1"],
           css: ["https://www.google.com/testScript1"],
         };
+
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
 
         //-- ijsUtils.htmlScipt options.data
         const data = undefined;
@@ -297,6 +317,16 @@ global.describe('codeBlockHelper', () => {
           css: ["https://www.google.com/testScript1","https://www.google.com/testScript2"],
         };
 
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
+
         //-- ijsUtils.htmlScipt options.data
         const data = undefined;
 
@@ -391,6 +421,16 @@ global.describe('codeBlockHelper', () => {
           css: [],
         };
 
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
+
         //-- ijsUtils.htmlScipt options.data
         const data = undefined;
 
@@ -473,6 +513,16 @@ global.describe('codeBlockHelper', () => {
           css: ["testScript1"],
         };
 
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
+
         //-- ijsUtils.htmlScipt options.data
         const data = undefined;
 
@@ -484,7 +534,7 @@ global.describe('codeBlockHelper', () => {
         //-- ijsUtils.htmlScript options.onRender start
         (obj => {
           console.log('loaded');
-        })({rootEl, data, utilityFunctions, options})
+        })({rootEl, data, utilityFunctions, options, animate})
         //-- ijsUtils.htmlScript options.onRender end
 
       }

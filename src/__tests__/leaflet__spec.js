@@ -214,6 +214,16 @@ global.describe('leaflet', () => {
           css: ["https://unpkg.com/leaflet@1.6.1/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.6.2/leaflet-providers.js"],
         };
 
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
+
         //-- ijsUtils.htmlScipt options.data
         const data = undefined;
 

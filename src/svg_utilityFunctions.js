@@ -99,8 +99,7 @@ const SvgUtils = module.exports; // eslint-disable-line no-unused-vars
 module.exports.animationFrameCalls = function animationFrameCalls() {
   const requestAnimationFrame = window.requestAnimationFrame
       || window.mozRequestAnimationFrame
-      || window.webkitRequestAnimationFrame
-      || window.msRequestAnimationFrame;
+      || window.webkitRequestAnimationFrame;
   
   const cancelAnimationFrame = window.cancelAnimationFrame
       || window.mozCancelAnimationFrame;
@@ -123,8 +122,15 @@ module.exports.animationFrameCalls = function animationFrameCalls() {
     window.stopAnimation = isAllowed;
   };
   
-  const nextAnimationFrame = (fn) => {
-    const animationId = requestAnimationFrame(fn);
+  const nextAnimationFrame = (fn, el) => {
+    const requestFn = (...rest) => {
+      if (el && !window.document.contains(el)) {
+        console.log('old nextAnimationFrame aborting, el has been removed from DOM');
+      } else {
+        fn.apply(globalThis, rest);
+      }
+    };
+    const animationId = requestAnimationFrame(requestFn);
     window.animation = animationId;
   };
   
@@ -146,3 +152,5 @@ module.exports.animationFrameCalls = function animationFrameCalls() {
     allowAnimations
   };
 };
+
+module.exports.animation = module.exports.animationFrameCalls;
