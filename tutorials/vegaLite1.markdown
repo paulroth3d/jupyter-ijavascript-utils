@@ -514,15 +514,7 @@ However, it seemed at the time of this witing that it did not work in all cases:
 [Such as this example](https://vega.github.io/vega-lite/examples/interactive_query_widgets.html).
 
 ```
-utils.vega.vegaMimeType({ ... });
-// Javascript Error: Cannot read properties of undefined (reading 'length')
-```
-
-However the following will work:
-
-```
-// however this will work:
-utils.vega.embedFromSpec({
+vegaSpec = {
   //-- spec from the example
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "Drag the sliders to highlight points.",
@@ -557,10 +549,33 @@ utils.vega.embedFromSpec({
       "size": {"value": 100}
     }
   }]
-});
+};
+```
+
+This will work correctly:
+
+```
+// this will work because we are using
+utils.vega.embedFromSpec(vegaSpec);
 ```
 
 ![Screenshot of Vega-Lite with Sliders](img/vegaLiteSliders.png)
+
+However the following will not in all cases, as an older version of Vega Lite is embedded within Jupyter. (At least as of May 2022)
+
+```
+//-- use the mimetype supported by vega will fail
+display.mime({ 'application/vnd.vega.v5+json': vegaSpec });
+// Javascript Error: Cannot read properties of undefined (reading 'length')
+```
+
+This is the same as calling the {@link module:vega.vegaMimeType|vega.vegaMimeType} function:
+
+```
+utils.vega.vegaMimeType(vegaSpec);
+// Javascript Error: Cannot read properties of undefined (reading 'length')
+```
+
 
 See the {@link module:vega.vegaMimeType|vega.vegaMimeType()} and {@link module:vega.vegaLiteMimeType|vega.vegaLiteMimeType()} entries for more.
 

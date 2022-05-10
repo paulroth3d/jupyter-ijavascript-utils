@@ -24,6 +24,22 @@ See documentation at: [https://jupyter-ijavascript-utils.onrender.com/](https://
 * 1.4 - Add in vega embed, vega mimetypes and example choropleth tutorial
 * 1.3 - Add Leaflet for Maps, allow Vega to use explicit specs (so [Examples can be copied and pasted](https://vega.github.io/vega-lite/examples/), and add in htmlScripts
 
+# What is this?
+
+The [jupyter-ijavascript-utils](https://www.npmjs.com/package/jupyter-ijavascript-utils) library is simply a collection of utility methods for Node and JavaScript Developers interested in Data Science.
+
+* Load
+* Aggregate
+* Manipulate
+* Format / Visualize
+* Refine and Explore
+
+Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](https://github.com/n-riesco/ijavascript) and the [Jupyter Lab - the latest interface for Jupyter](https://jupyter.org/) - and the installation is fairly simple in the [@link howToUse] guide. (Although suggestions welcome)
+
+This is not intended to be the only way to accomplish many of these tasks, and alternatives are mentioned in the documentation as available.
+
+![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.comimg/mainExampleNotebook.png)
+
 # For Example
 
 ## Get Sample Data
@@ -148,22 +164,53 @@ new utils.TableGenerator(barley)
 
 ## Show a Graph
 
-([See the vega module for more](https://jupyter-ijavascript-utils.onrender.com/module-vega.html))
+(See the {@tutorial vegaLite1} tutorial or the {@link module:vega|Vega module} for more)
 
 ```
+//-- make a point chart
 utils.vega.svg((vl) => vl.markPoint()
+    //-- data as an array of items
     .data(barley)
     .title('Barley Yield by Site')
     .width(600)
     .encode(
+        //-- x position is Nominal - not a number
         vl.x().fieldN('site'),
+        //-- y position is Quantitative - a number
         vl.y().fieldQ('yield'),
+        //-- Color is based on the year field
         vl.color().fieldN('year')
     )
 )
 ```
 
 ![Screenshot of Vega Cell](https://jupyter-ijavascript-utils.onrender.com/img/BarleyYieldBySite.png)
+
+Where making it into a bar chart, to understand the proportions of varieties grown is simply changing the mark type
+
+```
+// change from markPoint to markBar
+utils.vega.svg((vl) => vl.markBar()
+    //-- data as an array of items
+    .data(barley)
+    .title('Barley Yield by Site Variety')
+    .width(600)
+    .encode(
+        //-- x position is Nominal - not a number
+        vl.x().fieldN('site').title('Site'),
+        //-- y position is Quantitative - a number
+        vl.y().fieldQ('yield').title('Yield'),
+        //-- Color is based on the variety field
+        vl.color().fieldN('variety').title('Variety')
+    )
+)
+```
+
+![Screenshot of variety type](https://jupyter-ijavascript-utils.onrender.com/img/BarleyYieldBySiteVariety.png)
+
+With further options to zoom, pan, or setup interactive sliders:
+
+![Screenshot of vega lite with sliders](https://jupyter-ijavascript-utils.onrender.com/img/vegaLiteSliders.png)
 
 Or try your hand at the [Vega Lite Examples](https://vega.github.io/vega-lite/examples/)
 
