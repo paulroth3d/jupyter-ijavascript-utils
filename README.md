@@ -38,7 +38,7 @@ Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](http
 
 This is not intended to be the only way to accomplish many of these tasks, and alternatives are mentioned in the documentation as available.
 
-![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.comimg/mainExampleNotebook.png)
+![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.com/img/mainExampleNotebook.png)
 
 # For Example
 
