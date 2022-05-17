@@ -278,9 +278,11 @@ module.exports.embed = function embed(fn, options) {
   if (!context) throw (Error('No display sent. Expected to be called within iJavaScript'));
   const { $$: display, console: cellConsole } = context;
 
+  const cleanOptions = options || {};
+
   const {
     scripts = []
-  } = options;
+  } = cleanOptions;
 
   display.async();
 
@@ -289,7 +291,7 @@ module.exports.embed = function embed(fn, options) {
     const { spec } = VegaLite.compile(vegaMarkers.toSpec());
 
     IJSUtils.htmlScript({
-      ...options,
+      ...cleanOptions,
       data: spec,
       scripts: [
         ...scripts,
