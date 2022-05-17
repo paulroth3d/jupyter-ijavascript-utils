@@ -1,6 +1,42 @@
 const objectUtils = require('../object');
 
+// const initializeWeather = () => [
+//   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+//   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+//   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+// ];
+const cityLocations = new Map([
+  ['Chicago', { locationId: 1, city: 'Chicago', lat: 41.8781, lon: 87.6298 }],
+  ['New York', { locationId: 2, city: 'New York', lat: 40.7128, lon: 74.0060 }],
+  ['Seattle', { locationId: 3, city: 'Seattle', lat: 47.6062, lon: 122.3321 }]
+]);
+
 describe('ObjectUtils', () => {
+  global.describe('evaluate if function or property', () => {
+    global.it('returns the specific value if null is sent', () => {
+      const source = 23;
+      const expected = 23;
+      const results = objectUtils.evaluateFunctionOrProperty(null)(source);
+      global.expect(results).toBe(expected);
+    });
+    global.it('returns a property if a string is passed', () => {
+      const source = { age: 23 };
+      const expected = 23;
+      const results = objectUtils.evaluateFunctionOrProperty('age')(source);
+      global.expect(results).toBe(expected);
+    });
+    global.it('returns a mapped value if the function is passed',  () => {
+      const source = { age: 23 };
+      const expected = 23 * 2;
+      const results = objectUtils.evaluateFunctionOrProperty((r) => r.age * 2)(source);
+      global.expect(results).toBe(expected);
+    });
+    global.it('throws an error if an unexpected type is passed',  () => {
+      global.expect(() => objectUtils.evaluateFunctionOrProperty(new Date()))
+        .toThrow();
+    });
+  });
+
   describe('objAssign', () => {
     it('assigns a value on an existing object', () => {
       const expected = { first: 'john', last: 'doe' };
@@ -846,6 +882,404 @@ describe('ObjectUtils', () => {
       );
       global.expect(targetObject.class.id).toBe('econ-101');
       global.expect(result).toStrictEqual(expected);
+    });
+
+    global.it('join values', () => {
+      const weather = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+      ];
+
+      const results = objectUtils.join(weather, 'city', cityLocations, ((w, c) => ({ ...w, ...c })));
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3, lat: 47.6062, lon: 122.3321 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2, lat: 40.7128, lon: 74.006 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1, lat: 41.8781, lon: 87.6298 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('sets null values if join cannot be found', () => {
+      const weather = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 },
+        { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20 }
+      ];
+
+      const results = objectUtils.join(weather, 'city', cityLocations, ((w, c) => ({ ...w, ...c })));
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3, lat: 47.6062, lon: 122.3321 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2, lat: 40.7128, lon: 74.006 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1, lat: 41.8781, lon: 87.6298 },
+        { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+  });
+
+  global.describe('join', () => {
+    global.it('must have a joinFn', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const errorMsg = 'object.join(objectArray, indexField, targetMap, joinFn): joinFn is required';
+
+      global.expect(() => objectUtils.join(targetObj, indexField, targetMap, null)).toThrow(errorMsg);
+    });
+    global.it('must have a targetMap', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexField = 'city';
+      const targetMap = null;
+      const joinFn = jest.fn().mockImplementation((s) => s);
+
+      const errorMsg = 'object.join(objectArray, indexField, targetMap, joinFn): targetMap cannot be null';
+
+      global.expect(() => objectUtils.join(targetObj, indexField, targetMap, joinFn)).toThrow(errorMsg);
+    });
+
+    global.it('can join on a null object', () => {
+      const targetObj = null;
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const joinFn = jest.fn().mockImplementation((s, t) => s);
+
+      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const expected = [];
+
+      global.expect(joinFn).not.toHaveBeenCalled();
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join a single object', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const joinFn = jest.fn();
+
+      objectUtils.join(targetObj, indexField, targetMap, joinFn);
+
+      global.expect(joinFn).toHaveBeenCalled();
+
+      const resultArguments = joinFn.mock.calls[0];
+
+      //-- should be called only once, and with the source object and target matching object as arguments.
+      const expectedArguments = [targetObj, targetMap.get('Seattle')];
+      global.expect(resultArguments).toEqual(expectedArguments);
+    });
+
+    global.it('can join array', () => {
+      const targetObj = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+      ];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const joinFn = jest.fn().mockImplementation((s, t) => ({ ...s, locationId: t.locationId }));
+
+      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1 }
+      ];
+
+      //-- null was added
+      global.expect(targetObj.length).toBe(3);
+
+      //-- 4 items returned, one for each
+      global.expect(results).toBeTruthy();
+      global.expect(Array.isArray(results)).toBe(true);
+      global.expect(results.length).toBe(3);
+
+      global.expect(joinFn).toHaveBeenCalled();
+      global.expect(joinFn).toHaveBeenCalledTimes(3);
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join with null objects in the array', () => {
+      const targetObj = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+      ];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const joinFn = jest.fn().mockImplementation((s, t) => ({ ...s, locationId: t.locationId }));
+
+      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1 }
+      ];
+
+      //-- null was added
+      global.expect(targetObj.length).toBe(4);
+
+      //-- 4 items returned, one for each
+      global.expect(results).toBeTruthy();
+      global.expect(Array.isArray(results)).toBe(true);
+      global.expect(results.length).toBe(4);
+
+      //-- not called on null
+      global.expect(joinFn).toHaveBeenCalled();
+      global.expect(joinFn).toHaveBeenCalledTimes(3);
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join an array with a map', () => {
+      const targetObj = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 }];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const joinFn = jest.fn();
+
+      objectUtils.join(targetObj, indexField, targetMap, joinFn);
+
+      global.expect(joinFn).toHaveBeenCalled();
+
+      const resultArguments = joinFn.mock.calls[0];
+
+      //-- should be called only once, and with the source object and target matching object as arguments.
+      const expectedArguments = [targetObj[0], targetMap.get('Seattle')];
+      global.expect(resultArguments).toEqual(expectedArguments);
+    });
+
+    global.it('an join based on a formula', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexFn = (obj) => obj.city;
+      const targetMap = cityLocations;
+
+      const seattleLocation = targetMap.get('Seattle');
+      global.expect(seattleLocation.city).toBe('Seattle');
+
+      const joinFn = jest.fn().mockImplementation((source, target) => source);
+
+      objectUtils.join(targetObj, indexFn, targetMap, joinFn);
+
+      global.expect(joinFn).toHaveBeenCalled();
+      global.expect(joinFn).toHaveBeenCalledTimes(1);
+
+      const resultJoinFnArguments = joinFn.mock.calls[0];
+      const expectedJoinFnArguments = [targetObj, seattleLocation];
+
+      global.expect(resultJoinFnArguments).toEqual(expectedJoinFnArguments);
+    });
+    global.it('can lookup and store a pointer', () => {
+      const targetObj = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 },
+        { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20 }
+      ];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const joinFn = jest.fn().mockImplementation((s, t) => ({ ...s, location: t }));
+
+      /* eslint-disable object-property-newline */
+      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, location:
+          { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
+        },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, location:
+          { city: 'New York', locationId: 2, lat: 40.7128, lon: 74.006 }
+        },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, location:
+          { city: 'Chicago', locationId: 1, lat: 41.8781, lon: 87.6298 }
+        },
+        { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20, location: null }
+      ];
+      /* eslint-enable object-property-newline */
+
+      global.expect(results).toEqual(expected);
+    });
+  });
+
+  global.describe('joinProperties', () => {
+    global.describe('must have at least one property requested', () => {
+      global.it('none sent', () => {
+        const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+        const indexField = 'city';
+        const targetMap = cityLocations;
+
+        const errorMsg = 'object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join';
+
+        global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap)).toThrow(errorMsg);
+      });
+      global.it('null sent', () => {
+        const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+        const indexField = 'city';
+        const targetMap = cityLocations;
+
+        const errorMsg = 'object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join';
+
+        global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap, null)).toThrow(errorMsg);
+      });
+      global.it('null plus valid sent', () => {
+        const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+        const indexField = 'city';
+        const targetMap = cityLocations;
+
+        const errorMsg = 'object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join';
+
+        global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap, null, 'lat')).not.toThrow(errorMsg);
+      });
+    });
+    global.it('must have a targetMap', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexField = 'city';
+      const targetMap = null;
+      const errorMsg = 'object.join(objectArray, indexField, targetMap, joinFn): targetMap cannot be null';
+
+      global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap, 'lat')).toThrow(errorMsg);
+    });
+
+    global.it('can join on a null object', () => {
+      const targetObj = null;
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'lat', 'lon');
+      const expected = [];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join a single object', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join with multiple properties', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'lat', 'lon');
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, lat: 47.6062, lon: 122.3321 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join array', () => {
+      const targetObj = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+      ];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join with null objects in the array', () => {
+      const targetObj = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+      ];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('can join an array with a map', () => {
+      const targetObj = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 }];
+      const indexField = 'city';
+      const targetMap = cityLocations;
+
+      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const expected = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 }];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('an join based on a formula', () => {
+      const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+      const indexFn = (obj) => obj.city;
+      const targetMap = cityLocations;
+
+      const seattleLocation = targetMap.get('Seattle');
+      global.expect(seattleLocation.city).toBe('Seattle');
+
+      const results = objectUtils.joinProperties(targetObj, indexFn, targetMap, 'locationId');
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 }
+      ];
+
+      global.expect(results).toEqual(expected);
+    });
+
+    global.it('sets null values if join cannot be found', () => {
+      const weather = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 },
+        { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20 }
+      ];
+
+      const results = objectUtils.joinProperties(weather, 'city', cityLocations, 'locationId', 'lat', 'lon');
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3, lat: 47.6062, lon: 122.3321 },
+        null,
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2, lat: 40.7128, lon: 74.006 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, locationId: 1, lat: 41.8781, lon: 87.6298 },
+        { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20, locationId: undefined, lat: undefined, lon: undefined }
+      ];
+
+      global.expect(results).toEqual(expected);
     });
   });
 });

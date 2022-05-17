@@ -1,6 +1,6 @@
 const SourceMap = require('./SourceMap');
 
-const AggregateUtils = require('./aggregate');
+const ObjectUtils = require('./object');
 
 /**
  * Utilities for collating and grouping records
@@ -308,7 +308,7 @@ module.exports.index = function index(collection, indexFn) {
     throw (Error('group.index: Collection is not an array'));
   }
   
-  const cleanedIndexFn = AggregateUtils.evaluateFunctionOrProperty(indexFn);
+  const cleanedIndexFn = ObjectUtils.evaluateFunctionOrProperty(indexFn);
 
   collection.forEach((item, offset) => {
     let val = cleanedIndexFn(item, offset);

@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",

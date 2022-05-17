@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign, max-len */
 
 const schemaGenerator = require('generate-schema');
 
@@ -14,15 +14,17 @@ const schemaGenerator = require('generate-schema');
  *   * {@link module:object.objAssignEntities|objAssignEntities()} -
  *   * {@link module:object.selectObjectProperties|selectObjectProperties()} - keep only specific properties
  *   * {@link module:object.filterObjectProperties|filterObjectProperties()} - remove specific properties
- * * fetch child properties onto parents
- *   * {@link module:object.fetchObjectProperties|fetchObjectProperties()} - use dot notation to bring multiple child properties onto a parent
- *   * {@link module:object.fetchObjectProperty|fetchObjectProperty()} - use dot notation to bring a child property onto a parent
+ * * Fetch child properties from related objects
+ *   * {@link module:object.fetchObjectProperty|fetchObjectProperty(object, string)} - use dot notation to bring a child property onto a parent
+ *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
+ *   * {@link module:object.join|join(array, index, map, fn)} - join a collection against a map by a given index
+ *   * {@link module:object.joinProperties|join(array, index, map, ...fields)} - join a collection, and copy properties over from the mapped object.
  * * Rename properties
  *   * {@link module:object.cleanProperties|cleanProperties()} - correct inaccessible property names in a list of objects
  *   * {@link module:object.cleanPropertyNames|cleanPropertyNames()} - create a translation of inaccessible names to accessible ones
  *   * {@link module:object.cleanPropertyName|cleanPropertyName()} - create a translation of a specific property name to be accessible.
  *   * {@link module:object.renameProperties|renameProperties()} - Use a translation from old property names to new ones
- * * flatten object properties
+ * * Flatten object properties
  *   * {@link module:object.collapseSpecificObject|collapseSpecificObject()} - flatten object properties
  *   * {@link module:object.collapse|collapse()} - flatten specific object
  * * Create Map of objects by key
@@ -38,6 +40,30 @@ const ObjectUtils = module.exports;
 
 //-- private methods
 
+/**
+ * Generates a function if a property or null or a function is sent
+ * @param {Function | String} fnOrProp - 
+ * @return {Function}
+ * @private
+ */
+module.exports.evaluateFunctionOrProperty = function evaluateFunctionOrProperty(fnOrProp) {
+  if (!fnOrProp) {
+    return (r) => r;
+  } else if (typeof fnOrProp === 'string') {
+    return (r) => r[fnOrProp];
+  } else if (typeof fnOrProp === 'function') {
+    return fnOrProp;
+  }
+
+  throw (Error('Send either a Function or Property Name or null for a simple array'));
+};
+
+/**
+ * Identifies keys from an object, but handles null safely.
+ * @param {Object} - object to get the keys from
+ * @return {Array<String>} - collections of keys or [] if no keys are found.
+ * @private
+ */
 const keysFromObject = (obj) => {
   if (!obj) {
     return [];
@@ -353,7 +379,7 @@ module.exports.filterObjectProperties = function filterObjectProperties(list, pr
  * @param {Map<String,any>} propertyNames - Object with the keys as the properties
  *    and the values using dot notation to access related records and properties
  *    (ex: {parentName: 'somePropertyObject.parent.parent.name', childName: 'child.Name'})
- * @param {FetchObjectOptions} options -
+ * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions} 
  * @returns {Object[]} - objects with the properties resolved
  *    (ex: {parentname, childName, etc.})
  */
@@ -385,7 +411,7 @@ module.exports.fetchObjectProperties = function fetchObjectProperties(list, prop
  * @param {Object} obj - object to access the properties on
  * @param {String} propertyAccess - dot notation for the property to access
  *    (ex: `parent.obj.Name`)
- * @param {FetchObjectOptions} options -
+ * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions}
  * @returns {any} - the value accessed at the end ofthe property chain
  */
 module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyAccess, safeAccess) {
@@ -440,4 +466,171 @@ module.exports.getObjectPropertyTypes = function getObjectPropertyTypes(list) {
  */
 module.exports.generateSchema = function generateSchema(targetObj) {
   return schemaGenerator.json(targetObj);
+};
+
+/**
+ * Join values from an objectArray to a JavaScript Map.
+ * 
+ * For example:
+ * 
+ * ```
+ * weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   null,
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+ * ];
+ * 
+ * cityLocations = new Map([
+ *   ['Chicago', { locationId: 1, city: 'Chicago', lat: 41.8781, lon: 87.6298 }],
+ *   ['New York', { locationId: 2, city: 'New York', lat: 40.7128, lon: 74.0060 }],
+ *   ['Seattle', { locationId: 3, city: 'Seattle', lat: 47.6062, lon: 122.3321 }]
+ * ]);
+ * 
+ * utils.object.join(weather, 'city', cityLocations, (weather, city) => ({...weather, ...city}));
+ * // [
+ * //    {id:1, city:'Seattle',  month:'Aug', precip:0.87, locationId:3, lat:47.6062, lon:122.3321 },
+ * //    null,
+ * //    {id:3, city:'New York', month:'Apr', precip:3.94, locationId:2, lat:40.7128, lon:74.006 },
+ * //    {id:6, city:'Chicago',  month:'Apr', precip:3.62, locationId:1, lat:41.8781, lon:87.6298 }
+ * // ]
+ * ```
+ * 
+ * or join by lookup:
+ * 
+ * ```
+ * utils.object.join(weather, 'city', cityLocations, (weather, city) => ({...weather, city}));
+ * [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, city:
+ *     { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
+ *   },
+ *   null,
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, city:
+ *     { city: 'New York', locationId: 2, lat: 40.7128, lon: 74.006 }
+ *   },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, city:
+ *     { city: 'Chicago', locationId: 1, lat: 41.8781, lon: 87.6298 }
+ *   }
+ * ];
+ * ```
+ * 
+ * or performing a translation / calculate the index instead of a property:
+ * 
+ * ```
+ * const indexingFn = (weather) => `${weather.country}_${weather.city}`;
+ * utils.object.join(weather, indexingFn, cityLocations, (weather, city) => ({...weather, ...city}));
+ * // ...
+ * ```
+ * 
+ * The signature for the indexingFunction is `(sourceObj:Object): {any}` - providing the index to use against the map.
+ * 
+ * The signature for the mapping function is `(sourceObj:Object, mappedObject:Object) => {Object}`.
+ * 
+ * If the mappedObject could not be found by that index (left join), then mappedObject will be `null`.
+ * 
+ * As the results of the functions are mapped, you can either modify in-line (directly on the object),
+ * or on a clone of the object (ex: {...sourceObj})
+ * 
+ * Note, performing a JavaScript .map() call may be more performant in some cases,
+ * so consider it for more complex options.
+ * 
+ * **Note: indexField can be either a string name of the field to join,
+ * or a function to be passed the object and generate the index**
+ * 
+ * @param {Array<Object>} objectArray - collection of objects to join based on the target map
+ * @param {Function | String} indexField - property on each object in array to lookup against target map <br />
+ *      Signature if a function: `(sourceObj:Object): {any}`
+ * @param {Map} targetMap - Map with keys mapping to values to pass
+ * @param {Function} joinFn - function to call each time an objectArray object, has an indexField found in targetMap <br />
+ *      Signature: `(sourceObj:Object, mappedObject:Object) => {Object}`
+ * @returns {Array<Object>} - Array of results returned from `joinFn`
+ */
+module.exports.join = function join(objectArray, indexField, targetMap, joinFn) {
+  const cleanArray = !objectArray
+    ? []
+    : Array.isArray(objectArray)
+      ? objectArray
+      : [objectArray];
+
+  const indexFn = ObjectUtils.evaluateFunctionOrProperty(indexField);
+
+  if (!targetMap) {
+    throw Error('object.join(objectArray, indexField, targetMap, joinFn): targetMap cannot be null');
+  }
+
+  if (!joinFn || typeof joinFn !== 'function') {
+    throw Error('object.join(objectArray, indexField, targetMap, joinFn): joinFn is required');
+  }
+  
+  const results = cleanArray.map((entry) => {
+    if (!entry) return entry;
+
+    const index = indexFn(entry);
+    
+    const target = targetMap.has(index)
+      ? targetMap.get(index)
+      : null;
+
+    const result = joinFn(entry, target);
+
+    return result;
+  });
+
+  return results;
+};
+
+/**
+ * For cases where we simply want to pull values from one object to another.
+ * 
+ * For example:
+ * 
+ * ```
+ * weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   null,
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+ * ];
+ * 
+ * cityLocations = new Map([
+ *   ['Chicago', { locationId: 1, city: 'Chicago', lat: 41.8781, lon: 87.6298 }],
+ *   ['New York', { locationId: 2, city: 'New York', lat: 40.7128, lon: 74.0060 }],
+ *   ['Seattle', { locationId: 3, city: 'Seattle', lat: 47.6062, lon: 122.3321 }]
+ * ]);
+ * 
+ * utils.object.joinProperties(weather, 'city', cityLocations, 'lat', 'lon'));
+ * // [
+ * //    {id:1, city:'Seattle',  month:'Aug', precip:0.87, lat:47.6062, lon:122.3321 },
+ * //    null,
+ * //    {id:3, city:'New York', month:'Apr', precip:3.94, lat:40.7128, lon:74.006 },
+ * //    {id:6, city:'Chicago',  month:'Apr', precip:3.62, lat:41.8781, lon:87.6298 }
+ * // ]
+ * ```
+ * 
+ * @param {Array<Object>} objectArray - collection of objects to join based on the target map
+ * @param {Function | String} indexField - property on each object in array to lookup against target map <br />
+ *      Signature if a function: `(sourceObj:Object): {any}`
+ * @param {Map<any,Object>} targetMap - Map with keys mapping to values to pass
+ * @param {...String} fields - List of fields to add to the objectArray in-place against values from targetMap
+ * @returns {Array<Object>} - The modified objectArray with the fields applied.
+ */
+module.exports.joinProperties = function join(objectArray, indexField, targetMap, ...fields) {
+  const cleanFields = fields.filter((f) => f);
+  if (cleanFields.length < 1) {
+    throw Error('object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join');
+  }
+
+  const joinFn = (sourceObj, targetObj) => {
+    const cleanTarget = targetObj || {};
+    //-- allow for direct manipulation for speed
+    const result = sourceObj; // { ...sourceObj };
+
+    cleanFields.forEach((field) => {
+      result[field] = cleanTarget[field];
+    });
+
+    return result;
+  };
+
+  return ObjectUtils.join(objectArray, indexField, targetMap, joinFn);
 };

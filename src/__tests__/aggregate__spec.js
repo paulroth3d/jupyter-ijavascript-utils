@@ -15,31 +15,6 @@ const initializeWeather = () => [
 const floatEpsilon = (number, isAbove) => number + (isAbove ? 1 : -1) * 0.000001;
 
 global.describe('AggregateUtils', () => {
-  global.describe('evaluate if function or property', () => {
-    global.it('returns the specific value if null is sent', () => {
-      const source = 23;
-      const expected = 23;
-      const results = AggregateUtils.evaluateFunctionOrProperty(null)(source);
-      global.expect(results).toBe(expected);
-    });
-    global.it('returns a property if a string is passed', () => {
-      const source = { age: 23 };
-      const expected = 23;
-      const results = AggregateUtils.evaluateFunctionOrProperty('age')(source);
-      global.expect(results).toBe(expected);
-    });
-    global.it('returns a mapped value if the function is passed',  () => {
-      const source = { age: 23 };
-      const expected = 23 * 2;
-      const results = AggregateUtils.evaluateFunctionOrProperty((r) => r.age * 2)(source);
-      global.expect(results).toBe(expected);
-    });
-    global.it('throws an error if an unexpected type is passed',  () => {
-      global.expect(() => AggregateUtils.evaluateFunctionOrProperty(new Date()))
-        .toThrow();
-    });
-  });
-
   global.describe('extent', () => {
     global.it('finds a min value, with a property', () => {
       const source = initializeWeather();

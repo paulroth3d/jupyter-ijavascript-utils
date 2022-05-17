@@ -1,5 +1,6 @@
 /* eslint-disable implicit-arrow-linebreak */
 
+const ObjectUtils = require('./object');
 const FormatUtils = require('./format');
 
 /**
@@ -273,24 +274,6 @@ module.exports.deferCollection = (aggregateFn, ...rest) => {
 module.exports.defer = module.exports.deferCollection;
 
 /**
- * Generates a function if a property or null or a function is sent
- * @param {Function | String} fnOrProp - 
- * @return {Function}
- * @private
- */
-module.exports.evaluateFunctionOrProperty = function evaluateFunctionOrProperty(fnOrProp) {
-  if (!fnOrProp) {
-    return (r) => r;
-  } else if (typeof fnOrProp === 'string') {
-    return (r) => r[fnOrProp];
-  } else if (typeof fnOrProp === 'function') {
-    return fnOrProp;
-  }
-
-  throw (Error('Send either a Function or Property Name or null for a simple array'));
-};
-
-/**
  * Identifies the min and max of values of a collection
  * @param {Array} collection - 
  * @param {Function|String} accessor - function to identify the property, string property name or null
@@ -318,7 +301,7 @@ module.exports.extent = function extent(collection, accessor) {
  * // 0.87
  */
 module.exports.min = function min(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   return collection.reduce((current, val) => {
     const valEval = cleanedFunc(val);
     return valEval < current ? valEval : current;
@@ -338,7 +321,7 @@ module.exports.min = function min(collection, accessor) {
  * // 5.31
  */
 module.exports.max = function max(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   return collection.reduce((current, val) => {
     const valEval = cleanedFunc(val);
     return valEval > current ? valEval : current;
@@ -356,7 +339,7 @@ module.exports.max = function max(collection, accessor) {
  * // 26.69
  */
 module.exports.sum = function sum(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   return collection.reduce((current, val) => current + cleanedFunc(val), 0);
 };
 
@@ -385,7 +368,7 @@ module.exports.difference = function difference(collection, accessor) {
  * // 3.41
  */
 module.exports.avgMean = function avgMean(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   return collection.reduce((current, val) => current + cleanedFunc(val), 0)
     / collection.length;
 };
@@ -401,7 +384,7 @@ module.exports.avgMean = function avgMean(collection, accessor) {
  * //                      3.62
  */
 module.exports.avgMedian = function avgMedian(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   const results = collection.map(cleanedFunc).sort((a, b) => a - b);
   const middle = Math.floor(collection.length / 2);
   return collection.length % 2 === 0
@@ -422,7 +405,7 @@ module.exports.avgMedian = function avgMedian(collection, accessor) {
  * // 0.87
  */
 module.exports.first = function first(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   let result = null;
   for (let i = 0; i < collection.length; i += 1) {
     result = cleanedFunc(collection[i]);
@@ -464,7 +447,7 @@ module.exports.length = function length(collection) {
  * // [ 'apple', 'orange', 'banana' ]
  */
 module.exports.unique = function unique(collection, accessor, uniquifierFn) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   if (uniquifierFn) {
     return Array.from(new Set(
       collection.map((v) => uniquifierFn(cleanedFunc(v)))
@@ -525,7 +508,7 @@ module.exports.distinct = function distinct(collection, accessor, uniquifierFn) 
  * // 2
  */
 module.exports.countMap = function countMap(collection, accessor, uniquifierFn) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   const resultMap = new Map();
   collection.forEach((val) => {
     let result = cleanedFunc(val);
@@ -636,7 +619,7 @@ module.exports.duplicates = function duplicates(collection, accessor, uniquifier
  * // Set('d')
  */
 module.exports.notIn = function notIn(collection, accessor, targetIterator) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   const targetSet = new Set(targetIterator);
   const results = new Set();
   collection.forEach((record) => {
@@ -665,7 +648,7 @@ module.exports.notIn = function notIn(collection, accessor, targetIterator) {
  * aggregate.isUnique(data); // true
  */
 module.exports.isUnique = function isUnique(collection, accessor) {
-  const cleanedFunc = AggregateUtils.evaluateFunctionOrProperty(accessor);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   const uniqueValues = new Set();
   const duplicateValue = collection.find((record) => {
     const result = cleanedFunc(record);

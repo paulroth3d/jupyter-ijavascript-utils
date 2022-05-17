@@ -20,5 +20,8 @@
     },
     "vega_choroplethShort": {
         "title": "Let's make a Data Driven Map"
+    },
+    "whatCanDo": {
+        "title": "What can I do with this?"
     }
 }
