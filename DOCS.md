@@ -47,7 +47,7 @@ The [jupyter-ijavascript-utils](https://www.npmjs.com/package/jupyter-ijavascrip
 * Format / Visualize
 * Refine and Explore
 
-Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](https://github.com/n-riesco/ijavascript) and the [Jupyter Lab - the latest interface for Jupyter](https://jupyter.org/) - and the installation is fairly simple in the [@link howToUse] guide. (Although suggestions welcome)
+Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](https://github.com/n-riesco/ijavascript) and the [Jupyter Lab - the latest interface for Jupyter](https://jupyter.org/) - and the installation is fairly simple in the {@tutorial howToUse} guide. (Although suggestions welcome)
 
 This is not intended to be the only way to accomplish many of these tasks, and alternatives are mentioned in the documentation as available.
 

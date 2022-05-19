@@ -43,11 +43,12 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # Running Your Own Notebooks
 
-A many of the tutorials are simply exports of Jupyter notebooks (*.ipynb), found under the [docResources/notebooks](docResources/notebooks) folder.
+A many of the tutorials are simply exports of Jupyter notebooks (*.ipynb),
+found under the [docResources/notebooks](https://github.com/paulroth3d/jupyter-ijavascript-utils/tree/main/docResources/notebooks) folder.
 
 (Note that if you wish to `require` additional packages - like `jupyter-ijavascript-utils`,
 simply create a package in the folder you will run the `jupyter lab` command
-- such as the sample one under [docResources/notebooks/package.json](docResources/notebooks/package.json))
+- such as the sample one under [docResources/notebooks/package.json](https://github.com/paulroth3d/jupyter-ijavascript-utils/blob/main/docResources/notebooks/package.json))
 
 ## Google Collab
 
