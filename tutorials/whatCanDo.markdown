@@ -1,3 +1,5 @@
+**[This walkthrough is also available as a Jupyter ipynb Notebook - you can run yourself](notebooks/ex_WhatCanDo.ipynb)**
+
 # Reading / Writing Data
 
 A frequent question asked when discussing this project is: `what can I do with this?`

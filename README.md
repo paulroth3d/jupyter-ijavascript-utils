@@ -41,6 +41,42 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 ![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.com/img/mainExampleNotebook.png)
 
+# Running Your Own Notebooks
+
+A many of the tutorials are simply exports of Jupyter notebooks (*.ipynb), found under the [docResources/notebooks](docResources/notebooks) folder.
+
+(Note that if you wish to `require` additional packages - like `jupyter-ijavascript-utils`,
+simply create a package in the folder you will run the `jupyter lab` command
+- such as the sample one under [docResources/notebooks/package.json](docResources/notebooks/package.json))
+
+## Google Collab
+
+You can very easily use iJavaScript and the jupyter-ijavascript-utils within Google Collab.
+
+[See the excellent writeup from Alexey Okhimenko](https://dev.to/obenjiro/silence-of-the-fans-part-1-javascript-quickstart-5f3m)
+
+And the shortlink to run your own: [https://tinyurl.com/tf-js-colab](https://tinyurl.com/tf-js-colab)
+
+Steps Overview:
+
+* Clone the Google Collab Document
+* Run the first cell
+  * If you notice an error `unrecognized runtime "JavaScript"` - that's expected
+* Refresh your browser (see [Alexey's writeup for more](https://dev.to/obenjiro/silence-of-the-fans-part-1-javascript-quickstart-5f3m))
+* Run a cell to install modules, ex: `sh('npm install jupyter-ijavascript-utils')`
+* Then continue to run your code past this point.
+
+## Running on Binder
+
+!TODO
+
+[mybinder.org](https://mybinder.org/) is a great place to run a Jupyter Notebook online.
+
+We are still attempting to sort out a suitable link that will work for everyone
+(without overloading their service)
+
+(Please see [Issue #4](https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/4))
+
 # For Example
 
 ## Get Sample Data

@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
@@ -14,7 +14,7 @@
     "test:coverage": "TZ=UTC jest src --collectCoverage",
     "test:watch:coverage": "TZ=UTC jest src --watch --collectCoverage",
     "doc": "npm run prep:docdash && node_modules/.bin/jsdoc -c ./jsdoc.json -u ./tutorials ./DOCS.md",
-    "prep:docdash": "cp docResources/docdash/layout.tmpl node_modules/docdash/tmpl/layout.tmpl",
+    "prep:docdash": "cp docResources/docdash/layout.tmpl node_modules/docdash/tmpl/layout.tmpl && rm -rf docResources/notebooks/node_modules",
     "open:coverage": "open ./coverage/lcov-report/index.html",
     "open:docs": "open ./docs/index.html"
   },
