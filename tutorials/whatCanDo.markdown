@@ -1,22 +1,38 @@
 **[This walkthrough is also available as a Jupyter ipynb Notebook - you can run yourself](notebooks/ex_WhatCanDo.ipynb)**
 
-# Reading / Writing Data
-
-A frequent question asked when discussing this project is: `what can I do with this?`
-
-So I wanted to write something down to give a more concrete answer than the ones I've been giving lately.
-
-The purpose of this library is to help people with a grasp of JavaScript to more easily grasp and leverage Jupyter Notebooks or Notebooks in general.
+The purpose of this library is to help people with a grasp of JavaScript to leverage leverage Jupyter Notebooks without having to learn Python.
 
 Notebooks are a way to explore and experiment, in addition to write and explain ideas.
 
+(Essentially, they are data driven documents with both formatted text married next to code that can show some output)
+
 All of the tutorials provided here, including this one, was written as a notebook and simply exported.
+
+This library is simply a way for you to handle common needs and get your footing:
+
+* Loading and Exporting
+* Grouping and Aggregating
+* Visualizing and Charting
+
+And as this uses [nriesco's iJavaScript Jupyter Kernel](http://n-riesco.github.io/ijavascript/), this can be one module of many npm modules as you grow.
+
+* Storing Secrets - like with [dotenv](https://www.npmjs.com/package/dotenv) or others
+* Working with Cloud Metadata - like with [jsforce](https://jsforce.github.io/)
+* More aggregation control - similar to Pandas with [Danfo.js](https://danfo.jsdata.org/), or [others](https://www.npmjs.com/package/dataframe-js)
+* Machine Learning - with GPU enabled TensorFlows with [tfjs](https://www.npmjs.com/package/@tensorflow/tfjs-node-gpu)
+* and many many others
+
+Just to let out the air a little bit, notebooks don't give complete control over how it looks.
+
+While it also lets you run code, it is also not a full blown IDE (but [many IDEs even support it natively](https://code.visualstudio.com/docs/datascience/jupyter-notebooks))
+
+However, it gives you a great way to explore and share ideas.
+
+Come see if it might work for you.
 
 ## Why not Python?
 
 Jupyter Lab (the latest interface for Jupyter), and many other notebooks are installed and even developed using Python.
-
-If you can use it, then perhaps this isn't for you.
 
 However, I've found quite a few people that would really get a benefit of working with Notebooks - but without having to also learn Python.
 
@@ -24,16 +40,15 @@ While Python and JavaScript (often ECMA 262) are influencing one another - there
 
 For those JavaScript Developers that are looking to better understand Python, we developed a [Python for JavaScript Developers book here](https://github.com/paulroth3d/python-for-js-developers) - pull requests always welcome.
 
-Additionally, [ObservableHQ](https://observablehq.com) provides a really great experience for those familiar with JavaScript - [although it isn't technically JavaScript](https://observablehq.com/@observablehq/observables-not-javascript) and also worth a look.
+Additionally, [ObservableHQ](https://observablehq.com/tutorials) provides a really great experience for those familiar with JavaScript - [although it isn't technically JavaScript](https://observablehq.com/@observablehq/observables-not-javascript) and also worth a look.
 
+For example: [Lionel Radisson's creative coding](https://observablehq.com/@makio135/creative-coding),
+and [many others](https://observablehq.com/explore)
 
 ```javascript
 utils = require('jupyter-ijavascript-utils');
 ['utils']
 ```
-
-
-
 
     [ 'utils' ]
 
