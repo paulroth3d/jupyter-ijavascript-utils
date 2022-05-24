@@ -17,6 +17,8 @@ const generateRange = (length, defaultValue) => new Array(length).fill(defaultVa
 
 const IJSUtils = require('./ijs');
 
+const ArrayUtils = require('./array');
+
 const { createSort } = require('./array');
 
 /**
@@ -62,29 +64,32 @@ const { createSort } = require('./array');
  * * change the columns and headers
  *   * {@link TableGenerator#columns|columns(field, field, ...)} - specify fields and order
  *   * {@link TableGenerator#columnsToExclude|columnsToExclude(field, ...)} - specify fields not to show
- *   * {@link TableGenerator#labels|lables(obj} - labels for field headers
+ *   * {@link TableGenerator#labels|lables(obj)} - labels for field headers
  * * augment and change the values (non-destructively)
- *   * {@link TableGenerator#formatter|formatter(obj} - adjust values of specific fields
- *   * {@link TableGenerator#formatterFn|formatterFn(fn} - row, column aware adjustment
- *   * {@link TableGenerator#printOptions|printOptions(object} - options for value rendering
+ *   * {@link TableGenerator#formatter|formatter(obj)} - adjust values of specific fields
+ *   * {@link TableGenerator#formatterFn|formatterFn(fn)} - row, column aware adjustment
+ *   * {@link TableGenerator#printOptions|printOptions(object)} - options for value rendering
  *   * {@link TableGenerator#augment|augment(obj)} - add fields to table
  * * sort and limit the output
- *   * {@link TableGenerator#filter|filter(fn))} - determine which rows to include or not
- *   * {@link TableGenerator#limit|limit(number} - limit only specific # of rows
- *   * {@link TableGenerator#sortFn|sortFn(fn} - Standard Array sort function
- *   * {@link TableGenerator#sort|sort(field, field, ...} - sorts by fields, or descending with -
+ *   * {@link TableGenerator#filter|filter(fn)} - determine which rows to include or not
+ *   * {@link TableGenerator#limit|limit(number)} - limit only specific # of rows
+ *   * {@link TableGenerator#sortFn|sortFn(fn)} - Standard Array sort function
+ *   * {@link TableGenerator#sort|sort(field, field, ...)} - sorts by fields, or descending with '-'
+ * * transpose the output
+ *   * {@link TableGenerator#transpose|transpose()} - transposes the output prior to rendering
  * * style the table
- *   * {@link TableGenerator#styleTable|styleTable(string} - css style for the table
- *   * {@link TableGenerator#styleHeader|styleHeader(string} - css styles for the header row
+ *   * {@link TableGenerator#styleTable|styleTable(string)} - css style for the table
+ *   * {@link TableGenerator#styleHeader|styleHeader(string)} - css styles for the header row
  *   * {@link TableGenerator#styleRow|styleRow(fn)} - Function to style rows
- *   * {@link TableGenerator#styleCell|styleCell(fn} - Function to style cells
+ *   * {@link TableGenerator#styleCell|styleCell(fn)} - Function to style cells
  * * generate output
- *   * {@link TableGenerator#generateHTML|generateHTML(} - returns html table with the results
- *   * {@link TableGenerator#generateMarkdown|generateMarkdown(} - returns markdown with the results
- *   * {@link TableGenerator#generateCSV|generateCSV(} - generates a CSV with the results
- *   * {@link TableGenerator#generateArray|generateArray(} - generates an array for further process
+ *   * {@link TableGenerator#generateHTML|generateHTML()} - returns html table with the results
+ *   * {@link TableGenerator#generateMarkdown|generateMarkdown()} - returns markdown with the results
+ *   * {@link TableGenerator#generateCSV|generateCSV()} - generates a CSV with the results
+ *   * {@link TableGenerator#generateArray|generateArray()} - generates an array of headers and data for further process
+ *   * {@link TableGenerator#generateArray2|generateArray2()} - generates a single array for further process
  * * render in jupyter
- *   * {@link TableGenerator#render|render(} - renders the results in a table within jupyter
+ *   * {@link TableGenerator#render|render()} - renders the results in a table within jupyter
  * 
  */
 class TableGenerator {
@@ -192,6 +197,12 @@ class TableGenerator {
   #styleCell = null;
 
   /**
+   * Whether the data should be output transposed
+   * @type {Boolean}
+   */
+  #isTransposed = false;
+
+  /**
    * Function to format a value for a cell
    * 
    * @example
@@ -237,6 +248,7 @@ class TableGenerator {
     this.#styleHeader = '';
     this.#styleRow = null;
     this.#styleCell = null;
+    this.#isTransposed = false;
   }
 
   //--    GETTER SETTERS
@@ -781,6 +793,53 @@ class TableGenerator {
     return this;
   }
 
+  /**
+   * Transposes (flips along the diagonal) prior to output.
+   * 
+   * This can be very handy for wide, but short, tables.
+   * 
+   * For example, given the data:
+   * 
+   * ```
+   * const data = [
+   *   { name: 'John', color: 'green', age: 23, hair: 'blond', state: 'IL' },
+   *   { name: 'Jane', color: 'brown', age: 23, hair: 'blonde', state: 'IL' }
+   * ];
+   * ```
+   * 
+   * Running normally would give
+   * 
+   * ```
+   * new utils.TableGenerator(data)
+   *    .generateMarkdown();
+   * ```
+   * 
+   * name|color|age|hair  |state
+   * --  |--   |-- |--    |--
+   * John|green|23 |blond |IL
+   * Jane|brown|23 |blonde|IL
+   * 
+   * Running that transposed flips it.
+   * 
+   * ```
+   * new utils.TableGenerator(data)
+   *  .transpose()
+   *  .generateMarkdown();
+   * ```
+   * 
+   * name |John |Jane
+   * --   |--   |--
+   * color|green|brown
+   * age  |23   |23
+   * hair |blond|blonde
+   * state|IL   |IL
+   * @returns {TableGenerator}
+   */
+  transpose() {
+    this.#isTransposed = true;
+    return this;
+  }
+
   //-- Table Generation
 
   /**
@@ -833,13 +892,22 @@ class TableGenerator {
           record: row
         }));
 
-    const headers = keys.map(translateHeader);
+    let headers = keys.map(translateHeader);
     let data = cleanCollection.map(translateData);
 
     if (this.#limit < 0) {
       data = data.reverse().slice(0, -this.#limit);
     } else if (this.#limit > 0) {
       data = data.slice(0, this.#limit);
+    }
+
+    if (this.#isTransposed) {
+      let transposedResults = [headers, ...data];
+      transposedResults = ArrayUtils.transpose(transposedResults);
+
+      // eslint-disable-next-line prefer-destructuring
+      headers = transposedResults[0];
+      data = transposedResults.slice(1);
     }
 
     return ({ headers, data });
@@ -995,8 +1063,10 @@ class TableGenerator {
    */
 
   /**
-   * Generates an array of objects
+   * Generates an a result set to allow for further processing
    * 
+   * @see {@link TableGenerator#generateArray2|generateArray2()}
+   * @returns {TableArray}
    * @example
    * 
    * dataSet = [{reg:'z', source: 'A', temp: 99},
@@ -1019,12 +1089,42 @@ class TableGenerator {
    *     ['A', 100],
    *   ]
    * }
-   * 
-   * @returns {TableArray}
    */
-  generateArray() {
+  generateArray(returnUnifiedArray = false) {
     const results = this.prepare();
     return results;
+  }
+
+  /**
+   * Generates an array of objects in a 2d Array
+   * 
+   * NOTE: this can be helpful for needing to transpose results
+   * 
+   * @returns {any[][]} - 2d array with both headers and data included
+   * @see {@link TableGenerator#generateArray|generateArray()}
+   * @example
+   * 
+   * dataSet = [{reg:'z', source: 'A', temp: 99},
+   *    {reg: 'z', source: 'B', temp: 98},
+   *    {reg: 'z', source:'A', temp: 100}
+   * ];
+   * 
+   * //-- only show the temp and source columns
+   * new TableGenerator(dataSet)
+   *  .columnsToExclude('reg') // or .columnsToExclude(['reg'])
+   *  .generateArray2();
+   * 
+   * //--
+   * [
+   *  ['source', 'temp'],
+   *  ['A', 99],
+   *  ['B', 98],
+   *  ['A', 100],
+   * ];
+   */
+  generateArray2() {
+    const results = this.prepare();
+    return [...results.headers, ...results.data];
   }
 
   /**

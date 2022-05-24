@@ -393,6 +393,47 @@ global.describe('tableGenerator', () => {
         global.expect(results.data).toStrictEqual(expected.data);
       });
     });
+    global.describe('transpose', () => {
+      global.it('will transpose a result, if transposed once', () => {
+        const data = [
+          { name: 'John', color: 'green', age: 23, hair: 'blond', state: 'IL' },
+          { name: 'Jane', color: 'brown', age: 23, hair: 'blonde', state: 'IL' }
+        ];
+        const expected = ({
+          headers: ['name', 'John', 'Jane'],
+          data: [
+            ['color', 'green', 'brown'],
+            ['age', 23, 23],
+            ['hair', 'blond', 'blonde'],
+            ['state', 'IL', 'IL']
+          ]
+        });
+
+        const results = new TableGenerator(data)
+          .transpose()
+          .prepare();
+
+        global.expect(results).toEqual(expected);
+      });
+      global.it('will be the same result, if transposed twice', () => {
+        const data = [
+          { name: 'John', color: 'green', age: 23, hair: 'blond', state: 'IL' },
+          { name: 'Jane', color: 'brown', age: 23, hair: 'blonde', state: 'IL' }
+        ];
+        const expected = `name |John |Jane  
+--   |--   |--    
+color|green|brown 
+age  |23   |23    
+hair |blond|blonde
+state|IL   |IL    `;
+
+        const results = new TableGenerator(data)
+          .transpose()
+          .generateMarkdown();
+
+        global.expect(results).toEqual(expected);
+      });
+    });
   });
   global.describe('generateHTML', () => {
     global.it('can render a table', () => {
@@ -660,6 +701,27 @@ global.describe('tableGenerator', () => {
         ] });
       const results = new TableGenerator(weather)
         .generateArray();
+      global.expect(results.headers).toStrictEqual(expected.headers);
+      global.expect(results.data).toStrictEqual(expected.data);
+    });
+  });
+  global.describe('generateArray2', () => {
+    global.it('can prepare a table without any arguments', () => {
+      const weather = initializeWeather();
+      const expected = [
+        ['id', 'city', 'month', 'precip'],
+        [1, 'Seattle',  'Aug', 0.87],
+        [0, 'Seattle',  'Apr', 2.68],
+        [2, 'Seattle',  'Dec', 5.31],
+        [3, 'New York', 'Apr', 3.94],
+        [4, 'New York', 'Aug', 4.13],
+        [5, 'New York', 'Dec', 3.58],
+        [6, 'Chicago',  'Apr', 3.62],
+        [8, 'Chicago',  'Dec', 2.56],
+        [7, 'Chicago',  'Aug', 3.98]
+      ];
+      const results = new TableGenerator(weather)
+        .generateArray2();
       global.expect(results.headers).toStrictEqual(expected.headers);
       global.expect(results.data).toStrictEqual(expected.data);
     });

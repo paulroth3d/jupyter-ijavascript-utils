@@ -28,7 +28,8 @@ See the [#Installation section for requirements and installation](#install)
 
 ## What's New
 
-* 1.8 - add in What can I Do tutorial, and object.join methods
+* 1.9 - allow {@link TableGenerator#transpose|transposing results} on TableGenerator.
+* 1.8 - add in What can I Do tutorial, and {@link module:object.join|object.join methods}
 * 1.7 - revamp of `animation` method for ijs.htmlScript
 * 1.6 - add SVG support for rendering SVGs and animations with {@link module:svg}.
 * 1.5 - Add LaTeX / KaTeX support with {@link module:latex} for rendering Math formulas and PlantUML support for Diagrams
