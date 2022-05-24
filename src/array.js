@@ -16,8 +16,14 @@ require('./_types/global');
  *   * {@link module:array.SORT_ASCENDING|array.SORT_ASCENDING} - common ascending sorting function for array.sort()
  *   * {@link module:array.SORT_DESCENDING|array.SORT_DESCENDING} - common descending sorting function for array.sort()
  * * Rearrange Array
- *   * {@link module:array.reshape|array.reshape}
- *   * {@link module:array.transpose|array.transpose}
+ *   * {@link module:array.reshape|array.reshape} - reshapes an array to a size of rows and columns
+ *   * {@link module:array.transpose|array.transpose} - transposes (flips - the array along the diagonal)
+ * * Picking Values
+ *   * {@link module:array.peekFirst|array.peekFirst} - peeks at the first value in the list
+ *   * {@link module:array.peekLast|array.peekLast} - peeks at the last value in the list
+ *   * {@link module:array.pickRows|array.pickRows} - picks a row from a 2d array
+ *   * {@link module:array.pickColumns|array.pickColumns} - picks a column from a 2d array
+ *   * {@link module:array.pick|array.pick} - picks either/or rows and columns
  * 
  * @module array
  * @exports array
@@ -101,16 +107,142 @@ module.exports.createSort = (...fields) => {
   });
 };
 
+/**
+ * Peek in an array and return the first value in the array.
+ * 
+ * Or return the default value (`defaultVal`) - if the array is empty
+ * 
+ * @param {Array} targetArray - array to be peeked within
+ * @param {any} defaultVal - the value to return if the array is empty
+ * @returns {any}
+ */
 module.exports.peekFirst = function peekFirst(targetArray, defaultVal = null) {
   return (Array.isArray(targetArray) && targetArray.length > 0)
     ? targetArray[0]
     : defaultVal;
 };
 
+/**
+ * Peek in an array and return the last value in the array.
+ * 
+ * Or return the default value (`defaultVal`) - if the array is empty
+ * 
+ * @param {Array} targetArray - array to be peeked within
+ * @param {any} defaultVal - the value to return if the array is empty
+ * @returns {any}
+ */
 module.exports.peekLast = function peekLast(targetArray, defaultVal = null) {
   return (Array.isArray(targetArray) && targetArray.length > 0)
     ? targetArray[targetArray.length - 1]
     : defaultVal;
+};
+
+/**
+ * Picks a row (or multiple rows) from a 2d array.
+ * 
+ * Please also see [Danfo.js](https://danfo.jsdata.org/) for working with DataFrames.
+ * 
+ * @param {Array} array2d - 2d array to pick from [row][column]
+ * @param {...Number} rowIndices - Indexes of the row to return, [0...length-1]
+ * @returns - Array with only those rows
+ * @example
+ * data = [
+ *  ['john', 23, 'purple'],
+ *  ['jane', 32, 'red'],
+ *  ['ringo', 27, 'green']
+ * ];
+ * 
+ * utils.array.pickRows(data, 0);
+ * //-- [['john', 23, 'purple']];
+ * 
+ * utils.array.pickRows(data, 0, 1);
+ * //-- [['john', 23, 'purple'], ['jane', 32, 'red']];
+ */
+module.exports.pickRows = function pickRows(array2d, ...rowIndices) {
+  //-- allow passing an array as the first item
+  const cleanRowIndices = rowIndices.length > 0 && Array.isArray(rowIndices[0])
+    ? rowIndices[0]
+    : rowIndices;
+  return cleanRowIndices.map((index) => array2d[index]);
+};
+
+/**
+ * Picks a column (or multiple columns) from a 2d array
+ * 
+ * Please also see [Danfo.js](https://danfo.jsdata.org/) for working with DataFrames.
+ * 
+ * @param {Array} array2d - 2d array to pick from [row][column]
+ * @param  {...any} columns - Indexes of the columns to pick the values from: [0...row.length-1]
+ * @returns - Array with all rows, and only those columns
+ * @example
+ * data = [
+ *  ['john', 23, 'purple'],
+ *  ['jane', 32, 'red'],
+ *  ['ringo', 27, 'green']
+ * ];
+ * 
+ * utils.array.pickColumns(data, 0);
+ * //-- [['john'], ['jane'], ['ringo']];
+ * 
+ * utils.array.pickColumns(data, 0, 2);
+ * //-- [['john', 'purple'], ['jane', 'red'], ['ringo', 'green']];
+ */
+module.exports.pickColumns = function pickColumns(array2d, ...columns) {
+  //-- allow passing an array as the first item
+  const cleanColumns = columns.length > 0 && Array.isArray(columns[0])
+    ? columns[0]
+    : columns;
+  return array2d.map((row) => cleanColumns.map((columnIndex) => row[columnIndex]));
+};
+
+/**
+ * Convenience function for picking specific rows and columns from a 2d array.
+ * 
+ * Please also see [Danfo.js](https://danfo.jsdata.org/) for working with DataFrames.
+ * 
+ * @param {Array} array2d - 2d array to pick from [row][column]
+ * @param {Object} options - options on which to pick
+ * @param {Number[]} [options.rows = null] - indices of the rows to pick
+ * @param {Number[]} [options.columns = null] - indices of the columns to pick.
+ * @returns {Array} - 2d array of only the rows and columns chosen.
+ * @see {@link module:Array.pickRows} - picking rows
+ * @see {@link module:Array.pickColumns} - picking columns
+ * @returns - 2dArray of the columns and rows requested
+ * @example
+ * data = [
+ *  ['john', 23, 'purple'],
+ *  ['jane', 32, 'red'],
+ *  ['ringo', 27, 'green']
+ * ];
+ * 
+ * utils.array.pick(data, {rows: [0, 1]});
+ * //-- [['john', 23, 'purple'], ['jane', 32, 'red']];
+ * 
+ * utils.array.pick(data, {columns: [0, 2]});
+ * //-- [['john', 'purple'], ['jane', 'red'], ['ringo', 'green']];
+ * 
+ * utils.array.pick(data, {rows:[0, 1], columns:[0, 2]});
+ * //-- [['john', 'purple'], ['jane', 'red']];
+ */
+module.exports.pick = function pick(array2d, options) {
+  const cleanOptions = options || {};
+
+  const {
+    rows = null,
+    columns = null
+  } = cleanOptions;
+
+  let results = array2d;
+
+  if (rows) {
+    results = ArrayUtils.pickRows(results, rows);
+  }
+
+  if (columns) {
+    results = ArrayUtils.pickColumns(results, columns);
+  }
+
+  return results;
 };
 
 /**

@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "d3": "^6.7.0",
+    "danfojs-node": "^1.1.1",
+    "dotenv": "^16.0.1",
     "i18n-iso-countries": "^7.4.0",
     "jupyter-ijavascript-utils": "^1.8.1",
     "noisejs": "^2.1.0",

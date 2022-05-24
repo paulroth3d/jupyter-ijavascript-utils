@@ -95,7 +95,7 @@ module.exports.render = function render(body) {
  * For example, here we can give options on display options, and additional custom macros.
  * 
  * ```
- * utils.katex.render("c = \\pm\\root{a^2 + b^2}\\in\\RR", {
+ * utils.latex.katex("c = \\pm\\root{a^2 + b^2}\\in\\RR", {
  *     displayMode: false,
  *     macros: {
  *       "\\RR": "\\mathbb{R}",

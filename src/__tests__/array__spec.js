@@ -128,6 +128,210 @@ describe('ArrayUtils', () => {
     });
   });
 
+  global.describe('pickRows', () => {
+    global.describe('can pick from an array', () => {
+      global.test('with array of multiple rows', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        const rows = [0, 1];
+
+        const expected = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red']
+        ];
+
+        const results = ArrayUtils.pickRows(data, rows);
+        global.expect(results).toEqual(expected);
+      });
+      global.test('with params of multiple rows', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        // const rows = [0, 1];
+
+        const expected = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red']
+        ];
+
+        const results = ArrayUtils.pickRows(data, 0, 1);
+        global.expect(results).toEqual(expected);
+      });
+      global.test('with array of single row', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        const rows = [0];
+
+        const expected = [
+          ['john', 23, 'purple']
+        ];
+
+        const results = ArrayUtils.pickRows(data, rows);
+        global.expect(results).toEqual(expected);
+      });
+      global.test('with params of single row', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        // const rows = [0, 1];
+
+        const expected = [
+          ['john', 23, 'purple']
+        ];
+
+        const results = ArrayUtils.pickRows(data, 0);
+        global.expect(results).toEqual(expected);
+      });
+    });
+  });
+
+  global.describe('pick columns', () => {
+    global.describe('can pick from an array', () => {
+      global.test('with array of multiple columns', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        const columns = [0, 1];
+
+        const expected = [
+          ['john', 23],
+          ['jane', 32],
+          ['ringo', 27]
+        ];
+
+        const results = ArrayUtils.pickColumns(data, columns);
+        global.expect(results).toEqual(expected);
+      });
+      global.test('with params of multiple columns', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        // const columns = [0, 1];
+
+        const expected = [
+          ['john', 23],
+          ['jane', 32],
+          ['ringo', 27]
+        ];
+
+        const results = ArrayUtils.pickColumns(data, 0, 1);
+        global.expect(results).toEqual(expected);
+      });
+      global.test('with array of single column', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        const columns = [0];
+
+        const expected = [
+          ['john'],
+          ['jane'],
+          ['ringo']
+        ];
+
+        const results = ArrayUtils.pickColumns(data, columns);
+        global.expect(results).toEqual(expected);
+      });
+      global.test('with params of single column', () => {
+        const data = [
+          ['john', 23, 'purple'],
+          ['jane', 32, 'red'],
+          ['ringo', 27, 'green']
+        ];
+  
+        // const columns = [0, 1];
+
+        const expected = [
+          ['john'],
+          ['jane'],
+          ['ringo']
+        ];
+
+        const results = ArrayUtils.pickColumns(data, 0);
+        global.expect(results).toEqual(expected);
+      });
+    });
+  });
+
+  global.describe('pick', () => {
+    global.describe('pick rows', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const rows = [0, 1];
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red']
+      ];
+
+      const results = ArrayUtils.pick(data, { rows });
+      global.expect(results).toEqual(expected);
+    });
+    global.describe('pick columns', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const columns = [0, 1];
+
+      const expected = [
+        ['john', 23],
+        ['jane', 32],
+        ['ringo', 27]
+      ];
+
+      const results = ArrayUtils.pick(data, { columns });
+      global.expect(results).toEqual(expected);
+    });
+    global.describe('pick both', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const rows = [0, 1];
+      const columns = [0, 1];
+
+      const expected = [
+        ['john', 23],
+        ['jane', 32]
+      ];
+
+      const results = ArrayUtils.pick(data, { rows, columns });
+      global.expect(results).toEqual(expected);
+    });
+  });
+
   global.describe('size', () => {
     global.it('creates', () => {
       const expected = [undefined, undefined, undefined, undefined, undefined];

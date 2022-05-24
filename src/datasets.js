@@ -9,6 +9,9 @@ const fetch = require('node-fetch');
  * The data lives at [https://github.com/vega/vega-datasets](https://github.com/vega/vega-datasets)
  * and [https://cdn.jsdelivr.net/npm/vega-datasets](https://cdn.jsdelivr.net/npm/vega-datasets)
  * 
+ * **For those of you familiar with Pandas, please consider looking at [danfo.js](https://danfo.jsdata.org/)
+ * and [DataFrame.js](https://gmousse.gitbooks.io/dataframe-js/content/#dataframe-js)**
+ * 
  * * {@link module:datasets.list|list()} - retrieves the list of the datasets available
  * * {@link module:datasets.fetch|fetch(datasetName)} - returns a promise and fetches the dataset
  * 
