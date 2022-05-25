@@ -135,7 +135,7 @@ module.exports.await = async function ijsAsync(fn) {
   context.$$.async();
 
   try {
-    const results = fn(context.$$, context.console);
+    const results = await fn(context.$$, context.console);
     context.$$.sendResult(results);
   } catch (err) {
     context.console.error('error occurred');
