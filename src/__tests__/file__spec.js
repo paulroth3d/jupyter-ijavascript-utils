@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 jest.mock('fs');
 
 const fs = require('fs');
@@ -269,6 +270,223 @@ global.describe('FileUtil', () => {
       FileUtil.listFiles(path);
 
       global.expect(pino.mockInstance.error).toHaveBeenCalled();
+    });
+  });
+
+  global.describe('checkFiles', () => {
+    beforeEach(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    afterAll(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    global.describe('with no files passed', () => {
+      global.it('fails if null is passed', () => {
+        global.expect(() => FileUtil.checkFile(null)).toThrow();
+      });
+      global.it('fails if null is passed with other valid arguments', () => {
+        fsExtra.existsSync.mockReturnValue(true);
+        global.expect(() => FileUtil.checkFile('./testFile', null)).toThrow();
+      });
+      global.it('returns null if no arguments passed', () => {
+        const expected = null;
+        const results = FileUtil.checkFile();
+        global.expect(results).toBe(expected);
+      });
+      global.it('returns null if empty array passed in first argument', () => {
+        const expected = null;
+        const results = FileUtil.checkFile([]);
+        global.expect(results).toBe(expected);
+      });
+    });
+    global.describe('with one file', () => {
+      global.it('and file exists', () => {
+        const expected = null;
+
+        fsExtra.existsSync.mockReturnValue(true);
+  
+        const results = FileUtil.checkFile(
+          './file1'
+        );
+        global.expect(results).toBe(expected);
+
+        //-- we are not actually calling file, but the mock
+        global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+        const call = fsExtra.existsSync.mock.calls[0][0];
+        global.expect(call).toContain('file1');
+      });
+
+      global.it('and file does not exist', () => {
+        //-- use actual path.resolve to make life easier
+        //-- but makes expected hard to use
+        // const expected = null;
+        fsExtra.existsSync.mockReturnValue(false);
+  
+        const results = FileUtil.checkFile(
+          './file1'
+        );
+        global.expect(results).toBeTruthy();
+        global.expect(Array.isArray(results)).toBe(true);
+        global.expect(results.length).toBe(1);
+        global.expect(results[0]).toContain('file1');
+        
+        //-- we are not actually calling file, but the mock
+        global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+        const call = fsExtra.existsSync.mock.calls[0][0];
+        global.expect(call).toContain('file1');
+      });
+    });
+    global.describe('with file array', () => {
+      global.it('and file exists', () => {
+        const expected = null;
+
+        fsExtra.existsSync.mockReturnValue(true);
+  
+        const results = FileUtil.checkFile(
+          ['./file1']
+        );
+        global.expect(results).toBe(expected);
+
+        //-- we are not actually calling file, but the mock
+        global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+        const call = fsExtra.existsSync.mock.calls[0][0];
+        global.expect(call).toContain('file1');
+      });
+
+      global.it('and file does not exist', () => {
+        //-- use actual path.resolve to make life easier
+        //-- but makes expected hard to use
+        // const expected = null;
+        fsExtra.existsSync.mockReturnValue(false);
+  
+        const results = FileUtil.checkFile(
+          ['./file1']
+        );
+        global.expect(results).toBeTruthy();
+        global.expect(Array.isArray(results)).toBe(true);
+        global.expect(results.length).toBe(1);
+        global.expect(results[0]).toContain('file1');
+        
+        //-- we are not actually calling file, but the mock
+        global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+        const call = fsExtra.existsSync.mock.calls[0][0];
+        global.expect(call).toContain('file1');
+      });
+    });
+    global.describe('with multiple arguments', () => {
+      global.describe('and file exists', () => {
+        global.it('with separate arguments', () => {
+          //-- use actual path.resolve to make life easier
+          //-- but makes expected hard to use
+          // const expected = null;
+  
+          fsExtra.existsSync
+            .mockReturnValueOnce(true)
+            .mockReturnValueOnce(true);
+    
+          const results = FileUtil.checkFile(
+            './file1',
+            './file2'
+          );
+          global.expect(results).toBe(null);
+
+          global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(2);
+
+          let call;
+          call = fsExtra.existsSync.mock.calls[0][0];
+          global.expect(call).toContain('/file1');
+          call = fsExtra.existsSync.mock.calls[1][0];
+          global.expect(call).toContain('/file2');
+        });
+        global.it('with array', () => {
+          //-- use actual path.resolve to make life easier
+          //-- but makes expected hard to use
+          // const expected = null;
+  
+          fsExtra.existsSync
+            .mockReturnValueOnce(true)
+            .mockReturnValueOnce(true);
+    
+          const results = FileUtil.checkFile([
+            './file1',
+            './file2'
+          ]);
+          global.expect(results).toBe(null);
+
+          global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(2);
+
+          let call;
+          call = fsExtra.existsSync.mock.calls[0][0];
+          global.expect(call).toContain('/file1');
+          call = fsExtra.existsSync.mock.calls[1][0];
+          global.expect(call).toContain('/file2');
+        });
+      });
+
+      global.describe('and file does not exist', () => {
+        global.it('with separate arguments', () => {
+          //-- use actual path.resolve to make life easier
+          //-- but makes expected hard to use
+          // const expected = null;
+  
+          fsExtra.existsSync
+            .mockReturnValueOnce(true)
+            .mockReturnValueOnce(false);
+    
+          const results = FileUtil.checkFile(
+            './file1',
+            './file2'
+          );
+  
+          global.expect(results).toBeTruthy();
+          global.expect(Array.isArray(results)).toBe(true);
+          global.expect(results.length).toBe(2);
+  
+          // global.expect(results[0]).toBe(null);
+          global.expect(results[0]).toBeFalsy();
+          global.expect(results[1]).toContain('/file2');
+  
+          //-- check existsSync
+          global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(2);
+          global.expect(fsExtra.existsSync.mock.calls[0][0]).toContain('/file1');
+          global.expect(fsExtra.existsSync.mock.calls[1][0]).toContain('/file2');
+        });
+        global.it('as array of arguments', () => {
+          //-- use actual path.resolve to make life easier
+          //-- but makes expected hard to use
+          // const expected = null;
+  
+          fsExtra.existsSync
+            .mockReturnValueOnce(true)
+            .mockReturnValueOnce(false);
+    
+          const results = FileUtil.checkFile([
+            './file1',
+            './file2'
+          ]);
+  
+          global.expect(results).toBeTruthy();
+          global.expect(Array.isArray(results)).toBe(true);
+          global.expect(results.length).toBe(2);
+  
+          // global.expect(results[0]).toBe(null);
+          global.expect(results[0]).toBeFalsy();
+          global.expect(results[1]).toContain('/file2');
+  
+          //-- check existsSync
+          global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(2);
+          global.expect(fsExtra.existsSync.mock.calls[0][0]).toContain('/file1');
+          global.expect(fsExtra.existsSync.mock.calls[1][0]).toContain('/file2');
+        });
+      });
     });
   });
 });

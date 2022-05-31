@@ -26,6 +26,8 @@ const logger = require('./logger');
  * * listing directory
  *   * {@link module:file.pwd|pwd()} - list the current path
  *   * {@link module:file.listFiles|listFiles(path)} - list files in a diven path
+ * * checking files exist
+ *   * {@link module:file.checkFile|checkFile(...paths)} - check if a file at a path exists
  * 
  * ---
  * 
@@ -299,3 +301,87 @@ module.exports.listFiles = function listFiles(directoryPath) {
     logger.error(`unable to read directory: ${resolvedPath}`);
   }
 };
+
+/**
+ * Synchronously checks if any of the files provided do not exist.
+ * 
+ * For example:
+ * 
+ * ```
+ * //-- these exist
+ * // ./data/credentials.env
+ * // ./data/results.json
+ * 
+ * if (!utils.file.checkFile('./data/results.json')) {
+ *    //-- retrieve the results
+ *    utils.ijs.await(async($$, console) => {
+ *      results = await connection.query('SELECT XYZ from Contacts');
+ *      utils.file.write('./data/results.json', results);
+ *    });
+ * } else {
+ *    results = utils.file.readJSON('./data/results.json');
+ * }
+ * ```
+ * 
+ * Note, you can also ask for multiple files at once
+ * 
+ * ```
+ * utils.file.checkFile(
+ *    './data/credentials.env',
+ *    './data/results.json',
+ *    './data/results.csv'
+ * );
+ * // false
+ * ```
+ * 
+ * or as an array:
+ * 
+ * ```
+ * utils.file.checkFile(['./data/credentails.env']);
+ * // true
+ * ```
+ * 
+ * @param  {...String} files - List of file paths to check (can use relative paths, like './') <br />
+ *    see {@link file:listFiles|listFiles()} or {@link file:pwd|pwd()} to help you)
+ * @returns {String[]} - null if all files are found, or array of string paths of files not found
+ */
+module.exports.checkFile = function checkFile(...files) {
+  //-- allow passing an array of files
+  const cleanFiles = files.length === 1 && Array.isArray(files[0])
+    ? files[0]
+    : files;
+  
+  const resolvedFiles = cleanFiles.map((unresolvedPath) => path.resolve(unresolvedPath));
+
+  const notFoundFiles = resolvedFiles.map((resolvedPath) => fs.existsSync(resolvedPath)
+    ? null
+    : resolvedPath);
+  
+  //-- do not filter empty files, as position in array is helpful
+  if (notFoundFiles.filter((p) => p).length === 0) {
+    return null;
+  }
+
+  return notFoundFiles;
+};
+
+/*
+ * Execute an async function if any of the files do not exist
+ * @param {String[]} filePaths - list of paths of files to check that they exist
+ * @param {*} fnIfFailed - async function tha will run - but only if any of the files are not found.
+ */
+/*
+module.exports.ifNotExists = async function ifNotExists(filePaths, fnIfFailed) {
+  const filesNotFound = FileUtil.checkFile(filePaths);
+
+  let results;
+
+  if (filesNotFound) {
+    results = await fnIfFailed(filesNotFound);
+  } else {
+    results = null;
+  }
+
+  return results;
+};
+*/
