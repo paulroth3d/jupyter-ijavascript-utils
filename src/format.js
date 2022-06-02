@@ -12,6 +12,7 @@
  * * Formatting Strings
  *   * {@link module:format.capitalize|format.capitalize} - Capitalizes only the first character in the string (ex: 'John paul');
  *   * {@link module:format.capitalizeAll|format.capitalizeAll} - Capitalizes all the words in a string (ex: 'John Paul')
+ *   * {@link module:format.ellipsify|format.ellipsify} - Truncates a string if the length is 'too long'
  * * Formatting Time
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values

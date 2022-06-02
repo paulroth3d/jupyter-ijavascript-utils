@@ -211,6 +211,16 @@ global.describe('SourceMap', () => {
       // FileUtil.writeFileStd('./tmp/SourceMap', results);
       global.expect(results).toBe(expected);
     });
+
+    global.it('can stringify with a sourceMap', () => {
+      const instance = new SourceMap();
+      instance.setSource('test');
+      instance.set('A', 'Cuca');
+      const results = SourceMap.stringifyReducer(null, instance);
+      const expected = { data: [['A', 'Cuca']], dataType: 'SourceMap', source: 'test' };
+      // FileUtil.writeFileStd('./tmp/SourceMap', results);
+      global.expect(results).toStrictEqual(expected);
+    });
   });
 
   global.describe('reduce', () => {

@@ -13,7 +13,7 @@
 
 const { printValue } = require('./format');
 
-const generateRange = (length, defaultValue) => new Array(length).fill(defaultValue);
+// const generateRange = (length, defaultValue) => new Array(length).fill(defaultValue);
 
 const IJSUtils = require('./ijs');
 

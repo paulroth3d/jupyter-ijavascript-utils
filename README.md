@@ -21,6 +21,7 @@ See documentation at: [https://jupyter-ijavascript-utils.onrender.com/](https://
 
 # What's New
 
+* 1.10 - provide percentile (like 50th percentile) aggregates
 * 1.9 - allow transposing results on TableGenerator.
 * 1.8 - add in What can I Do tutorial, and object.join methods
 * 1.7 - revamp of `animation` method to htmlScript

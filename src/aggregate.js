@@ -1,5 +1,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
+const Percentile = require('percentile');
+
 const ObjectUtils = require('./object');
 const FormatUtils = require('./format');
 
@@ -13,6 +15,8 @@ const FormatUtils = require('./format');
  * 
  * Types of methods:
  * 
+ * * Select a single property
+ *   * {@link module:aggregate.property|property()} - maps to a single property (often used with other libraries)
  * * Ranges of values
  *   * {@link module:aggregate.extent|extent()} - returns the min and max of range
  *   * {@link module:aggregate.min|min()} - returns the minimum value of the range
@@ -35,6 +39,17 @@ const FormatUtils = require('./format');
  *   * {@link module:aggregate.sum|sum()} - sum of a collection
  * * Functional
  *   * {@link module:aggregate.deferCollection|deferCollection(function, bindArg, bindArg, ...)} - bind a function with arguments
+ * * Percentile
+ *   * {@link module:aggregate.percentile|percentile()} - determines the Nth percentile of a field or value
+ *   * {@link module:aggregate.percentile_01|percentile_01()} - 1th percentile
+ *   * {@link module:aggregate.percentile_05|percentile_05()} - 5th percentile
+ *   * {@link module:aggregate.percentile_10|percentile_10()} - 10th percentile
+ *   * {@link module:aggregate.percentile_25|percentile_25()} - 25th percentile
+ *   * {@link module:aggregate.percentile_50|percentile_50()} - 50th percentile
+ *   * {@link module:aggregate.percentile_75|percentile_75()} - 75th percentile
+ *   * {@link module:aggregate.percentile_90|percentile_90()} - 90th percentile
+ *   * {@link module:aggregate.percentile_95|percentile_95()} - 95th percentile
+ *   * {@link module:aggregate.percentile_99|percentile_99()} - 99th percentile
  * 
  * Please note, there is nothing special for these functions, such as working with {@link SourceMap#reduce|SourceMap.reduce()}
  * 
@@ -224,6 +239,34 @@ module.exports = {};
 
 // eslint-disable-next-line no-unused-vars
 const AggregateUtils = module.exports;
+
+/**
+ * Maps an array of values to a single property.
+ * 
+ * For example:
+ * 
+ * ```
+ * const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+ *  { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+ *  { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+ *  { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+ *  { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+ * ];
+ * 
+ * utils.object.propertyFromList(data, 'val')
+ * //-- [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+ * 
+ * utils.object.propertyFromList(data, (r) => r.val);
+ * //-- [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+ * ```
+ * 
+ * @param {Object[]} objectArray - Array of Objects to be mapped to a single property / value
+ * @param {Function | String} propertyOrFn - Name of the property or Function to return a value
+ * @returns {Array} - Array of values
+ */
+module.exports.property = function propertyFromList(objectArray, propertyOrFn) {
+  return ObjectUtils.propertyFromList(objectArray, propertyOrFn);
+};
 
 /**
  * Converts an aggregate function to two functions -
@@ -661,4 +704,158 @@ module.exports.isUnique = function isUnique(collection, accessor) {
     return true;
   });
   return duplicateValue === undefined;
+};
+
+/**
+ * Returns a given percentile from a list of objects.
+ * 
+ * **Note: this simply aggregates the values and passes to the [Percentile NPM Package](https://www.npmjs.com/package/percentile)**
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @param {Number} pct - Percentile (either .5 or 50)
+ * @returns {Number} - the pct percentile of a property within the collection
+ * @example
+ * const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+ *  { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+ *  { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+ *  { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+ *  { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+ * ];
+ * 
+ * utils.aggregate.percentile(data, 'val', 50) //-- returns 5
+ * utils.aggregate.percentile(data, (r) => r.val, 70) //-- returns 7
+ */
+module.exports.percentile = function percentile(collection, accessor, pct) {
+  const values = ObjectUtils.propertyFromList(collection, accessor);
+  const cleanPercentile = pct > 0 && pct < 1
+    ? pct * 100
+    : pct;
+  return Percentile(cleanPercentile, values);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_01 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 1);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_05 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 5);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_10 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 10);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_25 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 25);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_50 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 50);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_75 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 75);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_90 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 90);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_95 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 95);
+};
+
+/**
+ * Returns a hard coded percentage
+ * 
+ * {@link module:aggregate.percentage|See Percentage for more detail}
+ * 
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} accessor - function to access the value, string property or null
+ * @returns {Number} - the percentile of a property within the collection
+ * @see {@link module:aggregate.percentile|percentile} - as this simply hard codes the percentage
+ */
+module.exports.percentile_99 = function percentile(collection, accessor) {
+  return AggregateUtils.percentile(collection, accessor, 99);
 };

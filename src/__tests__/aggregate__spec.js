@@ -612,3 +612,185 @@ global.describe('AggregateUtils', () => {
     });
  */
 });
+
+global.describe('property', () => {
+  global.it('accesses a property from a list', () => {
+    const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+      { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+      { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+      { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+      { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+    ];
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = AggregateUtils.property(data, 'val');
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('accesses a function from a list', () => {
+    const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+      { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+      { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+      { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+      { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+    ];
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = AggregateUtils.property(data, (r) => r.val);
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('accesses values from a list', () => {
+    const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = AggregateUtils.property(data);
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('does not fail if not sent a list', () => {
+    const data = 1;
+    const expected = [];
+    const results = AggregateUtils.property(data, 'val');
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('does not fail if sent a null list', () => {
+    const data = null;
+    const expected = [];
+    const results = AggregateUtils.property(data, 'val');
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('does not fail if sent an empty list', () => {
+    const data = [];
+    const expected = [];
+    const results = AggregateUtils.property(data, 'val');
+    global.expect(results).toStrictEqual(expected);
+  });
+});
+
+global.describe('percentile', () => {
+  global.describe('gets the 50th percentile', () => {
+    global.it('from a property', () => {
+      const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+        { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+        { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+        { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+        { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+      ];
+      const percentile = 50;
+      const expected = 5;
+      const result = AggregateUtils.percentile(data, 'val', percentile);
+      global.expect(result).toBe(expected);
+    });
+    global.it('from a function', () => {
+      const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+        { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+        { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+        { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+        { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+      ];
+      const percentile = 50;
+      const expected = 5;
+      const result = AggregateUtils.percentile(data, (r) => r.val, percentile);
+      global.expect(result).toBe(expected);
+    });
+    global.it('from a decimal', () => {
+      const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+        { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+        { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+        { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+        { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+      ];
+      const percentile = 0.5;
+      const expected = 5;
+      const result = AggregateUtils.percentile(data, (r) => r.val, percentile);
+      global.expect(result).toBe(expected);
+    });
+  });
+  global.describe('does not fail', () => {
+    global.it('if the property is not found', () => {
+      const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+        { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+        { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+        { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+        { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+      ];
+      const percentile = 0.5;
+      const expected = undefined;
+      const result = AggregateUtils.percentile(data, 'invalidProp', percentile);
+      global.expect(result).toBe(expected);
+    });
+    global.it('if data is an empty array', () => {
+      const data = [];
+      const percentile = 0.5;
+      const expected = undefined;
+      const result = AggregateUtils.percentile(data, 'invalidProp', percentile);
+      global.expect(result).toBe(expected);
+    });
+    global.it('if data is not an array', () => {
+      const data = 2;
+      const percentile = 0.5;
+      const expected = undefined;
+      const result = AggregateUtils.percentile(data, 'invalidProp', percentile);
+      global.expect(result).toBe(expected);
+    });
+    global.it('if data is null', () => {
+      const data = 2;
+      const percentile = 0.5;
+      const expected = undefined;
+      const result = AggregateUtils.percentile(data, 'invalidProp', percentile);
+      global.expect(result).toBe(expected);
+    });
+  });
+
+  global.describe('percentile_n', () => {
+    global.it('01th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 1;
+      const result = AggregateUtils.percentile_01(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('05th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 5;
+      const result = AggregateUtils.percentile_05(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('10th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 10;
+      const result = AggregateUtils.percentile_10(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('25th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 25;
+      const result = AggregateUtils.percentile_25(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('50th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 50;
+      const result = AggregateUtils.percentile_50(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('75th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 75;
+      const result = AggregateUtils.percentile_75(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('90th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 90;
+      const result = AggregateUtils.percentile_90(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('95th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 95;
+      const result = AggregateUtils.percentile_95(data);
+      global.expect(result).toBe(expected);
+    });
+    global.it('99th percentile', () => {
+      const data = Array.from(new Array(101)).map((v, i) => i);
+      const expected = 99;
+      const result = AggregateUtils.percentile_99(data);
+      global.expect(result).toBe(expected);
+    });
+  });
+});

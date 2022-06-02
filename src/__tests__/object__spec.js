@@ -1591,3 +1591,52 @@ describe('ObjectUtils', () => {
     });
   });
 });
+
+global.describe('propertyFromList', () => {
+  global.it('accesses a property from a list', () => {
+    const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+      { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+      { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+      { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+      { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+    ];
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = objectUtils.propertyFromList(data, 'val');
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('accesses a function from a list', () => {
+    const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+      { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+      { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+      { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+      { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+    ];
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = objectUtils.propertyFromList(data, (r) => r.val);
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('accesses values from a list', () => {
+    const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = objectUtils.propertyFromList(data);
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('does not fail if not sent a list', () => {
+    const data = 1;
+    const expected = [];
+    const results = objectUtils.propertyFromList(data);
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('does not fail if sent a null list', () => {
+    const data = null;
+    const expected = [];
+    const results = objectUtils.propertyFromList(data);
+    global.expect(results).toStrictEqual(expected);
+  });
+  global.it('does not fail if sent an empty list', () => {
+    const data = [];
+    const expected = [];
+    const results = objectUtils.propertyFromList(data);
+    global.expect(results).toStrictEqual(expected);
+  });
+});

@@ -22,6 +22,7 @@ const schemaGenerator = require('generate-schema');
  *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
  *   * {@link module:object.join|join(array, index, map, fn)} - join a collection against a map by a given index
  *   * {@link module:object.joinProperties|join(array, index, map, ...fields)} - join a collection, and copy properties over from the mapped object.
+ *   * {@link module:object.propertyFromList|propertyFromList(array, propertyName)} - fetches a specific property from all objects in a list
  * * Rename properties
  *   * {@link module:object.cleanProperties|cleanProperties()} - correct inaccessible property names in a list of objects
  *   * {@link module:object.cleanPropertyNames|cleanPropertyNames()} - create a translation of inaccessible names to accessible ones
@@ -636,6 +637,40 @@ module.exports.joinProperties = function join(objectArray, indexField, targetMap
   };
 
   return ObjectUtils.join(objectArray, indexField, targetMap, joinFn);
+};
+
+/**
+ * Maps an array of values to a single property.
+ * 
+ * For example:
+ * 
+ * ```
+ * const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+ *  { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+ *  { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+ *  { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+ *  { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+ * ];
+ * 
+ * utils.object.propertyFromList(data, 'val')
+ * //-- [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+ * 
+ * utils.object.propertyFromList(data, (r) => r.val);
+ * //-- [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+ * ```
+ * 
+ * @param {Object[]} objectArray - Array of Objects to be mapped to a single property / value
+ * @param {Function | String} propertyOrFn - Name of the property or Function to return a value
+ * @returns {Array} - Array of values
+ */
+module.exports.propertyFromList = function propertyFromList(objectArray, propertyOrFn) {
+  const cleanArray = Array.isArray(objectArray)
+    ? objectArray
+    : [];
+  
+  const fn = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
+
+  return cleanArray.map(fn);
 };
 
 /**
