@@ -7,7 +7,7 @@
     </a>
     <img src="https://img.shields.io/badge/Coverage-98-green" />
     <a href="https://github.com/paulroth3d/jupyter-ijavascript-utils" alt="npm">
-        <img src="https://img.shields.io/badge/npm-%5E1.9.1-red" />
+        <img src="https://img.shields.io/badge/npm-%5E1.9.2-red" />
     </a>
 </p>
 

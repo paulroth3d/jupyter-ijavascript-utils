@@ -9,6 +9,9 @@ const schemaGenerator = require('generate-schema');
  *   * {@link module:object.keys|keys()} - Safely get the keys of an object or list of objects
  *   * {@link module:object.getObjectPropertyTypes|getObjectPropertyTypes()} - describe the properties of a list of objects
  *   * {@link module:object.generateSchema|generateSchema()} - generate a schema / describe properties of a list of objects
+ *   * {@link module:object.findWithoutProperties|findWithoutProperties()} - find objects without ALL the properties specified
+ *   * {@link module:object.findWithoutProperties|findWithProperties()} - find objects with any of the properties specified
+ *   * {@link module:object.setPropertyDefaults|setPropertyDefaults()} - sets values for objects that don't currently have the property
  * * Manipulating objects
  *   * {@link module:object.objAssign|objAssign()} -
  *   * {@link module:object.objAssignEntities|objAssignEntities()} -
@@ -633,4 +636,155 @@ module.exports.joinProperties = function join(objectArray, indexField, targetMap
   };
 
   return ObjectUtils.join(objectArray, indexField, targetMap, joinFn);
+};
+
+/**
+ * Finds objects that do not have ALL the properties specified.
+ *
+ * This can be very helpful in ensuring all objects actually meet a specification and are not missing values.
+ * 
+ * ```
+ * const students = [
+ *   { first: 'john', last: 'doe', age: 23 }, { first: 'jane', last: 'doe', age: 23 }, { first: 'jack', last: 'white', failure: 401 }
+ * ];
+ *
+ * utils.findWithoutProperties(students, 'first', 'last', 'age');
+ * // [{ first: 'jack', last: 'white', failure: 401 }]
+ * 
+ * utils.findWithoutProperties(students, 'failure');
+ * // [{ first: 'john', last: 'doe', age: 23 }, { first: 'jane', last: 'doe', age: 23 }] 
+ * ```
+ *
+ * Please note, that we can check a single object:
+ *
+ * ```
+ * utils.findWithoutProperties(students[0], 'failure');
+ * // []
+ * ```
+ * 
+ * @param {Object[]} objectsToCheck - the array of objects to check for the properties.
+ * @param {...String} propertiesToFind - the list of properties to find within the collection.
+ * @returns {Object[]} - Array of objects that are missing at least one of those properties
+ * @see {@link module:file.findWithProperties|findWithProperties} - if you want objects that do not have all properties
+ **/
+module.exports.findWithoutProperties = function findWithoutProperties(targetObj, ...propertiesToFind) {
+  const cleanProperties = propertiesToFind.length > 0 && Array.isArray(propertiesToFind[0])
+    ? propertiesToFind[0]
+    : propertiesToFind;
+  
+  const cleanTargets = Array.isArray(targetObj)
+    ? targetObj
+    : [targetObj];
+  
+  const results = [];
+      
+  cleanTargets.forEach((target) => {
+    if (cleanProperties.find((prop) => (typeof target[prop]) === 'undefined')) {
+      results.push(target);
+    }
+  });
+  
+  return results;
+};
+
+/**
+ * Finds objects that have any of the properties specified.
+ * 
+ * This can be very helpful when working with datasets that include mixed data (such as JSON)
+ * 
+ * ```
+ * const students = [
+ *   { first: 'john', last: 'doe' }, { first: 'jane', last: 'doe' }, { first: 'jack', last: 'white', failure: 401 }
+ * ];
+ *
+ * utils.findWithProperties(students, 'failure');
+ * // { first: 'jack', last: 'white', failure: 401 }
+ * ```
+ *
+ * Please note, that we can check a single object:
+ *
+ * ```
+ * utils.findWithProperties({ first: 'john', last: 'doe' }, 'failure');
+ * // []
+ * ```
+ * 
+ * @param {Object[]} objectsToCheck - the array of objects to check for the properties.
+ * @param {...String} propertiesToFind - the list of properties to find within the collection.
+ * @returns {Object[]} - Array of objects that have at least one of those properties
+ * @see {@link module:file.findWithoutProperties|findWithoutProperties} - if you want objects that do not have all properties
+ **/
+module.exports.findWithProperties = function findWithProperties(targetObj, ...propertiesToFind) {
+  const cleanProperties = propertiesToFind.length > 0 && Array.isArray(propertiesToFind[0])
+    ? propertiesToFind[0]
+    : propertiesToFind;
+
+  const cleanTargets = Array.isArray(targetObj)
+    ? targetObj
+    : [targetObj];
+   
+  const results = [];
+       
+  cleanTargets.forEach((target) => {
+    if (cleanProperties.find((prop) => (typeof target[prop]) !== 'undefined')) {
+      results.push(target);
+    }
+  });
+
+  return results;
+};
+
+/**
+ * Sets values for objects that don't currently have the property
+ * 
+ * This is very helpful for ensuring that all objects have a property,
+ * or setting a value to make it easier to identify that it is 'N/A'
+ * 
+ * Note, that only the {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty|ownProperties}
+ * on the default object are checked.
+ * 
+ * And values are applied to the target object, only if the property is not on the object (property is undefined)
+ * 
+ * @param {Object[] | Object} targetObject - Object to apply the properties to <br />
+ *              but ONLY if the object does not have that property (ex: undefined)
+ * @param {Object} defaultObj - Object with the properties and defaults applied
+ * @param {any} defaultObj.property - the property to check, with the default value assigned
+ * @see {@link module:file.findWithoutProperties|findWithoutProperties} - to determine if any objects do not have a set of properties
+ * @see {@link module:file.keys|keys} - to get a list of unique properties of all objects in a list.
+ * @example
+ * const students = [
+ *   { first: 'john', last: 'doe', birthday: '2002-04-01' },
+ *   { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+ *   { first: 'jack', last: 'white', failure: 401 }
+ * ];
+ * 
+ * utils.object.setPropertyDefaults(students, {
+ *  first: '',
+ *  last: '',
+ *  birthday: ''
+ * });
+ * 
+ * // [
+ * //   { first: 'john', last: 'doe', birthday: '2002-04-01' },
+ * //   { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+ * //   { first: 'jack', last: 'white', birthday: '', failure: 401 }
+ * // ];
+ */
+module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, defaultObj) {
+  const cleanTargets = Array.isArray(targetObject)
+    ? targetObject
+    : [targetObject];
+  
+  if (!defaultObj || typeof defaultObj !== 'object') {
+    throw Error('object.setPropertyDefaults(targetObject, defaultObject): defaultObject is expected to be an object with properties set to the defaults to apply');
+  }
+
+  const defaultKeys = Object.getOwnPropertyNames(defaultObj);
+
+  cleanTargets.forEach((target) => {
+    defaultKeys.forEach((prop) => {
+      if (typeof target[prop] === 'undefined') {
+        target[prop] = defaultObj[prop];
+      }
+    });
+  });
 };

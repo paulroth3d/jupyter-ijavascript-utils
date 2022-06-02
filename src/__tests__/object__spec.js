@@ -1282,4 +1282,312 @@ describe('ObjectUtils', () => {
       global.expect(results).toEqual(expected);
     });
   });
+
+  global.describe('findWithProperties', () => {
+    global.describe('array of objects', () => {
+      global.it('single property', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' }
+        ];
+        const results = objectUtils.findWithProperties(students, 'birthday');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('multiple properties', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithProperties(students, 'first', 'last', 'birthday');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('array of properties', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithProperties(students, ['first', 'last']);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching one', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithProperties(students, 'failure');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching multiple', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' }
+        ];
+        const results = objectUtils.findWithProperties(students, 'birthday');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching none', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+        ];
+        const results = objectUtils.findWithProperties(students, 'cuca');
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('single object', () => {
+      global.it('matching one', () => {
+        const students = { first: 'john', last: 'doe', birthday: '2002-04-01' };
+        const expected = [
+        ];
+        const results = objectUtils.findWithProperties(students, 'cuca');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching none', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+        ];
+        const results = objectUtils.findWithProperties(students, 'cuca');
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('findWithoutProperties', () => {
+    global.describe('array of objects', () => {
+      global.it('single property', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'birthday');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('multiple properties', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'first', 'last', 'birthday');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('array of properties', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithoutProperties(students, ['first', 'last', 'cuca']);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching one', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'birthday');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching multiple', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' }
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'failure');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching none', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'first');
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('single object', () => {
+      global.it('matching one', () => {
+        const students = { first: 'john', last: 'doe', birthday: '2002-04-01' };
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' }
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'failure');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('matching none', () => {
+        const students = { first: 'john', last: 'doe', birthday: '2002-04-01' };
+        const expected = [
+        ];
+        const results = objectUtils.findWithoutProperties(students, 'first');
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('setPropertyDefaults', () => {
+    global.describe('sets defaults on an array of objects', () => {
+      global.it('with one property missing', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', birthday: 'N/A', failure: 401 }
+        ];
+
+        objectUtils.setPropertyDefaults(students, {
+          first: 'N/A',
+          last: 'N/A',
+          birthday: 'N/A'
+        });
+
+        global.expect(students).toStrictEqual(expected);
+      });
+      global.it('with whole new property', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', color: 'N/A', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', color: 'N/A', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', color: 'N/A', birthday: 'N/A', failure: 401 }
+        ];
+
+        objectUtils.setPropertyDefaults(students, {
+          first: 'N/A',
+          last: 'N/A',
+          birthday: 'N/A',
+          color: 'N/A'
+        });
+
+        global.expect(students).toStrictEqual(expected);
+      });
+      global.it('with no changes if property exists', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+        const expected = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+
+        objectUtils.setPropertyDefaults(students, {
+          first: 'N/A',
+          last: 'N/A'
+        });
+
+        global.expect(students).toStrictEqual(expected);
+      });
+    });
+    global.describe('sets defaults on a single object', () => {
+      global.it('with whole new property', () => {
+        const students = { first: 'jack', last: 'white', failure: 401 };
+        const expected = { first: 'jack', last: 'white', color: 'N/A', birthday: 'N/A', failure: 401 };
+
+        objectUtils.setPropertyDefaults(students, {
+          first: 'N/A',
+          last: 'N/A',
+          birthday: 'N/A',
+          color: 'N/A'
+        });
+
+        global.expect(students).toStrictEqual(expected);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('if the default object is null or false', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+
+        const expectedError = 'object.setPropertyDefaults(targetObject, defaultObject): '
+          + 'defaultObject is expected to be an object with properties set to the defaults to apply';
+
+        global.expect(() => {
+          objectUtils.setPropertyDefaults(students, null);
+        }).toThrow(expectedError);
+      });
+      global.it('if the default object is not an object', () => {
+        const students = [
+          { first: 'john', last: 'doe', birthday: '2002-04-01' },
+          { first: 'jane', last: 'doe', birthday: '2003-05-01' },
+          { first: 'jack', last: 'white', failure: 401 }
+        ];
+
+        const expectedError = 'object.setPropertyDefaults(targetObject, defaultObject): '
+          + 'defaultObject is expected to be an object with properties set to the defaults to apply';
+
+        global.expect(() => {
+          objectUtils.setPropertyDefaults(students, 2);
+        }).toThrow(expectedError);
+      });
+    });
+  });
 });

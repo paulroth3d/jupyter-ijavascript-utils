@@ -9,6 +9,9 @@
  * * formatting Numbers
  *   * {@link module:format.zeroFill|format.zeroFill} - Pads a number to a specific length
  *   * {@link module:format.divideR|format.divideR}   - Divides a number to provide { integer, remainder } - ex: 5/3 as ( 1, remainder 2 )
+ * * Formatting Strings
+ *   * {@link module:format.capitalize|format.capitalize} - Capitalizes only the first character in the string (ex: 'John paul');
+ *   * {@link module:format.capitalizeAll|format.capitalizeAll} - Capitalizes all the words in a string (ex: 'John Paul')
  * * Formatting Time
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values
@@ -453,4 +456,41 @@ module.exports.clampDomain = function clampDomain(value, [minimum, maximum]) {
     return maximum;
   }
   return value;
+};
+
+/**
+ * Capitalizes the first character of the string.
+ * 
+ * @param {String} str - String to capitalize the first letter only
+ * @returns {String} - ex: 'John paul'
+ * @see {@link module:format.capitalizeAll|capitalizeAll} - to capitalize all words in a string
+ * @example
+ * utils.format.capitalize('john'); // 'John'
+ * utils.format.capitalize('john doe'); // 'John doe'
+ */
+module.exports.capitalize = function capitalize(str) {
+  if (!str || str.length === 0) {
+    return '';
+  }
+
+  //-- charAt does not work for unicode
+  const [first, ...rest] = str;
+  return first.toLocaleUpperCase() + rest.join('');
+};
+
+/**
+ * Capitalizes all words in a string.
+ * 
+ * @param {String} str - String to capitalize
+ * @returns {String} - ex: 'John-Paul'
+ * @see {@link module:format.capitalizeAll|capitalizeAll} - to capitalize all words in a string
+ * @example
+ * utils.format.capitalize('john'); // 'John'
+ * utils.format.capitalize('john doe'); // 'John Doe'
+ * utils.format.capitalize('john-paul'); // 'John-Paul'
+ */
+module.exports.capitalizeAll = function capitalizeAll(str) {
+  return (str || '').split(/\b/)
+    .map(FormatUtils.capitalize)
+    .join('');
 };

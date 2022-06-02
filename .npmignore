@@ -4,6 +4,7 @@ docs
 coverage
 tmp
 .ipynb_checkpoints
+*..env
 
 .screenrc
 .vscode

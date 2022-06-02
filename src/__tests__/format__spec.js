@@ -549,4 +549,98 @@ global.describe('format', () => {
       });
     });
   });
+
+  global.describe('capitalize', () => {
+    global.it('non word', () => {
+      const str = null;
+      const expected = '';
+      const results = FormatUtils.capitalize(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('empty string', () => {
+      const str = '';
+      const expected = '';
+      const results = FormatUtils.capitalize(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('one word', () => {
+      const str = 'null';
+      const expected = 'Null';
+      const results = FormatUtils.capitalize(str);
+      global.expect(results).toBe(expected);
+    });
+    global.describe('multiple words', () => {
+      const str = 'john doe';
+      const expected = 'John doe';
+      const results = FormatUtils.capitalize(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('unicode', () => {
+      const str = '𐐶𐐲𐑌𐐼𐐲𐑉';
+      const expected = '𐐎𐐲𐑌𐐼𐐲𐑉';
+      const results = FormatUtils.capitalize(str);
+      global.expect(results).toBe(expected);
+    });
+  });
+  global.describe('capitalize all', () => {
+    global.it('non word', () => {
+      const str = null;
+      const expected = '';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('empty string', () => {
+      const str = '';
+      const expected = '';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('one word', () => {
+      const str = 'null';
+      const expected = 'Null';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('space before word', () => {
+      const str = ' null';
+      const expected = ' Null';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('multiple words', () => {
+      const str = 'john doe';
+      const expected = 'John Doe';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('space before and after word', () => {
+      const str = ' null ';
+      const expected = ' Null ';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('formatting', () => {
+      const str = 'vw chevrolet-malibu';
+      const expected = 'Vw Chevrolet-Malibu';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    global.it('unicode', () => {
+      const str = '𐐶𐐲𐑌𐐼𐐲𐑉';
+      const expected = '𐐎𐐲𐑌𐐼𐐲𐑉';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    /*
+    //-- see issue #9
+    //-- https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/9
+    
+    global.it('unicode space', () => {
+      const str = 'alpha 𐐶𐐲𐑌𐐼𐐲𐑉';
+      const expected = 'Alpha 𐐎𐐲𐑌𐐼𐐲𐑉';
+      const results = FormatUtils.capitalizeAll(str);
+      global.expect(results).toBe(expected);
+    });
+    */
+  });
 });
