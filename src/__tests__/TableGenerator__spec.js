@@ -534,7 +534,7 @@ state|IL   |IL    `;
         const results = new TableGenerator(weather)
           .styleTable('1px solid black')
           .generateHTML();
-        const expected = `<table style="1px solid black">
+        const expected = `<table cellspacing="0px" style="1px solid black">
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -565,7 +565,7 @@ state|IL   |IL    `;
         const results = new TableGenerator(weather)
           .styleHeader('1px solid black')
           .generateHTML();
-        const expected = `<table >
+        const expected = `<table cellspacing="0px" >
 <tr style="1px solid black">
 \t<th>id</th>
 \t<th>city</th>
@@ -593,7 +593,7 @@ state|IL   |IL    `;
     global.describe('styleRow', () => {
       global.it('can style the rows with a literal', () => {
         const weather = initializeSmallWeather();
-        const expected = `<table >
+        const expected = `<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -624,7 +624,7 @@ state|IL   |IL    `;
     global.describe('styleCell', () => {
       global.it('can style the cells with a literal', () => {
         const weather = initializeSmallWeather();
-        const expected = `<table >
+        const expected = `<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -639,7 +639,7 @@ state|IL   |IL    `;
 </tr>
 <tr >
 \t<td >0</td>
-\t<td style="style:1">Seattle</td>
+\t<td style="style:1 ">Seattle</td>
 \t<td >Apr</td>
 \t<td >2.68</td>
 </tr>
@@ -652,11 +652,102 @@ state|IL   |IL    `;
         global.expect(results).toBe(expected);
       });
     });
+    global.describe('border', () => {
+      global.it('adds a border AND styleRow', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td style=" border: 1px solid #AAA">1</td>
+\t<td style=" border: 1px solid #AAA">Seattle</td>
+\t<td style=" border: 1px solid #AAA">Aug</td>
+\t<td style=" border: 1px solid #AAA">0.87</td>
+</tr>
+<tr >
+\t<td style=" border: 1px solid #AAA">0</td>
+\t<td style="style:1 border: 1px solid #AAA">Seattle</td>
+\t<td style=" border: 1px solid #AAA">Apr</td>
+\t<td style=" border: 1px solid #AAA">2.68</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1) ? `style:${rowIndex}` : '';
+        const borderCSS = true;
+        const results = new TableGenerator(weather)
+          .styleCell(styleRowFn)
+          .border(borderCSS)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('adds a border with true', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td style=" border: 1px solid #AAA">1</td>
+\t<td style=" border: 1px solid #AAA">Seattle</td>
+\t<td style=" border: 1px solid #AAA">Aug</td>
+\t<td style=" border: 1px solid #AAA">0.87</td>
+</tr>
+<tr >
+\t<td style=" border: 1px solid #AAA">0</td>
+\t<td style=" border: 1px solid #AAA">Seattle</td>
+\t<td style=" border: 1px solid #AAA">Apr</td>
+\t<td style=" border: 1px solid #AAA">2.68</td>
+</tr>
+</table>`;
+        const borderCSS = true;
+        const results = new TableGenerator(weather)
+          .border(borderCSS)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('adds a border with explicit css', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td style=" border: 2px dotted blue">1</td>
+\t<td style=" border: 2px dotted blue">Seattle</td>
+\t<td style=" border: 2px dotted blue">Aug</td>
+\t<td style=" border: 2px dotted blue">0.87</td>
+</tr>
+<tr >
+\t<td style=" border: 2px dotted blue">0</td>
+\t<td style=" border: 2px dotted blue">Seattle</td>
+\t<td style=" border: 2px dotted blue">Apr</td>
+\t<td style=" border: 2px dotted blue">2.68</td>
+</tr>
+</table>`;
+        const borderCSS = '2px dotted blue';
+        const results = new TableGenerator(weather)
+          .border(borderCSS)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+    });
     
     global.describe('augment', () => {
       global.it('can augment additional columns', () => {
         const weather = initializeSmallWeather();
-        const expected = `<table >
+        const expected = `<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -689,7 +780,7 @@ state|IL   |IL    `;
       });
       global.it('clears the format if we send a null formatter', () => {
         const weather = initializeSmallWeather();
-        const expected = `<table >
+        const expected = `<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -869,7 +960,7 @@ state|IL   |IL    `;
           .render();
         
         global.expect(htmlSpy).toHaveBeenCalled();
-        const expected = `<table >
+        const expected = `<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
