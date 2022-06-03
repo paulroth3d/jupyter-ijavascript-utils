@@ -2,6 +2,7 @@
 
 const Percentile = require('percentile');
 
+const ArrayUtils = require('./array');
 const ObjectUtils = require('./object');
 const FormatUtils = require('./format');
 
@@ -50,6 +51,8 @@ const FormatUtils = require('./format');
  *   * {@link module:aggregate.percentile_90|percentile_90()} - 90th percentile
  *   * {@link module:aggregate.percentile_95|percentile_95()} - 95th percentile
  *   * {@link module:aggregate.percentile_99|percentile_99()} - 99th percentile
+ * * Top Values
+ *   * {@link module:aggregate.topValues|topValues} - top (or bottom) values from a list of objects or literals
  * 
  * Please note, there is nothing special for these functions, such as working with {@link SourceMap#reduce|SourceMap.reduce()}
  * 
@@ -858,4 +861,87 @@ module.exports.percentile_95 = function percentile(collection, accessor) {
  */
 module.exports.percentile_99 = function percentile(collection, accessor) {
   return AggregateUtils.percentile(collection, accessor, 99);
+};
+
+/**
+ * Returns the Top N values from within a collection.
+ * 
+ * For example, if we have a list of weather records,
+ * we can get the month with the greatest rain.
+ * 
+ * **Note: this can also return the Bottom N values, if sorting in ascending order.
+ * ({@link module:array.createSort|see array.createSort() for more.})**
+ * 
+ * ```
+ * collection = [
+ *   { id: 0, month: '2021-Sep', precip: 2.68 },
+ *   { id: 1, month: '2021-Aug', precip: 0.87 },
+ *   { id: 2, month: '2021-Oct', precip: 5.31 },
+ *   { id: 3, month: '2021-Nov', precip: 3.94 },
+ *   { id: 4, month: '2021-Dec', precip: 4.13 },
+ *   { id: 5, month: '2022-Jan', precip: 3.58 },
+ *   { id: 6, month: '2022-Feb', precip: 3.62 },
+ *   { id: 7, month: '2022-Mar', precip: 3.98 },
+ *   { id: 8, month: '2022-Apr', precip: 2.56 }
+ * ];
+ * 
+ * //-- We can get the top 3 months with the highest rainfall
+ * utils.aggregate.topValues(collection, 3, 'month', '-precip');
+ * // '2021-Oct', '2021-Dec', '2022-Mar'
+ * 
+ * //-- Or the 3 most recent precipitation values:
+ * utils.aggregate.topValues(collection, 3, 'precip', '-id');
+ * // 2.56, 3.98, 3.62
+ * 
+ * //-- Lowest Rainfall is simply sorting in ascending order
+ * utils.aggregate.topValues(collection, 5, 'month', 'precip');
+ * // 0.87, 2.56, 2.68, 3.58, 3.62
+ * 
+ * //-- you can also combine values to make the values clearer, by passing a function
+ * const monthPrecip = function (record) => `${record.month} (${record.precip})`;
+ * utils.aggregate.topValues(collection, 3, monthPrecip, '-precip');
+ * // '2021-Oct (5.31)', '2021-Dec (4.13)', '2022-Mar (3.98)'
+ * ```
+ * 
+ * Literal values are also supported
+ * 
+ * ```
+ * collection = [ 2.68, 0.87, 5.31, 3.94, 4.13, 3.58, 3.62, 3.98, 2.56 ];
+ * 
+ * //-- top 5 values
+ * utils.aggregate.topValues(collection, 5);
+ * utils.aggregate.topValues(collection, 5, null, '-')
+ * // [5.31, 4.13, 3.98, 3.94, 3.62]
+ * 
+ * //-- bottom 5 values
+ * utils.aggregate.topValues(collection, 5, null, '');
+ * // 
+ * ```
+ * 
+ * @param {Array} collection - Collection of values we want to get the top values from
+ * @param {Number} [numValues=5] - the number of values to return
+ * @param {string | Function} [fieldOrFn = null] - field of the object to use as the value, <br />
+ *    Or the Function to generate the value, <br />
+ *    Or null if the value is an array of Comparables (like Number)
+ * @param  {...String} sortFields - field in the object to sort by,<br />
+ *    Prefixed by '-' if it should be sorted in Descending order
+ *    (ex: '-Year', 'Manufacturer')
+ * @returns {Array} - array of values
+ */
+module.exports.topValues = function topValues(collection, numValues = 5, fieldOrFn, ...sortFields) {
+  let cleanCollection = collection || [];
+
+  //-- if no sort fields are provided, sort in descending order
+  const cleanSortFields = sortFields.length === 0
+    ? ['-']
+    : sortFields;
+
+  cleanCollection = cleanCollection.sort(
+    ArrayUtils.createSort(...cleanSortFields)
+  );
+
+  return AggregateUtils.property(
+    cleanCollection.slice(0, numValues),
+    fieldOrFn
+  );
 };
