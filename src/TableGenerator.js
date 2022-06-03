@@ -82,6 +82,7 @@ const { createSort } = require('./array');
  *   * {@link TableGenerator#styleHeader|styleHeader(string)} - css styles for the header row
  *   * {@link TableGenerator#styleRow|styleRow(fn)} - Function to style rows
  *   * {@link TableGenerator#styleCell|styleCell(fn)} - Function to style cells
+ *   * {@link TableGenerator#border|border(string)} - Apply a border to the table data cells
  * * generate output
  *   * {@link TableGenerator#generateHTML|generateHTML()} - returns html table with the results
  *   * {@link TableGenerator#generateMarkdown|generateMarkdown()} - returns markdown with the results
@@ -104,6 +105,12 @@ class TableGenerator {
    * @type {Function}
    */
   #augmentFn = null;
+
+  /**
+   * Border CSS to also apply to the cells
+   * @type {String}
+   */
+  #borderCSS = ''; // 'solid 1px #AAA';
 
   /**
    * Optional array of exclusive columns to show based on the properties of each row\n
@@ -235,6 +242,7 @@ class TableGenerator {
   reset() {
     this.#data = [];
     this.#augmentFn = null;
+    this.#borderCSS = '';
     this.#columns = null;
     this.#columnsToExclude = [];
     this.#fetch = null;
@@ -334,6 +342,62 @@ class TableGenerator {
       });
       return newRecord;
     };
+
+    return this;
+  }
+
+  /**
+   * Convenience function to set an a border on the Data Cells.
+   * 
+   * This only applies when {@link TableGenerator#render|rendering HTML}
+   * or {@link TableGenerator#generateHTML|generating HTML}
+   * 
+   * As this adds additional CSS, the styling applied:
+   *   * {@link TableGenerator#styleTable|to the whole table}
+   *   * or {@link TableGenerator#styleRow|to the rows}
+   *   * or {@link TableGenerator#styleCell|to the data cells} will be affected
+   * 
+   * For example:
+   * 
+   * ```
+   * sourceData = [{id: 1, temp_F:98}, {id: 2, temp_F:99}, {id: 3, temp_F:100}];
+   * 
+   * new utils.TableGenerator(sourceData)
+   *    .border('1px solid #aaa')
+   *    .render();
+   * ```
+   * 
+   * <table cellspacing="0px" >
+   * <tr >
+   *   <th>id</th>
+   *   <th>temp_F</th>
+   * </tr>
+   * <tr >
+   *   <td style=" border: 1px solid #aaa">1</td>
+   *   <td style=" border: 1px solid #aaa">98</td>
+   * </tr>
+   * <tr >
+   *   <td style=" border: 1px solid #aaa">2</td>
+   *   <td style=" border: 1px solid #aaa">99</td>
+   * </tr>
+   * <tr >
+   *   <td style=" border: 1px solid #aaa">3</td>
+   *   <td style=" border: 1px solid #aaa">100</td>
+   * </tr>
+   * </table>
+   * 
+   * @param {String | Boolean} borderCSS - CSS String to additionally apply HTML TD elements
+   */
+  border(borderCSS) {
+    let cleanCSS = '';
+
+    if (borderCSS === true) {
+      cleanCSS = 'border: 1px solid #AAA';
+    } else if (borderCSS) {
+      cleanCSS = `border: ${borderCSS}`;
+    }
+
+    this.#borderCSS = cleanCSS;
 
     return this;
   }
@@ -987,6 +1051,7 @@ class TableGenerator {
     const styleRowFn = this.#styleRow;
     const styleCellFn = this.#styleCell;
     const printOptions = this.#printOptions;
+    const borderCSS = this.#borderCSS;
     
     const cleanFn = printValue;
 
@@ -1007,16 +1072,17 @@ class TableGenerator {
           + dataRow.map((value, columnIndex) => {
             //-- note - the data is from the original dataset, not the results
             const cellStyle = !styleCellFn
-              ? null
+              ? ''
               : styleCellFn({ value, columnIndex, rowIndex, row: dataRow, record });
             return '<td '
-              + (!cellStyle ? '' : `style="${cellStyle}"`)
+              + (borderCSS || cellStyle ? `style="${cellStyle} ${borderCSS}"` : '')
               + `>${cleanFn(value, printOptions)}</td>`;
           }).join('\n\t')
           + '\n</tr>';
       }).join('\n');
     
     const tableResults = '<table '
+      + 'cellspacing="0px" '
       + (!styleTable ? '' : `style="${styleTable}"`)
       + '>'
       + printHeader(results.headers, '')
