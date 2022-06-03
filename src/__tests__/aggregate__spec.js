@@ -794,3 +794,232 @@ global.describe('percentile', () => {
     });
   });
 });
+
+global.describe('topValues', () => {
+  global.describe('gets top values', () => {
+    global.it('3 precipitation -> month', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 8, month: '2022-Mar', precip: 2.56 },
+        { id: 7, month: '2022-Apr', precip: 3.98 }
+      ];
+      const expected = ['2021-Oct', '2021-Dec', '2022-Apr'];
+      const results = AggregateUtils.topValues(collection, 3, 'month', '-precip');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('5 precipitation -> month', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = ['2021-Oct', '2021-Dec', '2022-Mar', '2021-Nov', '2022-Feb'];
+      const results = AggregateUtils.topValues(collection, 5, 'month', '-precip');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('5 precipitation', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [5.31, 4.13, 3.98, 3.94, 3.62];
+      const results = AggregateUtils.topValues(collection, 5, 'precip', '-precip');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('3 most recent', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [2.56, 3.98, 3.62];
+      const results = AggregateUtils.topValues(collection, 3, 'precip', '-id');
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('gets lowest values', () => {
+    global.it('3 lowest', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [0.87, 2.56, 2.68];
+      const results = AggregateUtils.topValues(collection, 3, 'precip', 'precip');
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('can use literal values', () => {
+    global.it('top 5', () => {
+      const collection = [
+        2.68,
+        0.87,
+        5.31,
+        3.94,
+        4.13,
+        3.58,
+        3.62,
+        3.98,
+        2.56
+      ];
+      const expected = [5.31, 4.13, 3.98, 3.94, 3.62];
+      const results = AggregateUtils.topValues(collection, 5);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('top 5 explicit', () => {
+      const collection = [
+        2.68,
+        0.87,
+        5.31,
+        3.94,
+        4.13,
+        3.58,
+        3.62,
+        3.98,
+        2.56
+      ];
+      const expected = [5.31, 4.13, 3.98, 3.94, 3.62];
+      const results = AggregateUtils.topValues(collection, 5, null, '-');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('bottom 5', () => {
+      const collection = [
+        2.68,
+        0.87,
+        5.31,
+        3.94,
+        4.13,
+        3.58,
+        3.62,
+        3.98,
+        2.56
+      ];
+      const expected = [0.87, 2.56, 2.68, 3.58, 3.62];
+      const results = AggregateUtils.topValues(collection, 5, null, '');
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('does not fail', () => {
+    global.it('if the collection is null', () => {
+      const collection = null;
+      const expected = [];
+      const results = AggregateUtils.topValues(collection, 3, 'precip', 'precip');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('if the sort fields are empty on object collections', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 }
+      ];
+      const results = AggregateUtils.topValues(collection, 3);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('if the return count is more records than we have', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+      const results = AggregateUtils.topValues(collection, 100, 'id', 'id');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('if the return count is negative', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [0, 1, 2, 3, 4, 5, 6];
+      const results = AggregateUtils.topValues(collection, -2, 'id', 'id');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('if the return count is 0', () => {
+      const collection = [
+        { id: 0, month: '2021-Sep', precip: 2.68 },
+        { id: 1, month: '2021-Aug', precip: 0.87 },
+        { id: 2, month: '2021-Oct', precip: 5.31 },
+        { id: 3, month: '2021-Nov', precip: 3.94 },
+        { id: 4, month: '2021-Dec', precip: 4.13 },
+        { id: 5, month: '2022-Jan', precip: 3.58 },
+        { id: 6, month: '2022-Feb', precip: 3.62 },
+        { id: 7, month: '2022-Mar', precip: 3.98 },
+        { id: 8, month: '2022-Apr', precip: 2.56 }
+      ];
+      const expected = [];
+      const results = AggregateUtils.topValues(collection, 0, 'id', 'id');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('with the default number of values', () => {
+      const collection = [
+        2.68,
+        0.87,
+        5.31,
+        3.94,
+        4.13,
+        3.58,
+        3.62,
+        3.98,
+        2.56
+      ];
+      const expected = [5.31, 4.13, 3.98, 3.94, 3.62];
+      const results = AggregateUtils.topValues(collection);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+});
