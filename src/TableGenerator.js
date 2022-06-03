@@ -452,20 +452,64 @@ class TableGenerator {
    * 
    * (This is an alternate to {@link formatterFn} or simple `.map()` call on the source data)
    * 
+   * **NOTE: Only matching properties on the formatter object are changed - all others are left alone.**
+   * 
    * For example:
    * 
    * ```
-   * data = [{temp: 98, type: 'F'}, {temp: 99, type: 'F'}, {temp: 100, type: 'F'}];
+   * data = [
+   *   {station: 'A', temp: 98, type: 'F', descr: '0123'},
+   *   {station: 'A', temp: 99, type: 'F', descr: '0123456'},
+   *   {station: 'A', temp: 100, type: 'F', descr: '0123456789'}
+   * ];
    * 
    * //-- simple example where the temp property is converted, and type property overwritten
    * new TableGenerator(data)
    *  .formatter({
+   *    //-- property 'station' not mentioned, so no change
+   *    
+   *    //-- convert temperature to celsius
    *    temp: (value) => (value - 32) * 0.5556,
-   *    type: (value) => 'C'
-   *  })...
+   *    //-- overwrite type from 'F' to 'C'
+   *    type: 'C',
+   *    //-- ellipsify to shorten the description string, if longer than 8 characters
+   *    descr: (str) => utils.format.ellipsify(str, 8)
+   *  }).renderMarkdown()
    * ```
    * 
-   * Only properties on the object are checked - all others are left alone.
+   * station|temp  |type|descr    
+   * --     |--    |--  |--       
+   * A      |36.67 |F   |0123     
+   * A      |37.225|F   |0123456  
+   * A      |37.781|F   |01234567…
+   * 
+   * Note, due to frequent requests, simple datatype conversions can be requested.
+   * 
+   * Only ('String', 'Number', and 'Boolean') are supported
+   * 
+   * ```
+   * data = [
+   *   { propA: ' 8009', propB: 8009, isBoolean: 0},
+   *   { propA: ' 92032', propB: 92032, isBoolean: 1},
+   *   { propA: ' 234234', propB: 234234, isBoolean: 1},
+   * ];
+   * 
+   * new utils.TableGenerator(data)
+   *   .formatter({
+   *     //-- convert Prop A to Number - so render with Locale Number Formatting
+   *     propA: 'number',
+   *     //-- conver PropB to String - so render without Locale Number Formatting
+   *     propB: 'string',
+   *     //-- render 'True' or 'False'
+   *     isBoolean: 'boolean'
+   *   }).renderMarkdown();
+   * ```
+   * 
+   * propA|propB|isBoolean
+   * --                  |--                |--       
+   * 8,009               |8009              |false    
+   * 92,032              |92032             |true     
+   * 234,234             |234234            |true 
    * 
    * @param {Object} obj - object with properties storing arrow functions
    * @param {Function} obj.PropertyToTranslate - (value) => result
@@ -480,10 +524,25 @@ class TableGenerator {
 
     const fnMap = new Map();
     Object.getOwnPropertyNames(obj).forEach((key) => {
-      if ((typeof obj[key]) !== 'function') {
-        throw (Error(`Formatter properties must be functions. [${key}]`));
+      if ((typeof obj[key]) === 'string') {
+        let fn;
+        const str = obj[key].toLowerCase();
+        if (str === 'string') {
+          fn = (val) => String(val);
+        } else if (str === 'number') {
+          fn = (val) => Number(val);
+        } else if (str === 'boolean') {
+          fn = (val) => val ? 'true' : 'false';
+        } else {
+          throw Error(`TableGenerator.format: property ${key} formatter of ${str} is unsupported. Only (String, Number, Boolean) are supported`);
+        }
+        fnMap.set(key, fn);
+      } else {
+        if ((typeof obj[key]) !== 'function') {
+          throw (Error(`Formatter properties must be functions. [${key}]`));
+        }
+        fnMap.set(key, obj[key]);
       }
-      fnMap.set(key, obj[key]);
     });
     
     this.#formatterFn = ({ value, property }) => fnMap.has(property)
