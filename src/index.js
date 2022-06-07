@@ -17,6 +17,10 @@ const svg = require('./svg');
 const SourceMap = require('./SourceMap');
 const TableGenerator = require('./TableGenerator');
 
+const table = function table(...rest) {
+  return new TableGenerator(...rest);
+};
+
 /**
  * Default module
  * @module index
@@ -60,5 +64,7 @@ module.exports = {
   /** @see SourceMap */
   SourceMap,
   /** @see TableGenerator */
-  TableGenerator
+  TableGenerator,
+  /** @see TableGenerator */
+  table
 };

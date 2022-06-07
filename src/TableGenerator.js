@@ -22,7 +22,7 @@ const ArrayUtils = require('./array');
 const { createSort } = require('./array');
 
 /**
- * Class that renders a table
+ * Generates and or Renders Tables (Markdown, CSS, HTML, or plain arrays)
  * 
  * For example:
  * 
@@ -31,31 +31,60 @@ const { createSort } = require('./array');
  * ```
  * 
  * ```
- * new utils.TableGenerator(cars)
+ * utils.table(cars)
  *    .limit(2)
- *    .render()
+ *    .render();
  * ```
  * 
  * ![Screenshot of simple example](img/TableGenerator_simple.png)
  * 
  * ```
- * new utils.TableGenerator(cars)
+ * //-- with many options to tailor and format the table
+ * 
+ * utils.table(cars)
+ * 
+ *    //-- sort by year field (descending), Displacement (descending), Name (ascending)
  *    .sort('-Year', '-Displacement', 'Name')
+ *    
+ *    //-- limit to only the first 10 records
  *    .limit(10)
+ *    
+ *    //-- add in a new field / column called Kilometer_per_Litre
  *    .augment({
  *         'Kilometer_per_Litre': (row) => row.Miles_per_Gallon * 0.425144
  *    })
+ * 
+ *    //-- specify the columns to show by list of fields
  *    .columns('Name', 'Kilometer_per_Litre', 'Cylinders', 'Displacement', 'Acceleration', 'Year')
+ * 
+ *    //-- format how a field / column is rendered by ({ property: fn })
  *    .formatter({
  *        Year: (value) => value ? value.slice(0,4) : value
  *    })
+ * 
+ *    //-- make specific column headers more legible with ({ property: header })
  *    .labels({
  *        'Kilometer_per_Litre': 'Km/L'
  *    })
+ * 
+ *    //-- high light rows and cells based on data
+ *    .styleCell(({columnIndex, value}) => columnIndex === 1 && value > 10
+ *             ? 'background-color: #AAFFAA;' : ''
+ *    )
+ *    .styleRow(({record}) => record.Name.includes('diesel')
+ *             ? 'color: green;' : ''
+ *    )
+ * 
  *    .render()
  * ```
  * 
  * ![Screenshot of complex example](img/TableGenerator_complex.png)
+ * 
+ * ```
+ * //-- note, `utils.table(...)`
+ * //-- is the same as `new utils.TableGenerator(...)`
+ * //-- and now available as of `1.12.0`
+ * ```
  * 
  * # Types of calls:
  * 
@@ -299,7 +328,7 @@ class TableGenerator {
    * 
    * sourceData = [{id: 1, temp_F:98}, {id: 2, temp_F:99}, {id: 3, temp_F:100}];
    * 
-   * new utils.TableGenerator(sourceData)
+   * utils.table(sourceData)
    *  .augment({
    *    temp_C: (row) => (row.temp_F - 32) * 0.5556,
    *    temp_K: (row) => (row.temp_F - 32) * 0.5556 + 1000
@@ -362,7 +391,7 @@ class TableGenerator {
    * ```
    * sourceData = [{id: 1, temp_F:98}, {id: 2, temp_F:99}, {id: 3, temp_F:100}];
    * 
-   * new utils.TableGenerator(sourceData)
+   * utils.table(sourceData)
    *    .border('1px solid #aaa')
    *    .render();
    * ```
@@ -558,7 +587,7 @@ class TableGenerator {
    *   { propA: ' 234234', propB: 234234, isBoolean: 1},
    * ];
    * 
-   * new utils.TableGenerator(data)
+   * utils.table(data)
    *   .formatter({
    *     //-- convert Prop A to Number - so render with Locale Number Formatting
    *     propA: 'number',
@@ -697,7 +726,7 @@ class TableGenerator {
    *    {id: 1, dateTime:new Date(2022,3,4,9), child: { results: true }}
    * ];
    * 
-   * console.log(new utils.TableGenerator(dataSet)
+   * console.log(utils.table(dataSet)
    *     .generateMarkdown({align: true})
    * )
    * 
@@ -715,7 +744,7 @@ class TableGenerator {
    *    {id: 1, dateTime:new Date(2022,3,4,9), child: { results: true }}
    * ];
    * 
-   * console.log(new utils.TableGenerator(dataSet)
+   * console.log(utils.table(dataSet)
    *     .printOptions({ collapseObjects: true, dateFormat: 'toISOString'})
    *     .generateMarkdown({align: true})
    * )
@@ -787,7 +816,7 @@ class TableGenerator {
    *  ];
    *  
    * //-- only show the temp and source columns
-   * new utils.TableGenerator(dataSet)
+   * utils.table(dataSet)
    *   .columns('temp', 'source') // or .columns(['temp', 'source'])
    *   .styleTable('border:1px solid #000')
    *   .render();
@@ -815,7 +844,7 @@ class TableGenerator {
    *  ];
    *  
    * //-- only show the temp and source columns
-   * new utils.TableGenerator(dataSet)
+   * utils.table(dataSet)
    *   .columns('temp', 'source') // or .columns(['temp', 'source'])
    *   .styleHeader('border: 1px solid #000;')
    *   .render();
@@ -843,7 +872,7 @@ class TableGenerator {
    * ];
    * 
    * //-- only show the temp and source columns
-   * new utils.TableGenerator(dataSet)
+   * utils.table(dataSet)
    *   .columns('temp', 'source') // or .columns(['temp', 'source'])
    *   .styleRow(({rowIndex, row, record}) => {
    *     return (record.source === 'A') ? `color: #0A0;` : `color: #A00`;
@@ -885,7 +914,7 @@ class TableGenerator {
    * colorRange = new utils.svg.svgJS.Color('#0A0').to('#F00');
    * 
    * //-- only show the temp and source columns
-   * new utils.TableGenerator(dataSet)
+   * utils.table(dataSet)
    *   .styleCell(({value, columnIndex, rowIndex, row, record}) => {
    *     //-- style the color of the cell from Red:0 to Green:1
    *     // record is the exact record provided to data / the generator
@@ -933,7 +962,7 @@ class TableGenerator {
    * Running normally would give
    * 
    * ```
-   * new utils.TableGenerator(data)
+   * utils.table(data)
    *    .generateMarkdown();
    * ```
    * 
@@ -945,7 +974,7 @@ class TableGenerator {
    * Running that transposed flips it.
    * 
    * ```
-   * new utils.TableGenerator(data)
+   * utils.table(data)
    *  .transpose()
    *  .generateMarkdown();
    * ```
@@ -1267,7 +1296,7 @@ class TableGenerator {
    *   { id: 8, city: 'Chicago',  month: 'Dec', precip: 2.56 },
    *   { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98 }
    * ];
-   * new utils.TableGenerator(weather)
+   * utils.table(weather)
    *     .render();
    * ```
    * 
@@ -1302,7 +1331,7 @@ class TableGenerator {
    *   { id: 8, city: 'Chicago',  month: 'Dec', precip: 2.56 },
    *   { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98 }
    * ];
-   * new utils.TableGenerator(weather)
+   * utils.table(weather)
    *     .renderMarkdown();
    * 
    * // id|city    |month|precip
@@ -1341,7 +1370,7 @@ class TableGenerator {
    *   { id: 8, city: 'Chicago',  month: 'Dec', precip: 2.56 },
    *   { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98 }
    * ];
-   * new utils.TableGenerator(weather)
+   * utils.table(weather)
    *     .renderCSV();
    * 
    * // "id","city","month","precip"

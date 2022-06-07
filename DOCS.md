@@ -28,6 +28,7 @@ See the [#Installation section for requirements and installation](#install)
 
 ## What's New
 
+* 1.12 - provide `utils.table(...)` instead of `new utils.TableGenerator(...)`
 * 1.11 - provide {@link module:aggregate.topValues|topValues} (like top 5, bottom 3)
 * 1.10 - provide {@link module:aggregate.percentile|percentile} (like 50th percentile) aggregates
 * 1.9 - allow {@link TableGenerator#transpose|transposing results} on TableGenerator.
