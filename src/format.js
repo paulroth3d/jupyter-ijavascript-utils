@@ -495,3 +495,100 @@ module.exports.capitalizeAll = function capitalizeAll(str) {
     .map(FormatUtils.capitalize)
     .join('');
 };
+
+module.exports.interpolateColor = function interpolateColor(colorFrom, colorTo, domain) {
+  const [
+    domainMin = 0,
+    domainMax = 1
+  ] = domain || [];
+
+  if (domainMin >= domainMax) {
+    throw Error('colorInterpolate(colorFrom, colorTo, [domainMin, domainMax]): domainMin must be less than domainMax');
+  }
+
+  if (!colorFrom || typeof colorFrom !== 'string') {
+    throw Error('colorInterpolate(colorFrom, colorTo, ...): colorFrom is required');
+  }
+  if (!colorTo || typeof colorTo !== 'string') {
+    throw Error('colorInterpolate(colorFrom, colorTo, ...): colorFrom is required');
+  }
+
+  const parseColorStr = function parseColorStr(str) {
+    if (!str) {
+      throw Error(`colorInterpolate(colorFrom, colorTo, [min, max]): not a valid color: '${str}'`);
+    }
+    
+    let match;
+    /* eslint-disable no-cond-assign */
+    if (match = str.match(/.*([a-f][a-f])([a-f][a-f])([a-f][a-f])[a-f][a-f]+.*/i)) {
+      return ({
+        r: parseInt(match[1], 16),
+        g: parseInt(match[2], 16),
+        b: parseInt(match[3], 16)
+      });
+    } else if (match = str.match(/.*([a-f][a-f])([a-f][a-f])([a-f][a-f]).*/i)) {
+      return ({
+        r: parseInt(match[1], 16),
+        g: parseInt(match[2], 16),
+        b: parseInt(match[3], 16)
+      });
+    } else if (match = str.match(/.*([a-f])([a-f])([a-f]).*/i)) {
+      return ({
+        r: parseInt(`${match[1]}${match[1]}`, 16),
+        g: parseInt(`${match[2]}${match[2]}`, 16),
+        b: parseInt(`${match[3]}${match[3]}`, 16)
+      });
+    } else if (match = str.match(/.*rgb\([^0-9]*([0-9]+)[^0-9]+([0-9]+)[^0-9]+([0-9]+).*/i)) {
+      return ({
+        r: parseInt(match[1], 10),
+        g: parseInt(match[2], 10),
+        b: parseInt(match[3], 10)
+      });
+      /* eslint-enable no-cond-assign */
+    }
+    throw Error(`colorInterpolate():unable to parse color:${str}`);
+  };
+
+  const numberToColorHex = function numberToColorHex(num) {
+    if (num <= 0) return 0;
+    if (num >= 255) return 'ff';
+    if (num < 16) return `0${num.toString(16)}`;
+    return num.toString(16);
+  };
+
+  const colorToHex = function colorToHex(colorObj) {
+    return `#${
+      numberToColorHex(colorObj.r)
+    }${
+      numberToColorHex(colorObj.g)
+    }${
+      numberToColorHex(colorObj.b)
+    }`;
+  };
+
+  const colorFromObj = parseColorStr(colorFrom);
+  const colorToObj = parseColorStr(colorTo);
+  const deltaR = colorToObj.r - colorFromObj.r;
+  const deltaG = colorToObj.g - colorFromObj.g;
+  const deltaB = colorToObj.b - colorFromObj.b;
+
+  // console.log(`from:[${colorFrom}]:${JSON.stringify(colorFromObj)}, to[${colorTo}]:${JSON.stringify(colorToObj)}`);
+
+  const result = function colorInterpolateTo(val) {
+    if (val <= domainMin) {
+      return colorToHex(colorFromObj);
+    } else if (val >= domainMax) {
+      return colorToHex(colorToObj);
+    }
+    
+    const coefficient = (val - domainMin) / domainMax;
+    
+    return colorToHex(({
+      r: colorFromObj.r + Math.round(deltaR * coefficient),
+      g: colorFromObj.r + Math.round(deltaR * coefficient),
+      b: colorFromObj.r + Math.round(deltaR * coefficient)
+    }));
+  };
+
+  return result.bind(this, domainMin, domainMax, deltaR, deltaG, deltaB, colorFromObj, colorToObj);
+};

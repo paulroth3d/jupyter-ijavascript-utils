@@ -644,3 +644,190 @@ global.describe('format', () => {
     */
   });
 });
+
+global.describe('interpolate color', () => {
+  global.describe('parse colors', () => {
+    global.describe('rgb()', () => {
+      global.it('rgb(255,255,255)', () => {
+        const fromColor = 'rgb(255,255,255)';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#ffffff';
+        global.expect(result).toBe(expected);
+      });
+      global.it(' rgb(255,255,255)', () => {
+        const fromColor = ' rgb(255,255,255)';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#ffffff';
+        global.expect(result).toBe(expected);
+      });
+      global.it(' rgb( 255, 255, 255) ', () => {
+        const fromColor = ' rgb( 255, 255, 255) ';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#ffffff';
+        global.expect(result).toBe(expected);
+      });
+      global.it(' rgb( 1, 15, 100) ', () => {
+        const fromColor = ' rgb( 1, 15, 100) ';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#010f64';
+        global.expect(result).toBe(expected);
+      });
+      global.it(' rgb( 1, 15, 100) ', () => {
+        const fromColor = ' rgb( 1, 15, 100) ';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#010f64';
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('6 hex color', () => {
+      global.it('AABBCC', () => {
+        const fromColor = 'AABBCC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+      global.it(' AABBCC', () => {
+        const fromColor = 'AABBCC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+      global.it(' AABBCC ', () => {
+        const fromColor = 'AABBCC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+      global.it('#AABBCC ', () => {
+        const fromColor = 'AABBCC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+      global.it('#AABBCC ', () => {
+        const fromColor = 'AABBCC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+      //-- AABB still matches hex 3
+      // global.describe('invalid', () => {
+      //   global.it('not A-Z', () => {
+      //     const fromColor = 'GGAABB';
+      //     const toColor = fromColor;
+      //     const expectedError = 'Something';
+      //     global.expect(() => FormatUtils.interpolateColor(fromColor, toColor, [0, 1]))
+      //       .toThrow(expectedError);
+      //   });
+      // });
+      global.it('#AABBCC ', () => {
+        const fromColor = 'AABBCC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('3 hex color', () => {
+      global.it('ABC', () => {
+        const fromColor = 'ABC';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('8 hex color', () => {
+      global.it('AABBCCAA', () => {
+        const fromColor = 'AABBCCAA';
+        const toColor = fromColor;
+        const value = 0;
+        const result = FormatUtils.interpolateColor(fromColor, toColor, [0, 1])(value);
+        const expected = '#aabbcc';
+        global.expect(result).toBe(expected);
+      });
+    });
+  });
+  /*
+  global.describe('happy path', () => {
+    global.it('min value', () => {
+      const fromColor = '#FF0000';
+      const toColor = '#00FF00';
+      const domainMin = 0;
+      const domainMax = 1;
+      const value = 0;
+      
+      const formatFn = FormatUtils.interpolateColor(fromColor, toColor, [domainMin, domainMax]);
+      global.expect(typeof formatFn).toBe('function');
+      const results = formatFn(value);
+      const expected = '#FF0000';
+
+      global.expect(results).toBe(expected);
+    });
+    global.it('below min value', () => {
+      const fromColor = '#FF0000';
+      const toColor = '#00FF00';
+      const domainMin = 0;
+      const domainMax = 1;
+      const value = -0.5;
+      
+      const formatFn = FormatUtils.interpolateColor(fromColor, toColor, [domainMin, domainMax]);
+      global.expect(typeof formatFn).toBe('function');
+      const results = formatFn(value);
+      const expected = '#FF0000';
+
+      global.expect(results).toBe(expected);
+    });
+    global.it('max value', () => {
+      const fromColor = '#FF0000';
+      const toColor = '#00FF00';
+      const domainMin = 0;
+      const domainMax = 1;
+      const value = 1;
+      
+      const formatFn = FormatUtils.interpolateColor(fromColor, toColor, [domainMin, domainMax]);
+      global.expect(typeof formatFn).toBe('function');
+      const results = formatFn(value);
+      const expected = '#00FF00';
+
+      global.expect(results).toBe(expected);
+    });
+    global.it('above max value', () => {
+      const fromColor = '#FF0000';
+      const toColor = '#00FF00';
+      const domainMin = 0;
+      const domainMax = 1;
+      const value = 2;
+      
+      const formatFn = FormatUtils.interpolateColor(fromColor, toColor, [domainMin, domainMax]);
+      global.expect(typeof formatFn).toBe('function');
+      const results = formatFn(value);
+      const expected = '#00FF00';
+
+      global.expect(results).toBe(expected);
+    });
+  });
+  */
+});
