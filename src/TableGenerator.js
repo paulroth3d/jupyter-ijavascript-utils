@@ -1094,7 +1094,7 @@ class TableGenerator {
     const printBody = (collection) => collection
       .map((dataRow, rowIndex) => {
         const record = this.#data[rowIndex];
-        const rowStyle = !styleRowFn ? null : styleRowFn({ rowIndex, row: dataRow, record });
+        const rowStyle = !styleRowFn ? null : styleRowFn({ rowIndex, row: dataRow, record }) || '';
         return '<tr '
           + (!rowStyle ? '' : `style="${rowStyle}"`)
           + '>\n\t'
@@ -1102,9 +1102,9 @@ class TableGenerator {
             //-- note - the data is from the original dataset, not the results
             const cellStyle = !styleCellFn
               ? ''
-              : styleCellFn({ value, columnIndex, rowIndex, row: dataRow, record });
+              : styleCellFn({ value, columnIndex, rowIndex, row: dataRow, record }) || '';
             return '<td '
-              + (borderCSS || cellStyle ? `style="${cellStyle} ${borderCSS}"` : '')
+              + (borderCSS || cellStyle ? `style="${cellStyle}; ${borderCSS};"` : '')
               + `>${cleanFn(value, printOptions)}</td>`;
           }).join('\n\t')
           + '\n</tr>';
