@@ -3,6 +3,7 @@
   function-paren-newline,
   no-unused-vars,
   implicit-arrow-linebreak,
+  arrow-body-style,
   max-len
 */
 
@@ -421,7 +422,7 @@ class TableGenerator {
     let cleanCSS = '';
 
     if (borderCSS === true) {
-      cleanCSS = 'border: 1px solid #AAA';
+      cleanCSS = 'border: 1px solid #aaa';
     } else if (borderCSS) {
       cleanCSS = `border: ${borderCSS}`;
     }
@@ -1091,29 +1092,48 @@ class TableGenerator {
         .join('\n\t')
       + '\n</tr>\n';
 
+    //-- todo - investigate shadow root so css only applies to table
+    const printInlineCSS = (...cssStyles) => {
+      const cleanCSS = cssStyles
+        .filter((style) => style ? true : false);
+      
+      //-- short circuit if empty
+      if (cleanCSS.length < 1) {
+        return '';
+      }
+
+      const cssContents = cleanCSS
+        .map((style) => style.trim())
+        .map((style) => style.endsWith(';') ? style : `${style};`)
+        .join(' ');
+      
+      return `style="${cssContents}"`;
+    };
+
     const printBody = (collection) => collection
       .map((dataRow, rowIndex) => {
         const record = this.#data[rowIndex];
         const rowStyle = !styleRowFn ? null : styleRowFn({ rowIndex, row: dataRow, record }) || '';
-        return '<tr '
-          + (!rowStyle ? '' : `style="${rowStyle}"`)
-          + '>\n\t'
+
+        return `<tr ${printInlineCSS(rowStyle)}>\n\t`
           + dataRow.map((value, columnIndex) => {
-            //-- note - the data is from the original dataset, not the results
-            const cellStyle = !styleCellFn
-              ? ''
-              : styleCellFn({ value, columnIndex, rowIndex, row: dataRow, record }) || '';
-            return '<td '
-              + (borderCSS || cellStyle ? `style="${cellStyle}; ${borderCSS};"` : '')
-              + `>${cleanFn(value, printOptions)}</td>`;
+            //-- style for the cell
+            const cellStyle = !styleCellFn ? '' : styleCellFn({ value, columnIndex, rowIndex, row: dataRow, record });
+
+            return `<td ${
+              printInlineCSS(
+                borderCSS,
+                //-- could be inline, but not as clear
+                cellStyle
+              )
+            }>${
+              cleanFn(value, printOptions)
+            }</td>`;
           }).join('\n\t')
           + '\n</tr>';
       }).join('\n');
     
-    const tableResults = '<table '
-      + 'cellspacing="0px" '
-      + (!styleTable ? '' : `style="${styleTable}"`)
-      + '>'
+    const tableResults = `<table cellspacing="0px" ${printInlineCSS(styleTable)}>`
       + printHeader(results.headers, '')
       + printBody(results.data)
       + '\n</table>';

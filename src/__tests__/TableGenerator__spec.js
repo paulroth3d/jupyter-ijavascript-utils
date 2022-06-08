@@ -534,7 +534,7 @@ state|IL   |IL    `;
         const results = new TableGenerator(weather)
           .styleTable('1px solid black')
           .generateHTML();
-        const expected = `<table cellspacing="0px" style="1px solid black">
+        const expected = `<table cellspacing="0px" style="1px solid black;">
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -606,14 +606,16 @@ state|IL   |IL    `;
 \t<td >Aug</td>
 \t<td >0.87</td>
 </tr>
-<tr style="style:1">
+<tr style="dynamic-style: 1;">
 \t<td >0</td>
 \t<td >Seattle</td>
 \t<td >Apr</td>
 \t<td >2.68</td>
 </tr>
 </table>`;
-        const styleRowFn = ({ rowIndex }) => rowIndex % 2 === 0 ? '' : `style:${rowIndex}`;
+        const styleRowFn = ({ rowIndex }) => rowIndex % 2 === 0
+          ? ''
+          : `dynamic-style: ${rowIndex}`;
         const results = new TableGenerator(weather)
           .styleRow(styleRowFn)
           .generateHTML();
@@ -639,12 +641,14 @@ state|IL   |IL    `;
 </tr>
 <tr >
 \t<td >0</td>
-\t<td style="style:1 ">Seattle</td>
+\t<td style="dynamic-style: 1;">Seattle</td>
 \t<td >Apr</td>
 \t<td >2.68</td>
 </tr>
 </table>`;
-        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1) ? `style:${rowIndex}` : '';
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1)
+          ? `dynamic-style: ${rowIndex}`
+          : '';
         const results = new TableGenerator(weather)
           .styleCell(styleRowFn)
           .generateHTML();
@@ -663,19 +667,21 @@ state|IL   |IL    `;
 \t<th>precip</th>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">1</td>
-\t<td style=" border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Aug</td>
-\t<td style=" border: 1px solid #AAA">0.87</td>
+\t<td style="border: 1px solid #aaa;">1</td>
+\t<td style="border: 1px solid #aaa;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Aug</td>
+\t<td style="border: 1px solid #aaa;">0.87</td>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">0</td>
-\t<td style="style:1 border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Apr</td>
-\t<td style=" border: 1px solid #AAA">2.68</td>
+\t<td style="border: 1px solid #aaa;">0</td>
+\t<td style="border: 1px solid #aaa; dynamic-style: 1;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Apr</td>
+\t<td style="border: 1px solid #aaa;">2.68</td>
 </tr>
 </table>`;
-        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1) ? `style:${rowIndex}` : '';
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1)
+          ? `dynamic-style: ${rowIndex}`
+          : '';
         const borderCSS = true;
         const results = new TableGenerator(weather)
           .styleCell(styleRowFn)
@@ -694,16 +700,16 @@ state|IL   |IL    `;
 \t<th>precip</th>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">1</td>
-\t<td style=" border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Aug</td>
-\t<td style=" border: 1px solid #AAA">0.87</td>
+\t<td style="border: 1px solid #aaa;">1</td>
+\t<td style="border: 1px solid #aaa;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Aug</td>
+\t<td style="border: 1px solid #aaa;">0.87</td>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">0</td>
-\t<td style=" border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Apr</td>
-\t<td style=" border: 1px solid #AAA">2.68</td>
+\t<td style="border: 1px solid #aaa;">0</td>
+\t<td style="border: 1px solid #aaa;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Apr</td>
+\t<td style="border: 1px solid #aaa;">2.68</td>
 </tr>
 </table>`;
         const borderCSS = true;
@@ -723,16 +729,16 @@ state|IL   |IL    `;
 \t<th>precip</th>
 </tr>
 <tr >
-\t<td style=" border: 2px dotted blue">1</td>
-\t<td style=" border: 2px dotted blue">Seattle</td>
-\t<td style=" border: 2px dotted blue">Aug</td>
-\t<td style=" border: 2px dotted blue">0.87</td>
+\t<td style="border: 2px dotted blue;">1</td>
+\t<td style="border: 2px dotted blue;">Seattle</td>
+\t<td style="border: 2px dotted blue;">Aug</td>
+\t<td style="border: 2px dotted blue;">0.87</td>
 </tr>
 <tr >
-\t<td style=" border: 2px dotted blue">0</td>
-\t<td style=" border: 2px dotted blue">Seattle</td>
-\t<td style=" border: 2px dotted blue">Apr</td>
-\t<td style=" border: 2px dotted blue">2.68</td>
+\t<td style="border: 2px dotted blue;">0</td>
+\t<td style="border: 2px dotted blue;">Seattle</td>
+\t<td style="border: 2px dotted blue;">Apr</td>
+\t<td style="border: 2px dotted blue;">2.68</td>
 </tr>
 </table>`;
         const borderCSS = '2px dotted blue';
