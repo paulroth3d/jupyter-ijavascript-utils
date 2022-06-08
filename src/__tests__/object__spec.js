@@ -365,6 +365,12 @@ describe('ObjectUtils', () => {
       global.expect(result).toHaveProperty('base', 'obj');
       global.expect(result).toHaveProperty('targetValue', 'test');
     });
+    it('returns an empty object if the object to collapse is null', () => {
+      const targetObj = null;
+      const result = objectUtils.collapse(targetObj);
+      const expected = {};
+      global.expect(result).toEqual(expected);
+    });
     it('is the same even if it is on the same object', () => {
       const targetObj = { base: 'obj', targetValue: 'test' };
       const result = objectUtils.collapse(targetObj);
@@ -461,10 +467,34 @@ describe('ObjectUtils', () => {
       }];
       global.expect(result).toStrictEqual(expected);
     });
+    global.it('can select properties as arguments', () => {
+      const baseObj = {
+        a: 1,
+        b: 2,
+        c: 3,
+        d: 4
+      };
+      const result = objectUtils.selectObjectProperties(baseObj, 'a', 'b');
+      const expected = [{
+        a: 1,
+        b: 2
+      }];
+      global.expect(result).toStrictEqual(expected);
+    });
     global.it('does not throw an error if selecting properties on null', () => {
       const result = objectUtils.selectObjectProperties(null, ['a', 'b']);
       global.expect(result).toBeTruthy();
       global.expect(Array.isArray(result)).toBe(true);
+    });
+    global.it('returns an empty array if requesting an empty list of properties', () => {
+      const result = objectUtils.selectObjectProperties(null, []);
+      const expected = [];
+      global.expect(result).toEqual(expected);
+    });
+    global.it('returns an empty array if requesting an null list of properties', () => {
+      const result = objectUtils.selectObjectProperties(null, null);
+      const expected = [];
+      global.expect(result).toEqual(expected);
     });
   });
   global.it('can select properties of a list of 1 object', () => {

@@ -491,6 +491,7 @@ global.describe('leaflet', () => {
           const results = LeafletUtils.renderMarkers(markers, { uuid: 'testUUID' });
 
           // FileUtils.writeFileStd('./tmp/tmp', results);
+          //-- @TODO - not acceptable enough, but not sure of options
           global.expect(results).toBeTruthy();
         });
       });
@@ -519,6 +520,7 @@ global.describe('leaflet', () => {
           const expected = `const data = [[1,1,null],[2,2,null]];`;
 
           // FileUtils.writeFileStd('./tmp/tmp', results);
+          //-- @TODO - not acceptable enough, but not sure of options
           global.expect(results).toContain(expected);
         });
         global.it('succeeds if there is a lat, lon and title', () => {
@@ -527,6 +529,7 @@ global.describe('leaflet', () => {
           const expected = `const data = [[1,1,"A"],[2,2,"B"]];`;
 
           // FileUtils.writeFileStd('./tmp/tmp', results);
+          //-- @TODO - not acceptable enough, but not sure of options
           global.expect(results).toContain(expected);
         });
         global.it('succeeds if there is a lat, lon and title and more', () => {
@@ -534,7 +537,26 @@ global.describe('leaflet', () => {
           const results = LeafletUtils.renderMarkers(markers, { uuid: 'testUUID' });
 
           // FileUtils.writeFileStd('./tmp/tmp', results);
+          //-- @TODO - not acceptable enough, but not sure of options
           global.expect(results).toBeTruthy();
+        });
+
+        global.it('throws an error if no markers are specified', () => {
+          const markers = null;
+
+          const expectedError = 'leaflet.renderMarkers(markers, options): markers are required';
+
+          // FileUtils.writeFileStd('./tmp/tmp', results);
+          global.expect(() => LeafletUtils.renderMarkers(markers, { uuid: 'testUUID' }))
+            .toThrow(expectedError);
+        });
+        global.it('throws an error if markers are not an array or object', () => {
+          const markers = [2];
+
+          const expectedError = 'leaflet.renderMarkers(markers, options): object markers must follow schema: ({ lat, lon, title? })';
+          // FileUtils.writeFileStd('./tmp/tmp', results);
+          global.expect(() => LeafletUtils.renderMarkers(markers, { uuid: 'testUUID' }))
+            .toThrow(expectedError);
         });
       });
     });

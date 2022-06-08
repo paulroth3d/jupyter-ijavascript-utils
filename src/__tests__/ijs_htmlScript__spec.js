@@ -172,6 +172,113 @@ global.describe('codeBlockHelper', () => {
       global.expect(results).toStrictEqual(expected);
     });
 
+    global.it('can width and height set explicitly through strings', () => {
+      const options = {
+        scripts: [
+          'https://unpkg.com/leaflet@1.6.0/dist/leaflet.js',
+          'https://unpkg.com/leaflet-providers@1.1.0/leaflet-providers.js'
+        ],
+        css: [
+          'https://unpkg.com/leaflet@1.6.0/dist/leaflet.css'
+        ],
+        width: "100%",
+        height: "100%",
+        debug: true,
+        console: true,
+        uuid: '7e1e94f5-934e-49e9-8769-43989c877b43',
+        onReady: `console.log('startupScript');`
+      };
+
+      const results = IJSUtils.htmlScript(options);
+
+      const expected = `<html><body>
+  <div uuid="7e1e94f5-934e-49e9-8769-43989c877b43" style="width:100%; height: 100%"></div>
+  <div scriptUUID="7e1e94f5-934e-49e9-8769-43989c877b43" ></div>
+  <script>
+    if (typeof globalThis.uuidCountdown === 'undefined') {
+      globalThis.uuidCountdown = new Map();
+    }
+
+    globalThis.uuidCountdown.set('7e1e94f5-934e-49e9-8769-43989c877b43', {
+      scriptIndex: -1,
+      scriptsToLoad: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.1.0/leaflet-providers.js"],
+      onReady: (rootUUID) => {
+        console.log('IJSUtils.htmlScript:' + rootUUID + ' starting render');
+
+        debugger;
+
+        const rootEl = document.querySelector('div[uuid="7e1e94f5-934e-49e9-8769-43989c877b43"]');
+
+        const options = {
+          uuid: '7e1e94f5-934e-49e9-8769-43989c877b43',
+          width: '100%',
+          height: '100%',
+          scripts: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.1.0/leaflet-providers.js"],
+          css: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.1.0/leaflet-providers.js"],
+        };
+
+        const animate = function (requestAnimationFrameTarget) {
+          requestAnimationFrame((...passThroughArgs) => {
+            if (!document.contains(rootEl)) {
+              console.log('old animation stopping. rootEl has been removed from DOM');
+              return;
+            }
+            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
+          })
+        }
+
+        //-- ijsUtils.htmlScipt options.data
+        const data = undefined;
+
+        //-- ijsUtils.htmlScript options.utilityFunctions start
+        const utilityFunctions = {};
+
+        //-- ijsUtils.htmlScript options.utiiltyFunctions end
+
+        //-- ijsUtils.htmlScript options.onRender start
+        console.log('startupScript');
+        //-- ijsUtils.htmlScript options.onRender end
+
+        console.log('IJSUtils.htmlScript:' + rootUUID + ' ending render');
+      }
+    });
+
+    //-- script tags created dynamically have race conditions, load sequentially
+    function externalScriptLoaded(rootUUID) {
+      const result = globalThis.uuidCountdown.get(rootUUID);
+      result.scriptIndex += 1;
+      if (result.scriptIndex >= result.scriptsToLoad.length) {
+        result.onReady(rootUUID);
+        globalThis.uuidCountdown.delete(rootUUID);
+      } else {
+        const newScript = document.createElement('script');
+        newScript.src = result.scriptsToLoad[result.scriptIndex];
+        newScript.crossorigin='';
+        newScript.uuid=rootUUID;
+        newScript.onload = () => externalScriptLoaded(rootUUID);
+
+        const scriptRoot = document.querySelector('div[scriptUUID="' + rootUUID + '"]');
+        scriptRoot.append(newScript);
+      }
+    }
+
+    externalScriptLoaded('7e1e94f5-934e-49e9-8769-43989c877b43');
+  </script>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  crossorigin=""
+  uuid="7e1e94f5-934e-49e9-8769-43989c877b43"
+/>
+</body></html>
+`;
+
+      // FileUtils.writeFileStd('./tmp/tmp', results);
+
+      global.expect(results).toStrictEqual(expected);
+    });
+
     global.it('can include a single script and CSS', () => {
       const options = {
         scripts: [
@@ -484,6 +591,7 @@ global.describe('codeBlockHelper', () => {
         debug: false,
         console: false,
         uuid: '7e1e94f5-934e-49e9-8769-43989c877b43',
+        utilityFunctions: null,
         onReady: (obj) => {
           console.log('loaded');
         }
@@ -702,6 +810,23 @@ global.describe('codeBlockHelper', () => {
       };
 
       const expectedError = 'ijsUtils.htmlScript: Must be in iJavaScript context to render html';
+
+      global.expect(
+        () => IJSUtils.htmlScript(options)
+      ).toThrow(expectedError);
+    });
+    
+    global.it('throws an error if on ready is not a function or a string', () => {
+      const options = {
+        width: 600,
+        height: 700,
+        debug: false,
+        console: false,
+        uuid: '7e1e94f5-934e-49e9-8769-43989c877b43',
+        onReady: true
+      };
+
+      const expectedError = 'ijsUtils.htmlScript: onReadyCode must be a string or function';
 
       global.expect(
         () => IJSUtils.htmlScript(options)

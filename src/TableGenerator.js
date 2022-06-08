@@ -1,10 +1,8 @@
 /* eslint-disable
   prefer-template,
   function-paren-newline,
-  no-unused-vars,
   implicit-arrow-linebreak,
-  arrow-body-style,
-  max-len
+  arrow-body-style
 */
 
 //-- TODO: review stringbuilder for large datasets
@@ -356,7 +354,6 @@ class TableGenerator {
       return this;
     }
 
-    const fnMap = new Map();
     const augmentKeys = Object.getOwnPropertyNames(obj);
 
     augmentKeys.forEach((key) => {
@@ -1001,6 +998,8 @@ class TableGenerator {
    * @private
    */
   prepare() {
+    //-- data should ALWAYS be set to a valid array, but added in case
+    /* istanbul ignore next */
     let cleanCollection = this.#data || [];
     if (this.#sortFn) {
       cleanCollection = cleanCollection.sort(this.#sortFn);
@@ -1151,7 +1150,9 @@ class TableGenerator {
       align = true
     } = options || {};
 
-    const styleCellFn = this.#styleCell;
+    //-- review style options for markdown
+    // const styleCellFn = this.#styleCell;
+
     const printOptions = this.#printOptions;
     const cleanFn = printValue;
 
@@ -1166,10 +1167,10 @@ class TableGenerator {
     data = data.map((row, rowIndex) =>
       row.map((value, columnIndex) => {
         //-- shift down because the headers are added
-        const record = rowIndex > 0 ? this.#data[rowIndex - 1] : {};
         const cleanedValue = cleanFn(value, printOptions);
         
         //-- @TODO - we want to bold / make italic, but this needs more thought
+        // const record = rowIndex > 0 ? this.#data[rowIndex - 1] : {};
         // const cellStyle = !styleCellFn
         //   ? null
         //   : styleCellFn({ value, columnIndex, rowIndex, row, record });

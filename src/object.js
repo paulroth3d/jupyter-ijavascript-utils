@@ -274,7 +274,7 @@ module.exports.cleanPropertyName = function cleanPropertyName(property) {
   return cleanProperty;
 };
 
-const renameObjectProperties = function renameObjectProperties(object = {}, originalKeys, targetKeys) {
+const renameObjectProperties = function renameObjectProperties(object, originalKeys, targetKeys) {
   const result = { ...object };
   originalKeys.forEach((originalKey, index) => {
     const targetKey = targetKeys[index];
@@ -344,11 +344,16 @@ module.exports.collapse = function collapse(targetObj) {
  * @param {String[]} propertyNames - list of the only properties to keep
  * @returns {Object[]}
  */
-module.exports.selectObjectProperties = function selectObjectProperties(list, propertyNames) {
+module.exports.selectObjectProperties = function selectObjectProperties(list, ...propertyNames) {
+  const cleanPropertyNames = propertyNames.length > 0 && Array.isArray(propertyNames[0])
+    ? propertyNames[0]
+    : propertyNames;
+
   if (!list) return [];
   const targetList = Array.isArray(list) ? list : [list];
+
   return targetList.map(
-    (record) => (propertyNames || []).reduce(
+    (record) => cleanPropertyNames.reduce(
       (result, prop) => ObjectUtils.objAssign(result, prop, record[prop]), {}
     )
   );

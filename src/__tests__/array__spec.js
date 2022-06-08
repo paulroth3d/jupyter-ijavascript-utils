@@ -26,6 +26,20 @@ describe('ArrayUtils', () => {
       const expected = [0, 1, 2, 3, 4, 5, 6, 7, 8];
       global.expect(resultIds).toEqual(expected);
     });
+
+    global.it('can sort with equivalent values', () => {
+      const valuesToSort = [1, 0, 2, 3, 4, 5, 6, 8, 7];
+      const sortFn = ArrayUtils.createSort('-');
+
+      //-- duplicate some values
+      valuesToSort.push(4);
+      valuesToSort.push(6);
+
+      const expected = [8, 7, 6, 6, 5, 4, 4, 3, 2, 1, 0];
+      const results = valuesToSort.sort(sortFn);
+
+      global.expect(results).toEqual(expected);
+    });
     
     global.it('should sort descending with -', () => {
       const weatherToSort = initializeWeather();
@@ -277,7 +291,7 @@ describe('ArrayUtils', () => {
   });
 
   global.describe('pick', () => {
-    global.describe('pick rows', () => {
+    global.it('pick rows', () => {
       const data = [
         ['john', 23, 'purple'],
         ['jane', 32, 'red'],
@@ -294,7 +308,7 @@ describe('ArrayUtils', () => {
       const results = ArrayUtils.pick(data, { rows });
       global.expect(results).toEqual(expected);
     });
-    global.describe('pick columns', () => {
+    global.it('pick columns', () => {
       const data = [
         ['john', 23, 'purple'],
         ['jane', 32, 'red'],
@@ -312,7 +326,7 @@ describe('ArrayUtils', () => {
       const results = ArrayUtils.pick(data, { columns });
       global.expect(results).toEqual(expected);
     });
-    global.describe('pick both', () => {
+    global.it('pick both', () => {
       const data = [
         ['john', 23, 'purple'],
         ['jane', 32, 'red'],
@@ -328,6 +342,57 @@ describe('ArrayUtils', () => {
       ];
 
       const results = ArrayUtils.pick(data, { rows, columns });
+      global.expect(results).toEqual(expected);
+    });
+    global.it('pick with null options returns the whole array', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const rows = null;
+      const columns = null;
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const results = ArrayUtils.pick(data, { rows, columns });
+      global.expect(results).toEqual(expected);
+    });
+    global.it('pick with neither option returns the whole array', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const results = ArrayUtils.pick(data, {});
+      global.expect(results).toEqual(expected);
+    });
+    global.it('pick without any option returns the whole array', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const results = ArrayUtils.pick(data);
       global.expect(results).toEqual(expected);
     });
   });
