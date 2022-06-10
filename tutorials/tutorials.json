@@ -1,16 +1,40 @@
 {
+    "a_whatCanDo": {
+        "title": "What can I do with this?"
+    },
+    "b_setup": {
+        "title": "Setup / Architecture",
+        "children": ["howToUse", "architecture"]
+    },
+    "c_exampleWalkthrough": {
+        "title": "Example Walkthrough"
+    },
+    "d_htmlScriptAnimating": {
+        "title": "Html Script / Animating"
+    },
+    "e_gettingData": {
+        "title": "Getting Data"
+    },
+    "f_dataframes": {
+        "title": "Grouping / DataFrames",
+        "children": ["groupingAggregating", "dataFrames"]
+    },
+    "g_visualization": {
+        "title": "Visualization",
+        "children": ["vegaLite1", "noiseVisualization", "plantuml"]
+    },
+    "h_exporting": {
+        "title": "Generating Tables and Exporting"
+    },
+    "architecture": {
+        "title": "Architecture"
+    },
     "vegaLite1": {
         "title": "Vega-Lite",
         "children": ["vega_choroplethLong", "vega_choroplethShort"]
     },
     "howToUse": {
         "title": "How to Use"
-    },
-    "exampleWalkthrough": {
-        "title": "Example Walkthrough"
-    },
-    "htmlScript": {
-        "title": "Html Script"
     },
     "noiseVisualization": {
         "title": "Noise Visualization"
@@ -21,7 +45,19 @@
     "vega_choroplethShort": {
         "title": "Let's make a Data Driven Map"
     },
-    "whatCanDo": {
-        "title": "What can I do with this?"
+    "plantuml": {
+        "title": "Diagramming with PlantUML"
+    },
+    "htmlScript": {
+        "title": "Client Side Scripting with HTML Script"
+    },
+    "animating": {
+        "title": "Animating with HTML Script"
+    },
+    "groupingAggregating": {
+        "title": "Grouping and Aggregating with Utils"
+    },
+    "dataFrames": {
+        "title": "Super-Charge manipulation with DataFrames"
     }
 }
