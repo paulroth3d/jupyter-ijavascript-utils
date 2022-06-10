@@ -103,129 +103,6 @@ utils.ijs.htmlScript({
 */
 ```
 
-<html><body>
-  <div uuid="213ef6e0-75c9-4c98-9a7c-b317492653f2" style="width:10px; height: 10px"></div>
-  <div scriptUUID="213ef6e0-75c9-4c98-9a7c-b317492653f2" ></div>
-  <script>
-    if (typeof globalThis.uuidCountdown === 'undefined') {
-      globalThis.uuidCountdown = new Map();
-    }
-
-    globalThis.uuidCountdown.set('213ef6e0-75c9-4c98-9a7c-b317492653f2', {
-      scriptIndex: -1,
-      scriptsToLoad: [],
-      onReady: (rootUUID) => {
-        console.log('IJSUtils.htmlScript:' + rootUUID + ' starting render');
-
-        const rootEl = document.querySelector('div[uuid="213ef6e0-75c9-4c98-9a7c-b317492653f2"]');
-
-        const options = {
-          uuid: '213ef6e0-75c9-4c98-9a7c-b317492653f2',
-          width: '10px',
-          height: '10px',
-          scripts: [],
-          css: [],
-        };
-
-        //-- ijsUtils.htmlScipt options.data
-        const data = undefined;
-
-        //-- ijsUtils.htmlScript options.utilityFunctions start
-        const utilityFunctions = {};
-        utilityFunctions.animationFrameCalls = function animationFrameCalls() {
-  const requestAnimationFrame = window.requestAnimationFrame
-      || window.mozRequestAnimationFrame
-      || window.webkitRequestAnimationFrame
-      || window.msRequestAnimationFrame;
-
-  const cancelAnimationFrame = window.cancelAnimationFrame
-      || window.mozCancelAnimationFrame;
-
-  const stopOtherAnimations = () => {
-    if (window.animation) {
-      cancelAnimationFrame(window.animation);
-      window.animation = null;
-    }
-  };
-
-  const resetAllAnimations = () => {
-    window.stopAnimation = true;
-    window.setTimeout(() => {
-      window.stopAnimation = false;
-    }, 500);
-  };
-
-  const allowAnimations = (isAllowed = true) => {
-    window.stopAnimation = isAllowed;
-  };
-
-  const nextAnimationFrame = (fn) => {
-    const animationId = requestAnimationFrame(fn);
-    window.animation = animationId;
-  };
-
-  const checkAnimationsAllowed = () => {
-    if (window.stopAnimation) {
-      console.log('stopping the animation');
-      return (false);
-    }
-    return true;
-  };
-
-  return {
-    requestAnimationFrame,
-    cancelAnimationFrame,
-    stopOtherAnimations,
-    nextAnimationFrame,
-    checkAnimationsAllowed,
-    resetAllAnimations,
-    allowAnimations
-  };
-};
-
-        //-- ijsUtils.htmlScript options.utiiltyFunctions end
-
-        //-- ijsUtils.htmlScript options.onRender start
-        (() => {        
-        if (window.stopAnimation !== undefined) {
-            console.log('restarting animation');
-            window.stopAnimation = true;
-            window.setTimeout(() => {
-                console.log('allowing animation again');
-                window.stopAnimation = false;
-            }, 500);            
-        }
-    })({rootEl, data, utilityFunctions, options})
-        //-- ijsUtils.htmlScript options.onRender end
-
-        console.log('IJSUtils.htmlScript:' + rootUUID + ' ending render');
-      }
-    });
-
-    //-- script tags created dynamically have race conditions, load sequentially
-    function externalScriptLoaded(rootUUID) {
-      const result = globalThis.uuidCountdown.get(rootUUID);
-      result.scriptIndex += 1;
-      if (result.scriptIndex >= result.scriptsToLoad.length) {
-        result.onReady(rootUUID);
-        globalThis.uuidCountdown.delete(rootUUID);
-      } else {
-        const newScript = document.createElement('script');
-        newScript.src = result.scriptsToLoad[result.scriptIndex];
-        newScript.crossorigin='';
-        newScript.uuid=rootUUID;
-        newScript.onload = () => externalScriptLoaded(rootUUID);
-
-        const scriptRoot = document.querySelector('div[scriptUUID="' + rootUUID + '"]');
-        scriptRoot.append(newScript);
-      }
-    }
-
-    externalScriptLoaded('213ef6e0-75c9-4c98-9a7c-b317492653f2');
-  </script>
-
-</body></html>
-
 # Perlin vs Simplex Noise
 
 Perlin Noise was made by Ken Perlin for the Movie `Tron` to produce more natural feeling computer generated textures.
@@ -812,19 +689,178 @@ utils.vega.svgFromSpec({
 
 ![svg](img/noiseVisualization_axisChart.svg)
 
-# Animating to show the value
+# Rendering Simplex Noise Directly
 
-Moving along the Z-Axis, we can show how these values play over time.
+The simplest way of looking at an image with Simplex values, is to render it in 2d - usin the `x` and `y` pixel positions.
 
-In our case, we'll always have the screen corners be between 0-1 at each of the corners.
+Here we wil also use the  and pass that through `utilityFunctions` (so we can use it in JavaScript).
 
-We'll call 'density' the number of pixels between each of the indicators.
+* `utilityFunctions` can pass the [utils.random.simplexGenerator](https://jupyter-ijavascript-utils.onrender.com/SimplexGenerator.html)
+    so we don't need to worry about an external script.
+* `data` has the configurable values we can use in the script
+* `data.cellSize` dictates how 'zoomed in' we are, and [0,0] - [1,1] are shown on screen
+* `setCanvasColor` helps to demystify how to paint rgba() to a canvas
 
-The number of points will still be evenly distributed based on the number of pixels betwen 'indicators'
 
-![Screenshot of animation for 1d](../img/noise1d.gif)
+```javascript
+utils.ijs.htmlScript({
+    width: 400,
+    height: 400,
+    data: { cellSize: 150, textSize: 15 },
+    utilityFunctions: ({ simplex: utils.random.simplexGenerator }),
+    html: '<canvas id="draw-target" />',
+    onReady: ({ rootEl, options, utilityFunctions, data }) => {
+        const canvas = rootEl.querySelector('canvas#draw-target');
+        
+        const noise = utilityFunctions.simplex();
+        
+        canvas.width = parseInt(options.width);
+        canvas.height = parseInt(options.height);
 
-[Link to animation](https://paulroth3d.github.io/drift/v6/?offset=0&width=30&density=20&initial=F00&final=0F0&min=1&max=1&period=7000)
+        var ctx = canvas.getContext('2d');
+
+        var image = ctx.createImageData(canvas.width, canvas.height);
+        var imageData = image.data;
+        
+        function setCanvasColor(index, { red, green, blue, alpha }) {
+            imageData[index + 0] = red;
+            imageData[index + 1] = green;
+            imageData[index + 2] = blue;
+            imageData[index + 3] = alpha;
+        }
+
+        for (var x = 0; x < canvas.width; x++) {
+          for (var y = 0; y < canvas.height; y++) {
+            var value = noise.simplex2d(x / data.cellSize, y / data.cellSize) * 256;
+              
+            var cell = (x + y * canvas.width) * 4;
+
+            //-- cells are for each pixel
+            //-- and in sets of 4: [red, green, blue, alpha]
+            setCanvasColor(
+                cell,
+                {
+                    red: value < 0 ? Math.abs(value) : 0,
+                    green: value > 0 ? value : 0,
+                    blue: 0,
+                    alpha: 255
+                }
+            );
+          }
+        }
+        
+        ctx.fillColor = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(image, 0, 0);
+        
+        ctx.font = '16px sans-serif'
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'left';
+        ctx.fillText('(0, 0)', 0, data.textSize);
+        ctx.fillText('(1, 0)', data.cellSize, data.textSize);
+        ctx.fillText('(0, 1)', 0, data.cellSize + data.textSize);
+        ctx.fillText('(1, 1)', data.cellSize, data.cellSize + data.textSize);
+    }
+});
+```
+
+![Screenshot](../img/noiseSimplexSimple.jpg)
+
+**(NOTE: since simplex returns -1 to 1, black means zero, green means how positive, and red means how negative)**
+
+## Animating
+
+Animating this becomes fairly simple:
+
+* include the `animate` parameter in `onReady`
+* wrap the code to be run every `frame` (repeatedly) in a function (ex: `draw`)
+* call `animate(functionName)` (or `animate(draw)` in this case) to repeatedly execute draw every [animation frame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
+* call your `draw` function once - to start the loop going
+
+
+```javascript
+utils.ijs.htmlScript({
+    width: 400,
+    height: 400,
+    
+    data: {
+        period: 10000,
+        cellSize: 150,
+        textSize: 15
+    },
+    utilityFunctions: ({
+        simplex: utils.random.simplexGenerator,
+        timePeriod: utils.format.timePeriod
+    }),
+    html: '<canvas id="draw-target" />',
+    onReady: ({ rootEl, options, data, utilityFunctions, animate }) => {
+        const canvas = rootEl.querySelector('canvas#draw-target');
+        
+        const noise = utilityFunctions.simplex();
+        
+        canvas.width = parseInt(options.width);
+        canvas.height = parseInt(options.height);
+
+        var ctx = canvas.getContext('2d');
+
+        var image = ctx.createImageData(canvas.width, canvas.height);
+        var imageData = image.data;
+        
+        function setCanvasColor(index, { red, green, blue, alpha }) {
+            imageData[index + 0] = red;
+            imageData[index + 1] = green;
+            imageData[index + 2] = blue;
+            imageData[index + 3] = alpha;
+        }
+
+        var height = 0;
+                
+        function draw() {
+          var start = Date.now();
+          height = utilityFunctions.timePeriod(data.period);
+
+          for (var x = 0; x < canvas.width; x++) {
+            for (var y = 0; y < canvas.height; y++) {
+              var value = noise.simplex3d(x / data.cellSize, y / data.cellSize, height) * 256;
+                
+              var cell = (x + y * canvas.width) * 4;
+
+              //-- cells are for each pixel
+              //-- and in sets of 4: [red, green, blue, alpha]
+              setCanvasColor(
+                cell,
+                {
+                  red: value < 0 ? Math.abs(value) : 0,
+                  green: value > 0 ? value : 0,
+                  blue: 0,
+                  alpha: 255
+                }
+              );
+            }
+          }
+
+          var end = Date.now();
+
+          ctx.fillColor = 'black';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.putImageData(image, 0, 0);
+        
+          ctx.font = '16px sans-serif'
+          ctx.fillStyle = 'white';
+          ctx.textAlign = 'left';
+          ctx.fillText('(0, 0)', 0, data.textSize);
+          ctx.fillText('(1, 0)', data.cellSize, data.textSize);
+          ctx.fillText('(0, 1)', 0, data.cellSize + data.textSize);
+          ctx.fillText('(1, 1)', data.cellSize, data.cellSize + data.textSize);
+
+          animate(draw);
+        };
+        draw();
+    }
+})
+```
+
+![Screenshot of animation](../img/simplexNoiseAnim.gif)
 
 # Animation showing the value
 
