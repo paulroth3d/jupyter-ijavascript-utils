@@ -204,11 +204,27 @@ We would recommend to keeping this to simple fetches and parsing in general howe
 This jupyter-ijavascript-utils library includes two convenience functions for working with [fetch](https://www.npmjs.com/package/node-fetch),
 a simple shim for traditional [JavaScript fetch calls](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) from within node.
                                                        
-
-
 Additional libraries can also be used to parse the data and generate datasets
                              
 (For example: [cheerio](https://www.npmjs.com/package/cheerio-select))
+
+## Working with Text Files
+
+[TODO]
+
+You can also work with Text files and use it based on the current path:
+
+There are also many many different ways to do this.
+
+```
+sillySong = utils.file.load('../data/pirates.txt');
+
+sillySong.split(/\n[ \t]*\n/)        // split on multiple line breaks
+  .map(stanza => stanza.split(/\n/)  // split lines by newline
+    .map(line => line.trim())        // trim each line
+  );
+sillySong[0][0]; // I am the very model of a modern Major-General,
+```
 
 # Generating
 
