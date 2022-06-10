@@ -3,15 +3,15 @@
 There may be times you would like to leverage client (browser side) technologies, 
 such as CDN libraries to do things you couldn't do in Jupyter otherwise
 
-![Screenshot of QR Code](img//htmlScript_qrCode.png)
+![Screenshot of QR Code](img/htmlScript_qrCode.png)
 
 ...make things interactive,
 
-![Screenshot of sliders with Vega Lite](img//vegaLiteSliders.png)
+![Screenshot of sliders with Vega Lite](img/vegaLiteSliders.png)
 
 ...or even show animations
 
-![circle animation](img//svgAnimation2Dark.gif)
+![circle animation](img/svgAnimation2Dark.gif)
 
 **then you need to render client side / on the browser**
 using JavaScript (with a little bit of HTML)
@@ -52,7 +52,7 @@ In the case for htmlScript, we can serialize the `onReady` function,
 and ensure the dynamic loading of the required scripts are indeed serial,
 so we can dependably load javascript in order and then run code in the browser.
 
-![Sequence Diagram for HTML Script execution](img//architecture_output19.svg)
+![Sequence Diagram for HTML Script execution](img/architecture_output19.svg)
 
 Please see the Client Side / HTML Script section in the {@tutorial architecture} document for more.
 
@@ -97,7 +97,7 @@ utils.ijs.htmlScript({
 
 
 
-![Screenshot of QR Code](img//htmlScript_qrCode.png)
+![Screenshot of QR Code](img/htmlScript_qrCode.png)
 
 # onReady and Client Side JavaScript
 
@@ -130,7 +130,7 @@ utils.ijs.htmlScript({
 
 
 
-![Screenshot of browser inspector and error](img//htmlScript_simpleError.jpg)
+![Screenshot of browser inspector and error](img/htmlScript_simpleError.jpg)
 
 ## Fixing the Example - UtilityFunctions
 
@@ -155,7 +155,7 @@ utils.ijs.htmlScript({
 
 
 
-![Screenshot of utility functions to save the day](img//htmlScript_utilityFunctions.jpg)
+![Screenshot of utility functions to save the day](img/htmlScript_utilityFunctions.jpg)
 
 ## Fixing the Example - Sending Data
 
@@ -186,7 +186,7 @@ utils.ijs.htmlScript({
 
 
 
-![Screenshot with data](img//htmlScript_data.jpg)
+![Screenshot with data](img/htmlScript_data.jpg)
 
 ## Advanced Examples
 
@@ -226,7 +226,7 @@ utils.ijs.htmlScript({
 
 
 
-![Screenshot of Leaflet](img//htmlScript_leaflet.png)
+![Screenshot of Leaflet](img/htmlScript_leaflet.png)
 
 ## Many Possibilities
 
@@ -275,7 +275,7 @@ utils.vega.embedFromSpec(vegaSpec);
 ```
 
 
-![Screenshot of sliders with Vega Lite](img//vegaLiteSliders.png)
+![Screenshot of sliders with Vega Lite](img/vegaLiteSliders.png)
 
 We would love to hear which libraries have been helpful for you, and pull requests are welcome.
 
@@ -384,7 +384,7 @@ onReady: ({rootEl, data, options}) => {
 
 
 
-![Screenshot of D3 within Jupyter](img//htmlScriptD3.png)
+![Screenshot of D3 within Jupyter](img/htmlScriptD3.png)
 
 # Animations
 
@@ -537,7 +537,7 @@ utils.ijs.htmlScript({
 
 
 
-![circle animation](img//htmlScript_circleAnimation.gif)
+![circle animation](img/htmlScript_circleAnimation.gif)
 
 # Extending HtmlScript
 
@@ -564,15 +564,15 @@ Please remember that only the content of the functions in `utilityFunctions` and
 
 For example, this will fail because the `utils` nodeJS variable is referenced
 
-![Screenshot of browser inspector and error](img//htmlScript_simpleError.jpg)
+![Screenshot of browser inspector and error](img/htmlScript_simpleError.jpg)
 
 We can fix it by using `utilityFunctions` to pass the function definition
 
-![Screenshot of utility functions to save the day](img//htmlScript_utilityFunctions.jpg)
+![Screenshot of utility functions to save the day](img/htmlScript_utilityFunctions.jpg)
 
 Or by using the `data` attribute to pass data.
 
-![Screenshot with data](img//htmlScript_data.jpg)
+![Screenshot with data](img/htmlScript_data.jpg)
 
 [See the Simple Failure Example for more](#Simple-Failure-Example)
 
