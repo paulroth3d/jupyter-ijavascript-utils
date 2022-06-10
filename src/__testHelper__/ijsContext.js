@@ -9,7 +9,7 @@ const removeIJSContext = () => {
 const createNewDisplay = (name) => {
   const valueFn = jest.fn((value) => `display:${name}:${(value)}`);
   const newDisplay = ({
-    async: () => {},
+    async: valueFn,
     text: valueFn,
     png: valueFn,
     svg: valueFn,

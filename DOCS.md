@@ -18,6 +18,7 @@ See the [#Installation section for requirements and installation](#install)
 | {@link module:leaflet}        | Render maps with <a href="leaflet.org">Leaflet</a>                                                  |
 | {@link module:object}         | Massage and manipulate Objects or Collections of Objects.                                           |
 | {@link module:plantuml}       | Render <a href="https://plantuml.com">PlantUML</a> within Jupyter results.                          |
+| {@link module:random}       | Generate random values, pick from arrays, or create natural looking images based on 2d/3d space.                          |
 | {@link module:set}            | Functional Utilities for managing JavaScript Sets - allowing for chaining.                          |
 | {@link module:svg}            | Programmatically create SVGs (either jupyter side for exports, or client side for animations)       |
 | {@link module:vega}           | Generate Charts / Graphs / Maps with <a href="https://vega.github.io/vega/">Vega</a> and <a href="https://vega.github.io/vega-lite/">Vega-Lite</a>                                         |
@@ -28,6 +29,7 @@ See the [#Installation section for requirements and installation](#install)
 
 ## What's New
 
+* 1.13 - provide {@link module:random|utils.random()} to genrate random values
 * 1.12 - provide `utils.table(...)` instead of `new utils.TableGenerator(...)`
 * 1.11 - provide {@link module:aggregate.topValues|topValues} (like top 5, bottom 3)
 * 1.10 - provide {@link module:aggregate.percentile|percentile} (like 50th percentile) aggregates

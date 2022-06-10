@@ -7,7 +7,7 @@
     </a>
     <img src="https://img.shields.io/badge/Coverage-98-green" />
     <a href="https://github.com/paulroth3d/jupyter-ijavascript-utils" alt="npm">
-        <img src="https://img.shields.io/badge/npm-%5E1.12-red" />
+        <img src="https://img.shields.io/badge/npm-%5E1.13-red" />
     </a>
 </p>
 
@@ -21,6 +21,7 @@ See documentation at: [https://jupyter-ijavascript-utils.onrender.com/](https://
 
 # What's New
 
+* 1.13 - provide {@link module:random|utils.random()} to genrate random values
 * 1.12 - provide `utils.table(...)` instead of `new utils.TableGenerator(...)`
 * 1.11 - provide topValues (like top 5, bottom 3)
 * 1.10 - provide percentile (like 50th percentile) aggregates

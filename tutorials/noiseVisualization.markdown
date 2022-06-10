@@ -26,7 +26,7 @@ fn(x, y, time) => []-1 ... 1]
 
 So instead of creating static noise values, we can animate.
 
-![Screenshot of animation for 1d](img/noise1d.gif)
+![Screenshot of animation for 1d](img/simplexNoiseAnim.gif)
 
 This is made a bit clearer if we put a 'spin' where counter clockwise / red is negative, and clock-wise / green is positive values - shown on a 2d grid as we move up and down the z-plane.
 

@@ -12,6 +12,7 @@ const object = require('./object');
 const plantuml = require('./plantuml');
 const leaflet = require('./leaflet');
 const latex = require('./latex');
+const random = require('./random');
 const svg = require('./svg');
 
 const SourceMap = require('./SourceMap');
@@ -54,6 +55,8 @@ module.exports = {
   object,
   /** @see {@link module:plantuml} */
   plantuml,
+  /** @see module:random */
+  random,
   /** @see module:set */
   set,
   /** @see module:svg */
