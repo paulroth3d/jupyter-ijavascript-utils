@@ -159,6 +159,7 @@ module.exports.randomArray = function randomArray(arraySize, generatingFunction)
 /**
  * Returns a new Simplex Generator
  * @function simplexGenerator
+ * @static
  * @param {Number} [seed] - seed to use for the generator (or null for random)
  * @returns {SimplexGenerator} - Simplex Generator that can generate in multiple dimensions
  */

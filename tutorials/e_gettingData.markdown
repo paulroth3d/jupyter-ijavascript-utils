@@ -235,16 +235,16 @@ Generating Data can also be a simple option if desired.
 We have two sets of methods on the [random module](https://jupyter-ijavascript-utils.onrender.com/module-random.html)
 
 -   Generating Random Numbers
-    -   [randomInteger(min, max)](https://jupyter-ijavascript-utils.onrender.com/module-random.html#.randomInteger) - inclusive integer between min and max values
-    -   [randomInteger(min, max)](https://jupyter-ijavascript-utils.onrender.com/module-random.html#.random) - inclusive float between min and max values
+    -   {@link module:random.randomInteger|randomInteger(min, max)} - inclusive integer between min and max values
+    -   {@link module:random.randomInteger|random(min, max)} - inclusive float between min and max values
 -   Working with Arrays
-    -   [pickRandom(array)](https://jupyter-ijavascript-utils.onrender.com/module-random.html#.pickRandom) - picks a value at random from the list
-    -   [randomArray(size, fn)](https://jupyter-ijavascript-utils.onrender.com/module-random.html#.randomArray) - creates an array of size length, with each value generated from fn
--   Simplex Noise
-    -   simplexGenerator(seed) - Number generator between -1 and 1 given an x/y/z coordinate
+    -   {@link module:random.pickRandom|pickRandom(array)} - picks a value at random from the list
+    -   {@link module:random.randomArray|randomArray(size, fn)} - creates an array of size length, with each value generated from fn
 
-Additionally, there are so many different ways of generating visualizations
-based on simplex noise.
+Additionally, we have the {@link SimplexGenerator|Simplex Noise Generator}
+
+-   {@link SimplexGenerator.simplex2d|simplex2d(x, y)} - generate number between -1 and 1 given an x/y coordinate
+-   {@link SimplexGenerator.simplex3d|simplex3d(x, y, z)} - generate number between -1 and 1 given an x/y/z coordinate
 
 From straight (red - negative / green - positive)
 
