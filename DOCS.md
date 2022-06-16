@@ -1,10 +1,25 @@
 # Overview
 
-This is a simple Library for using Jupyter with the IJavaScript kernel
+This is a simple Library for using Jupyter with the IJavaScript kernel.
+
+Jupyter is a way to programmatically explore a subject and interleave text and markdown to make Data Driven Documents.
 
 See the [#Installation section for requirements and installation](#install)
 
-# What is this?
+Notebooks are a way to explore and experiment, in addition to write and explain ideas.
+
+**All of the tutorials provided here, including this one, was written as a notebook and simply exported.**
+
+![Screenshot](img/started_jupyterSideBySide.jpg)
+
+The document itself is a list of cells that can be either:
+* Text or Markdown (like this)
+* Or Code Results (NodeJS code in this case)
+    * rendering images, interactive charts, maps or even generated text based on data.
+
+![Screenshot showing generated markdown](img/started_generatedText.jpg)
+
+## This Library helps with the Coding Side of Things
 
 The [jupyter-ijavascript-utils](https://www.npmjs.com/package/jupyter-ijavascript-utils) library is simply a collection of utility methods for Node and JavaScript Developers interested in Data Science.
 

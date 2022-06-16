@@ -6,13 +6,34 @@ Notebooks are a way to explore and experiment, in addition to write and explain 
 
 (Essentially, they are data driven documents with both formatted text married next to code that can show some output)
 
-All of the tutorials provided here, including this one, was written as a notebook and simply exported.
+**All of the tutorials provided here, including this one, was written as a notebook and simply exported.**
 
-This library is simply a way for you to handle common needs and get your footing:
+![Screenshot](img/started_jupyterSideBySide.jpg)
 
-* Loading and Exporting
-* Grouping and Aggregating
-* Visualizing and Charting
+The document itself is a list of cells that can be either:
+* Text or Markdown (like this)
+* Or Code Results (NodeJS code in this case)
+
+![Screenshot of Animation](img/noiseFinal.gif)
+
+**note: You can choose whether to show the code or simply show the results.**
+
+*We often include the code for illustration purposes in these tutorials, but many documents we write do not show them at all.*
+
+## This Library helps with the Coding Side of Things
+
+So you can focus on what you want to work on:
+
+* **Load**
+    * (ex: {@link module:file}, {@link module:datasets} or the {@tutorial e_gettingData} tutorial)
+* **Manipulate and Refine**
+    * (ex: {@link module:array}, {@link module:object}, or {@link module:set})
+* **Aggregate, Manipulate and Explore**
+    * (ex: {@link module:group}, {@link module:aggregate} or the {@tutorial f_dataframes} tutorial)
+* **Format / Visualize**
+    * (ex: {@link module:format}, {@link module:vega}, or the {@tutorial g_visualization} tutorial)
+* **Export**
+    * (ex: {@link TableGenerator}, or the {@tutorial h_exporting} tutorial)
 
 And as this uses [nriesco's iJavaScript Jupyter Kernel](http://n-riesco.github.io/ijavascript/), this can be one module of many npm modules as you grow.
 
