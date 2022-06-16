@@ -4,8 +4,6 @@ The purpose of this library is to help people with a grasp of JavaScript to leve
 
 Notebooks are a way to explore and experiment, in addition to write and explain ideas.
 
-(Essentially, they are data driven documents with both formatted text married next to code that can show some output)
-
 **All of the tutorials provided here, including this one, was written as a notebook and simply exported.**
 
 ![Screenshot](img/started_jupyterSideBySide.jpg)
@@ -16,9 +14,11 @@ The document itself is a list of cells that can be either:
 
 ![Screenshot of Animation](img/noiseFinal.gif)
 
-**note: You can choose whether to show the code or simply show the results.**
-
 *We often include the code for illustration purposes in these tutorials, but many documents we write do not show them at all.*
+
+Code cells can render images, interactive charts, maps or even generated text based on data.
+
+![Screenshot showing generated markdown](img/started_generatedText.jpg)
 
 ## This Library helps with the Coding Side of Things
 
@@ -101,6 +101,8 @@ When rendering the document, cells that are code are sent to the Kernel to ask w
 
 Jupyter by itself doesn't understand the code, it just passes it to a program that does - and this is called a 'Kernel'
 
+![Diagram](img/architecture_output6.svg)
+
 This allows Jupyter to work with all kinds of languages, like:
 
 * Ruby
@@ -108,9 +110,11 @@ This allows Jupyter to work with all kinds of languages, like:
 * Perl
 * C++
 
-[Or see the full list of current Kernels from Jupyter's website](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels)
+[See the full list of current Kernels from Jupyter's website](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels)
 
 Here, we assume we'll be using [nriesco's iJavaScript Kernel for Jupyter](https://github.com/n-riesco/ijavascript), as it provides JavaScript support for Jupyter.
+
+(For more, see the {@tutorial architecture} tutorial)
 
 ## Data Driven Notebooks
 

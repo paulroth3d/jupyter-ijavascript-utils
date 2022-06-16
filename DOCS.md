@@ -14,10 +14,12 @@ Notebooks are a way to explore and experiment, in addition to write and explain 
 
 The document itself is a list of cells that can be either:
 * Text or Markdown (like this)
-* Or Code Results (NodeJS code in this case)
+* Or executable Code (NodeJS code in this case)
     * rendering images, interactive charts, maps or even generated text based on data.
 
 ![Screenshot showing generated markdown](img/started_generatedText.jpg)
+
+**note: You can choose whether to show the code or simply show the results.**
 
 ## This Library helps with the Coding Side of Things
 

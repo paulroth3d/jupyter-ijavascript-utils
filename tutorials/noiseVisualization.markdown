@@ -764,7 +764,7 @@ utils.ijs.htmlScript({
 });
 ```
 
-![Screenshot](../img/noiseSimplexSimple.jpg)
+![Screenshot](img/noiseSimplexSimple.jpg)
 
 **(NOTE: since simplex returns -1 to 1, black means zero, green means how positive, and red means how negative)**
 
@@ -860,7 +860,7 @@ utils.ijs.htmlScript({
 })
 ```
 
-![Screenshot of animation](../img/simplexNoiseAnim.gif)
+![Screenshot of animation](img/simplexNoiseAnim.gif)
 
 # Animation showing the value
 

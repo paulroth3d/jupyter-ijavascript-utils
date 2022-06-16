@@ -29,7 +29,7 @@ If you don't currently manage Python, we would recommend installing the free [An
 
 The Individual Edition is free and manages versions of Python and Jupyter Lab for you.
 
-![Screenshot of Anaconda Navigator](../img/Anaconda_NavigatorHome.png)
+![Screenshot of Anaconda Navigator](img/Anaconda_NavigatorHome.png)
 
 Anaconda includes Python 3, Jupyter Lab, command line (conda) and a GUI (Anaconda Navigator) to install packages and manage environments.
 
@@ -39,7 +39,7 @@ Note that after Anaconda is downloaded, there may be a lengthy 'setup' as it dow
 
 There is also a smaller package of Anaconda - called MiniConda - that only includes the conda command line tools, Python and the packages they depend on.
 
-![Screenshot of MiniConda](../img/Anaconda_MiniCondaHome.png)
+![Screenshot of MiniConda](img/Anaconda_MiniCondaHome.png)
 
 As such - it does not include JupyterLab out of the box, but there are some great resources on [how to install miniconda and JupyterLab](https://betterprogramming.pub/how-to-use-miniconda-with-python-and-jupyterlab-5ce07845e818), but this might not be the best option for those getting started.
 
@@ -117,7 +117,7 @@ Additionally, [this document discusses overall Security within Jupyter Lab noteb
 
 You'll then see a Launcher tab, such as the following:
 
-![Screenshot of Jupyter Lab Launcher](../img/setup_nodeKernel.png)
+![Screenshot of Jupyter Lab Launcher](img/setup_nodeKernel.png)
 
 Select `JavaScript` under Notebooks to create an `Untitled.ipynb` notebook.
 
@@ -133,7 +133,7 @@ console.log('JavaScript is working');
 
 Execute the cell with the 'Play' / '▶' button
 
-![Screenshot of JupyterLab JavaScript check](../img/JupyterLab_CheckWorking.png)
+![Screenshot of JupyterLab JavaScript check](img/JupyterLab_CheckWorking.png)
 
 ## Testing Node Modules are Found
 
@@ -150,7 +150,7 @@ utils.object.keys(utils);
 
 This shows the `jupyter-ijavascript-utils` library is available from our `node_modules`
 
-![Screenshot of Jupyter with a require](../img/howToUse_require.png)
+![Screenshot of Jupyter with a require](img/howToUse_require.png)
 
 Note that Jupyter executes cells in order from top to bottom.
 

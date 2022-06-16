@@ -80,7 +80,7 @@ Each Kernel provides a running instance of node (and variables), that can then b
 
 Within Jupyter, we have a list of Kernels that are currently 'running' (active) - each providing a running instance that the code is executing within.
 
-![screenshot of jupyter lab kernel management](../img/architecture_kernelManagement.png)
+![screenshot of jupyter lab kernel management](img/architecture_kernelManagement.png)
 
 When a document is initially run (and there is no running instance for that document), then one is instantiated.
 
@@ -106,7 +106,7 @@ See the [docs](http://n-riesco.github.io/ijavascript/doc/custom.ipynb.html) for 
 
 This can be quite helpful, as NPM Modules can generate the SVG Code, and then render them using one of those mime types.
 
-![Screenshot generating SVG from Vega-Lite](../img/vegaObjectSchema.png)
+![Screenshot generating SVG from Vega-Lite](img/vegaObjectSchema.png)
 
 ## Dynamic HTML
 
@@ -118,7 +118,7 @@ We can pick and choose one specific cell, all cells after a specific point, etc.
 
 The results are then injected into the DOM through dynamic html / javascript directly underneath the 'cell contents' - as 'cell results'
 
-![screenshot of jupyter running](../img/architecture_exampleExecution.png)
+![screenshot of jupyter running](img/architecture_exampleExecution.png)
 
 ----
 
@@ -144,7 +144,7 @@ We can also leverage a number of other techniques to serialize NodeJS functions,
 
 The [utils.ijs.htmlScript()](https://jupyter-ijavascript-utils.onrender.com/module-ijs.html#.htmlScript) method generates html that is then executed on the client once the dynamic html is rendered.  (Such as loading scripts from a CDN, and the NodeJS script that will be converted and passed to the client to run when all dependencies have been loaded)
 
-![Screenshot](../img/htmlScript_qrCode.png)
+![Screenshot](img/htmlScript_qrCode.png)
 
 ![Sequence diagram for HTML Script loading](img/architecture_output19.svg)
 
@@ -154,7 +154,7 @@ At this point it is very similar to developing an html page, but one that can be
 
 (Note: we are still working on leveraging ShadowRoots for the results - see [Issue #2](https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/2))
 
-![Screenshot of leaflet using htmlScript](../img/htmlScript_leaflet.png)
+![Screenshot of leaflet using htmlScript](img/htmlScript_leaflet.png)
 
 (See [the jupyter-ijavascript-utils leaflet module for more](https://jupyter-ijavascript-utils.onrender.com/module-leaflet.html))
 
