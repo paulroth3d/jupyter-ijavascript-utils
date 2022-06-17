@@ -9,6 +9,8 @@
  * * formatting Numbers
  *   * {@link module:format.zeroFill|format.zeroFill} - Pads a number to a specific length
  *   * {@link module:format.divideR|format.divideR}   - Divides a number to provide { integer, remainder } - ex: 5/3 as ( 1, remainder 2 )
+ *   * {@link module:format.compactNumber|format.compactNumber} - Converts a number to a compact format, ex: 100K, 2M
+ *   * {@link module:format.compactParse|format.compactParse} - Parses a compact number to a true number (very useful for sorting)
  * * Formatting Strings
  *   * {@link module:format.capitalize|format.capitalize} - Capitalizes only the first character in the string (ex: 'John paul');
  *   * {@link module:format.capitalizeAll|format.capitalizeAll} - Capitalizes all the words in a string (ex: 'John Paul')
@@ -494,4 +496,139 @@ module.exports.capitalizeAll = function capitalizeAll(str) {
   return (str || '').split(/\b/)
     .map(FormatUtils.capitalize)
     .join('');
+};
+
+/* eslint-disable comma-spacing */
+module.exports.metricSI = [
+  ['Y', { key: 'Y', name: 'yotta', value: 10 ** 24 , fullName: 'Septillion'    }],
+  ['Z', { key: 'Z', name: 'zetta', value: 10 ** 21 , fullName: 'Sextillion'    }],
+  ['E', { key: 'E', name: 'exa',   value: 10 ** 18 , fullName: 'Quintillion'   }],
+  ['P', { key: 'P', name: 'peta',  value: 10 ** 15 , fullName: 'Quadrillion'   }],
+  ['T', { key: 'T', name: 'tera',  value: 10 ** 12 , fullName: 'Trillion'      }],
+  ['G', { key: 'G', name: 'giga',  value: 10 ** 9  , fullName: 'Billion'       }],
+  ['M', { key: 'M', name: 'mega',  value: 10 ** 6  , fullName: 'Million'       }],
+  ['K', { key: 'K', name: 'kilo',  value: 10 ** 3  , fullName: 'Thousand'      }],
+  // ['H', { key: 'H', name: 'hecto', value: 10 ** 2  , fullName: 'Hundred'       }],
+  // ['D', { key: 'D', name: 'deka',  value: 10 ** 1  , fullName: 'Ten'           }],
+  // ['d', { key: 'd', name: 'deci',  value: 10 ** -1 , fullName: 'Tenth'         }],
+  ['', { key: '', name: '', value: 1, fullName: ''     }],
+  ['c', { key: 'c', name: 'centi', value: 10 ** -2 , fullName: 'Hundredth'     }],
+  ['m', { key: 'm', name: 'milli', value: 10 ** -3 , fullName: 'Thousandth'    }],
+  ['μ', { key: 'μ', name: 'micro', value: 10 ** -6 , fullName: 'Millionth'     }],
+  ['n', { key: 'n', name: 'nano',  value: 10 ** -9 , fullName: 'Billionth'     }],
+  ['p', { key: 'p', name: 'pico',  value: 10 ** -12, fullName: 'Trillionth'    }],
+  ['f', { key: 'f', name: 'femto', value: 10 ** -15, fullName: 'Quadrillionth' }],
+  ['a', { key: 'a', name: 'atto',  value: 10 ** -18, fullName: 'Quintillionth' }],
+  ['z', { key: 'z', name: 'zepto', value: 10 ** -21, fullName: 'Sextillionth'  }],
+  ['y', { key: 'y', name: 'yocto', value: 10 ** -24, fullName: 'Septillionth'  }]
+];
+
+module.exports.metricSIMap = new Map(FormatUtils.metricSI);
+/* eslint-enable comma-spacing */
+
+/**
+ * This parses compact numbers, like 100K, 2M, etc.
+ * 
+ * key|name |fullName     |value2  
+ * -- |--   |--           |--      
+ * Y  |yotta|Septillion   |10^24   
+ * Z  |zetta|Sextillion   |10^21   
+ * E  |exa  |Quintillion  |10^18   
+ * P  |peta |Quadrillion  |10^15   
+ * T  |tera |Trillion     |10^12   
+ * G  |giga |Billion      |10^9    
+ * M  |mega |Million      |10^6    
+ * K  |kilo |Thousand     |10^3    
+ * m  |milli|Thousandth   |0.001   
+ * μ  |micro|Millionth    |0.000001
+ * n  |nano |Billionth    |10^-9   
+ * p  |pico |Trillionth   |10^-12  
+ * f  |femto|Quadrillionth|10^-15  
+ * a  |atto |Quintillionth|10^-18  
+ * z  |zepto|Sextillionth |10^-21  
+ * y  |yocto|Septillionth |10^-24
+ * 
+ * @param {String} compactStr - Compact Number String, like 100K, 2M, etc.
+ * @returns {Number}
+ * @example
+ * utils.compactParse('1.2K'); // 1200
+ * utils.compactParse('12');   // 12
+ * utils.compactParse('299.8M')// 299800000
+ */
+module.exports.compactParse = function compactParse(compactStr) {
+  const match = (compactStr || '').match(/([\d.]+)([a-zA-Zμ])?/);
+  if (!match) {
+    throw Error(`Unable to parse short number:${compactStr}`);
+  }
+  
+  const parsedNumber = parseFloat(match[1]);
+  const char = match[2];
+  let value = parsedNumber;
+  
+  if (FormatUtils.metricSIMap.has(char)) {
+    value *= FormatUtils.metricSIMap.get(char).value;
+  }
+  
+  return value;
+};
+
+/**
+ * Converts a number to a compact version.
+ * 
+ * key|name |fullName     |value2  
+ * -- |--   |--           |--      
+ * Y  |yotta|Septillion   |10^24   
+ * Z  |zetta|Sextillion   |10^21   
+ * E  |exa  |Quintillion  |10^18   
+ * P  |peta |Quadrillion  |10^15   
+ * T  |tera |Trillion     |10^12   
+ * G  |giga |Billion      |10^9    
+ * M  |mega |Million      |10^6    
+ * K  |kilo |Thousand     |10^3    
+ * m  |milli|Thousandth   |0.001   
+ * μ  |micro|Millionth    |0.000001
+ * n  |nano |Billionth    |10^-9   
+ * p  |pico |Trillionth   |10^-12  
+ * f  |femto|Quadrillionth|10^-15  
+ * a  |atto |Quintillionth|10^-18  
+ * z  |zepto|Sextillionth |10^-21  
+ * y  |yocto|Septillionth |10^-24
+ * 
+ * Note, a standard method Javascript is now available
+ * with {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat|Intl.NumberFormat()}
+ * 
+ * This method handles very simple cases, but you can use the `compact` layout
+ * for much more control.
+ * 
+ * @param {Number} num - Number to create into a compact number
+ * @param {Number} digits - Significant digits
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed|Number.toFixed(num, digits)}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat|Intl.NumberFormat()} - as the compact format does something similar
+ * @returns {String}
+ * @example 
+ * utils.format.compactNumber(123.456, 1);   // 123.5
+ * utils.format.compactNumber(759878, 0);    // 760K
+ * utils.format.compactNumber(0.0000002, 1); // 200n
+ * 
+ * //-- or using Intl.NumberFormat
+ * new Intl.NumberFormat('en-GB', {
+ *   notation: "compact",
+ *   compactDisplay: "short"
+ * }).format(987654321);
+ * // → 988M
+ */
+module.exports.compactNumber = function compactNumber(num, digits = 0) {
+  if (num === 0) {
+    return '0';
+  } else if (Number.isNaN(num) || !num) {
+    return '';
+  }
+
+  let si = FormatUtils.metricSI.find((siEntry) => siEntry[1].value <= num);
+  if (!si) si = FormatUtils.metricSI[FormatUtils.metricSI.length - 1];
+
+  const siValue = si[1].value;
+  const siKey = si[0];
+
+  return (num / siValue).toFixed(digits) + siKey;
 };

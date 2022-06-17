@@ -1670,3 +1670,156 @@ global.describe('propertyFromList', () => {
     global.expect(results).toStrictEqual(expected);
   });
 });
+
+global.describe('mapProperties', () => {
+  global.describe('can map', () => {
+    global.it('one property', () => {
+      const list = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const expected = [
+        { id: 100, age: '21', name: 'p1' },
+        { id: 200, age: '22', name: 'p2' },
+        { id: 300, age: '23', name: 'p3' },
+        { id: 400, age: '24', name: 'p4' },
+        { id: 500, age: '25', name: 'p5' }
+      ];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, 'id');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('two properties', () => {
+      const list = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const expected = [
+        { id: 100, age: 21, name: 'p1' },
+        { id: 200, age: 22, name: 'p2' },
+        { id: 300, age: 23, name: 'p3' },
+        { id: 400, age: 24, name: 'p4' },
+        { id: 500, age: 25, name: 'p5' }
+      ];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('no properties', () => {
+      const list = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const expected = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('with one object', () => {
+    global.it('one property', () => {
+      const list = { id: '100', age: '21', name: 'p1' };
+      const expected = [{ id: 100, age: '21', name: 'p1' }];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, 'id');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('two properties', () => {
+      const list = { id: '100', age: '21', name: 'p1' };
+      const expected = [{ id: 100, age: 21, name: 'p1' }];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('with properties in an array', () => {
+    global.it('one property', () => {
+      const list = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const expected = [
+        { id: 100, age: '21', name: 'p1' },
+        { id: 200, age: '22', name: 'p2' },
+        { id: 300, age: '23', name: 'p3' },
+        { id: 400, age: '24', name: 'p4' },
+        { id: 500, age: '25', name: 'p5' }
+      ];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, ['id']);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('two properties', () => {
+      const list = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const expected = [
+        { id: 100, age: 21, name: 'p1' },
+        { id: 200, age: 22, name: 'p2' },
+        { id: 300, age: 23, name: 'p3' },
+        { id: 400, age: 24, name: 'p4' },
+        { id: 500, age: 25, name: 'p5' }
+      ];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, ['id', 'age']);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('no properties', () => {
+      const list = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const expected = [
+        { id: '100', age: '21', name: 'p1' },
+        { id: '200', age: '22', name: 'p2' },
+        { id: '300', age: '23', name: 'p3' },
+        { id: '400', age: '24', name: 'p4' },
+        { id: '500', age: '25', name: 'p5' }
+      ];
+      const parseNum = (str) => parseInt(str, 10);
+      const results = objectUtils.mapProperties(list, parseNum, []);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('throws an error', () => {
+    global.it('if the formatting function is missing', () => {
+      const list = { id: '100', age: '21', name: 'p1' };
+      const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
+      global.expect(() => {
+        objectUtils.mapProperties(list);
+      }).toThrow(expectedError);
+    });
+    global.it('if the formatting is not a function', () => {
+      const list = { id: '100', age: '21', name: 'p1' };
+      const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
+      global.expect(() => {
+        objectUtils.mapProperties(list, 'a', 'id');
+      }).toThrow(expectedError);
+    });
+  });
+});

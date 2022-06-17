@@ -643,4 +643,279 @@ global.describe('format', () => {
     });
     */
   });
+
+  global.describe('compact', () => {
+    global.describe('compactParse', () => {
+      global.it('(0, 1)', () => {
+        const { num, digits } = { num: 0, digits: 1 };
+        const expected = '0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(12, 0)', () => {
+        const { num, digits } = { num: 12, digits: 0 };
+        const expected = '12';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(12, 1)', () => {
+        const { num, digits } = { num: 12, digits: 1 };
+        const expected = '12.0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(1234, 0)', () => {
+        const { num, digits } = { num: 1234, digits: 0 };
+        const expected = '1K';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(1234, 1)', () => {
+        const { num, digits } = { num: 1234, digits: 1 };
+        const expected = '1.2K';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(1234, 2)', () => {
+        const { num, digits } = { num: 1234, digits: 2 };
+        const expected = '1.23K';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(10^8, 1)', () => {
+        const { num, digits } = { num: 100000000, digits: 1 };
+        const expected = '100.0M';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(299792458, 1)', () => {
+        const { num, digits } = { num: 299792458, digits: 1 };
+        const expected = '299.8M';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(759878, 1)', () => {
+        const { num, digits } = { num: 759878, digits: 1 };
+        const expected = '759.9K';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(759878, 0)', () => {
+        const { num, digits } = { num: 759878, digits: 0 };
+        const expected = '760K';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(123.456, 1)', () => {
+        const { num, digits } = { num: 123.456, digits: 1 };
+        const expected = '123.5';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(123.456, 2)', () => {
+        const { num, digits } = { num: 123.456, digits: 2 };
+        const expected = '123.46';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(123.456, 4)', () => {
+        const { num, digits } = { num: 123.456, digits: 4 };
+        const expected = '123.4560';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(87, 1)', () => {
+        const { num, digits } = { num: 87, digits: 1 };
+        const expected = '87.0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(10, 1)', () => {
+        const { num, digits } = { num: 10, digits: 1 };
+        const expected = '10.0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(4, 1)', () => {
+        const { num, digits } = { num: 4, digits: 1 };
+        const expected = '4.0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(1, 1)', () => {
+        const { num, digits } = { num: 1, digits: 1 };
+        const expected = '1.0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(0.02, 1)', () => {
+        const { num, digits } = { num: 0.02, digits: 0 };
+        const expected = '2c';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(0.0000002, 1)', () => {
+        const { num, digits } = { num: 0.0000002, digits: 0 };
+        const expected = '200n';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(10^-25, 1)', () => {
+        const { num, digits } = { num: 2 * 10 ** -25, digits: 1 };
+        const expected = '0.2y';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(NaN, 1)', () => {
+        const { num, digits } = { num: NaN, digits: 1 };
+        const expected = '';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(Null, 1)', () => {
+        const { num, digits } = { num: null, digits: 1 };
+        const expected = '';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(Undefined, 1)', () => {
+        const { num, digits } = { num: undefined, digits: 1 };
+        const expected = '';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('(0, 1)', () => {
+        const { num, digits } = { num: 0, digits: 1 };
+        const expected = '0';
+        const results = FormatUtils.compactNumber(num, digits);
+        global.expect(results).toBe(expected);
+      });
+      global.it('default digits as 0', () => {
+        const num = 100;
+        const expected = '100';
+        const results = FormatUtils.compactNumber(num);
+        global.expect(results).toBe(expected);
+      });
+    });
+
+    global.describe('compactNumber', () => {
+      global.it('(0.2y', () => {
+        const str = '0.2y';
+        const results = FormatUtils.compactParse(str);
+        const expected = 2 * 10 ** -25;
+        global.expect(results).toBeCloseTo(expected);
+      });
+      global.it('10k', () => {
+        const str = '10K';
+        const expected = 10000;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBe(expected);
+      });
+      global.it('200n', () => {
+        const str = '200n';
+        const expected = 0.0000002;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('2c', () => {
+        const str = '2c';
+        const expected = 0.02;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('1', () => {
+        const str = '1';
+        const expected = 1;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('12', () => {
+        const str = '12';
+        const expected = 12;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('87', () => {
+        const str = '87';
+        const expected = 87;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('123.456', () => {
+        const str = '123.456';
+        const expected = 123.456;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('760K', () => {
+        const str = '760K';
+        const expected = 760000;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('299.8M', () => {
+        const str = '299.8M';
+        const expected = 299800000;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('100.0M', () => {
+        const str = '100.0M';
+        const expected = 100000000;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('0', () => {
+        const str = '0';
+        const expected = 0;
+        const result = FormatUtils.compactParse(str);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('NaN', () => {
+        const str = 'NaN';
+        const expected = 0;
+        const expectedError = 'Unable to parse short number:NaN';
+        global.expect(() => {
+          const result = FormatUtils.compactParse(str);
+          global.expect(result).toBeCloseTo(expected);
+        }).toThrow(expectedError);
+      });
+      global.it('undefined', () => {
+        const str = 'undefined';
+        const expected = 0;
+        const expectedError = 'Unable to parse short number:undefined';
+        global.expect(() => {
+          const result = FormatUtils.compactParse(str);
+          global.expect(result).toBeCloseTo(expected);
+        }).toThrow(expectedError);
+      });
+      global.it('abc', () => {
+        const str = 'abc';
+        const expected = 0;
+        const expectedError = 'Unable to parse short number:abc';
+        global.expect(() => {
+          const result = FormatUtils.compactParse(str);
+          global.expect(result).toBeCloseTo(expected);
+        }).toThrow(expectedError);
+      });
+      global.it('actual null', () => {
+        const str = null;
+        const expected = 0;
+        const expectedError = 'Unable to parse short number:null';
+        global.expect(() => {
+          const result = FormatUtils.compactParse(str);
+          global.expect(result).toBeCloseTo(expected);
+        }).toThrow(expectedError);
+      });
+      global.it('actual undefined', () => {
+        const str = undefined;
+        const expected = 0;
+        const expectedError = 'Unable to parse short number:undefined';
+        global.expect(() => {
+          const result = FormatUtils.compactParse(str);
+          global.expect(result).toBeCloseTo(expected);
+        }).toThrow(expectedError);
+      });
+    });
+  });
 });

@@ -29,6 +29,7 @@ See the [#Installation section for requirements and installation](#install)
 
 ## What's New
 
+* 1.14 - provide {@link module:object.mapProperties|object.mapProperties()} and {@link module:format.compactNumber|format.compactNumber()}
 * 1.13 - provide {@link module:random|utils.random()} to genrate random values
 * 1.12 - provide `utils.table(...)` instead of `new utils.TableGenerator(...)`
 * 1.11 - provide {@link module:aggregate.topValues|topValues} (like top 5, bottom 3)

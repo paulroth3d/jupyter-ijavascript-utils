@@ -17,6 +17,7 @@ const schemaGenerator = require('generate-schema');
  *   * {@link module:object.objAssignEntities|objAssignEntities()} -
  *   * {@link module:object.selectObjectProperties|selectObjectProperties()} - keep only specific properties
  *   * {@link module:object.filterObjectProperties|filterObjectProperties()} - remove specific properties
+ *   * {@link module:object.mapProperties|mapProperties(collection, fn, ...properties)} - map multiple properties at once (like parseInt, or toString)
  * * Fetch child properties from related objects
  *   * {@link module:object.fetchObjectProperty|fetchObjectProperty(object, string)} - use dot notation to bring a child property onto a parent
  *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
@@ -826,5 +827,60 @@ module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, 
         target[prop] = defaultObj[prop];
       }
     });
+  });
+};
+
+/**
+ * Applies a function to a set of properties on an object, or collection.
+ * 
+ * This is shorthand for a mapping function,
+ * but useful if doing the same operation (like converting to compactNumbers, converting to string, etc)
+ * 
+ * For example, the two are equivalent:
+ * 
+ * ```
+ * const list = [
+ *  { id: '100', age: '21', name: 'p1' },
+ *  { id: '200', age: '22', name: 'p2' },
+ *  { id: '300', age: '23', name: 'p3' },
+ *  { id: '400', age: '24', name: 'p4' },
+ *  { id: '500', age: '25', name: 'p5' }
+ * ];
+ * 
+ * const numToString = (val) => String(val);
+ * 
+ * const listMapProperties = utils.object.mapProperties(list, numToString, 'id', 'val');
+ * 
+ * const listMap = list.map((obj) => ({
+ *  ...obj,
+ *  id: numToString(obj.val),
+ *  age: numToString(obj.val)
+ * }));
+ * ```
+ * 
+ * @param {Object[]} objCollection - object or multiple objects that should have properties formatted
+ * @param {Function} formattingFn - function to apply to all the properties specified
+ * @param  {...any} propertiesToFormat - list of properties to apply the formatting function
+ * @returns {Object[] - clone of objCollection with properties mapped
+ */
+module.exports.mapProperties = function mapProperties(objCollection, formattingFn, ...propertiesToFormat) {
+  const cleanCollection = !Array.isArray(objCollection)
+    ? [objCollection]
+    : objCollection;
+
+  const cleanProperties = propertiesToFormat.length > 0 && Array.isArray(propertiesToFormat[0])
+    ? propertiesToFormat[0]
+    : propertiesToFormat;
+  
+  if (typeof formattingFn !== 'function') {
+    throw Error('object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided');
+  }
+  
+  return cleanCollection.map((obj) => {
+    const clone = { ...obj };
+    cleanProperties.forEach((prop) => {
+      clone[prop] = formattingFn(obj[prop]);
+    });
+    return clone;
   });
 };
