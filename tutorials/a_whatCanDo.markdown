@@ -57,8 +57,6 @@ Jupyter Lab (the latest interface for Jupyter), and many other notebooks are ins
 
 However, I've found quite a few people that would really get a benefit of working with Notebooks - but without having to also learn Python.
 
-While Python and JavaScript (often ECMA 262) are influencing one another - there are differences - and these can be challenging to deal with especially on deadlines.
-
 For those JavaScript Developers that are looking to better understand Python, we developed a [Python for JavaScript Developers book here](https://github.com/paulroth3d/python-for-js-developers) - pull requests always welcome.
 
 Additionally, [ObservableHQ](https://observablehq.com/tutorials) provides a really great experience for those familiar with JavaScript - [although it isn't technically JavaScript](https://observablehq.com/@observablehq/observables-not-javascript) and also worth a look.
@@ -66,16 +64,14 @@ Additionally, [ObservableHQ](https://observablehq.com/tutorials) provides a real
 For example: [Lionel Radisson's creative coding](https://observablehq.com/@makio135/creative-coding),
 and [many others](https://observablehq.com/explore)
 
+## At first glance, notebooks can seem like pretty documentation
+
 ```javascript
 utils = require('jupyter-ijavascript-utils');
 ['utils']
 ```
 
     [ 'utils' ]
-
-
-
-## At first glance, notebooks can seem like pretty documentation
 
 The notebook is written as a collection of `cells` that essentially are either:
 
