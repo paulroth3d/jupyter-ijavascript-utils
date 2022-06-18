@@ -39,7 +39,7 @@ const IJSUtils = require('./ijs');
  * 
  * ```
  * utils.svg.render({ width: 400, height: 200,
- *     onReady: ({el, width, height }) => {
+ *     onReady: ({el, width, height, SVG }) => {
  *         const yellowTransition = new SVG.Color('#FF0000').to('#00FF00');
  *         for (let i = 0; i <=5; i++){
  *             el.rect(100, 100)

@@ -10,7 +10,7 @@ const InternalHtmlScripts = require('./htmlScript_internal');
  * **Note that [Leaflet](https://leafletjs.com/)
  * and [Leaflet-Provider](https://leaflet-extras.github.io/leaflet-providers/preview/)
  * are both accessed from unpkg.com. The version is easily upgradable -
- * {@link module:leaflet.render|see render(options) for more} **
+ * {@link module:leaflet.render|see render(options) for more}**
  * 
  * * Render Leaflet
  *   * {@link module:leaflet.render|leaflet.render(options)} - Render leaflet
