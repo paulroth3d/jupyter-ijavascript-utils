@@ -1299,7 +1299,7 @@ class TableGenerator {
    */
   generateArray2() {
     const results = this.prepare();
-    return [...results.headers, ...results.data];
+    return [[...results.headers], ...results.data];
   }
 
   /**

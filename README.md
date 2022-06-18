@@ -19,6 +19,23 @@ Simple library for working with Jupyter - through IJavaScript kernel.
 
 See documentation at: [https://jupyter-ijavascript-utils.onrender.com/](https://jupyter-ijavascript-utils.onrender.com/)
 
+# What is this?
+
+The [jupyter-ijavascript-utils](https://www.npmjs.com/package/jupyter-ijavascript-utils) library is simply a collection of utility methods for Node and JavaScript Developers interested in Data Science.
+
+* Load
+* Aggregate
+* Manipulate
+* Format / Visualize
+* Refine and Explore
+* Export
+
+Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](https://github.com/n-riesco/ijavascript) and the [Jupyter Lab - the latest interface for Jupyter](https://jupyter.org/) - and the installation is fairly simple in the [How to Use guide](https://jupyter-ijavascript-utils.onrender.com/tutorial-howToUse.html). (Although suggestions welcome)
+
+This is not intended to be the only way to accomplish many of these tasks, and alternatives are mentioned in the documentation as available.
+
+![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.com/img/mainExampleNotebook.png)
+
 # What's New
 
 * 1.14 - provide format.compactNumber and object.mapProperties
@@ -33,22 +50,6 @@ See documentation at: [https://jupyter-ijavascript-utils.onrender.com/](https://
 * 1.5 - Add Latex support for rendering Math formulas and PlantUML support for Diagrams
 * 1.4 - Add in vega embed, vega mimetypes and example choropleth tutorial
 * 1.3 - Add Leaflet for Maps, allow Vega to use explicit specs (so [Examples can be copied and pasted](https://vega.github.io/vega-lite/examples/), and add in htmlScripts
-
-# What is this?
-
-The [jupyter-ijavascript-utils](https://www.npmjs.com/package/jupyter-ijavascript-utils) library is simply a collection of utility methods for Node and JavaScript Developers interested in Data Science.
-
-* Load
-* Aggregate
-* Manipulate
-* Format / Visualize
-* Refine and Explore
-
-Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](https://github.com/n-riesco/ijavascript) and the [Jupyter Lab - the latest interface for Jupyter](https://jupyter.org/) - and the installation is fairly simple in the [How to Use guide](https://jupyter-ijavascript-utils.onrender.com/tutorial-howToUse.html). (Although suggestions welcome)
-
-This is not intended to be the only way to accomplish many of these tasks, and alternatives are mentioned in the documentation as available.
-
-![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.com/img/mainExampleNotebook.png)
 
 # Running Your Own Notebooks
 

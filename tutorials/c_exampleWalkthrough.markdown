@@ -1,4 +1,4 @@
-**[This walkthrough is also available as a Jupyter ipynb Notebook - you can run yourself](notebooks/ex_Walkthrough.ipynb)**
+**[This walkthrough is also available as a Jupyter ipynb Notebook - you can run yourself](notebooks/c_exampleWalkthrough.ipynb)**
 
 Let's say that you have a dataset that you would like to quickly understand.
 

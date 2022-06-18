@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="165px" preserveAspectRatio="none" style="width:734px;height:165px;background:#FFFFFF;" version="1.1" viewBox="0 0 734 165" width="734px" zoomAndPan="magnify"><defs/><g><!--MD5=[fee662a292a0353a69bd162820bae93b]
+entity User--><g id="elem_User"><ellipse cx="32.5" cy="15.059" fill="#F1F1F1" rx="9.059" ry="9.059" style="stroke:#181818;stroke-width:0.5;"/><rect fill="#F1F1F1" height="36.4883" rx="9.059" ry="9.059" style="stroke:#181818;stroke-width:0.5;" width="51" x="7" y="24.118"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="31" x="17" y="47.6532">User</text></g><!--MD5=[e9dede37b31fdda9664526f66258b036]
+entity Browser--><g id="elem_Browser"><rect fill="#DFD1F2" height="36.4883" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="75" x="93" y="15.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="55" x="103" y="39.0352">Browser</text></g><!--MD5=[b1435b213846e3ddcd1e6c1cd6b83b9a]
+entity Server--><g id="elem_Server"><path d="M331.3912,18.6137 C335.6722,12.55 340.2216,13.0622 344.024,19.1128 C348.0011,13.1634 353.3331,11.9269 358.0845,18.2238 C360.8816,12.5868 367.1041,11.9091 370.936,16.9821 C375.4321,11.1868 380.024,11.1903 383.6027,17.9106 C386.1878,11.1846 390.678,12.0073 394.9237,16.1866 C399.7756,8.7752 405.3432,9.0584 409.4714,16.8777 C412.4741,11.3157 418.2309,10.903 421.0555,17.0537 C425.2596,11.7122 430.8982,11.9983 434.324,17.9668 C439.0432,12.6239 443.4362,13.1693 446.1317,19.9395 C449.7692,14.7069 454.8745,13.8178 458.8209,19.5832 C467.6026,21.8789 470.6078,28.8329 463.5402,35.7541 C468.5678,42.4872 466.6868,46.9263 459.4452,50.1757 C455.3169,56.2212 451.1716,56.8048 446.5603,50.6874 C443.7399,55.942 437.5918,56.4482 434.0482,51.5816 C430.856,57.9111 425.8093,59.0776 420.7407,53.7179 C418.3001,59.2856 414.2606,61.4399 409.4684,56.162 C405.5842,61.9367 399.4901,61.7443 395.7378,56.0047 C392.0652,63.6016 385.7197,61.8191 381.9022,56.1559 C377.499,60.8119 373.9943,61.0826 370.9835,54.7699 C365.3453,60.783 360.7295,61.7338 356.5674,53.2973 C351.4093,59.8109 346.3459,58.9468 343.5013,51.1804 C338.8309,56.7693 335.5148,54.6977 332.3327,49.6218 C323.1548,48.8075 320.6781,42.0087 326.3554,35.0859 C320.2983,28.4864 322.6152,20.6785 331.3912,18.6137 " fill="#DFF2D1" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="114" x="337.5" y="39.0352">Notebook Server</text></g><!--MD5=[cb798c5dd5bb639090b009f755d03b00]
+entity Kernel--><g id="elem_Kernel"><rect fill="#DFF2D1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="84" x="534.5" y="10.5"/><rect fill="#DFF2D1" height="10" style="stroke:#181818;stroke-width:1.0;" width="15" x="598.5" y="15.5"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="596.5" y="17.5"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="596.5" y="21.5"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="44" x="549.5" y="44.0352">Kernel</text></g><!--MD5=[c5a94b7685b36a5b310047256c565c76]
+entity Notebook--><g id="elem_Notebook"><path d="M316,124.5 L316,155.9883 A2.5,2.5 0 0 0 318.5,158.4883 L470.5,158.4883 A2.5,2.5 0 0 0 473,155.9883 L473,132 L463,122 L318.5,122 A2.5,2.5 0 0 0 316,124.5 " fill="#D9D9D9" style="stroke:#181818;stroke-width:1.0;"/><path d="M463,122 L463,129.5 A2.5,2.5 0 0 0 465.5,132 L473,132 " fill="#D9D9D9" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="137" x="326" y="145.5352">Notebook.ipynb File</text></g><!--MD5=[ec4c93e45963a154c97e3947d19a9663]
+link User to Browser--><g id="link_User_Browser"><path d="M58.15,49.44 C70.02,54.2 81.89,55.33 93.76,52.83 " fill="none" id="User-to-Browser" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="98.85,51.54,89.1427,49.8759,94.0035,52.7695,91.1099,57.6303,98.85,51.54" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[0233b85d49a159daa7eef88a906a0340]
+reverse link User to Browser--><g id="link_User_Browser"><path d="M62.92,15.84 C74.89,12.02 86.87,11.89 98.85,15.46 " fill="none" id="User-backto-Browser" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="58.15,17.56,67.9739,18.2603,62.8519,15.8593,65.2528,10.7373,58.15,17.56" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[82276629f7f99def49fe0731f1ca4b74]
+link Browser to Server--><g id="link_Browser_Server"><path d="M173.34,33.5 C212.21,33.5 270.45,33.5 317.41,33.5 " fill="none" id="Browser-Server" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="322.5,33.5,313.5,29.5,317.5,33.5,313.5,37.5,322.5,33.5" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="168.04,33.5,177.04,37.5,173.04,33.5,177.04,29.5,168.04,33.5" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="118" x="186.25" y="27.0684">HTTP &amp; Websocket</text></g><!--MD5=[db1393b37c1f9d80da9a2e15560cfc15]
+link Server to Kernel--><g id="link_Server_Kernel"><path d="M471.82,33.5 C491.24,33.5 511.5,33.5 528.97,33.5 " fill="none" id="Server-Kernel" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="534.3,33.5,525.3,29.5,529.3,33.5,525.3,37.5,534.3,33.5" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="466.69,33.5,475.69,37.5,471.69,33.5,475.69,29.5,466.69,33.5" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="31" x="485" y="27.0684">ØMQ</text></g><!--MD5=[982d153c678f1942e1e681a10eb5da92]
+link Kernel to Kernel--><g id="link_Kernel_Kernel"><path d="M618.87,22.77 C637.48,21.83 653.5,25.4 653.5,33.5 C653.5,40.84 640.35,44.46 624.02,44.37 " fill="none" id="Kernel-to-Kernel" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="618.87,44.23,627.7521,48.4854,623.868,44.3728,627.9806,40.4887,618.87,44.23" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="30" x="675.5" y="31.0684">code</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="62" x="659.5" y="46.3789">execution</text></g><!--MD5=[20aa3825ffb26ee7df541fc331dffae3]
+reverse link Server to Notebook--><g id="link_Server_Notebook"><path d="M383.14,61.84 C380.86,80.78 381.39,105.42 384.73,121.7 " fill="none" id="Server-backto-Notebook" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="383.85,56.66,378.6545,65.027,383.1649,61.6128,386.5791,66.1232,383.85,56.66" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[379147ba8b462d1121133cdff4ca3712]
+link Server to Notebook--><g id="link_Server_Notebook"><path d="M405.77,56.66 C408.72,74.25 408.74,98.75 405.84,116.44 " fill="none" id="Server-to-Notebook" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="404.84,121.7,410.4415,113.5992,405.7683,116.7869,402.5806,112.1138,404.84,121.7" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[f2802abe1b86f3e1eb95c14ff3945792]
+@startuml
+<style>
+rectangle {
+  BackGroundColor #dfd1f2
+  LineThickness 1
+  LineColor black
+}
+cloud {
+    BackGroundColor #dff2d1
+    LineThickness 1
+}
+component {
+    BackGroundColor #dff2d1
+    LineThickness 1
+}
+file {
+    BackGroundColor #d9d9d9
+    LineThickness 1
+}
+</style>
+
+Person User
+rectangle Browser
+cloud "Notebook Server" as Server
+component Kernel
+file "Notebook.ipynb File" as Notebook
+
+User -ri-> Browser
+Browser -le-> User
+
+Browser <-ri-> Server : HTTP & Websocket
+
+Server <-ri-> Kernel: "ØMQ"
+
+Kernel -> Kernel : "code\nexecution"
+
+Notebook -up-> Server
+Server -do-> Notebook
+@enduml
+
+PlantUML version 1.2022.5(Sat Apr 30 05:55:52 CDT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

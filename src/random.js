@@ -128,7 +128,7 @@ module.exports.pickRandom = function pickRandom(targetArray) {
   const min = 0;
   const max = targetArray.length;
 
-  return Math.floor(Math.random(seed) * (max - min) + min);
+  return targetArray[Math.floor(Math.random(seed) * (max - min) + min)];
 };
 
 /**
@@ -158,7 +158,8 @@ module.exports.randomArray = function randomArray(arraySize, generatingFunction)
 
 /**
  * Returns a new Simplex Generator
- * @function simplex
+ * @function simplexGenerator
+ * @static
  * @param {Number} [seed] - seed to use for the generator (or null for random)
  * @returns {SimplexGenerator} - Simplex Generator that can generate in multiple dimensions
  */
