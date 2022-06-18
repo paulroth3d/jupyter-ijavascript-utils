@@ -13,7 +13,15 @@
 
 # Overview
 
-Simple library for working with Jupyter - through IJavaScript kernel.
+This is a library to help people that understand JavaScript
+to leverage for using Jupyter with the iJavaScript kernel
+as a way to load and explore data, and ultimately tell compelling stories with visuals.
+
+Notebooks are a way to explore and experiment, in addition to write and explain ideas.
+
+**All of the tutorials provided here, including this one, was written as a notebook and simply exported.**
+
+![Screenshot](docResources/img/started_jupyterSideBySide.jpg)
 
 # Documentation
 
@@ -34,7 +42,7 @@ Currently, we assume you'll be using [nriesco's iJavaScript Jupyter Kernel](http
 
 This is not intended to be the only way to accomplish many of these tasks, and alternatives are mentioned in the documentation as available.
 
-![Screenshot of example notebook](https://jupyter-ijavascript-utils.onrender.com/img/mainExampleNotebook.png)
+![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New
 
@@ -208,7 +216,7 @@ new utils.TableGenerator(barley)
     .render()
 ```
 
-![Screenshot of table](https://jupyter-ijavascript-utils.onrender.com/img/BarleySimpleTable.png)
+![Screenshot of table](docResources/img/BarleySimpleTable.png)
 
 ## Show a Graph
 
@@ -232,7 +240,7 @@ utils.vega.svg((vl) => vl.markPoint()
 )
 ```
 
-![Screenshot of Vega Cell](https://jupyter-ijavascript-utils.onrender.com/img/BarleyYieldBySite.png)
+![Screenshot of Vega Cell](docResources/img/BarleyYieldBySite.png)
 
 Where making it into a bar chart, to understand the proportions of varieties grown is simply changing the mark type
 
@@ -254,33 +262,33 @@ utils.vega.svg((vl) => vl.markBar()
 )
 ```
 
-![Screenshot of variety type](https://jupyter-ijavascript-utils.onrender.com/img/BarleyYieldBySiteVariety.png)
+![Screenshot of variety type](docResources/img/BarleyYieldBySiteVariety.png)
 
 With further options to zoom, pan, or setup interactive sliders:
 
-![Screenshot of vega lite with sliders](https://jupyter-ijavascript-utils.onrender.com/img/vegaLiteSliders.png)
+![Screenshot of vega lite with sliders](docResources/img/vegaLiteSliders.png)
 
 Or try your hand at the [Vega Lite Examples](https://vega.github.io/vega-lite/examples/)
 
-![Screenshot of Vega-Lite Examples](https://jupyter-ijavascript-utils.onrender.com/img/vegaLiteExamplesSm.png)
+![Screenshot of Vega-Lite Examples](docResources/img/vegaLiteExamplesSm.png)
 
 ## Create a Data Driven Map
 
 ([See the Data Driven Maps Tutorial for More](https://jupyter-ijavascript-utils.onrender.com/tutorial-vega_choroplethLong.html))
 
-![Screenshot of choropleth](https://jupyter-ijavascript-utils.onrender.com/img/choropleth_workingFull.svg)
+![Screenshot of choropleth](docResources/img/choropleth_workingFull.svg)
 
 ## Render Maps
 
 ([See the Leaflet module for more](https://jupyter-ijavascript-utils.onrender.com/module-leaflet.html))
 
-![Screenshot of Leaflet](https://jupyter-ijavascript-utils.onrender.com/img/leafletRenderMarkers.png)
+![Screenshot of Leaflet](docResources/img/leafletRenderMarkers.png)
 
 ## Generate Text Driven Diagrams
 
 ([See the PlantUML module for more](https://jupyter-ijavascript-utils.onrender.com/module-plantuml.html))
 
-![Screenshot of PlantUML](https://jupyter-ijavascript-utils.onrender.com/img/plantumlSequence.png)
+![Screenshot of PlantUML](docResources/img/plantumlSequence.png)
 
 ## Render Other Libraries
 
@@ -296,15 +304,15 @@ utils.ijs.htmlScript({
 });
 ```
 
-![Screenshot of QR Code](https://jupyter-ijavascript-utils.onrender.com/img/htmlScript_qrCode.png)
+![Screenshot of QR Code](docResources/img/htmlScript_qrCode.png)
 
 ## Create Animations
 
 (See the [Noise Visualization Tutorial](https://jupyter-ijavascript-utils.onrender.com/tutorial-noiseVisualization.html) or [SVG Module](file:///Users/proth/Documents/notebooks/jupyter-ijavascript-utils/docs/module-svg.html) for more)
 
-[![Screenshot of dark animation](https://jupyter-ijavascript-utils.onrender.com/img/noiseVisualization_wavesDark.svg)](https://jupyter-ijavascript-utils.onrender.com/img/svgAnimation2Dark.gif)
+[![Screenshot of dark animation](docResources/img/noiseVisualization_wavesDark.svg)](docResources/img/svgAnimation2Dark.gif)
 
-[![Screenshot of light animation](https://jupyter-ijavascript-utils.onrender.com/img/noiseVisualization_wavesLight.svg)](https://jupyter-ijavascript-utils.onrender.com/img/svgAnimation2Light.gif)
+[![Screenshot of light animation](docResources/img/noiseVisualization_wavesLight.svg)](docResources/img/svgAnimation2Light.gif)
 
 (click the image to play the gif animation)
 

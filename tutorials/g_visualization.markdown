@@ -239,12 +239,6 @@ utils.vega.svg((vl) => vl.markPoint()
 
 
 
-    
-![svg](output_11_0.svg)
-    
-
-
-
 ![Screenshot of chart](img/CarsDisplacementByHorsepower.png)
 
 ## Data Driven Maps
@@ -272,107 +266,6 @@ utils.leaflet.renderMarkers([
   [52.23040500771883, 21.012146472930908, "point 4"]
 ], {height: 400, provider: 'Stamen.Watercolor'});
 ```
-
-
-
-
-<html><body>
-  <div uuid="0c72b0cb-e083-40d1-917d-45f3b3c20e1c" style="width:100%; height: 400px"></div>
-  <div scriptUUID="0c72b0cb-e083-40d1-917d-45f3b3c20e1c" ></div>
-  <script>
-    if (typeof globalThis.uuidCountdown === 'undefined') {
-      globalThis.uuidCountdown = new Map();
-    }
-
-    globalThis.uuidCountdown.set('0c72b0cb-e083-40d1-917d-45f3b3c20e1c', {
-      scriptIndex: -1,
-      scriptsToLoad: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.13.0/leaflet-providers.js"],
-      onReady: (rootUUID) => {
-        console.log('IJSUtils.htmlScript:' + rootUUID + ' starting render');
-
-        const rootEl = document.querySelector('div[uuid="0c72b0cb-e083-40d1-917d-45f3b3c20e1c"]');
-
-        const options = {
-          uuid: '0c72b0cb-e083-40d1-917d-45f3b3c20e1c',
-          width: '100%',
-          height: '400px',
-          scripts: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.13.0/leaflet-providers.js"],
-          css: ["https://unpkg.com/leaflet@1.6.0/dist/leaflet.js","https://unpkg.com/leaflet-providers@1.13.0/leaflet-providers.js"],
-        };
-
-        const animate = function (requestAnimationFrameTarget) {
-          requestAnimationFrame((...passThroughArgs) => {
-            if (!document.contains(rootEl)) {
-              console.log('old animation stopping. rootEl has been removed from DOM');
-              return;
-            }
-            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
-          })
-        }
-
-        //-- ijsUtils.htmlScipt options.data
-        const data = [[52.230020586193795,21.01083755493164,"point 1"],[52.22924516170657,21.011320352554325,"point 2"],[52.229511304688444,21.01270973682404,"point 3"],[52.23040500771883,21.012146472930908,"point 4"]];
-
-        //-- ijsUtils.htmlScript options.utilityFunctions start
-        const utilityFunctions = {};
-
-        //-- ijsUtils.htmlScript options.utiiltyFunctions end
-
-        //-- ijsUtils.htmlScript options.onRender start
-        if (!L.tileLayer.provider) console.error('Leaflet.tileLayer.provider is null');
-        map = L.map(rootEl, {});
-
-        L.tileLayer.provider('Stamen.Watercolor').addTo(map);
-
-        (function leafletMarkersOnReady({ map, leaflet, data }) {
-  const markerData = data;
-
-  // eslint-disable-next-line new-cap
-  const mapMarkers = markerData.map(([lat, lon, title], index) => new leaflet.marker([lat, lon])
-    .bindPopup(title || String(index))
-    .addTo(map));
-
-  const markerGroup = leaflet.featureGroup(mapMarkers);
-
-  map.fitBounds(markerGroup.getBounds().pad(0.2));
-})({rootEl, data, map, leaflet:L, options});
-        //-- ijsUtils.htmlScript options.onRender end
-
-        console.log('IJSUtils.htmlScript:' + rootUUID + ' ending render');
-      }
-    });
-
-    //-- script tags created dynamically have race conditions, load sequentially
-    function externalScriptLoaded(rootUUID) {
-      const result = globalThis.uuidCountdown.get(rootUUID);
-      result.scriptIndex += 1;
-      if (result.scriptIndex >= result.scriptsToLoad.length) {
-        result.onReady(rootUUID);
-        globalThis.uuidCountdown.delete(rootUUID);
-      } else {
-        const newScript = document.createElement('script');
-        newScript.src = result.scriptsToLoad[result.scriptIndex];
-        newScript.crossorigin='';
-        newScript.uuid=rootUUID;
-        newScript.onload = () => externalScriptLoaded(rootUUID);
-
-        const scriptRoot = document.querySelector('div[scriptUUID="' + rootUUID + '"]');
-        scriptRoot.append(newScript);
-      }
-    }
-
-    externalScriptLoaded('0c72b0cb-e083-40d1-917d-45f3b3c20e1c');
-  </script>
-
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-  crossorigin=""
-  uuid="0c72b0cb-e083-40d1-917d-45f3b3c20e1c"
-/>
-</body></html>
-
-
 
 
 ![Screenshot of map](img/leafletRenderMarkers.png)
@@ -465,13 +358,7 @@ The utility here is a wrapper for [SVG.js](https://svgjs.dev/),
   })
 
 ```
-
-
-
-
-    
-![svg](output_24_0.svg)
-    
+ 
 
 
 
@@ -492,97 +379,6 @@ utils.svg.embed(({ el, SVG, width, height }) => {
 ```
 
 
-
-
-<html><body>
-  <div uuid="2947c1b5-8f6f-4c50-958e-48878e8dc15c" style="width:400px; height: 200px"></div>
-  <div scriptUUID="2947c1b5-8f6f-4c50-958e-48878e8dc15c" ></div>
-  <script>
-    if (typeof globalThis.uuidCountdown === 'undefined') {
-      globalThis.uuidCountdown = new Map();
-    }
-
-    globalThis.uuidCountdown.set('2947c1b5-8f6f-4c50-958e-48878e8dc15c', {
-      scriptIndex: -1,
-      scriptsToLoad: ["https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"],
-      onReady: (rootUUID) => {
-        console.log('IJSUtils.htmlScript:' + rootUUID + ' starting render');
-
-        const rootEl = document.querySelector('div[uuid="2947c1b5-8f6f-4c50-958e-48878e8dc15c"]');
-
-        const options = {
-          uuid: '2947c1b5-8f6f-4c50-958e-48878e8dc15c',
-          width: '400px',
-          height: '200px',
-          scripts: ["https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"],
-          css: ["https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"],
-        };
-
-        const animate = function (requestAnimationFrameTarget) {
-          requestAnimationFrame((...passThroughArgs) => {
-            if (!document.contains(rootEl)) {
-              console.log('old animation stopping. rootEl has been removed from DOM');
-              return;
-            }
-            requestAnimationFrameTarget.apply(globalThis, passThroughArgs);
-          })
-        }
-
-        //-- ijsUtils.htmlScipt options.data
-        const data = undefined;
-
-        //-- ijsUtils.htmlScript options.utilityFunctions start
-        const utilityFunctions = {};
-
-        //-- ijsUtils.htmlScript options.utiiltyFunctions end
-
-        //-- ijsUtils.htmlScript options.onRender start
-        const el = SVG().addTo(rootEl);
-const width = 400;
-const height = 200;
-el.size(width, height);
-
-(({ el, SVG, width, height }) => {
-    var rect1 = el.rect(100, 100)
-        .move(width/2, 0);
-
-    rect1.animate(1000, 0, 'absolute')
-        .move(width/2, 100)
-        .loop(true, true);
-})({ rootEl, el, SVG, data, width, height, utilityFunctions, options, animate });
-        //-- ijsUtils.htmlScript options.onRender end
-
-        console.log('IJSUtils.htmlScript:' + rootUUID + ' ending render');
-      }
-    });
-
-    //-- script tags created dynamically have race conditions, load sequentially
-    function externalScriptLoaded(rootUUID) {
-      const result = globalThis.uuidCountdown.get(rootUUID);
-      result.scriptIndex += 1;
-      if (result.scriptIndex >= result.scriptsToLoad.length) {
-        result.onReady(rootUUID);
-        globalThis.uuidCountdown.delete(rootUUID);
-      } else {
-        const newScript = document.createElement('script');
-        newScript.src = result.scriptsToLoad[result.scriptIndex];
-        newScript.crossorigin='';
-        newScript.uuid=rootUUID;
-        newScript.onload = () => externalScriptLoaded(rootUUID);
-
-        const scriptRoot = document.querySelector('div[scriptUUID="' + rootUUID + '"]');
-        scriptRoot.append(newScript);
-      }
-    }
-
-    externalScriptLoaded('2947c1b5-8f6f-4c50-958e-48878e8dc15c');
-  </script>
-
-</body></html>
-
-
-
-
 ![Screenshot of animation](img/svgAnimation1.gif)
 
 Leveraging [Noise](https://jupyter-ijavascript-utils.onrender.com/tutorial-noiseVisualization.html) you can make some very interesting images even without data.
@@ -593,7 +389,7 @@ Leveraging [Noise](https://jupyter-ijavascript-utils.onrender.com/tutorial-noise
 
 By balancing computing between the client and the browser side (through [HTMLScript]()) you can leverage additional libraries that can use the DOM.
 
-![Screenshot](../img/htmlScript_qrCode.png)
+![Screenshot](img/htmlScript_qrCode.png)
               
         
 For more, please see the [Architecture section](https://jupyter-ijavascript-utils.onrender.com/tutorial-architecture.html)
