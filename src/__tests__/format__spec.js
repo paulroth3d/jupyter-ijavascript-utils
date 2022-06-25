@@ -918,4 +918,175 @@ global.describe('format', () => {
       });
     });
   });
+
+  global.describe('safeConvertFloat', () => {
+    global.describe('fails conversion', () => {
+      global.it('null', () => {
+        const val = null;
+        const expected = Number.NaN;
+        const result = FormatUtils.safeConvertFloat(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('Nan', () => {
+        const val = Number.NaN;
+        const expected = Number.NaN;
+        const result = FormatUtils.safeConvertFloat(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('empty string', () => {
+        const val = '';
+        const expected = Number.NaN;
+        const result = FormatUtils.safeConvertFloat(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('succeeds conversion', () => {
+      global.it('2', () => {
+        const val = '2';
+        const expected = 2;
+        const result = FormatUtils.safeConvertFloat(val);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('number 2', () => {
+        const val = 2;
+        const expected = 2;
+        const result = FormatUtils.safeConvertFloat(val);
+        global.expect(result).toBeCloseTo(expected);
+      });
+    });
+  });
+  global.describe('safeConvertInteger', () => {
+    global.describe('fails conversion', () => {
+      global.it('null', () => {
+        const val = null;
+        const expected = Number.NaN;
+        const result = FormatUtils.safeConvertInteger(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('Nan', () => {
+        const val = Number.NaN;
+        const expected = Number.NaN;
+        const result = FormatUtils.safeConvertInteger(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('empty string', () => {
+        const val = '';
+        const expected = Number.NaN;
+        const result = FormatUtils.safeConvertInteger(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('succeeds conversion', () => {
+      global.it('2', () => {
+        const val = '2';
+        const expected = 2;
+        const result = FormatUtils.safeConvertInteger(val);
+        global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('number 2', () => {
+        const val = 2;
+        const expected = 2;
+        const result = FormatUtils.safeConvertInteger(val);
+        global.expect(result).toBeCloseTo(expected);
+      });
+    });
+  });
+
+  global.describe('safeConvertString', () => {
+    global.describe('fails conversion', () => {
+      global.it('null', () => {
+        const val = null;
+        const expected = 'null';
+        const result = FormatUtils.safeConvertString(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('Nan', () => {
+        const val = Number.NaN;
+        const expected = 'NaN';
+        const result = FormatUtils.safeConvertString(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('empty string', () => {
+        const val = '';
+        const expected = '';
+        const result = FormatUtils.safeConvertString(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('succeeds conversion', () => {
+      global.it('string 2', () => {
+        const val = '2';
+        const expected = '2';
+        const result = FormatUtils.safeConvertString(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('number 2', () => {
+        const val = 2;
+        const expected = '2';
+        const result = FormatUtils.safeConvertString(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+  });
+
+  global.describe('safeConvertBoolean', () => {
+    global.describe('fails conversion', () => {
+      global.it('null', () => {
+        const val = null;
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('Nan', () => {
+        const val = Number.NaN;
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('empty string', () => {
+        const val = '';
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('succeeds conversion', () => {
+      global.it('string True', () => {
+        const val = 'True';
+        const expected = true;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string TRUE', () => {
+        const val = 'True';
+        const expected = true;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string False', () => {
+        const val = 'False';
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string FALSE', () => {
+        const val = 'FALSE';
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('number 10', () => {
+        const val = 10;
+        const expected = true;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('number 0', () => {
+        const val = 0;
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+  });
 });

@@ -632,3 +632,72 @@ module.exports.compactNumber = function compactNumber(num, digits = 0) {
 
   return (num / siValue).toFixed(digits) + siKey;
 };
+
+module.exports.safeConvertString = function safeConvertString(val) {
+  try {
+    return String(val);
+  } catch (err) {
+    //-- I cannot find a way to reliably throw an error, but keep it in case it does
+    /* istanbul ignore next */
+    return null;
+  }
+};
+
+module.exports.safeConvertFloat = function safeConvertFloat(val) {
+  try {
+    return Number.parseFloat(val);
+  } catch (err) {
+    //-- I cannot find a way to reliably throw an error, but keep it in case it does
+    /* istanbul ignore next */
+    return null;
+  }
+};
+
+module.exports.safeConvertInteger = function safeConvertInteger(val) {
+  try {
+    return Number.parseInt(val, 10);
+  } catch (err) {
+    //-- I cannot find a way to reliably throw an error, but keep it in case it does
+    /* istanbul ignore next */
+    return null;
+  }
+};
+
+module.exports.safeConvertBoolean = function safeConvertBoolean(val) {
+  if (typeof val === 'string') {
+    return val.toUpperCase() === 'TRUE';
+  }
+  return val ? true : false;
+};
+
+module.exports.prepareFormatterObject = function prepareFormatterObject(formatterObject) {
+  //-- @TODO: find way to reliably say that the propertyTranslation is an object
+  // propertyTranslations.constructor.name !== 'Object'
+  if (!formatterObject) {
+    throw Error(['ObjectUtils.formatProperties(collection, propertyTranslations): propertyTranslations must be an object, ',
+      'with the properties matching those to be formatted, and values as functions returning the new value'].join(''));
+  }
+
+  const translationKeys = Array.from(Object.keys(formatterObject));
+
+  const result = ({ ...formatterObject });
+
+  translationKeys.forEach((key) => {
+    const translationVal = formatterObject[key];
+    if (typeof translationVal === 'function') {
+      //-- do nothing
+    } else if (translationVal === 'string') {
+      result[key] = FormatUtils.safeConvertString;
+    } else if (translationVal === 'number' || translationVal === 'float') {
+      result[key] = FormatUtils.safeConvertFloat;
+    } else if (translationVal === 'int' || translationVal === 'integer') {
+      result[key] = FormatUtils.safeConvertInteger;
+    } else if (translationVal === 'boolean') {
+      result[key] = FormatUtils.safeConvertBoolean;
+    } else {
+      result[key] = () => translationVal;
+    }
+  });
+
+  return result;
+};

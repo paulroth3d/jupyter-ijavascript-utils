@@ -409,7 +409,7 @@ global.describe('tableGenerator', () => {
         }
       });
       global.describe('basic type conversion', () => {
-        global.it('string', () => {
+        global.it('string 1', () => {
           const weather = initializeWeather();
           const expected = ({
             headers: ['id', 'city', 'month', 'precip'],
@@ -430,7 +430,7 @@ global.describe('tableGenerator', () => {
           global.expect(results.headers).toStrictEqual(expected.headers);
           global.expect(results.data).toStrictEqual(expected.data);
         });
-        global.it('string', () => {
+        global.it('string 2', () => {
           const weather = initializeWeather()
             .map((r) => ({ ...r, precip: String(r.precip) }));
           const expected = ({
@@ -454,21 +454,21 @@ global.describe('tableGenerator', () => {
           global.expect(results.headers).toStrictEqual(expected.headers);
           global.expect(results.data).toStrictEqual(expected.data);
         });
-        global.it('string', () => {
+        global.it('boolean', () => {
           const weather = initializeWeather()
             .map((r) => ({ ...r, isHot: r.precip >= 4 }));
           const expected = ({
             headers: ['id', 'city', 'month', 'precip', 'isHot'],
             data: [
-              [1, 'Seattle',  'Aug', 0.87, 'false'],
-              [0, 'Seattle',  'Apr', 2.68, 'false'],
-              [2, 'Seattle',  'Dec', 5.31, 'true'],
-              [3, 'New York', 'Apr', 3.94, 'false'],
-              [4, 'New York', 'Aug', 4.13, 'true'],
-              [5, 'New York', 'Dec', 3.58, 'false'],
-              [6, 'Chicago',  'Apr', 3.62, 'false'],
-              [8, 'Chicago',  'Dec', 2.56, 'false'],
-              [7, 'Chicago',  'Aug', 3.98, 'false']
+              [1, 'Seattle',  'Aug', 0.87, false],
+              [0, 'Seattle',  'Apr', 2.68, false],
+              [2, 'Seattle',  'Dec', 5.31, true],
+              [3, 'New York', 'Apr', 3.94, false],
+              [4, 'New York', 'Aug', 4.13, true],
+              [5, 'New York', 'Dec', 3.58, false],
+              [6, 'Chicago',  'Apr', 3.62, false],
+              [8, 'Chicago',  'Dec', 2.56, false],
+              [7, 'Chicago',  'Aug', 3.98, false]
             ] });
 
           const results = new TableGenerator(weather)
@@ -477,6 +477,7 @@ global.describe('tableGenerator', () => {
           global.expect(results.headers).toStrictEqual(expected.headers);
           global.expect(results.data).toStrictEqual(expected.data);
         });
+        /*
         global.it('fails if formatter is string, but not string, number, boolean', () => {
           const weather = initializeWeather();
           
@@ -490,6 +491,7 @@ global.describe('tableGenerator', () => {
               .prepare();
           }).toThrow(expectedError);
         });
+        */
       });
     });
     global.describe('limit', () => {

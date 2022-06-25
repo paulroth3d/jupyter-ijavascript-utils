@@ -7,7 +7,7 @@
     </a>
     <img src="https://img.shields.io/badge/Coverage-98-green" />
     <a href="https://github.com/paulroth3d/jupyter-ijavascript-utils" alt="npm">
-        <img src="https://img.shields.io/badge/npm-%5E1.14-red" />
+        <img src="https://img.shields.io/badge/npm-%5E1.15-red" />
     </a>
 </p>
 
@@ -46,6 +46,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.15 - provide object.formatProperties - as a way to quickly convert to string, number, etc.
 * 1.14 - provide format.compactNumber and object.mapProperties
 * 1.13 - provide utils.random() to genrate random values
 * 1.12 - provide `utils.table(...)` instead of `new utils.TableGenerator(...)`

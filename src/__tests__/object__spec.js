@@ -1620,206 +1620,429 @@ describe('ObjectUtils', () => {
       });
     });
   });
-});
 
-global.describe('propertyFromList', () => {
-  global.it('accesses a property from a list', () => {
-    const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
-      { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
-      { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
-      { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
-      { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
-    ];
-    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const results = objectUtils.propertyFromList(data, 'val');
-    global.expect(results).toStrictEqual(expected);
+  global.describe('propertyFromList', () => {
+    global.it('accesses a property from a list', () => {
+      const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+        { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+        { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+        { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+        { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+      ];
+      const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const results = objectUtils.propertyFromList(data, 'val');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('accesses a function from a list', () => {
+      const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
+        { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
+        { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
+        { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
+        { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
+      ];
+      const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const results = objectUtils.propertyFromList(data, (r) => r.val);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('accesses values from a list', () => {
+      const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const results = objectUtils.propertyFromList(data);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('does not fail if not sent a list', () => {
+      const data = 1;
+      const expected = [];
+      const results = objectUtils.propertyFromList(data);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('does not fail if sent a null list', () => {
+      const data = null;
+      const expected = [];
+      const results = objectUtils.propertyFromList(data);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('does not fail if sent an empty list', () => {
+      const data = [];
+      const expected = [];
+      const results = objectUtils.propertyFromList(data);
+      global.expect(results).toStrictEqual(expected);
+    });
   });
-  global.it('accesses a function from a list', () => {
-    const data = [{ record: 'jobA', val: 1 }, { record: 'jobA', val: 2 },
-      { record: 'jobA', val: 3 }, { record: 'jobA', val: 4 },
-      { record: 'jobA', val: 5 }, { record: 'jobA', val: 6 },
-      { record: 'jobA', val: 7 }, { record: 'jobA', val: 8 },
-      { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
-    ];
-    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const results = objectUtils.propertyFromList(data, (r) => r.val);
-    global.expect(results).toStrictEqual(expected);
-  });
-  global.it('accesses values from a list', () => {
-    const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const results = objectUtils.propertyFromList(data);
-    global.expect(results).toStrictEqual(expected);
-  });
-  global.it('does not fail if not sent a list', () => {
-    const data = 1;
-    const expected = [];
-    const results = objectUtils.propertyFromList(data);
-    global.expect(results).toStrictEqual(expected);
-  });
-  global.it('does not fail if sent a null list', () => {
-    const data = null;
-    const expected = [];
-    const results = objectUtils.propertyFromList(data);
-    global.expect(results).toStrictEqual(expected);
-  });
-  global.it('does not fail if sent an empty list', () => {
-    const data = [];
-    const expected = [];
-    const results = objectUtils.propertyFromList(data);
-    global.expect(results).toStrictEqual(expected);
-  });
-});
 
-global.describe('mapProperties', () => {
-  global.describe('can map', () => {
-    global.it('one property', () => {
-      const list = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const expected = [
-        { id: 100, age: '21', name: 'p1' },
-        { id: 200, age: '22', name: 'p2' },
-        { id: 300, age: '23', name: 'p3' },
-        { id: 400, age: '24', name: 'p4' },
-        { id: 500, age: '25', name: 'p5' }
-      ];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, 'id');
-      global.expect(results).toStrictEqual(expected);
+  global.describe('mapProperties', () => {
+    global.describe('can map', () => {
+      global.it('one property', () => {
+        const list = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const expected = [
+          { id: 100, age: '21', name: 'p1' },
+          { id: 200, age: '22', name: 'p2' },
+          { id: 300, age: '23', name: 'p3' },
+          { id: 400, age: '24', name: 'p4' },
+          { id: 500, age: '25', name: 'p5' }
+        ];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, 'id');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('two properties', () => {
+        const list = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const expected = [
+          { id: 100, age: 21, name: 'p1' },
+          { id: 200, age: 22, name: 'p2' },
+          { id: 300, age: 23, name: 'p3' },
+          { id: 400, age: 24, name: 'p4' },
+          { id: 500, age: 25, name: 'p5' }
+        ];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('no properties', () => {
+        const list = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const expected = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
-    global.it('two properties', () => {
-      const list = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const expected = [
-        { id: 100, age: 21, name: 'p1' },
-        { id: 200, age: 22, name: 'p2' },
-        { id: 300, age: 23, name: 'p3' },
-        { id: 400, age: 24, name: 'p4' },
-        { id: 500, age: 25, name: 'p5' }
-      ];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
-      global.expect(results).toStrictEqual(expected);
+    global.describe('with one object', () => {
+      global.it('one property', () => {
+        const list = { id: '100', age: '21', name: 'p1' };
+        const expected = [{ id: 100, age: '21', name: 'p1' }];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, 'id');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('two properties', () => {
+        const list = { id: '100', age: '21', name: 'p1' };
+        const expected = [{ id: 100, age: 21, name: 'p1' }];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
+        global.expect(results).toStrictEqual(expected);
+      });
     });
-    global.it('no properties', () => {
-      const list = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const expected = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum);
-      global.expect(results).toStrictEqual(expected);
+    global.describe('with properties in an array', () => {
+      global.it('one property', () => {
+        const list = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const expected = [
+          { id: 100, age: '21', name: 'p1' },
+          { id: 200, age: '22', name: 'p2' },
+          { id: 300, age: '23', name: 'p3' },
+          { id: 400, age: '24', name: 'p4' },
+          { id: 500, age: '25', name: 'p5' }
+        ];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, ['id']);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('two properties', () => {
+        const list = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const expected = [
+          { id: 100, age: 21, name: 'p1' },
+          { id: 200, age: 22, name: 'p2' },
+          { id: 300, age: 23, name: 'p3' },
+          { id: 400, age: 24, name: 'p4' },
+          { id: 500, age: 25, name: 'p5' }
+        ];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, ['id', 'age']);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('no properties', () => {
+        const list = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const expected = [
+          { id: '100', age: '21', name: 'p1' },
+          { id: '200', age: '22', name: 'p2' },
+          { id: '300', age: '23', name: 'p3' },
+          { id: '400', age: '24', name: 'p4' },
+          { id: '500', age: '25', name: 'p5' }
+        ];
+        const parseNum = (str) => parseInt(str, 10);
+        const results = objectUtils.mapProperties(list, parseNum, []);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('throws an error', () => {
+      global.it('if the formatting function is missing', () => {
+        const list = { id: '100', age: '21', name: 'p1' };
+        const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
+        global.expect(() => {
+          objectUtils.mapProperties(list);
+        }).toThrow(expectedError);
+      });
+      global.it('if the formatting is not a function', () => {
+        const list = { id: '100', age: '21', name: 'p1' };
+        const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
+        global.expect(() => {
+          objectUtils.mapProperties(list, 'a', 'id');
+        }).toThrow(expectedError);
+      });
     });
   });
-  global.describe('with one object', () => {
-    global.it('one property', () => {
-      const list = { id: '100', age: '21', name: 'p1' };
-      const expected = [{ id: 100, age: '21', name: 'p1' }];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, 'id');
-      global.expect(results).toStrictEqual(expected);
+
+  global.describe('formatProperties', () => {
+    global.describe('can translate with a function', () => {
+      global.it('with no properties assigned', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({}));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('with one property to clean', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'B', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'B', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'B', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ station: () => 'B' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('with two properties to clean', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'B', isFahreinheit: true, offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'B', isFahreinheit: true, offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'B', isFahreinheit: false, offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ station: () => 'B', isFahreinheit: (val) => val === 'true' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('with many properties to clean', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: true, offset: 0, temp: 36.669599999999996, type: 'C', descr: '0123' },
+          { station: 'A', isFahreinheit: true, offset: 2, temp: 37.2252, type: 'C', descr: '0123456' },
+          { station: 'A', isFahreinheit: false, offset: 3, temp: 37.7808, type: 'C', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({
+          type: 'C',
+          offset: 'number',
+          isFahreinheit: 'boolean',
+          temp: (val) => (val - 32) * 0.5556
+        }));
+        global.expect(result).toStrictEqual(expected);
+      });
     });
-    global.it('two properties', () => {
-      const list = { id: '100', age: '21', name: 'p1' };
-      const expected = [{ id: 100, age: 21, name: 'p1' }];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
-      global.expect(results).toStrictEqual(expected);
+    global.describe('throws an error', () => {
+      global.it('or not as a safe example', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const formatter = {};
+        global.expect(() => objectUtils.formatProperties(data, formatter)).not.toThrow();
+      });
+      global.it('if the format is null', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const formatter = null;
+        // eslint-disable-next-line
+        const expectedError = 'ObjectUtils.formatProperties(collection, propertyTranslations): propertyTranslations must be an object, with the properties matching those to be formatted, and values as functions returning the new value';
+        global.expect(() => objectUtils.formatProperties(data, formatter)).toThrow(expectedError);
+      });
     });
-  });
-  global.describe('with properties in an array', () => {
-    global.it('one property', () => {
-      const list = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const expected = [
-        { id: 100, age: '21', name: 'p1' },
-        { id: 200, age: '22', name: 'p2' },
-        { id: 300, age: '23', name: 'p3' },
-        { id: 400, age: '24', name: 'p4' },
-        { id: 500, age: '25', name: 'p5' }
-      ];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, ['id']);
-      global.expect(results).toStrictEqual(expected);
+    global.describe('can translate with a literal', () => {
+      global.it('with one string literal', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'B', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'B', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'B', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ station: 'B' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('with one number literal', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 20, isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 20, isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 20, isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ station: 20 }));
+        global.expect(result).toStrictEqual(expected);
+      });
     });
-    global.it('two properties', () => {
-      const list = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const expected = [
-        { id: 100, age: 21, name: 'p1' },
-        { id: 200, age: 22, name: 'p2' },
-        { id: 300, age: 23, name: 'p3' },
-        { id: 400, age: 24, name: 'p4' },
-        { id: 500, age: 25, name: 'p5' }
-      ];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, ['id', 'age']);
-      global.expect(results).toStrictEqual(expected);
+    global.describe('with a function shorthand', () => {
+      global.it('string', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: '98', type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ temp: 'string' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('number', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: 123 },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
+        ];
+        const result = objectUtils.formatProperties(data, ({ descr: 'number' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('float', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: 123 },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
+        ];
+        const result = objectUtils.formatProperties(data, ({ descr: 'float' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('int', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: 123 },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
+        ];
+        const result = objectUtils.formatProperties(data, ({ descr: 'int' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('integer', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: 123 },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
+        ];
+        const result = objectUtils.formatProperties(data, ({ descr: 'integer' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('boolean', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: true, offset: '0', temp: 98, type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: true, offset: '2', temp: 99, type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: false, offset: '3', temp: 100, type: 'F', descr: '0123456789' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ isFahreinheit: 'boolean' }));
+        global.expect(result).toStrictEqual(expected);
+      });
     });
-    global.it('no properties', () => {
-      const list = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const expected = [
-        { id: '100', age: '21', name: 'p1' },
-        { id: '200', age: '22', name: 'p2' },
-        { id: '300', age: '23', name: 'p3' },
-        { id: '400', age: '24', name: 'p4' },
-        { id: '500', age: '25', name: 'p5' }
-      ];
-      const parseNum = (str) => parseInt(str, 10);
-      const results = objectUtils.mapProperties(list, parseNum, []);
-      global.expect(results).toStrictEqual(expected);
+    global.describe('does not fail', () => {
+      global.it('if null is passed for a collection', () => {
+        const data = null;
+        const expected = [];
+        const result = objectUtils.formatProperties(data, ({ station: 20 }));
+        global.expect(result).toStrictEqual(expected);
+      });
     });
-  });
-  global.describe('throws an error', () => {
-    global.it('if the formatting function is missing', () => {
-      const list = { id: '100', age: '21', name: 'p1' };
-      const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
-      global.expect(() => {
-        objectUtils.mapProperties(list);
-      }).toThrow(expectedError);
-    });
-    global.it('if the formatting is not a function', () => {
-      const list = { id: '100', age: '21', name: 'p1' };
-      const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
-      global.expect(() => {
-        objectUtils.mapProperties(list, 'a', 'id');
-      }).toThrow(expectedError);
+    global.describe('can format a single object', () => {
+      const data = { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' };
+      const expected = [{ station: 'A', isFahreinheit: true, offset: 2, temp: 37.2252, type: 'C', descr: '0123456' }];
+      const result = objectUtils.formatProperties(data, ({
+        type: 'C',
+        offset: 'number',
+        isFahreinheit: 'boolean',
+        temp: (val) => (val - 32) * 0.5556
+      }));
+      global.expect(result).toStrictEqual(expected);
     });
   });
 });

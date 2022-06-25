@@ -1,6 +1,8 @@
 # Overview
 
-This is a simple Library for using Jupyter with the IJavaScript kernel.
+This is a library to help people that understand JavaScript
+to leverage for using Jupyter with the iJavaScript kernel
+as a way to load and explore data, and ultimately tell compelling stories with visuals.
 
 Jupyter is a way to programmatically explore a subject and interleave text and markdown to make Data Driven Documents.
 
@@ -44,6 +46,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 ## What's New
 
+* 1.15 - provide {@link module:object.formatProperties|object.formatProperties} - as a way to quickly convert to string, number, etc.
 * 1.14 - provide {@link module:object.mapProperties|object.mapProperties()} and {@link module:format.compactNumber|format.compactNumber()}
 * 1.13 - provide {@link module:random|utils.random()} to genrate random values
 * 1.12 - provide `utils.table(...)` instead of `new utils.TableGenerator(...)`

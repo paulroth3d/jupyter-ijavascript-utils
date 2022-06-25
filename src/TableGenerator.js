@@ -18,6 +18,8 @@ const IJSUtils = require('./ijs');
 
 const ArrayUtils = require('./array');
 
+const FormatUtils = require('./format');
+
 const { createSort } = require('./array');
 
 /**
@@ -613,27 +615,11 @@ class TableGenerator {
       return this;
     }
 
+    const cleanedFormatter = FormatUtils.prepareFormatterObject(obj);
+
     const fnMap = new Map();
-    Object.getOwnPropertyNames(obj).forEach((key) => {
-      if ((typeof obj[key]) === 'string') {
-        let fn;
-        const str = obj[key].toLowerCase();
-        if (str === 'string') {
-          fn = (val) => String(val);
-        } else if (str === 'number') {
-          fn = (val) => Number(val);
-        } else if (str === 'boolean') {
-          fn = (val) => val ? 'true' : 'false';
-        } else {
-          throw Error(`TableGenerator.format: property ${key} formatter of ${str} is unsupported. Only (String, Number, Boolean) are supported`);
-        }
-        fnMap.set(key, fn);
-      } else {
-        if ((typeof obj[key]) !== 'function') {
-          throw (Error(`Formatter properties must be functions. [${key}]`));
-        }
-        fnMap.set(key, obj[key]);
-      }
+    Object.getOwnPropertyNames(cleanedFormatter).forEach((key) => {
+      fnMap.set(key, cleanedFormatter[key]);
     });
     
     this.#formatterFn = ({ value, property }) => fnMap.has(property)

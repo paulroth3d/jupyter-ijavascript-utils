@@ -2,6 +2,8 @@
 
 const schemaGenerator = require('generate-schema');
 
+const FormatUtils = require('./format');
+
 /**
  * Utility for working with and massaging javascript objects.
  * 
@@ -18,6 +20,7 @@ const schemaGenerator = require('generate-schema');
  *   * {@link module:object.selectObjectProperties|selectObjectProperties()} - keep only specific properties
  *   * {@link module:object.filterObjectProperties|filterObjectProperties()} - remove specific properties
  *   * {@link module:object.mapProperties|mapProperties(collection, fn, ...properties)} - map multiple properties at once (like parseInt, or toString)
+ *   * {@link module:object.formatProperties|formatProperties(collection, propertyTranslation)} - map specific properties (ex: toString, toNumber, etc)
  * * Fetch child properties from related objects
  *   * {@link module:object.fetchObjectProperty|fetchObjectProperty(object, string)} - use dot notation to bring a child property onto a parent
  *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
@@ -146,7 +149,8 @@ module.exports.objAssignEntities = function objAssignEntities(obj, entities) {
  * Runs a map over a collection, and adds properties the the objects.
  * 
  * @param {Object | Array<Object>} objCollection - object or collection of objects to augment
- * @param {Function} mappingFn - (record) => {Object} mapping function
+ * @param {Function | Object} mappingFn - (record) => {Object} mapping function <br />
+ *            or object with properties to create 
  * @param {Boolean} [inPlace=false] - whether to update the collection in place (true) or cloned (false)
  * @returns {Array<Object>} - collection of records with the fields merged
  * @example
@@ -437,6 +441,82 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
       }
       throw Error(`Invalid property ${propertyAccess} [${prop}] does not exist - safeAccess:${safeAccess}`);
     }, obj);
+};
+
+/**
+ * Translates specific properties to a new value on an object, or collection of objects.
+ * 
+ * The properties defined in the `propertyTranslations` argument is then the property to be updated. (All other properties remain the same)
+ * 
+ * You can either provide a function accepting the current value and returning the new value (any) => any
+ * 
+ * Or you can provide one of the common shorthands:
+ * 
+ * * 'string'
+ * * 'float' or 'number'
+ * * 'int' or 'integer'
+ * * 'boolean'
+ * 
+ * ```
+ * data = [
+ *   {station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123'},
+ *   {station: 'A', isFahreinheit: 'TRUE', offset: '2', temp: 99, type: 'F', descr: '0123456'},
+ *   {station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789'}
+ * ];
+ * 
+ * utils.object.format(data, ({
+ *   //-- to a literal value
+ *   type: 'C',
+ *   //-- convert it to 'string', 'number' || 'float', 'int' || 'integer', 'boolean'
+ *   offset: 'number',
+ *   isFahreinheit: 'boolean',
+ *   //-- or convert the value with a function accepting the current value
+ *   //-- and returning the new value
+ *   temp: (val) => (val - 32) * 0.5556
+ * }));
+ * 
+ * // [
+ * //   { station: 'A', isFahreinheit: true, offset: 0, temp: 36.669599999999996, type: 'C', descr: '0123' },
+ * //   { station: 'A', isFahreinheit: true, offset: 2, temp: 37.2252, type: 'C', descr: '0123456' },
+ * //   { station: 'A', isFahreinheit: false, offset: 3, temp: 37.7808, type: 'C', descr: '0123456789' }
+ * // ];
+ * ```
+ * 
+ * **Please note, you can pass a single object to be cleaned**,<br /> but it will be returned as an array of one object.
+ * 
+ * ```
+ * data = [{station: 'A', isFahreinheit: 'TRUE', offset: '2', temp: 99, type: 'F', descr: '0123456'}];
+ * 
+ * utils.object.format(data, ({
+ *   //-- convert it to 'string', 'number' || 'float', 'int' || 'integer', 'boolean'
+ *   offset: 'number',
+ *   isFahreinheit: 'boolean'
+ * }));
+ * 
+ * // [{station: 'A', isFahreinheit: true, offset: 2, temp: 99, type: 'F', descr: '0123456'}];
+ * ```
+ * 
+ * @param {Object} collection - the list of objects to update specific properties
+ * @param {Object} propertyTranslations - An object with property names as the properties to update <br />
+ *      and the values as a function ((any) => any) accepting the current value, returning the new value.
+ * @returns {Object[]} - collection of objects transformed
+ * @see {@link module:object.augment|augment(collection, fn)} - to add in new properties
+ * @see {@link TableGenerator#formatter} - for other examples
+ */
+module.exports.formatProperties = function formatProperties(collection, propertyTranslations) {
+  const cleanCollection = !collection ? []
+    : Array.isArray(collection) ? collection : [collection];
+  
+  propertyTranslations = FormatUtils.prepareFormatterObject(propertyTranslations);
+  const translationKeys = Array.from(Object.keys(propertyTranslations));
+  
+  return cleanCollection.map((obj) => {
+    const clone = { ...obj };
+    translationKeys.forEach((key) => {
+      clone[key] = propertyTranslations[key](clone[key]);
+    });
+    return clone;
+  });
 };
 
 /**
