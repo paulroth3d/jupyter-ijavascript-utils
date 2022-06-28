@@ -28,7 +28,8 @@ const FormatUtils = require('./format');
  *   * {@link module:object.joinProperties|join(array, index, map, ...fields)} - join a collection, and copy properties over from the mapped object.
  *   * {@link module:object.propertyFromList|propertyFromList(array, propertyName)} - fetches a specific property from all objects in a list
  * * Rename properties
- *   * {@link module:object.cleanProperties|cleanProperties()} - correct inaccessible property names in a list of objects
+ *   * {@link module:object.cleanProperties|cleanProperties()} - correct inaccessible property names in a list of objects - in place
+ *  *   * {@link module:object.cleanProperties2|cleanProperties2()} - correct inaccessible property names in a list of objects - on a cloned list
  *   * {@link module:object.cleanPropertyNames|cleanPropertyNames()} - create a translation of inaccessible names to accessible ones
  *   * {@link module:object.cleanPropertyName|cleanPropertyName()} - create a translation of a specific property name to be accessible.
  *   * {@link module:object.renameProperties|renameProperties()} - Use a translation from old property names to new ones
@@ -231,7 +232,11 @@ module.exports.keys = function keys(objOrArray = {}) {
 };
 
 /**
- * Cleans all the properties of the array of objects
+ * Cleans all the properties of the array of objects in place (does not make Copies)
+ * 
+ * **NOTE: This is faster than {@link module:ObjectUtils.cleanProperties2|cleanProperties2},
+ * but the standard order of the properties (using Object.keys) will be altered.**
+ * 
  * @param {Object[]} objectsToBeCleaned -
  * @return {Object[]} - cleaned objects
  */
@@ -243,20 +248,97 @@ module.exports.cleanProperties = function cleanProperties(objectsToBeCleaned) {
 };
 
 /**
+ * Labels and Values from {@link module:object.cleanProperties2|object.cleanProperties2}
+ * 
+ * ```
+ * {
+ *   labels: { date: 'date', kind: 'kind', num: 'num' },
+ *   values: [
+ *     { date: ' 2021-07-11T22:23:07+0100', kind: ' s', num: '192' },
+ *     { date: ' 2021-07-09T19:54:48+0100', kind: ' c', num: '190' },
+ *     { date: ' 2021-07-08T17:00:32+0100', kind: ' s', num: '190' }
+ *   ]
+ * };
+ * ```
+ * 
+ * @typedef {Object} CleanedProperties
+ * @property {Object} labels - an object with translations of the fields and labels
+ * @property {String} labels.property - for each translated property, stores the original property name
+ * @property {Object[]} values - cleaned values
+ 
+ */
+
+/**
+ * Cleans properties on clones of objects.
+ * 
+ * Additionally, this returns a mapping of what the properties used to be named,
+ * as this can be helpful for rendering out tables.
+ * 
+ * @param {Object[]} objectsToBeCleaned - collection of objects to be cleaned
+ * @returns {CleanedProperties} - { labels: Object - propertyName:originalProperty, values: cleaned collection }
+ * @see {@link module:object~CleanedProperties}
+ * @example
+const badData = [
+  { '"name"': 'john', num: '192', ' kind': ' s', '1st date': ' 2021-07-11T22:23:07+0100' },
+  { '"name"': 'jane', num: '190', ' kind': ' c', '1st date': ' 2021-07-09T19:54:48+0100' },
+  { '"name"': 'ringo', num: '190', ' kind': ' s', '1st date': ' 2021-07-08T17:00:32+0100' }
+];
+const cleaned = objectUtils.cleanProperties2(badData);
+// {
+//   labels: { 1st_date: '1st date', kind: 'kind', num: 'num' },
+//   values: [
+//     { name: 'john', num: '192', kind: ' s', '1st_date': ' 2021-07-11T22:23:07+0100' },
+//     { name: 'jane', num: '190', kind: ' c', '1st_date': ' 2021-07-09T19:54:48+0100' },
+//     { name: 'ringo', num: '190', kind: ' s', '1st_date': ' 2021-07-08T17:00:32+0100' }
+//   ]
+// }
+ */
+module.exports.cleanProperties2 = function cleanProperties2(objectsToBeCleaned) {
+  const cleanedPropertyNames = ObjectUtils.cleanPropertyNames(objectsToBeCleaned);
+  const keys = ObjectUtils.keys(cleanedPropertyNames);
+
+  const translation = keys.reduce((result, key) => ObjectUtils
+    .objAssign(result, cleanedPropertyNames[key], ObjectUtils.lightlyCleanProperty(key)), {});
+  
+  const values = (objectsToBeCleaned || [])
+    .map((obj) => keys.reduce(
+      (result, key) => ObjectUtils.objAssign(result, cleanedPropertyNames[key], obj[key]),
+      {}
+    ));
+  
+  return ({ labels: translation, values });
+};
+
+/**
+ * cleans properties so they are still legible
+ * @private
+ * @param {String} propertyName - property name to be cleaned
+ * @returns {String}
+ */
+module.exports.lightlyCleanProperty = function lightlyCleanProperty(propertyName) {
+  //-- assume property name is a string
+  return propertyName.trim()
+    .replace(/^["']/, '')
+    .replace(/['"]$/, '');
+};
+
+/**
  * Cleans the list of object keys - likely from a CSV
  * @param {(Object| String[])} objectKeys -
  * @return {Object} - object with key:value as original:new
  */
-module.exports.cleanPropertyNames = function cleanPropertyNames(objectKeys) {
+module.exports.cleanPropertyNames = function cleanPropertyNames(target) {
   let originalKeys;
-  if (Array.isArray(objectKeys)) {
-    if ((typeof objectKeys[0]) === 'string') {
-      originalKeys = objectKeys;
+  if (!target) {
+    return {};
+  } else if (Array.isArray(target)) {
+    if ((typeof target[0]) === 'string') {
+      originalKeys = target;
     } else {
-      originalKeys = ObjectUtils.keys(objectKeys);
+      originalKeys = ObjectUtils.keys(target);
     }
   } else {
-    originalKeys = Object.keys(objectKeys);
+    originalKeys = Object.keys(target);
   }
 
   const result = {};

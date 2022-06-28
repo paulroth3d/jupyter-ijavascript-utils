@@ -22,6 +22,11 @@
  * * Identifying Time Periods
  *   * {@link module:format.timePeriod|format.timePeriod} - Converts a time to a time period, very helpful for animations
  *   * {@link module:format.timePeriodPercent|format.timePeriodPercent} - Determines the percent complete of the current time period
+ * * Converting values safely
+ *   * {@link module:format.safeConvertString|format.safeConvertString} - converts a value to string, or uses a default for any error
+ *   * {@link module:format.safeConvertFloat|format.safeConvertFloat} - converts a value to a Number (123.4), or uses a default for any error or NaN
+ *   * {@link module:format.safeConvertInteger|format.safeConvertInteger} - converts a value to a Number (123), or uses a default for any error or NaN
+ *   * {@link module:format.safeConvertBoolean|format.safeConvertBoolean} - converts a value to a boolean
  * 
  * @module format
  * @exports format
@@ -633,39 +638,119 @@ module.exports.compactNumber = function compactNumber(num, digits = 0) {
   return (num / siValue).toFixed(digits) + siKey;
 };
 
-module.exports.safeConvertString = function safeConvertString(val) {
+/**
+ * Converts a value to a String, <br />
+ * Or returns `otherwise` if any exceptions are found.
+ * 
+ * @param {any} val - value to convert
+ * @param {any} otherwise - value to use if any exceptions are caught
+ * @returns {String} - `String(val)`
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive|toPrimitive}
+ * @returns {String}
+ * @example
+ * utils.format.safeConvertString(23); // '23'
+ * 
+ * const customObj = {
+ *  toString: () => `String Value`
+ * };
+ * utils.format.safeConvertString(customObj); // 'String Value'
+ */
+module.exports.safeConvertString = function safeConvertString(val, otherwise = null) {
   try {
     return String(val);
   } catch (err) {
-    //-- I cannot find a way to reliably throw an error, but keep it in case it does
-    /* istanbul ignore next */
-    return null;
+    return otherwise;
   }
 };
 
-module.exports.safeConvertFloat = function safeConvertFloat(val) {
+/**
+ * Converts a value to a Floating Number, <br />
+ * Or returns `otherwise` if any exceptions are found or value is NaN
+ * 
+ * @param {any} val - value to convert
+ * @param {any} otherwise - value to use if any exceptions are caught
+ * @returns {Number}
+ * @example
+ * utils.format.safeConvertFloat('23.1'); // 23.1
+ * utils.format.safeConvertFloat('not a number', -1); // -1
+ */
+module.exports.safeConvertFloat = function safeConvertFloat(val, otherwise = NaN) {
+  if (typeof val === 'string') {
+    //-- replace the variable in memory to minimize garbage collection.
+    // eslint-disable-next-line no-param-reassign
+    val = val.replace(/[^0-9.]/g, '');
+  }
+
   try {
-    return Number.parseFloat(val);
+    const result = Number.parseFloat(val);
+    if (Number.isNaN(result)) {
+      return otherwise;
+    }
+    return result;
   } catch (err) {
-    //-- I cannot find a way to reliably throw an error, but keep it in case it does
+    //-- cannot reliably get the exception to be thrown so cannot test this line
     /* istanbul ignore next */
-    return null;
+    return otherwise;
   }
 };
 
-module.exports.safeConvertInteger = function safeConvertInteger(val) {
+/**
+ * Converts a value to a Floating Number, <br />
+ * Or returns `otherwise` if any exceptions are found or value is Not a Number.
+ * 
+ * @param {any} val - value to convert
+ * @param {any} otherwise - value to use if any exceptions are caught
+ * @param {Number} [radix = 10] - radix to use in converting the string
+ * @returns {Number}
+ * @example
+ * utils.format.safeConvertFloat('23'); // 23
+ * utils.format.safeConvertFloat('not a number', -1); // -1
+ */
+module.exports.safeConvertInteger = function safeConvertInteger(val, otherwise = NaN, radix = 10) {
+  if (typeof val === 'string') {
+    //-- replace the variable in memory to minimize garbage collection.
+    // eslint-disable-next-line no-param-reassign
+    val = val.replace(/[^0-9.]/g, '');
+  }
+
   try {
-    return Number.parseInt(val, 10);
+    const result = Number.parseInt(val, radix);
+    if (Number.isNaN(result)) {
+      return otherwise;
+    }
+    return result;
   } catch (err) {
-    //-- I cannot find a way to reliably throw an error, but keep it in case it does
+    //-- cannot reliably get the exception to be thrown so cannot test this line
     /* istanbul ignore next */
-    return null;
+    return otherwise;
   }
 };
 
+/**
+ * Converts a value to boolean.
+ * 
+ * Note this uses the standard JavaScript `truthy` conversion,
+ * but with special exceptions for strings: only 'true', 'yes', '1' are considered true.
+ * 
+ * @param {any} val - value to be converted
+ * @returns {Boolean}
+ * @example
+ * utils.format.safeConvertBoolean(1); // true
+ * utils.format.safeConvertBoolean({ pojo: true }); // true
+ * utils.format.safeConvertBoolean('TruE'); // true - case insensitive
+ * utils.format.safeConvertBoolean('YeS'); // true - case insensitive
+ * utils.format.safeConvertBoolean('1'); // true
+ * 
+ * utils.format.safeConvertBoolean(0); // false
+ * utils.format.safeConvertBoolean(null); // false
+ * utils.format.safeConvertBoolean('false'); // false
+ * utils.format.safeConvertBoolean('No'); // false
+ * utils.format.safeConvertBoolean('0'); // false
+ */
 module.exports.safeConvertBoolean = function safeConvertBoolean(val) {
   if (typeof val === 'string') {
-    return val.toUpperCase() === 'TRUE';
+    const valUpper = val.toUpperCase();
+    return valUpper === 'TRUE' || valUpper === 'YES' || valUpper === '1';
   }
   return val ? true : false;
 };

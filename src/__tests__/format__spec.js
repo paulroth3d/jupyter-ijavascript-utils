@@ -939,6 +939,35 @@ global.describe('format', () => {
         const result = FormatUtils.safeConvertFloat(val);
         global.expect(result).toBe(expected);
       });
+      global.it('catches error', () => {
+        const otherwise = 1234;
+        const MyClass = function MyClass(val) {
+          this.val = val;
+          return this;
+        };
+        MyClass.prototype.valueOf = function valueOf() {
+          throw Error('Some Error');
+        };
+        const val = new MyClass(10);
+        const result = FormatUtils.safeConvertFloat(val, otherwise);
+        global.expect(result).toBe(otherwise);
+      });
+      global.it('uses standard valueOf', () => {
+        const expected = 1234;
+        const val = {
+          value: 1234,
+          toString: () => `${this.value}`,
+          valueOf: () => this.value
+        };
+        const result = FormatUtils.safeConvertFloat(val, expected);
+        global.expect(result).toBe(expected);
+      });
+      global.it('uses otherwise if NaN', () => {
+        const otherwise = 1234;
+        const val = Number.NaN;
+        const result = FormatUtils.safeConvertFloat(val, otherwise);
+        global.expect(result).toBe(otherwise);
+      });
     });
     global.describe('succeeds conversion', () => {
       global.it('2', () => {
@@ -975,6 +1004,19 @@ global.describe('format', () => {
         const result = FormatUtils.safeConvertInteger(val);
         global.expect(result).toBe(expected);
       });
+      global.it('catches error', () => {
+        const otherwise = 1234;
+        const MyClass = function MyClass(val) {
+          this.val = val;
+          return this;
+        };
+        MyClass.prototype.valueOf = function valueOf() {
+          throw Error('Some Error');
+        };
+        const val = new MyClass(10);
+        const result = FormatUtils.safeConvertInteger(val, otherwise);
+        global.expect(result).toBe(otherwise);
+      });
     });
     global.describe('succeeds conversion', () => {
       global.it('2', () => {
@@ -988,6 +1030,22 @@ global.describe('format', () => {
         const expected = 2;
         const result = FormatUtils.safeConvertInteger(val);
         global.expect(result).toBeCloseTo(expected);
+      });
+      global.it('uses standard valueOf', () => {
+        const expected = 1234.5;
+        const val = {
+          value: 1234.5,
+          toString: () => `${this.value}`,
+          valueOf: () => this.value
+        };
+        const result = FormatUtils.safeConvertInteger(val, expected);
+        global.expect(result).toBe(expected);
+      });
+      global.it('uses otherwise if NaN', () => {
+        const otherwise = 1234;
+        const val = Number.NaN;
+        const result = FormatUtils.safeConvertInteger(val, otherwise);
+        global.expect(result).toBe(otherwise);
       });
     });
   });
@@ -1012,6 +1070,20 @@ global.describe('format', () => {
         const result = FormatUtils.safeConvertString(val);
         global.expect(result).toBe(expected);
       });
+      global.it('attempt to throw exception', () => {
+        const expected = 'otherwise';
+        const MyClass = function MyClass(val) {
+          this.val = val;
+          return this;
+        };
+        MyClass.prototype.toString = function toString() {
+          throw Error('String conversion error');
+        };
+
+        const val = new MyClass(10);
+        const result = FormatUtils.safeConvertString(val, expected);
+        global.expect(result).toBe(expected);
+      });
     });
     global.describe('succeeds conversion', () => {
       global.it('string 2', () => {
@@ -1024,6 +1096,19 @@ global.describe('format', () => {
         const val = 2;
         const expected = '2';
         const result = FormatUtils.safeConvertString(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('uses standard toString', () => {
+        const expected = 'expected';
+        const MyClass = function MyClass(val) {
+          this.val = val;
+          return this;
+        };
+        MyClass.prototype.toString = function toString() {
+          return this.val;
+        };
+        const val = new MyClass(expected);
+        const result = FormatUtils.safeConvertString(val, 'otherwise');
         global.expect(result).toBe(expected);
       });
     });
@@ -1083,6 +1168,38 @@ global.describe('format', () => {
       });
       global.it('number 0', () => {
         const val = 0;
+        const expected = false;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string yes', () => {
+        let val = 'yes';
+        const expected = true;
+        let result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+
+        val = 'YES';
+        result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string no', () => {
+        let val = 'no';
+        const expected = false;
+        let result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+
+        val = 'NO';
+        result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string 1', () => {
+        const val = '1';
+        const expected = true;
+        const result = FormatUtils.safeConvertBoolean(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string 0', () => {
+        const val = '0';
         const expected = false;
         const result = FormatUtils.safeConvertBoolean(val);
         global.expect(result).toBe(expected);

@@ -227,36 +227,36 @@ describe('ObjectUtils', () => {
       expect(found).toEqual(expected);
     });
   });
-  describe('clean properties', () => {
-    it('leaves a normal property alone', () => {
+  global.describe('clean properties', () => {
+    global.it('leaves a normal property alone', () => {
       const expected = 'first';
       const found = objectUtils.cleanPropertyName('first');
-      expect(found).toBe(expected);
+      global.expect(found).toBe(expected);
     });
-    it('cleans a property if the property is completely quoted', () => {
+    global.it('cleans a property if the property is completely quoted', () => {
       const expected = 'first';
       const found = objectUtils.cleanPropertyName('"first"');
-      expect(found).toBe(expected);
+      global.expect(found).toBe(expected);
     });
-    it('works with spaces', () => {
+    global.it('works with spaces', () => {
       const expected = 'first_woman';
       const dirty = 'first woman';
       const found = objectUtils.cleanPropertyName(dirty);
-      expect(found).toBe(expected);
+      global.expect(found).toBe(expected);
     });
-    it('works with numbers', () => {
+    global.it('works with numbers', () => {
       const expected = '1st_woman';
       const dirty = '1st woman';
       const found = objectUtils.cleanPropertyName(dirty);
-      expect(found).toBe(expected);
+      global.expect(found).toBe(expected);
     });
-    it('works with odd characters', () => {
+    global.it('works with odd characters', () => {
       const expected = 'first_woman';
       const dirty = 'first ("woman")';
       const found = objectUtils.cleanPropertyName(dirty);
-      expect(found).toBe(expected);
+      global.expect(found).toBe(expected);
     });
-    it('works on bad data from d3', () => {
+    global.it('works on bad data from d3', () => {
       const badData = [
         { num: '192', ' kind': ' s', ' date': ' 2021-07-11T22:23:07+0100' },
         { num: '190', ' kind': ' c', ' date': ' 2021-07-09T19:54:48+0100' },
@@ -264,7 +264,7 @@ describe('ObjectUtils', () => {
       ];
       const expected = { ' date': 'date', ' kind': 'kind', num: 'num' };
       const found = objectUtils.cleanPropertyNames(badData[0]);
-      expect(found).toEqual(expected);
+      global.expect(found).toEqual(expected);
     });
     global.it('can clean properties as a set of fields provided', () => {
       const badData = [
@@ -275,7 +275,7 @@ describe('ObjectUtils', () => {
       const expected = { ' date': 'date', ' kind': 'kind', num: 'num' };
       const keys = objectUtils.keys(badData[0]);
       const found = objectUtils.cleanPropertyNames(keys);
-      expect(found).toEqual(expected);
+      global.expect(found).toEqual(expected);
     });
     global.it('can clean properties from a list of objects provided', () => {
       const badData = [
@@ -285,9 +285,9 @@ describe('ObjectUtils', () => {
       ];
       const expected = { ' date': 'date', ' kind': 'kind', num: 'num' };
       const keys = objectUtils.keys(badData);
-      expect(keys).toEqual(['num', ' kind', ' date']);
+      global.expect(keys).toEqual(['num', ' kind', ' date']);
       const found = objectUtils.cleanPropertyNames(badData);
-      expect(found).toEqual(expected);
+      global.expect(found).toEqual(expected);
     });
     global.it('can clean properties ', () => {
       const badData = [
@@ -301,7 +301,195 @@ describe('ObjectUtils', () => {
         { date: ' 2021-07-08T17:00:32+0100', kind: ' s', num: '190' }
       ];
       const found = objectUtils.cleanProperties(badData);
-      expect(found).toEqual(expected);
+      global.expect(found).toEqual(expected);
+    });
+  });
+  global.describe('cleanProperties2', () => {
+    global.describe('can clean properties', () => {
+      global.it('leaves a normal property alone', () => {
+        const badData = [
+          { num: '192' },
+          { num: '190' },
+          { num: '190' }
+        ];
+        const expected = {
+          labels: { num: 'num' },
+          values: [
+            { num: '192' },
+            { num: '190' },
+            { num: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('cleans a property if the property is quoted', () => {
+        const badData = [
+          { first: '192', '"second"': '192' },
+          { first: '190', '"second"': '190' },
+          { first: '190', '"second"': '190' }
+        ];
+        const expected = {
+          labels: { first: 'first', second: 'second' },
+          values: [
+            { first: '192', second: '192' },
+            { first: '190', second: '190' },
+            { first: '190', second: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('cleans a property if the property is partially quoted start', () => {
+        const badData = [
+          { first: '192', '"second': '192' },
+          { first: '190', '"second': '190' },
+          { first: '190', '"second': '190' }
+        ];
+        const expected = {
+          labels: { first: 'first', second: 'second' },
+          values: [
+            { first: '192', second: '192' },
+            { first: '190', second: '190' },
+            { first: '190', second: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('cleans a property if the property is partially quoted - end', () => {
+        const badData = [
+          { first: '192', 'second"': '192' },
+          { first: '190', 'second"': '190' },
+          { first: '190', 'second"': '190' }
+        ];
+        const expected = {
+          labels: { first: 'first', second: 'second' },
+          values: [
+            { first: '192', second: '192' },
+            { first: '190', second: '190' },
+            { first: '190', second: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('works with spaces', () => {
+        const badData = [
+          { first: '192', 'second name': '192' },
+          { first: '190', 'second name': '190' },
+          { first: '190', 'second name': '190' }
+        ];
+        const expected = {
+          labels: { first: 'first', second_name: 'second name' },
+          values: [
+            { first: '192', second_name: '192' },
+            { first: '190', second_name: '190' },
+            { first: '190', second_name: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('works with numbers', () => {
+        const badData = [
+          { first: '192', '2nd name': '192' },
+          { first: '190', '2nd name': '190' },
+          { first: '190', '2nd name': '190' }
+        ];
+        const expected = {
+          labels: { first: 'first', '2nd_name': '2nd name' },
+          values: [
+            { first: '192', '2nd_name': '192' },
+            { first: '190', '2nd_name': '190' },
+            { first: '190', '2nd_name': '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('works with odd characters', () => {
+        const badData = [
+          { first: '192', 'name("2nd")': '192' },
+          { first: '190', 'name("2nd")': '190' },
+          { first: '190', 'name("2nd")': '190' }
+        ];
+        const expected = {
+          labels: { first: 'first', name_2nd: 'name("2nd")' },
+          values: [
+            { first: '192', name_2nd: '192' },
+            { first: '190', name_2nd: '190' },
+            { first: '190', name_2nd: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('works on bad data from d3', () => {
+        const badData = [
+          { num: '192', ' kind': ' s', ' date': ' 2021-07-11T22:23:07+0100' },
+          { num: '190', ' kind': ' c', ' date': ' 2021-07-09T19:54:48+0100' },
+          { num: '190', ' kind': ' s', ' date': ' 2021-07-08T17:00:32+0100' }
+        ];
+        const expected = {
+          labels: { date: 'date', kind: 'kind', num: 'num' },
+          values: [
+            { num: '192', kind: ' s', date: ' 2021-07-11T22:23:07+0100' },
+            { num: '190', kind: ' c', date: ' 2021-07-09T19:54:48+0100' },
+            { num: '190', kind: ' s', date: ' 2021-07-08T17:00:32+0100' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        global.expect(found).toEqual(expected);
+      });
+      global.it('can clean properties ', () => {
+        const badData = [
+          { num: '192', ' kind': ' s', ' date': ' 2021-07-11T22:23:07+0100' },
+          { num: '190', ' kind': ' c', ' date': ' 2021-07-09T19:54:48+0100' },
+          { num: '190', ' kind': ' s', ' date': ' 2021-07-08T17:00:32+0100' }
+        ];
+        const expected = {
+          labels: { date: 'date', kind: 'kind', num: 'num' },
+          values: [
+            { date: ' 2021-07-11T22:23:07+0100', kind: ' s', num: '192' },
+            { date: ' 2021-07-09T19:54:48+0100', kind: ' c', num: '190' },
+            { date: ' 2021-07-08T17:00:32+0100', kind: ' s', num: '190' }
+          ]
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+      global.it('does not fail on null', () => {
+        const badData = null;
+        const expected = {
+          labels: {},
+          values: []
+        };
+        const found = objectUtils.cleanProperties2(badData);
+        expect(found).toEqual(expected);
+      });
+    });
+    global.describe('keeps the order of the properties', () => {
+      global.it('when cleaned', () => {
+        const badData = [
+          { num: '192', ' kind': ' s', ' date': ' 2021-07-11T22:23:07+0100' },
+          { num: '190', ' kind': ' c', ' date': ' 2021-07-09T19:54:48+0100' },
+          { num: '190', ' kind': ' s', ' date': ' 2021-07-08T17:00:32+0100' }
+        ];
+        const expected = {
+          labels: { date: ' date', kind: ' kind', num: 'num' },
+          values: [
+            { num: '192', kind: ' s', date: ' 2021-07-11T22:23:07+0100' },
+            { num: '190', kind: ' c', date: ' 2021-07-09T19:54:48+0100' },
+            { num: '190', kind: ' s', date: ' 2021-07-08T17:00:32+0100' }
+          ]
+        };
+        const results = objectUtils.cleanProperties2(badData);
+
+        const expectedStr = JSON.stringify(expected.values);
+        const resultsStr = JSON.stringify(results.values);
+        expect(resultsStr).toEqual(expectedStr);
+      });
     });
   });
   describe('renameProperties', () => {
