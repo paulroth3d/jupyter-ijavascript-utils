@@ -135,6 +135,25 @@ global.describe('tableGenerator', () => {
         global.expect(results.headers).toStrictEqual(expected.headers);
         global.expect(results.data).toStrictEqual(expected.data);
       });
+      global.it('shows columns for all rows provided', () => {
+        const weather = [
+          { id: 1, city: 'Seattle',  month: 'Aug' },
+          { id: 0, city: 'Seattle',  month: 'Apr' },
+          { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+        ];
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle', 'Aug', undefined],
+            [0, 'Seattle', 'Apr', undefined],
+            [2, 'Seattle', 'Dec', 5.31]
+          ]
+        });
+        const results = new TableGenerator(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
     });
     global.describe('sortFn', () => {
       global.it('can sort a table', () => {
