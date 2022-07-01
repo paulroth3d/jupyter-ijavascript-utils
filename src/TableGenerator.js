@@ -20,6 +20,8 @@ const ArrayUtils = require('./array');
 
 const FormatUtils = require('./format');
 
+const ObjectUtils = require('./object');
+
 const { createSort } = require('./array');
 
 /**
@@ -1002,12 +1004,7 @@ class TableGenerator {
     }
 
     //-- determine the columns to use
-    //-- (based on fields of first record or columns provided)
-    const firstRow = cleanCollection.length > 0
-      ? cleanCollection[0]
-      : {};
-    
-    let keys = this.#columns || Object.keys(firstRow);
+    let keys = this.#columns || ObjectUtils.keys(cleanCollection);// Object.keys(firstRow);
     keys = keys.filter((key) => this.#columnsToExclude.indexOf(key) === -1);
 
     //-- identify the formatter to use

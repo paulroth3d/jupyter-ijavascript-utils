@@ -312,11 +312,19 @@ module.exports.millisecondDuration = function millisecondDuration(milliseconds) 
  * format.ellipsify('longName', 8) // 'longName' (as maxLen is 8)
  * format.ellipsify('longName', 4) // 'long…' (as str is longer than maxLen)
  */
-module.exports.ellipsify = function ellipsify(str, maxLen = 50) {
-  if (str && str.length > maxLen) {
-    return `${str.substring(0, maxLen)}…`;
+module.exports.ellipsify = function ellipsify(str, maxLen) {
+  const cleanStr = !str
+    ? ''
+    : typeof str === 'string'
+      ? str
+      : JSON.stringify(str);
+  
+  const cleanLen = maxLen > 0 ? maxLen : 50;
+
+  if (cleanStr.length > cleanLen) {
+    return `${cleanStr.substring(0, cleanLen)}…`;
   }
-  return str;
+  return cleanStr;
 };
 
 /**
@@ -755,6 +763,26 @@ module.exports.safeConvertBoolean = function safeConvertBoolean(val) {
   return val ? true : false;
 };
 
+module.exports.parseCommand = function parseCommand(commandStr) {
+  if (!commandStr || commandStr.indexOf('(') < 0) {
+    return [commandStr];
+  }
+
+  const match = commandStr.match(/^([a-zA-Z].+)[(](.*)[)]$/i);
+  let result = [];
+
+  if (match) {
+    const commandArgs = (match[2] || '').split(',').map((s) => s.trim()).filter((v) => v !== '');
+    result = [
+      match[1].trim(),
+      commandArgs
+    ];
+  } else {
+    result = [commandStr];
+  }
+  return result;
+};
+
 module.exports.prepareFormatterObject = function prepareFormatterObject(formatterObject) {
   //-- @TODO: find way to reliably say that the propertyTranslation is an object
   // propertyTranslations.constructor.name !== 'Object'
@@ -769,16 +797,24 @@ module.exports.prepareFormatterObject = function prepareFormatterObject(formatte
 
   translationKeys.forEach((key) => {
     const translationVal = formatterObject[key];
-    if (typeof translationVal === 'function') {
+    const translationValType = typeof translationVal;
+    if (translationValType === 'function') {
       //-- do nothing
-    } else if (translationVal === 'string') {
-      result[key] = FormatUtils.safeConvertString;
-    } else if (translationVal === 'number' || translationVal === 'float') {
-      result[key] = FormatUtils.safeConvertFloat;
-    } else if (translationVal === 'int' || translationVal === 'integer') {
-      result[key] = FormatUtils.safeConvertInteger;
-    } else if (translationVal === 'boolean') {
-      result[key] = FormatUtils.safeConvertBoolean;
+    } else if (translationValType === 'string') {
+      const [command, args = []] = FormatUtils.parseCommand(translationVal);
+      if (command === 'string') {
+        result[key] = FormatUtils.safeConvertString;
+      } else if (command === 'ellipsify' || command === 'elipsify' || command === 'ellipsis' || command === 'elipsis') {
+        result[key] = (str) => FormatUtils.ellipsify(str, args[0]);
+      } else if (command === 'number' || command === 'float') {
+        result[key] = FormatUtils.safeConvertFloat;
+      } else if (command === 'int' || command === 'integer') {
+        result[key] = FormatUtils.safeConvertInteger;
+      } else if (command === 'bool' || command === 'boolean') {
+        result[key] = FormatUtils.safeConvertBoolean;
+      } else {
+        result[key] = () => translationVal;
+      }
     } else {
       result[key] = () => translationVal;
     }

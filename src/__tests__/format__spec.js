@@ -276,6 +276,30 @@ global.describe('format', () => {
       const results = FormatUtils.ellipsify(str);
       global.expect(results).toBe(expected);
     });
+    global.it('ellipsifies by default on long strings with null passed', () => {
+      const str = '012345678901234567890123456789012345678901234567891';
+      const expected = `01234567890123456789012345678901234567890123456789${FormatUtils.ELLIPSIS}`;
+      const results = FormatUtils.ellipsify(str, null);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can ellipsify on null', () => {
+      const str = null;
+      const expected = '';
+      const results = FormatUtils.ellipsify(str, 10);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can ellipsify on undefined', () => {
+      const str = undefined;
+      const expected = '';
+      const results = FormatUtils.ellipsify(str, 10);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can ellipsify an object', () => {
+      const str = { first: 'name', last: 'name' };
+      const expected = '{"first":"…';
+      const results = FormatUtils.ellipsify(str, 10);
+      global.expect(results).toBe(expected);
+    });
   });
 
   global.describe('zeroFill', () => {
@@ -1203,6 +1227,68 @@ global.describe('format', () => {
         const expected = false;
         const result = FormatUtils.safeConvertBoolean(val);
         global.expect(result).toBe(expected);
+      });
+    });
+  });
+  global.describe('can parse commands', () => {
+    global.describe('successfully', () => {
+      global.it('without parentheses', () => {
+        const str = 'ellipsify';
+        const [expectedCommand, expectedArgs] = ['ellipsify', undefined];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+      global.it('with parentheses', () => {
+        const str = 'ellipsify(20)';
+        const [expectedCommand, expectedArgs] = ['ellipsify', ['20']];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+      global.it('with multiple arguments', () => {
+        const str = 'ellipsify(20, 21, 22)';
+        const [expectedCommand, expectedArgs] = ['ellipsify', ['20', '21', '22']];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+      global.it('with empty parentheses', () => {
+        const str = 'ellipsify()';
+        const [expectedCommand, expectedArgs] = ['ellipsify', []];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+    });
+    global.describe('does not accept the command', () => {
+      global.it('if there are spaces around the command', () => {
+        const str = ' ellipsify(20)';
+        const [expectedCommand, expectedArgs] = [' ellipsify(20)'];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+      global.it('if there are missing paren 1', () => {
+        const str = 'ellipsify20)';
+        const [expectedCommand, expectedArgs] = ['ellipsify20)'];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+      global.it('if there are missing paren 2', () => {
+        const str = 'ellipsify(20';
+        const [expectedCommand, expectedArgs] = ['ellipsify(20'];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
+      });
+      global.it('if there are missing paren both', () => {
+        const str = 'ellipsify20';
+        const [expectedCommand, expectedArgs] = ['ellipsify20'];
+        const [command, args] = FormatUtils.parseCommand(str);
+        global.expect(command).toBe(expectedCommand);
+        global.expect(args).toStrictEqual(expectedArgs);
       });
     });
   });
