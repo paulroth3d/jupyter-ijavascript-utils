@@ -2142,6 +2142,41 @@ describe('ObjectUtils', () => {
         const result = objectUtils.formatProperties(data, ({ temp: 'string' }));
         global.expect(result).toStrictEqual(expected);
       });
+      global.it('ellipsis', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: '98', type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '0123456' },
+          {
+            station: 'A',
+            isFahreinheit: 'true',
+            offset: '3',
+            temp: '100',
+            type: 'F',
+            descr: '0123456789012345678901234567890123456789012345678901234567890123456789'
+          }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: '98', type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '01234567890123456789012345678901234567890123456789…' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ descr: 'ellipsis' }));
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('ellipsis(5)', () => {
+        const data = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: '98', type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '0123456' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '0123456789' }
+        ];
+        const expected = [
+          { station: 'A', isFahreinheit: 'true', offset: '0', temp: '98', type: 'F', descr: '0123' },
+          { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '01234…' },
+          { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '01234…' }
+        ];
+        const result = objectUtils.formatProperties(data, ({ descr: 'ellipsis(5)' }));
+        global.expect(result).toStrictEqual(expected);
+      });
       global.it('number', () => {
         const data = [
           { station: 'A', isFahreinheit: 'true', offset: '0', temp: 98, type: 'F', descr: '0123' },
