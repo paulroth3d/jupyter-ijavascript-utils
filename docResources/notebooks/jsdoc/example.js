@@ -1,0 +1,1 @@
+/** example doclet */ \n var example = true
