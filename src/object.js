@@ -206,10 +206,12 @@ module.exports.augment = function augment(objCollection, mappingFn, inPlace = fa
  */
 module.exports.mapByProperty = function mapByProperty(collection, propertyName) {
   if (!propertyName) throw new Error('object.mapByProperty: expects a propertyName');
+
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(propertyName);
   
   return (collection || []).reduce(
     (result, entry) => {
-      result.set(entry[propertyName], entry);
+      result.set(cleanedFunc(entry), entry);
       return result;
     }, new Map()
   );

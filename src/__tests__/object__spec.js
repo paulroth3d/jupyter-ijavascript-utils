@@ -639,6 +639,48 @@ describe('ObjectUtils', () => {
       const result = objectUtils.mapByProperty(null, 'field');
       global.expect(result).toStrictEqual(expected);
     });
+    global.describe('accessor', () => {
+      global.it('can map property name', () => {
+        const createPerson = (first, last) => ({ first, last });
+        const collection = [
+          createPerson('1', 'person'),
+          createPerson('2', 'person'),
+          createPerson('3', 'person'),
+          createPerson('4', 'person'),
+          createPerson('5', 'person')
+        ];
+        const expected = new Map();
+        expected.set(collection[0].first, collection[0]);
+        expected.set(collection[1].first, collection[1]);
+        expected.set(collection[2].first, collection[2]);
+        expected.set(collection[3].first, collection[3]);
+        expected.set(collection[4].first, collection[4]);
+
+        const result = objectUtils.mapByProperty(collection, 'first');
+
+        global.expect(result).toEqual(result);
+      });
+      global.it('can map function', () => {
+        const createPerson = (first, last) => ({ first, last });
+        const collection = [
+          createPerson('1', 'person'),
+          createPerson('2', 'person'),
+          createPerson('3', 'person'),
+          createPerson('4', 'person'),
+          createPerson('5', 'person')
+        ];
+        const expected = new Map();
+        expected.set(collection[0].first, collection[0]);
+        expected.set(collection[1].first, collection[1]);
+        expected.set(collection[2].first, collection[2]);
+        expected.set(collection[3].first, collection[3]);
+        expected.set(collection[4].first, collection[4]);
+
+        const result = objectUtils.mapByProperty(collection, (r) => r.first);
+
+        global.expect(result).toEqual(result);
+      });
+    });
   });
   global.describe('selectObjectProperties', () => {
     global.it('can select properties of an object', () => {
