@@ -46,6 +46,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.16 - provide file.matchFiles - as a way to find files or directories
 * 1.15 - provide object.formatProperties - as a way to quickly convert to string, number, etc.
 * 1.14 - provide format.compactNumber and object.mapProperties
 * 1.13 - provide utils.random() to genrate random values

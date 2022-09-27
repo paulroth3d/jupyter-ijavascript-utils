@@ -1,5 +1,4 @@
-/* global fetch */
-/* eslint-disable no-empty, class-methods-use-this */
+/* eslint-disable no-empty, class-methods-use-this, no-redeclare */
 
 //-- encode the strings into the format needed for the plantuml server
 const plantUMLEncoder = require('plantuml-encoder');

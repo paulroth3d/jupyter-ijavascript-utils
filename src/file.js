@@ -26,6 +26,7 @@ const logger = require('./logger');
  * * listing directory
  *   * {@link module:file.pwd|pwd()} - list the current path
  *   * {@link module:file.listFiles|listFiles(path)} - list files in a diven path
+ *   * {@link module:file.matchFiles|matchFiles(path, matchingFn)} - find files or directories with a matching fn
  * * checking files exist
  *   * {@link module:file.checkFile|checkFile(...paths)} - check if a file at a path exists
  * 
@@ -306,15 +307,16 @@ module.exports.listFiles = function listFiles(directoryPath, readdirOptions = nu
 /**
  * Finds files in a directory, returning only the file names and paths of those that match a function.
  * 
- * Note the matching function returns both fileNames and {@link https://nodejs.org/api/fs.html#class-fsdirent|DirEnt}
- * objects (allowing for checking for `isFile()`, `isDirectory()`, `.isSymbolicLink()`, etc.)
+ * Note the matching function passes both fileNames and {@link https://nodejs.org/api/fs.html#class-fsdirent|DirEnt} objects<br />
+ * {(fileName:String, file:{@link https://nodejs.org/api/fs.html#class-fsdirent|DirEnt}) => Boolean}<br />
+ * allowing for checking for files:`.isFile()`, directories:`.isDirectory()`, symbolic links:`.isSymbolicLink()`, etc.
  * 
- * For example, if there is a `./tmp` folder, with files:
+ * For example, if there is a `./tmp` folder, with:
  * 
- * * ./tmp/fileA
- * * ./tmp/fileB
- * * ./tmp/dirA
- * * ./tmp/dirB
+ * * ./tmp/fileA (file)
+ * * ./tmp/fileB (file)
+ * * ./tmp/dirA  (directory)
+ * * ./tmp/dirB  (directory)
  * 
  * You could find only files like the following:
  * 
