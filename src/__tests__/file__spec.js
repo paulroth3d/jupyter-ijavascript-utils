@@ -4,6 +4,9 @@ jest.mock('fs');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
 const pino = require('pino');
+const pathLib = require('path');
+
+const FileMock = require('../__testHelper__/FileMock');
 
 //-- TODO: mock path and fs
 //-- currently I get an infinite loop error with jest when trying
@@ -270,6 +273,98 @@ global.describe('FileUtil', () => {
       FileUtil.listFiles(path);
 
       global.expect(pino.mockInstance.error).toHaveBeenCalled();
+    });
+    global.it('can accept a listdir argument', () => {
+      const path = './tmp';
+      const expectedArgs = 'expectedArgs';
+
+      fsExtra.existsSync.mockReturnValue(true);
+      fsExtra.ensureDirSync.mockReturnValue(false);
+      fsExtra.readdirSync.mockImplementationOnce((filePath, args) => args);
+
+      FileUtil.listFiles(path, expectedArgs);
+
+      global.expect(fsExtra.readdirSync.mock.calls[0][1]).toBe(expectedArgs);
+    });
+  });
+
+  global.describe('matchFiles', () => {
+    beforeEach(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    afterAll(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    global.describe('can match files', () => {
+      global.it('with the full path', () => {
+        const path = './tmp';
+        const resultList = ['a', 'b', 'c', 'd']
+          .map((str) => new FileMock(str));
+        const expected = ['a', 'b']
+          .map((str) => pathLib.resolve(path, str));
+        
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.ensureDirSync.mockReturnValue(false);
+        fsExtra.readdirSync.mockImplementation(() => resultList);
+  
+        const evenFn = (val) => val === 'a' || val === 'b';
+        const results = FileUtil.matchFiles(path, evenFn);
+  
+        global.expect(results).toEqual(expected);
+      });
+      global.it('without the full path', () => {
+        const path = './tmp';
+        const resultList = ['a', 'b', 'c', 'd']
+          .map((str) => new FileMock(str));
+        const expected = ['a', 'b'];
+        
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.ensureDirSync.mockReturnValue(false);
+        fsExtra.readdirSync.mockImplementation(() => resultList);
+  
+        const evenFn = (val) => val === 'a' || val === 'b';
+        const results = FileUtil.matchFiles(path, evenFn, false);
+  
+        global.expect(results).toEqual(expected);
+      });
+    });
+
+    global.describe('does not fail', () => {
+      global.it('if no results are found', () => {
+        const path = './tmp';
+        const resultList = []
+          .map((str) => new FileMock(str));
+        const expected = [];
+        
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.ensureDirSync.mockReturnValue(false);
+        fsExtra.readdirSync.mockImplementation(() => resultList);
+  
+        const evenFn = (val) => val === 'a' || val === 'b';
+        const results = FileUtil.matchFiles(path, evenFn, false);
+  
+        global.expect(results).toEqual(expected);
+      });
+      global.it('if matcher says no matches found', () => {
+        const path = './tmp';
+        const resultList = ['a', 'b', 'c']
+          .map((str) => new FileMock(str));
+        const expected = [];
+        
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.ensureDirSync.mockReturnValue(false);
+        fsExtra.readdirSync.mockImplementation(() => resultList);
+  
+        //-- always return false
+        const noFn = (val) => false;
+        const results = FileUtil.matchFiles(path, noFn, false);
+  
+        global.expect(results).toEqual(expected);
+      });
     });
   });
 

@@ -279,12 +279,13 @@ module.exports.pwd = function pwd() {
  * List files in a directory
  * 
  * @param {String} directoryPath - path of the directory to list
+ * @param {Object} [readdirOptions=null] - object with options to pass to fs readdir
  * @see {@link module:file.pwd|pwd()} - to get the current working directory
  * @example
  * utils.file.listFiles('./');
  * // ['.gitignore', 'data', ... ];
  */
-module.exports.listFiles = function listFiles(directoryPath) {
+module.exports.listFiles = function listFiles(directoryPath, readdirOptions = null) {
   const resolvedPath = path.resolve(directoryPath);
   if (!fs.existsSync(resolvedPath)) {
     logger.error('Path does not exist: %s', resolvedPath);
@@ -295,11 +296,62 @@ module.exports.listFiles = function listFiles(directoryPath) {
   }
 
   try {
-    const results = fs.readdirSync(resolvedPath);
+    const results = fs.readdirSync(resolvedPath, readdirOptions);
     return results;
   } catch (err) {
     logger.error(`unable to read directory: ${resolvedPath}`);
   }
+};
+
+/**
+ * Finds files in a directory, returning only the file names and paths of those that match a function.
+ * 
+ * Note the matching function returns both fileNames and {@link https://nodejs.org/api/fs.html#class-fsdirent|DirEnt}
+ * objects (allowing for checking for `isFile()`, `isDirectory()`, `.isSymbolicLink()`, etc.)
+ * 
+ * For example, if there is a `./tmp` folder, with files:
+ * 
+ * * ./tmp/fileA
+ * * ./tmp/fileB
+ * * ./tmp/dirA
+ * * ./tmp/dirB
+ * 
+ * You could find only files like the following:
+ * 
+ * ```
+ * utils.file.matchFiles('./tmp', (fileName, file) => file.isFile());
+ * // ['./tmp/fileA', './tmp/fileB'];
+ * ```
+ * 
+ * or find directories ending with the letter B:
+ * 
+ * ```
+ * utils.file.matchFiles('./tmp',
+ *  (fileName, file) => file.isDirectory() && fileName.endsWith('B')
+ * );
+ * // ['./tmp/dirB'];
+ * ```
+ * 
+ * Note: passing false as the last parameter will only return file names
+ * 
+ * ```
+ * utils.file.matchFiles('./tmp', (fileName) => fileName.startsWith('file'), false);
+ * // ['fileA', 'fileB']
+ * ```
+ * 
+ * @param {String} directoryPath - path of the directory to match within
+ * @param {Function} matchingFunction - (DirEnt) => Boolean function to determine
+ *  if the path should be returned or not
+ * @param {Boolean} [returnFullPath=true] - whether the full path should be returned
+ * @returns {String[]} - list of the files that match 
+
+ */
+module.exports.matchFiles = function matchFiles(directoryPath, matchingFunction, returnFullPath = true) {
+  return FileUtil.listFiles(directoryPath, { withFileTypes: true })
+    .filter((dirExt) => matchingFunction(dirExt.name, dirExt))
+    .map((dirExt) => returnFullPath
+      ? path.resolve(directoryPath, dirExt.name)
+      : dirExt.name);
 };
 
 /**
