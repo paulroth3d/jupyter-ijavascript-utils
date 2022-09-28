@@ -170,6 +170,9 @@ module.exports.printValue = function printValue(value, options) {
       return `[Map length=${value.size} ]`;
     }
     return JSON.stringify(value, FormatUtils.mapReplacer);
+  } else if (typeof value[Symbol.iterator] === 'function') {
+    //-- iterator
+    return JSON.stringify(Array.from(value));
   } else if (valType === 'object' && (collapseObjects || collapse)) {
     return String(value);
   }

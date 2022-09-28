@@ -78,6 +78,12 @@ global.describe('format', () => {
         const result = FormatUtils.printValue(value, { collapseObjects: true });
         global.expect(result).toBe(expected);
       });
+      global.it('prints an iteratable correctly', () => {
+        const value = new Map([['A', 1], ['B', 2]]).keys();
+        const expected = '["A","B"]';
+        const result = FormatUtils.printValue(value);
+        global.expect(result).toBe(expected);
+      });
       global.it('prints a 2d map correctly', () => {
         const value = new Map();
         value.set('C', new Map([['A', 1], ['B', 2]]));
