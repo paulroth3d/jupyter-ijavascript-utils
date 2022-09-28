@@ -26,7 +26,7 @@ const logger = require('./logger');
  * * listing directory
  *   * {@link module:file.pwd|pwd()} - list the current path
  *   * {@link module:file.listFiles|listFiles(path)} - list files in a diven path
- *   * {@link module:file.matchFiles|matchFiles(path, matchingFn)} - find files or directories with a matching fn
+ *   * {@link module:file.matchFiles|matchFiles(path, matchingFn)} - find files or directories based on type of file or name
  * * checking files exist
  *   * {@link module:file.checkFile|checkFile(...paths)} - check if a file at a path exists
  * 
@@ -282,6 +282,7 @@ module.exports.pwd = function pwd() {
  * @param {String} directoryPath - path of the directory to list
  * @param {Object} [readdirOptions=null] - object with options to pass to fs readdir
  * @see {@link module:file.pwd|pwd()} - to get the current working directory
+ * @see {@link module:file.matchFiles|matchFiles(path, matchingFn)} - find files or directories based on type of file or name
  * @example
  * utils.file.listFiles('./');
  * // ['.gitignore', 'data', ... ];
@@ -345,6 +346,7 @@ module.exports.listFiles = function listFiles(directoryPath, readdirOptions = nu
  * @param {Function} matchingFunction - (DirEnt) => Boolean function to determine
  *  if the path should be returned or not
  * @param {Boolean} [returnFullPath=true] - whether the full path should be returned
+ * @see {@link module:file.listFiles|listFiles(path)} - list files in a diven path
  * @returns {String[]} - list of the files that match 
 
  */

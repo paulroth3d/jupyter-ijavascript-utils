@@ -191,9 +191,9 @@ module.exports.augment = function augment(objCollection, mappingFn, inPlace = fa
 /**
  * Creates a map of a list of objects based on a specific property
  * @param {Object[]} collection - collection of objects
- * @param {String} propertyName - the name of the property to map on
+ * @param {Function | String} propertyOrFn - Name of the property or Function to return a value
  * @returns {Map<String, Object>} - map using the propertyName as the key
- * @see {@link module:group.by|group(collection, accessor)} - if there is a possibility the records are not unique
+ * @see {@link module:group.by|group(collection, propertyOrFn)} - if there is a possibility the records are not unique
  * @example
  * const data = [{ id: '123', name: 'jim' },
  *    { id: '456', name: 'mary' },
@@ -204,10 +204,10 @@ module.exports.augment = function augment(objCollection, mappingFn, inPlace = fa
  * //      '456': { id: '456', name: 'mary' },
  * //      '789': { id: '789', name: 'sue' });
  */
-module.exports.mapByProperty = function mapByProperty(collection, propertyName) {
-  if (!propertyName) throw new Error('object.mapByProperty: expects a propertyName');
+module.exports.mapByProperty = function mapByProperty(collection, propertyOrFn) {
+  if (!propertyOrFn) throw new Error('object.mapByProperty: expects a propertyName');
 
-  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(propertyName);
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
   
   return (collection || []).reduce(
     (result, entry) => {
