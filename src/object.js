@@ -14,6 +14,7 @@ const FormatUtils = require('./format');
  *   * {@link module:object.findWithoutProperties|findWithoutProperties()} - find objects without ALL the properties specified
  *   * {@link module:object.findWithoutProperties|findWithProperties()} - find objects with any of the properties specified
  *   * {@link module:object.setPropertyDefaults|setPropertyDefaults()} - sets values for objects that don't currently have the property
+ *   * {@link module:object.propertyValueSample|propertyValueSample(collection)} - finds non-empty values for all properties found in the collection
  * * Manipulating objects
  *   * {@link module:object.objAssign|objAssign()} -
  *   * {@link module:object.objAssignEntities|objAssignEntities()} -
@@ -1047,4 +1048,56 @@ module.exports.mapProperties = function mapProperties(objCollection, formattingF
     });
     return clone;
   });
+};
+
+/**
+ * Finds all the properties for objects in a collection,
+ * and provides the first 'non-empty' value found of each property.
+ * 
+ * Non-Empty means:
+ * 
+ * * not null
+ * * not undefined
+ * * not an empty string
+ * * not an empty array
+ * 
+ * This can be especially helpful for heterogeneous collections
+ * and can be much faster than something like {@link https://danfo.jsdata.org/api-reference/dataframe/danfo.dataframe.describe|danfojs.describe}
+ * 
+ * @param {Object[]} objCollection - Array of objects that we want to understand
+ * @returns {Map<String,any>} - Collection of all properties and the first 'non-empty' value found
+ * @example
+ * let collection = [
+ *  { first: 'jane', age: 23 },
+ *  { first: 'john', last: 'doe', age: 21 }
+ * ];
+ * 
+ * utils.object.propertyValueSample(collection);
+ * // { first: 'jane', last: 'doe', age: 23 }
+ */
+module.exports.propertyValueSample = function propertyValueSample(objCollection) {
+  if (!objCollection) {
+    throw new Error('propertyValueSample(objectCollection): objectCollection is required');
+  }
+
+  const collection = Array.isArray(objCollection) ? objCollection : [objCollection];
+
+  const result = new Map();
+  let entryValue;
+
+  collection.forEach((entry) => {
+    if (entry && (typeof entry) === 'object') {
+      for (const entryProperty of Object.keys(entry)) {
+        entryValue = entry[entryProperty];
+        if (
+          !FormatUtils.isEmptyValue(entryValue)
+          && !result.has(entryProperty)
+        ) {
+          result.set(entryProperty, entryValue);
+        }
+      }
+    }
+  });
+
+  return result;
 };

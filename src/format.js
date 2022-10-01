@@ -27,6 +27,8 @@
  *   * {@link module:format.safeConvertFloat|format.safeConvertFloat} - converts a value to a Number (123.4), or uses a default for any error or NaN
  *   * {@link module:format.safeConvertInteger|format.safeConvertInteger} - converts a value to a Number (123), or uses a default for any error or NaN
  *   * {@link module:format.safeConvertBoolean|format.safeConvertBoolean} - converts a value to a boolean
+ * * Identifying values
+ *   * {@link module:format.isEmptyValue|format.isEmptyValue} - determine if a value is not 'empty'
  * 
  * @module format
  * @exports format
@@ -825,3 +827,20 @@ module.exports.prepareFormatterObject = function prepareFormatterObject(formatte
 
   return result;
 };
+
+/**
+ * Tests for empty values:
+ * 
+ * * (zeros are allowed)
+ * * not null
+ * * not undefined
+ * * not an empty string
+ * * not an empty array `[]`
+ * 
+ * @param {any} val - a value to be tested 
+ * @returns {Boolean} - TRUE if the value is not 'empty'
+ */
+module.exports.isEmptyValue = (val) =>
+  //-- allow for 0s
+  val === null || val === undefined || val === ''
+  || (Array.isArray(val) && val.length === 0);

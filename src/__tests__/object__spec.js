@@ -1,4 +1,4 @@
-const objectUtils = require('../object');
+const ObjectUtils = require('../object');
 
 // const initializeWeather = () => [
 //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
@@ -16,23 +16,23 @@ describe('ObjectUtils', () => {
     global.it('returns the specific value if null is sent', () => {
       const source = 23;
       const expected = 23;
-      const results = objectUtils.evaluateFunctionOrProperty(null)(source);
+      const results = ObjectUtils.evaluateFunctionOrProperty(null)(source);
       global.expect(results).toBe(expected);
     });
     global.it('returns a property if a string is passed', () => {
       const source = { age: 23 };
       const expected = 23;
-      const results = objectUtils.evaluateFunctionOrProperty('age')(source);
+      const results = ObjectUtils.evaluateFunctionOrProperty('age')(source);
       global.expect(results).toBe(expected);
     });
     global.it('returns a mapped value if the function is passed',  () => {
       const source = { age: 23 };
       const expected = 23 * 2;
-      const results = objectUtils.evaluateFunctionOrProperty((r) => r.age * 2)(source);
+      const results = ObjectUtils.evaluateFunctionOrProperty((r) => r.age * 2)(source);
       global.expect(results).toBe(expected);
     });
     global.it('throws an error if an unexpected type is passed',  () => {
-      global.expect(() => objectUtils.evaluateFunctionOrProperty(new Date()))
+      global.expect(() => ObjectUtils.evaluateFunctionOrProperty(new Date()))
         .toThrow();
     });
   });
@@ -41,63 +41,63 @@ describe('ObjectUtils', () => {
     it('assigns a value on an existing object', () => {
       const expected = { first: 'john', last: 'doe' };
       let found = {};
-      found = objectUtils.objAssign(found, 'first', 'john');
-      found = objectUtils.objAssign(found, 'last', 'doe');
+      found = ObjectUtils.objAssign(found, 'first', 'john');
+      found = ObjectUtils.objAssign(found, 'last', 'doe');
       expect(found).toEqual(expected);
     });
     it('assigns a value even on an empty object', () => {
       const expected = { first: 'john' };
-      const found = objectUtils.objAssign(undefined, 'first', 'john');
+      const found = ObjectUtils.objAssign(undefined, 'first', 'john');
       expect(found).toEqual(expected);
     });
   });
   describe('propertyObj', () => {
     it('can create a simple object by itself', () => {
       const expected = { first: 'john' };
-      const found = objectUtils.objAssign(null, 'first', 'john');
+      const found = ObjectUtils.objAssign(null, 'first', 'john');
       expect(found).toEqual(expected);
     });
     it('can combine multiple property objects', () => {
       const expected = { first: 'john', last: 'doe' };
-      const found = objectUtils.objAssign(null, 'first', 'john', 'last', 'doe');
+      const found = ObjectUtils.objAssign(null, 'first', 'john', 'last', 'doe');
       expect(found).toEqual(expected);
     });
     it('still works if multiple properties are not even', () => {
       const expected = { first: 'john', last: undefined };
-      const found = objectUtils.objAssign(null, 'first', 'john', 'last');
+      const found = ObjectUtils.objAssign(null, 'first', 'john', 'last');
       global.expect(found).toEqual(expected);
     });
     global.it('throws an error if a property is not passed', () => {
-      global.expect(() => objectUtils.objAssign(null)).toThrow();
+      global.expect(() => ObjectUtils.objAssign(null)).toThrow();
     });
     global.it('throws an error if a property is not a string', () => {
-      global.expect(() => objectUtils.objAssign(null, 1, 'doe')).toThrow();
+      global.expect(() => ObjectUtils.objAssign(null, 1, 'doe')).toThrow();
     });
   });
   global.describe('objAssignEntities', () => {
     global.it('can assign at least one entity', () => {
       const entities = [['first', 'john']];
       const expected = { first: 'john' };
-      const result = objectUtils.objAssignEntities(null, entities);
+      const result = ObjectUtils.objAssignEntities(null, entities);
       global.expect(result).toEqual(expected);
     });
     global.it('can assign multiple entities', () => {
       const entities = [['first', 'john'], ['last', 'doe']];
       const expected = { first: 'john', last: 'doe' };
-      const result = objectUtils.objAssignEntities(null, entities);
+      const result = ObjectUtils.objAssignEntities(null, entities);
       global.expect(result).toEqual(expected);
     });
     global.it('appends to an existing object', () => {
       const entities = [['first', 'john']];
       const expected = { first: 'john', last: 'doe' };
-      const result = objectUtils.objAssignEntities({ last: 'doe' }, entities);
+      const result = ObjectUtils.objAssignEntities({ last: 'doe' }, entities);
       global.expect(result).toEqual(expected);
     });
     global.it('fails if entities are not an array', () => {
       try {
         // not sure why this isn't catching the error
-        //global.expect(objectUtils.objAssignEntities(null, {})).toThrow();
-        objectUtils.objAssignEntities(null, {});
+        //global.expect(ObjectUtils.objAssignEntities(null, {})).toThrow();
+        ObjectUtils.objAssignEntities(null, {});
         jest.fail('exception should be thrown if entities are not an array');
       } catch (err) {
         //
@@ -106,8 +106,8 @@ describe('ObjectUtils', () => {
     global.it('fails if entities are not sent', () => {
       try {
         // not sure why this isn't catching the error
-        // global.expect(objectUtils.objAssignEntities(null, [])).toThrow();
-        objectUtils.objAssignEntities(null, []);
+        // global.expect(ObjectUtils.objAssignEntities(null, [])).toThrow();
+        ObjectUtils.objAssignEntities(null, []);
         jest.fail('exception should be thrown if entities are not an array');
       } catch (err) {
         //
@@ -120,7 +120,7 @@ describe('ObjectUtils', () => {
         const data = { source: 'A', value: 5 };
         const augmentFn = (record) => ({ origin: `s_${record.source}` });
         const expected = [{ source: 'A', value: 5, origin: 's_A' }];
-        const results = objectUtils.augment(data, augmentFn, false);
+        const results = ObjectUtils.augment(data, augmentFn, false);
         
         //-- original data to be unmodified
         global.expect(data.origin).toBeUndefined();
@@ -140,7 +140,7 @@ describe('ObjectUtils', () => {
           { source: 'A', value: 6, origin: 's_A' }, { source: 'B', value: 13, origin: 's_B' },
           { source: 'A', value: 5, origin: 's_A' }, { source: 'B', value: 12, origin: 's_B' }
         ];
-        const results = objectUtils.augment(data, augmentFn, false);
+        const results = ObjectUtils.augment(data, augmentFn, false);
         global.expect(data[0].origin).toBeUndefined();
         global.expect(expected[0].origin).toBe('s_A');
         global.expect(results).toEqual(expected);
@@ -157,7 +157,7 @@ describe('ObjectUtils', () => {
           { source: 'A', value: 6, origin: 's_A' }, { source: 'B', value: 13, origin: 's_B' },
           { source: 'A', value: 5, origin: 's_A' }, { source: 'B', value: 12, origin: 's_B' }
         ];
-        const results = objectUtils.augment(data, augmentFn);
+        const results = ObjectUtils.augment(data, augmentFn);
         global.expect(data[0].origin).toBeUndefined();
         global.expect(expected[0].origin).toBe('s_A');
         global.expect(results).toEqual(expected);
@@ -168,7 +168,7 @@ describe('ObjectUtils', () => {
         const data = { source: 'A', value: 5 };
         const augmentFn = (record) => ({ origin: `s_${record.source}` });
         const expected = [{ source: 'A', value: 5, origin: 's_A' }];
-        const results = objectUtils.augment(data, augmentFn, true);
+        const results = ObjectUtils.augment(data, augmentFn, true);
         
         //-- original data to be unmodified
         global.expect(data.origin).toBe('s_A');
@@ -188,7 +188,7 @@ describe('ObjectUtils', () => {
           { source: 'A', value: 6, origin: 's_A' }, { source: 'B', value: 13, origin: 's_B' },
           { source: 'A', value: 5, origin: 's_A' }, { source: 'B', value: 12, origin: 's_B' }
         ];
-        const results = objectUtils.augment(data, augmentFn, true);
+        const results = ObjectUtils.augment(data, augmentFn, true);
         global.expect(data[0].origin).toBe('s_A');
         global.expect(expected[0].origin).toBe('s_A');
         global.expect(results).toEqual(expected);
@@ -198,17 +198,17 @@ describe('ObjectUtils', () => {
   describe('safe keys', () => {
     it('can get keys off a null object', () => {
       const expected = [];
-      const found = objectUtils.keys(undefined);
+      const found = ObjectUtils.keys(undefined);
       expect(found).toEqual(expected);
     });
     it('can get keys off an object', () => {
       const expected = ['first', 'last'];
-      const found = objectUtils.keys({ first: 'john', last: 'doe' });
+      const found = ObjectUtils.keys({ first: 'john', last: 'doe' });
       expect(found).toEqual(expected);
     });
     it('can get keys off an array', () => {
       const expected = ['first', 'last', 'cuca'];
-      const found = objectUtils.keys([
+      const found = ObjectUtils.keys([
         { first: 'john', last: 'doe' },
         { first: 'jane', last: 'doe' },
         { first: 'robin', last: 'lloyd', cuca: 'monga' }
@@ -217,7 +217,7 @@ describe('ObjectUtils', () => {
     });
     it('can get keys off an array, including nulls', () => {
       const expected = ['first', 'last', 'cuca'];
-      const found = objectUtils.keys([
+      const found = ObjectUtils.keys([
         { first: 'john', last: 'doe' },
         { first: 'jane', last: 'doe' },
         { first: 'robin', last: 'lloyd', cuca: 'monga' },
@@ -230,30 +230,30 @@ describe('ObjectUtils', () => {
   global.describe('clean properties', () => {
     global.it('leaves a normal property alone', () => {
       const expected = 'first';
-      const found = objectUtils.cleanPropertyName('first');
+      const found = ObjectUtils.cleanPropertyName('first');
       global.expect(found).toBe(expected);
     });
     global.it('cleans a property if the property is completely quoted', () => {
       const expected = 'first';
-      const found = objectUtils.cleanPropertyName('"first"');
+      const found = ObjectUtils.cleanPropertyName('"first"');
       global.expect(found).toBe(expected);
     });
     global.it('works with spaces', () => {
       const expected = 'first_woman';
       const dirty = 'first woman';
-      const found = objectUtils.cleanPropertyName(dirty);
+      const found = ObjectUtils.cleanPropertyName(dirty);
       global.expect(found).toBe(expected);
     });
     global.it('works with numbers', () => {
       const expected = '1st_woman';
       const dirty = '1st woman';
-      const found = objectUtils.cleanPropertyName(dirty);
+      const found = ObjectUtils.cleanPropertyName(dirty);
       global.expect(found).toBe(expected);
     });
     global.it('works with odd characters', () => {
       const expected = 'first_woman';
       const dirty = 'first ("woman")';
-      const found = objectUtils.cleanPropertyName(dirty);
+      const found = ObjectUtils.cleanPropertyName(dirty);
       global.expect(found).toBe(expected);
     });
     global.it('works on bad data from d3', () => {
@@ -263,7 +263,7 @@ describe('ObjectUtils', () => {
         { num: '190', ' kind': ' s', ' date': ' 2021-07-08T17:00:32+0100' }
       ];
       const expected = { ' date': 'date', ' kind': 'kind', num: 'num' };
-      const found = objectUtils.cleanPropertyNames(badData[0]);
+      const found = ObjectUtils.cleanPropertyNames(badData[0]);
       global.expect(found).toEqual(expected);
     });
     global.it('can clean properties as a set of fields provided', () => {
@@ -273,8 +273,8 @@ describe('ObjectUtils', () => {
         { num: '190', ' kind': ' s', ' date': ' 2021-07-08T17:00:32+0100' }
       ];
       const expected = { ' date': 'date', ' kind': 'kind', num: 'num' };
-      const keys = objectUtils.keys(badData[0]);
-      const found = objectUtils.cleanPropertyNames(keys);
+      const keys = ObjectUtils.keys(badData[0]);
+      const found = ObjectUtils.cleanPropertyNames(keys);
       global.expect(found).toEqual(expected);
     });
     global.it('can clean properties from a list of objects provided', () => {
@@ -284,9 +284,9 @@ describe('ObjectUtils', () => {
         { num: '190', ' kind': ' s', ' date': ' 2021-07-08T17:00:32+0100' }
       ];
       const expected = { ' date': 'date', ' kind': 'kind', num: 'num' };
-      const keys = objectUtils.keys(badData);
+      const keys = ObjectUtils.keys(badData);
       global.expect(keys).toEqual(['num', ' kind', ' date']);
-      const found = objectUtils.cleanPropertyNames(badData);
+      const found = ObjectUtils.cleanPropertyNames(badData);
       global.expect(found).toEqual(expected);
     });
     global.it('can clean properties ', () => {
@@ -300,7 +300,7 @@ describe('ObjectUtils', () => {
         { date: ' 2021-07-09T19:54:48+0100', kind: ' c', num: '190' },
         { date: ' 2021-07-08T17:00:32+0100', kind: ' s', num: '190' }
       ];
-      const found = objectUtils.cleanProperties(badData);
+      const found = ObjectUtils.cleanProperties(badData);
       global.expect(found).toEqual(expected);
     });
   });
@@ -320,7 +320,7 @@ describe('ObjectUtils', () => {
             { num: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('cleans a property if the property is quoted', () => {
@@ -337,7 +337,7 @@ describe('ObjectUtils', () => {
             { first: '190', second: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('cleans a property if the property is partially quoted start', () => {
@@ -354,7 +354,7 @@ describe('ObjectUtils', () => {
             { first: '190', second: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('cleans a property if the property is partially quoted - end', () => {
@@ -371,7 +371,7 @@ describe('ObjectUtils', () => {
             { first: '190', second: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('works with spaces', () => {
@@ -388,7 +388,7 @@ describe('ObjectUtils', () => {
             { first: '190', second_name: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('works with numbers', () => {
@@ -405,7 +405,7 @@ describe('ObjectUtils', () => {
             { first: '190', '2nd_name': '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('works with odd characters', () => {
@@ -422,7 +422,7 @@ describe('ObjectUtils', () => {
             { first: '190', name_2nd: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('works on bad data from d3', () => {
@@ -439,7 +439,7 @@ describe('ObjectUtils', () => {
             { num: '190', kind: ' s', date: ' 2021-07-08T17:00:32+0100' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         global.expect(found).toEqual(expected);
       });
       global.it('can clean properties ', () => {
@@ -456,7 +456,7 @@ describe('ObjectUtils', () => {
             { date: ' 2021-07-08T17:00:32+0100', kind: ' s', num: '190' }
           ]
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
       global.it('does not fail on null', () => {
@@ -465,7 +465,7 @@ describe('ObjectUtils', () => {
           labels: {},
           values: []
         };
-        const found = objectUtils.cleanProperties2(badData);
+        const found = ObjectUtils.cleanProperties2(badData);
         expect(found).toEqual(expected);
       });
     });
@@ -484,7 +484,7 @@ describe('ObjectUtils', () => {
             { num: '190', kind: ' s', date: ' 2021-07-08T17:00:32+0100' }
           ]
         };
-        const results = objectUtils.cleanProperties2(badData);
+        const results = ObjectUtils.cleanProperties2(badData);
 
         const expectedStr = JSON.stringify(expected.values);
         const resultsStr = JSON.stringify(results.values);
@@ -497,21 +497,21 @@ describe('ObjectUtils', () => {
       const dirtyObject = { first: 'john', last: 'doe' };
       const translation = { first: 'first_name' };
       const expected = { first_name: 'john', last: 'doe' };
-      const found = objectUtils.renameProperties(dirtyObject, translation);
+      const found = ObjectUtils.renameProperties(dirtyObject, translation);
       expect(found).toEqual(expected);
       expect(found).not.toEqual(dirtyObject);
     });
     it('returns an empty object if renaming a null object', () => {
       //-- don't put the result in the spec
       // const expected = {};
-      const result = objectUtils.renameProperties(null, { first: 'first_name' });
+      const result = ObjectUtils.renameProperties(null, { first: 'first_name' });
       global.expect(result).toBeTruthy();
       global.expect(typeof result).toBe('object');
     });
     it('returns an empty object if renaming a null object', () => {
       //-- don't put the result in the spec
       // const expected = {};
-      const result = objectUtils.renameProperties([null], { first: 'first_name' });
+      const result = ObjectUtils.renameProperties([null], { first: 'first_name' });
       global.expect(result).toBeTruthy();
       global.expect(typeof result).toBe('object');
     });
@@ -528,8 +528,8 @@ describe('ObjectUtils', () => {
       { '"first name"': 'jim', 'last name': 'bob', 'current (occupation)': 'scientist' }
     ];
 
-    // const keys = objectUtils.keys(dirty);
-    const cleanedKeys = objectUtils.cleanPropertyNames(dirty[0]);
+    // const keys = ObjectUtils.keys(dirty);
+    const cleanedKeys = ObjectUtils.cleanPropertyNames(dirty[0]);
     const expectedKeys = {
       '"first name"': 'first_name',
       'last name': 'last_name',
@@ -537,7 +537,7 @@ describe('ObjectUtils', () => {
     };
     expect(cleanedKeys).toEqual(expectedKeys);
 
-    const cleanedObjects = objectUtils.renameProperties(dirty, cleanedKeys);
+    const cleanedObjects = ObjectUtils.renameProperties(dirty, cleanedKeys);
     expect(cleanedObjects).toEqual(expected);
   });
   describe('collapse', () => {
@@ -548,27 +548,27 @@ describe('ObjectUtils', () => {
           targetValue: 'test'
         }
       };
-      const result = objectUtils.collapse(targetObj);
+      const result = ObjectUtils.collapse(targetObj);
       global.expect(result).not.toBeNull();
       global.expect(result).toHaveProperty('base', 'obj');
       global.expect(result).toHaveProperty('targetValue', 'test');
     });
     it('returns an empty object if the object to collapse is null', () => {
       const targetObj = null;
-      const result = objectUtils.collapse(targetObj);
+      const result = ObjectUtils.collapse(targetObj);
       const expected = {};
       global.expect(result).toEqual(expected);
     });
     it('is the same even if it is on the same object', () => {
       const targetObj = { base: 'obj', targetValue: 'test' };
-      const result = objectUtils.collapse(targetObj);
+      const result = ObjectUtils.collapse(targetObj);
       global.expect(result).not.toBeNull();
       global.expect(result).toHaveProperty('base', 'obj');
       global.expect(result).toHaveProperty('targetValue', 'test');
     });
     it('collapses even if the values are on two separate objects', () => {
       const targetObj = { p1: { base: 'obj' }, p2: { targetValue: 'test' } };
-      const result = objectUtils.collapse(targetObj);
+      const result = ObjectUtils.collapse(targetObj);
       global.expect(result).not.toBeNull();
       global.expect(result).toHaveProperty('base', 'obj');
       global.expect(result).toHaveProperty('targetValue', 'test');
@@ -578,13 +578,13 @@ describe('ObjectUtils', () => {
 
       let travellingObj = targetObj;
       // eslint-disable-next-line no-plusplus
-      for (let i = 0; i < objectUtils.MAX_COLLAPSE_DEPTH + 4; i++) {
+      for (let i = 0; i < ObjectUtils.MAX_COLLAPSE_DEPTH + 4; i++) {
         travellingObj.p = {};
         travellingObj = travellingObj.p;
       }
       travellingObj.targetValue = 'test';
 
-      const result = objectUtils.collapse(targetObj);
+      const result = ObjectUtils.collapse(targetObj);
 
       global.expect(result).not.toBeNull();
       global.expect(result).toHaveProperty('base', 'obj');
@@ -601,7 +601,7 @@ describe('ObjectUtils', () => {
         createRecord(4, 'd'),
         createRecord(5, 'e')
       ];
-      const result = objectUtils.generateSchema(targetObj);
+      const result = ObjectUtils.generateSchema(targetObj);
       const expected = { type: 'object', properties: { a: { type: 'number' }, b: { type: 'string' } }, required: ['a', 'b'] };
       // console.log(JSON.stringify(result.items));
       global.expect(result.items).toStrictEqual(expected);
@@ -624,19 +624,19 @@ describe('ObjectUtils', () => {
       expected.set('4', createPerson('4', 'person'));
       expected.set('5', createPerson('5', 'person'));
 
-      const result = objectUtils.mapByProperty(collection, 'first');
+      const result = ObjectUtils.mapByProperty(collection, 'first');
       expect(result).toStrictEqual(expected);
     });
     global.it('can map an empty list without throwing an error', () => {
-      objectUtils.mapByProperty([], 'field');
+      ObjectUtils.mapByProperty([], 'field');
     });
     global.it('throws an error if no property is requested', () => {
-      global.expect(() => objectUtils.mapByProperty([]))
+      global.expect(() => ObjectUtils.mapByProperty([]))
         .toThrow('object.mapByProperty: expects a propertyName');
     });
     global.it('returns an empty map if the object to be mapped is null', () => {
       const expected = new Map();
-      const result = objectUtils.mapByProperty(null, 'field');
+      const result = ObjectUtils.mapByProperty(null, 'field');
       global.expect(result).toStrictEqual(expected);
     });
     global.describe('accessor', () => {
@@ -656,7 +656,7 @@ describe('ObjectUtils', () => {
         expected.set(collection[3].first, collection[3]);
         expected.set(collection[4].first, collection[4]);
 
-        const result = objectUtils.mapByProperty(collection, 'first');
+        const result = ObjectUtils.mapByProperty(collection, 'first');
 
         global.expect(result).toEqual(result);
       });
@@ -676,7 +676,7 @@ describe('ObjectUtils', () => {
         expected.set(collection[3].first, collection[3]);
         expected.set(collection[4].first, collection[4]);
 
-        const result = objectUtils.mapByProperty(collection, (r) => r.first);
+        const result = ObjectUtils.mapByProperty(collection, (r) => r.first);
 
         global.expect(result).toEqual(result);
       });
@@ -690,7 +690,7 @@ describe('ObjectUtils', () => {
         c: 3,
         d: 4
       };
-      const result = objectUtils.selectObjectProperties(baseObj, ['a', 'b']);
+      const result = ObjectUtils.selectObjectProperties(baseObj, ['a', 'b']);
       const expected = [{
         a: 1,
         b: 2
@@ -704,7 +704,7 @@ describe('ObjectUtils', () => {
         c: 3,
         d: 4
       };
-      const result = objectUtils.selectObjectProperties(baseObj, 'a', 'b');
+      const result = ObjectUtils.selectObjectProperties(baseObj, 'a', 'b');
       const expected = [{
         a: 1,
         b: 2
@@ -712,17 +712,17 @@ describe('ObjectUtils', () => {
       global.expect(result).toStrictEqual(expected);
     });
     global.it('does not throw an error if selecting properties on null', () => {
-      const result = objectUtils.selectObjectProperties(null, ['a', 'b']);
+      const result = ObjectUtils.selectObjectProperties(null, ['a', 'b']);
       global.expect(result).toBeTruthy();
       global.expect(Array.isArray(result)).toBe(true);
     });
     global.it('returns an empty array if requesting an empty list of properties', () => {
-      const result = objectUtils.selectObjectProperties(null, []);
+      const result = ObjectUtils.selectObjectProperties(null, []);
       const expected = [];
       global.expect(result).toEqual(expected);
     });
     global.it('returns an empty array if requesting an null list of properties', () => {
-      const result = objectUtils.selectObjectProperties(null, null);
+      const result = ObjectUtils.selectObjectProperties(null, null);
       const expected = [];
       global.expect(result).toEqual(expected);
     });
@@ -734,7 +734,7 @@ describe('ObjectUtils', () => {
       c: 30,
       d: 40
     }];
-    const result = objectUtils.selectObjectProperties(baseObj, ['a', 'b']);
+    const result = ObjectUtils.selectObjectProperties(baseObj, ['a', 'b']);
     const expected = [{
       a: 10,
       b: 20
@@ -753,7 +753,7 @@ describe('ObjectUtils', () => {
       c: 230,
       d: 240
     }];
-    const result = objectUtils.selectObjectProperties(baseObj, ['a', 'b']);
+    const result = ObjectUtils.selectObjectProperties(baseObj, ['a', 'b']);
     const expected = [{
       a: 110,
       b: 120
@@ -771,7 +771,7 @@ describe('ObjectUtils', () => {
         c: 3,
         d: 4
       };
-      const result = objectUtils.filterObjectProperties(baseObj, ['a', 'b']);
+      const result = ObjectUtils.filterObjectProperties(baseObj, ['a', 'b']);
       const expected = [{
         c: 3,
         d: 4
@@ -779,7 +779,7 @@ describe('ObjectUtils', () => {
       global.expect(result).toStrictEqual(expected);
     });
     global.it('does not throw an error if filtering on null', () => {
-      const result = objectUtils.filterObjectProperties(null, ['a', 'b']);
+      const result = ObjectUtils.filterObjectProperties(null, ['a', 'b']);
       global.expect(result).toBeTruthy();
       global.expect(Array.isArray(result)).toBe(true);
     });
@@ -791,7 +791,7 @@ describe('ObjectUtils', () => {
       c: 30,
       d: 40
     }];
-    const result = objectUtils.filterObjectProperties(baseObj, ['a', 'b']);
+    const result = ObjectUtils.filterObjectProperties(baseObj, ['a', 'b']);
     const expected = [{
       c: 30,
       d: 40
@@ -810,7 +810,7 @@ describe('ObjectUtils', () => {
       c: 230,
       d: 240
     }];
-    const result = objectUtils.filterObjectProperties(baseObj, ['a', 'b']);
+    const result = ObjectUtils.filterObjectProperties(baseObj, ['a', 'b']);
     const expected = [{
       c: 130,
       d: 140
@@ -830,7 +830,7 @@ describe('ObjectUtils', () => {
       const expected = new Map();
       expected.set('string', new Set(['name']));
       expected.set('number', new Set(['age', 'height']));
-      const results = objectUtils.getObjectPropertyTypes(target);
+      const results = ObjectUtils.getObjectPropertyTypes(target);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('can find the types on a list of objects', () => {
@@ -847,7 +847,7 @@ describe('ObjectUtils', () => {
       const expected = new Map();
       expected.set('string', new Set(['name', 'education']));
       expected.set('number', new Set(['age', 'height']));
-      const results = objectUtils.getObjectPropertyTypes(target);
+      const results = ObjectUtils.getObjectPropertyTypes(target);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('can find the types even with a null in a list of objects', () => {
@@ -864,7 +864,7 @@ describe('ObjectUtils', () => {
       const expected = new Map();
       expected.set('string', new Set(['name', 'education']));
       expected.set('number', new Set(['age', 'height']));
-      const results = objectUtils.getObjectPropertyTypes(target);
+      const results = ObjectUtils.getObjectPropertyTypes(target);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('can find the types with some objects having less properties', () => {
@@ -881,12 +881,12 @@ describe('ObjectUtils', () => {
       const expected = new Map();
       expected.set('string', new Set(['name', 'education']));
       expected.set('number', new Set(['age', 'height']));
-      const results = objectUtils.getObjectPropertyTypes(target);
+      const results = ObjectUtils.getObjectPropertyTypes(target);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('does not throw an error if gettingPropertyTypes on null', () => {
       const expected = new Map();
-      const result = objectUtils.getObjectPropertyTypes(null);
+      const result = ObjectUtils.getObjectPropertyTypes(null);
       global.expect(result).toStrictEqual(expected);
     });
   });
@@ -901,7 +901,7 @@ describe('ObjectUtils', () => {
         }
       };
       const expected = 'john';
-      const result = objectUtils.fetchObjectProperty(targetObj, 'first');
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'first');
       global.expect(result).toStrictEqual(expected);
     });
     global.it('can fetch a simple string property off an object', () => {
@@ -914,7 +914,7 @@ describe('ObjectUtils', () => {
         }
       };
       const expected = 'john';
-      const result = objectUtils.fetchObjectProperty(targetObj, 'first');
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'first');
       global.expect(result).toStrictEqual(expected);
     });
     global.it('can fetch a simple number property off an object', () => {
@@ -927,7 +927,7 @@ describe('ObjectUtils', () => {
         }
       };
       const expected = 24;
-      const result = objectUtils.fetchObjectProperty(targetObj, 'age');
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'age');
       global.expect(result).toStrictEqual(expected);
     });
     global.it('can fetch a simple object property off an object', () => {
@@ -940,7 +940,7 @@ describe('ObjectUtils', () => {
         }
       };
       const expected = { id: 'econ-101', name: 'Economy of Thought' };
-      const result = objectUtils.fetchObjectProperty(targetObj, 'class');
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class');
       global.expect(result).toStrictEqual(expected);
     });
     global.it('can fetch a child property off a related object', () => {
@@ -953,7 +953,7 @@ describe('ObjectUtils', () => {
         }
       };
       const expected = 'econ-101';
-      const result = objectUtils.fetchObjectProperty(targetObj, 'class.id');
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.id');
       global.expect(result).toStrictEqual(expected);
     });
     global.it('will not thrown an error if we target an invalid property', () => {
@@ -966,7 +966,7 @@ describe('ObjectUtils', () => {
         }
       };
       //-- no exception to be thrown because we are safe
-      const result = objectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty', { safeAccess: false });
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty', { safeAccess: false });
       global.expect(result).toBeFalsy();
     });
     global.it('will throw an error if we access past an invalid property is not found', () => {
@@ -979,7 +979,7 @@ describe('ObjectUtils', () => {
         }
       };
       try {
-        objectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: false });
+        ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: false });
         global.expect('an exception should have been thrown').toBe(true);
       } catch (err) {
         global.expect(err).toBeTruthy();
@@ -995,7 +995,7 @@ describe('ObjectUtils', () => {
         }
       };
       //-- no exception to be thrown because we are safe
-      const result = objectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: true });
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: true });
       global.expect(result).toBeFalsy();
     });
     global.it('can support elvis operators', () => {
@@ -1008,11 +1008,11 @@ describe('ObjectUtils', () => {
         }
       };
       //-- no exception to be thrown because we are safe
-      const result = objectUtils.fetchObjectProperty(targetObj, 'class.?invalidProperty.?invalidProperty2', { safeAccess: false });
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.?invalidProperty.?invalidProperty2', { safeAccess: false });
       global.expect(result).toBeFalsy();
     });
     global.it('does not throw an error if fetching properties on null', () => {
-      const result = objectUtils.fetchObjectProperty(null, 'clases.className');
+      const result = ObjectUtils.fetchObjectProperty(null, 'clases.className');
       global.expect(result).toBeNull();
     });
   });
@@ -1034,7 +1034,7 @@ describe('ObjectUtils', () => {
         { first: 'john', classId: 'econ-101', professor: 'Professor Oak' },
         { first: 'jane', classId: 'econ-101', professor: 'Professor Oak' }
       ];
-      const result = objectUtils.fetchObjectProperties(
+      const result = ObjectUtils.fetchObjectProperties(
         targetObjects,
         { first: 'first', classId: 'class.id', professor: 'class.professor.name' }
       );
@@ -1055,7 +1055,7 @@ describe('ObjectUtils', () => {
         { first: 'jane', age: 24, class: classInfo }
       ];
       try {
-        objectUtils.fetchObjectProperties(
+        ObjectUtils.fetchObjectProperties(
           targetObjects,
           { first: 'first', classId: 'class.id', professor: 'class.professor.name', invalidProp: 'cuca.monga.cowabunga' }
         );
@@ -1081,7 +1081,7 @@ describe('ObjectUtils', () => {
         { first: 'john', classId: 'econ-101', professor: 'Professor Oak', invalidProp: null },
         { first: 'jane', classId: 'econ-101', professor: 'Professor Oak', invalidProp: null }
       ];
-      const result = objectUtils.fetchObjectProperties(
+      const result = ObjectUtils.fetchObjectProperties(
         targetObjects,
         { first: 'first', classId: 'class.id', professor: 'class.professor.name', invalidProp: 'cuca.monga.cowabunga' },
         { safeAccess: true }
@@ -1105,7 +1105,7 @@ describe('ObjectUtils', () => {
         { first: 'john', age: 24, classId: 'econ-101', professor: 'Professor Oak', class: classInfo },
         { first: 'jane', age: 24, classId: 'econ-101', professor: 'Professor Oak', class: classInfo }
       ];
-      const result = objectUtils.fetchObjectProperties(
+      const result = ObjectUtils.fetchObjectProperties(
         targetObjects,
         { first: 'first', classId: 'class.id', professor: 'class.professor.name' },
         { append: true }
@@ -1114,7 +1114,7 @@ describe('ObjectUtils', () => {
       global.expect(result).toStrictEqual(expected);
     });
     global.it('does not throw an error if fetching properties on null', () => {
-      const result = objectUtils.fetchObjectProperties(
+      const result = ObjectUtils.fetchObjectProperties(
         null,
         { first: 'first', classId: 'class.id', professor: 'class.professor.name' }
       );
@@ -1135,7 +1135,7 @@ describe('ObjectUtils', () => {
       const expected = [
         { first: 'john', age: 24, classId: 'econ-101', professor: 'Professor Oak', class: classInfo },
       ];
-      const result = objectUtils.fetchObjectProperties(
+      const result = ObjectUtils.fetchObjectProperties(
         targetObject,
         { first: 'first', classId: 'class.id', professor: 'class.professor.name' },
         { append: true }
@@ -1152,7 +1152,7 @@ describe('ObjectUtils', () => {
         { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
       ];
 
-      const results = objectUtils.join(weather, 'city', cityLocations, ((w, c) => ({ ...w, ...c })));
+      const results = ObjectUtils.join(weather, 'city', cityLocations, ((w, c) => ({ ...w, ...c })));
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3, lat: 47.6062, lon: 122.3321 },
         null,
@@ -1172,7 +1172,7 @@ describe('ObjectUtils', () => {
         { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20 }
       ];
 
-      const results = objectUtils.join(weather, 'city', cityLocations, ((w, c) => ({ ...w, ...c })));
+      const results = ObjectUtils.join(weather, 'city', cityLocations, ((w, c) => ({ ...w, ...c })));
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3, lat: 47.6062, lon: 122.3321 },
         null,
@@ -1193,7 +1193,7 @@ describe('ObjectUtils', () => {
 
       const errorMsg = 'object.join(objectArray, indexField, targetMap, joinFn): joinFn is required';
 
-      global.expect(() => objectUtils.join(targetObj, indexField, targetMap, null)).toThrow(errorMsg);
+      global.expect(() => ObjectUtils.join(targetObj, indexField, targetMap, null)).toThrow(errorMsg);
     });
     global.it('must have a targetMap', () => {
       const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
@@ -1203,7 +1203,7 @@ describe('ObjectUtils', () => {
 
       const errorMsg = 'object.join(objectArray, indexField, targetMap, joinFn): targetMap cannot be null';
 
-      global.expect(() => objectUtils.join(targetObj, indexField, targetMap, joinFn)).toThrow(errorMsg);
+      global.expect(() => ObjectUtils.join(targetObj, indexField, targetMap, joinFn)).toThrow(errorMsg);
     });
 
     global.it('can join on a null object', () => {
@@ -1213,7 +1213,7 @@ describe('ObjectUtils', () => {
 
       const joinFn = jest.fn().mockImplementation((s, t) => s);
 
-      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const results = ObjectUtils.join(targetObj, indexField, targetMap, joinFn);
       const expected = [];
 
       global.expect(joinFn).not.toHaveBeenCalled();
@@ -1228,7 +1228,7 @@ describe('ObjectUtils', () => {
 
       const joinFn = jest.fn();
 
-      objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      ObjectUtils.join(targetObj, indexField, targetMap, joinFn);
 
       global.expect(joinFn).toHaveBeenCalled();
 
@@ -1250,7 +1250,7 @@ describe('ObjectUtils', () => {
 
       const joinFn = jest.fn().mockImplementation((s, t) => ({ ...s, locationId: t.locationId }));
 
-      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const results = ObjectUtils.join(targetObj, indexField, targetMap, joinFn);
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
         { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2 },
@@ -1283,7 +1283,7 @@ describe('ObjectUtils', () => {
 
       const joinFn = jest.fn().mockImplementation((s, t) => ({ ...s, locationId: t.locationId }));
 
-      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const results = ObjectUtils.join(targetObj, indexField, targetMap, joinFn);
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
         null,
@@ -1313,7 +1313,7 @@ describe('ObjectUtils', () => {
 
       const joinFn = jest.fn();
 
-      objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      ObjectUtils.join(targetObj, indexField, targetMap, joinFn);
 
       global.expect(joinFn).toHaveBeenCalled();
 
@@ -1334,7 +1334,7 @@ describe('ObjectUtils', () => {
 
       const joinFn = jest.fn().mockImplementation((source, target) => source);
 
-      objectUtils.join(targetObj, indexFn, targetMap, joinFn);
+      ObjectUtils.join(targetObj, indexFn, targetMap, joinFn);
 
       global.expect(joinFn).toHaveBeenCalled();
       global.expect(joinFn).toHaveBeenCalledTimes(1);
@@ -1358,7 +1358,7 @@ describe('ObjectUtils', () => {
       const joinFn = jest.fn().mockImplementation((s, t) => ({ ...s, location: t }));
 
       /* eslint-disable object-property-newline */
-      const results = objectUtils.join(targetObj, indexField, targetMap, joinFn);
+      const results = ObjectUtils.join(targetObj, indexField, targetMap, joinFn);
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, location:
           { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
@@ -1387,7 +1387,7 @@ describe('ObjectUtils', () => {
 
         const errorMsg = 'object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join';
 
-        global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap)).toThrow(errorMsg);
+        global.expect(() => ObjectUtils.joinProperties(targetObj, indexField, targetMap)).toThrow(errorMsg);
       });
       global.it('null sent', () => {
         const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
@@ -1396,7 +1396,7 @@ describe('ObjectUtils', () => {
 
         const errorMsg = 'object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join';
 
-        global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap, null)).toThrow(errorMsg);
+        global.expect(() => ObjectUtils.joinProperties(targetObj, indexField, targetMap, null)).toThrow(errorMsg);
       });
       global.it('null plus valid sent', () => {
         const targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
@@ -1405,7 +1405,7 @@ describe('ObjectUtils', () => {
 
         const errorMsg = 'object.joinProperties(objectArray, indexField, targetMap, ...fields): at least one property passed to join';
 
-        global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap, null, 'lat')).not.toThrow(errorMsg);
+        global.expect(() => ObjectUtils.joinProperties(targetObj, indexField, targetMap, null, 'lat')).not.toThrow(errorMsg);
       });
     });
     global.it('must have a targetMap', () => {
@@ -1414,7 +1414,7 @@ describe('ObjectUtils', () => {
       const targetMap = null;
       const errorMsg = 'object.join(objectArray, indexField, targetMap, joinFn): targetMap cannot be null';
 
-      global.expect(() => objectUtils.joinProperties(targetObj, indexField, targetMap, 'lat')).toThrow(errorMsg);
+      global.expect(() => ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'lat')).toThrow(errorMsg);
     });
 
     global.it('can join on a null object', () => {
@@ -1422,7 +1422,7 @@ describe('ObjectUtils', () => {
       const indexField = 'city';
       const targetMap = cityLocations;
 
-      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'lat', 'lon');
+      const results = ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'lat', 'lon');
       const expected = [];
 
       global.expect(results).toEqual(expected);
@@ -1433,7 +1433,7 @@ describe('ObjectUtils', () => {
       const indexField = 'city';
       const targetMap = cityLocations;
 
-      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const results = ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 }
       ];
@@ -1446,7 +1446,7 @@ describe('ObjectUtils', () => {
       const indexField = 'city';
       const targetMap = cityLocations;
 
-      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'lat', 'lon');
+      const results = ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'lat', 'lon');
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, lat: 47.6062, lon: 122.3321 }
       ];
@@ -1463,7 +1463,7 @@ describe('ObjectUtils', () => {
       const indexField = 'city';
       const targetMap = cityLocations;
 
-      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const results = ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
         { id: 3, city: 'New York', month: 'Apr', precip: 3.94, locationId: 2 },
@@ -1483,7 +1483,7 @@ describe('ObjectUtils', () => {
       const indexField = 'city';
       const targetMap = cityLocations;
 
-      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const results = ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 },
         null,
@@ -1499,7 +1499,7 @@ describe('ObjectUtils', () => {
       const indexField = 'city';
       const targetMap = cityLocations;
 
-      const results = objectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
+      const results = ObjectUtils.joinProperties(targetObj, indexField, targetMap, 'locationId');
       const expected = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 }];
 
       global.expect(results).toEqual(expected);
@@ -1513,7 +1513,7 @@ describe('ObjectUtils', () => {
       const seattleLocation = targetMap.get('Seattle');
       global.expect(seattleLocation.city).toBe('Seattle');
 
-      const results = objectUtils.joinProperties(targetObj, indexFn, targetMap, 'locationId');
+      const results = ObjectUtils.joinProperties(targetObj, indexFn, targetMap, 'locationId');
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3 }
       ];
@@ -1530,7 +1530,7 @@ describe('ObjectUtils', () => {
         { id: 7, city: 'San Francisco',  month: 'Apr', precip: 5.20 }
       ];
 
-      const results = objectUtils.joinProperties(weather, 'city', cityLocations, 'locationId', 'lat', 'lon');
+      const results = ObjectUtils.joinProperties(weather, 'city', cityLocations, 'locationId', 'lat', 'lon');
       const expected = [
         { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, locationId: 3, lat: 47.6062, lon: 122.3321 },
         null,
@@ -1555,7 +1555,7 @@ describe('ObjectUtils', () => {
           { first: 'john', last: 'doe', birthday: '2002-04-01' },
           { first: 'jane', last: 'doe', birthday: '2003-05-01' }
         ];
-        const results = objectUtils.findWithProperties(students, 'birthday');
+        const results = ObjectUtils.findWithProperties(students, 'birthday');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('multiple properties', () => {
@@ -1569,7 +1569,7 @@ describe('ObjectUtils', () => {
           { first: 'jane', last: 'doe', birthday: '2003-05-01' },
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithProperties(students, 'first', 'last', 'birthday');
+        const results = ObjectUtils.findWithProperties(students, 'first', 'last', 'birthday');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('array of properties', () => {
@@ -1583,7 +1583,7 @@ describe('ObjectUtils', () => {
           { first: 'jane', last: 'doe', birthday: '2003-05-01' },
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithProperties(students, ['first', 'last']);
+        const results = ObjectUtils.findWithProperties(students, ['first', 'last']);
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching one', () => {
@@ -1595,7 +1595,7 @@ describe('ObjectUtils', () => {
         const expected = [
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithProperties(students, 'failure');
+        const results = ObjectUtils.findWithProperties(students, 'failure');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching multiple', () => {
@@ -1608,7 +1608,7 @@ describe('ObjectUtils', () => {
           { first: 'john', last: 'doe', birthday: '2002-04-01' },
           { first: 'jane', last: 'doe', birthday: '2003-05-01' }
         ];
-        const results = objectUtils.findWithProperties(students, 'birthday');
+        const results = ObjectUtils.findWithProperties(students, 'birthday');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching none', () => {
@@ -1619,7 +1619,7 @@ describe('ObjectUtils', () => {
         ];
         const expected = [
         ];
-        const results = objectUtils.findWithProperties(students, 'cuca');
+        const results = ObjectUtils.findWithProperties(students, 'cuca');
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -1628,7 +1628,7 @@ describe('ObjectUtils', () => {
         const students = { first: 'john', last: 'doe', birthday: '2002-04-01' };
         const expected = [
         ];
-        const results = objectUtils.findWithProperties(students, 'cuca');
+        const results = ObjectUtils.findWithProperties(students, 'cuca');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching none', () => {
@@ -1639,7 +1639,7 @@ describe('ObjectUtils', () => {
         ];
         const expected = [
         ];
-        const results = objectUtils.findWithProperties(students, 'cuca');
+        const results = ObjectUtils.findWithProperties(students, 'cuca');
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -1656,7 +1656,7 @@ describe('ObjectUtils', () => {
         const expected = [
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithoutProperties(students, 'birthday');
+        const results = ObjectUtils.findWithoutProperties(students, 'birthday');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('multiple properties', () => {
@@ -1668,7 +1668,7 @@ describe('ObjectUtils', () => {
         const expected = [
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithoutProperties(students, 'first', 'last', 'birthday');
+        const results = ObjectUtils.findWithoutProperties(students, 'first', 'last', 'birthday');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('array of properties', () => {
@@ -1682,7 +1682,7 @@ describe('ObjectUtils', () => {
           { first: 'jane', last: 'doe', birthday: '2003-05-01' },
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithoutProperties(students, ['first', 'last', 'cuca']);
+        const results = ObjectUtils.findWithoutProperties(students, ['first', 'last', 'cuca']);
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching one', () => {
@@ -1694,7 +1694,7 @@ describe('ObjectUtils', () => {
         const expected = [
           { first: 'jack', last: 'white', failure: 401 }
         ];
-        const results = objectUtils.findWithoutProperties(students, 'birthday');
+        const results = ObjectUtils.findWithoutProperties(students, 'birthday');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching multiple', () => {
@@ -1707,7 +1707,7 @@ describe('ObjectUtils', () => {
           { first: 'john', last: 'doe', birthday: '2002-04-01' },
           { first: 'jane', last: 'doe', birthday: '2003-05-01' }
         ];
-        const results = objectUtils.findWithoutProperties(students, 'failure');
+        const results = ObjectUtils.findWithoutProperties(students, 'failure');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching none', () => {
@@ -1718,7 +1718,7 @@ describe('ObjectUtils', () => {
         ];
         const expected = [
         ];
-        const results = objectUtils.findWithoutProperties(students, 'first');
+        const results = ObjectUtils.findWithoutProperties(students, 'first');
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -1728,14 +1728,14 @@ describe('ObjectUtils', () => {
         const expected = [
           { first: 'john', last: 'doe', birthday: '2002-04-01' }
         ];
-        const results = objectUtils.findWithoutProperties(students, 'failure');
+        const results = ObjectUtils.findWithoutProperties(students, 'failure');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('matching none', () => {
         const students = { first: 'john', last: 'doe', birthday: '2002-04-01' };
         const expected = [
         ];
-        const results = objectUtils.findWithoutProperties(students, 'first');
+        const results = ObjectUtils.findWithoutProperties(students, 'first');
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -1755,7 +1755,7 @@ describe('ObjectUtils', () => {
           { first: 'jack', last: 'white', birthday: 'N/A', failure: 401 }
         ];
 
-        objectUtils.setPropertyDefaults(students, {
+        ObjectUtils.setPropertyDefaults(students, {
           first: 'N/A',
           last: 'N/A',
           birthday: 'N/A'
@@ -1775,7 +1775,7 @@ describe('ObjectUtils', () => {
           { first: 'jack', last: 'white', color: 'N/A', birthday: 'N/A', failure: 401 }
         ];
 
-        objectUtils.setPropertyDefaults(students, {
+        ObjectUtils.setPropertyDefaults(students, {
           first: 'N/A',
           last: 'N/A',
           birthday: 'N/A',
@@ -1796,7 +1796,7 @@ describe('ObjectUtils', () => {
           { first: 'jack', last: 'white', failure: 401 }
         ];
 
-        objectUtils.setPropertyDefaults(students, {
+        ObjectUtils.setPropertyDefaults(students, {
           first: 'N/A',
           last: 'N/A'
         });
@@ -1809,7 +1809,7 @@ describe('ObjectUtils', () => {
         const students = { first: 'jack', last: 'white', failure: 401 };
         const expected = { first: 'jack', last: 'white', color: 'N/A', birthday: 'N/A', failure: 401 };
 
-        objectUtils.setPropertyDefaults(students, {
+        ObjectUtils.setPropertyDefaults(students, {
           first: 'N/A',
           last: 'N/A',
           birthday: 'N/A',
@@ -1831,7 +1831,7 @@ describe('ObjectUtils', () => {
           + 'defaultObject is expected to be an object with properties set to the defaults to apply';
 
         global.expect(() => {
-          objectUtils.setPropertyDefaults(students, null);
+          ObjectUtils.setPropertyDefaults(students, null);
         }).toThrow(expectedError);
       });
       global.it('if the default object is not an object', () => {
@@ -1845,7 +1845,7 @@ describe('ObjectUtils', () => {
           + 'defaultObject is expected to be an object with properties set to the defaults to apply';
 
         global.expect(() => {
-          objectUtils.setPropertyDefaults(students, 2);
+          ObjectUtils.setPropertyDefaults(students, 2);
         }).toThrow(expectedError);
       });
     });
@@ -1860,7 +1860,7 @@ describe('ObjectUtils', () => {
         { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
       ];
       const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      const results = objectUtils.propertyFromList(data, 'val');
+      const results = ObjectUtils.propertyFromList(data, 'val');
       global.expect(results).toStrictEqual(expected);
     });
     global.it('accesses a function from a list', () => {
@@ -1871,31 +1871,31 @@ describe('ObjectUtils', () => {
         { record: 'jobA', val: 9 }, { record: 'jobA', val: 10 }
       ];
       const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      const results = objectUtils.propertyFromList(data, (r) => r.val);
+      const results = ObjectUtils.propertyFromList(data, (r) => r.val);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('accesses values from a list', () => {
       const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      const results = objectUtils.propertyFromList(data);
+      const results = ObjectUtils.propertyFromList(data);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('does not fail if not sent a list', () => {
       const data = 1;
       const expected = [];
-      const results = objectUtils.propertyFromList(data);
+      const results = ObjectUtils.propertyFromList(data);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('does not fail if sent a null list', () => {
       const data = null;
       const expected = [];
-      const results = objectUtils.propertyFromList(data);
+      const results = ObjectUtils.propertyFromList(data);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('does not fail if sent an empty list', () => {
       const data = [];
       const expected = [];
-      const results = objectUtils.propertyFromList(data);
+      const results = ObjectUtils.propertyFromList(data);
       global.expect(results).toStrictEqual(expected);
     });
   });
@@ -1918,7 +1918,7 @@ describe('ObjectUtils', () => {
           { id: 500, age: '25', name: 'p5' }
         ];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, 'id');
+        const results = ObjectUtils.mapProperties(list, parseNum, 'id');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('two properties', () => {
@@ -1937,7 +1937,7 @@ describe('ObjectUtils', () => {
           { id: 500, age: 25, name: 'p5' }
         ];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
+        const results = ObjectUtils.mapProperties(list, parseNum, 'id', 'age');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('no properties', () => {
@@ -1956,7 +1956,7 @@ describe('ObjectUtils', () => {
           { id: '500', age: '25', name: 'p5' }
         ];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum);
+        const results = ObjectUtils.mapProperties(list, parseNum);
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -1965,14 +1965,14 @@ describe('ObjectUtils', () => {
         const list = { id: '100', age: '21', name: 'p1' };
         const expected = [{ id: 100, age: '21', name: 'p1' }];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, 'id');
+        const results = ObjectUtils.mapProperties(list, parseNum, 'id');
         global.expect(results).toStrictEqual(expected);
       });
       global.it('two properties', () => {
         const list = { id: '100', age: '21', name: 'p1' };
         const expected = [{ id: 100, age: 21, name: 'p1' }];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, 'id', 'age');
+        const results = ObjectUtils.mapProperties(list, parseNum, 'id', 'age');
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -1993,7 +1993,7 @@ describe('ObjectUtils', () => {
           { id: 500, age: '25', name: 'p5' }
         ];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, ['id']);
+        const results = ObjectUtils.mapProperties(list, parseNum, ['id']);
         global.expect(results).toStrictEqual(expected);
       });
       global.it('two properties', () => {
@@ -2012,7 +2012,7 @@ describe('ObjectUtils', () => {
           { id: 500, age: 25, name: 'p5' }
         ];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, ['id', 'age']);
+        const results = ObjectUtils.mapProperties(list, parseNum, ['id', 'age']);
         global.expect(results).toStrictEqual(expected);
       });
       global.it('no properties', () => {
@@ -2031,7 +2031,7 @@ describe('ObjectUtils', () => {
           { id: '500', age: '25', name: 'p5' }
         ];
         const parseNum = (str) => parseInt(str, 10);
-        const results = objectUtils.mapProperties(list, parseNum, []);
+        const results = ObjectUtils.mapProperties(list, parseNum, []);
         global.expect(results).toStrictEqual(expected);
       });
     });
@@ -2040,14 +2040,14 @@ describe('ObjectUtils', () => {
         const list = { id: '100', age: '21', name: 'p1' };
         const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
         global.expect(() => {
-          objectUtils.mapProperties(list);
+          ObjectUtils.mapProperties(list);
         }).toThrow(expectedError);
       });
       global.it('if the formatting is not a function', () => {
         const list = { id: '100', age: '21', name: 'p1' };
         const expectedError = 'object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided';
         global.expect(() => {
-          objectUtils.mapProperties(list, 'a', 'id');
+          ObjectUtils.mapProperties(list, 'a', 'id');
         }).toThrow(expectedError);
       });
     });
@@ -2066,7 +2066,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({}));
+        const result = ObjectUtils.formatProperties(data, ({}));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('with one property to clean', () => {
@@ -2080,7 +2080,7 @@ describe('ObjectUtils', () => {
           { station: 'B', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
           { station: 'B', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({ station: () => 'B' }));
+        const result = ObjectUtils.formatProperties(data, ({ station: () => 'B' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('with two properties to clean', () => {
@@ -2094,7 +2094,7 @@ describe('ObjectUtils', () => {
           { station: 'B', isFahreinheit: true, offset: '2', temp: 99, type: 'F', descr: '0123456' },
           { station: 'B', isFahreinheit: false, offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({ station: () => 'B', isFahreinheit: (val) => val === 'true' }));
+        const result = ObjectUtils.formatProperties(data, ({ station: () => 'B', isFahreinheit: (val) => val === 'true' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('with many properties to clean', () => {
@@ -2108,7 +2108,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: true, offset: 2, temp: 37.2252, type: 'C', descr: '0123456' },
           { station: 'A', isFahreinheit: false, offset: 3, temp: 37.7808, type: 'C', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({
+        const result = ObjectUtils.formatProperties(data, ({
           type: 'C',
           offset: 'number',
           isFahreinheit: 'boolean',
@@ -2125,7 +2125,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
         const formatter = {};
-        global.expect(() => objectUtils.formatProperties(data, formatter)).not.toThrow();
+        global.expect(() => ObjectUtils.formatProperties(data, formatter)).not.toThrow();
       });
       global.it('if the format is null', () => {
         const data = [
@@ -2136,7 +2136,7 @@ describe('ObjectUtils', () => {
         const formatter = null;
         // eslint-disable-next-line
         const expectedError = 'ObjectUtils.formatProperties(collection, propertyTranslations): propertyTranslations must be an object, with the properties matching those to be formatted, and values as functions returning the new value';
-        global.expect(() => objectUtils.formatProperties(data, formatter)).toThrow(expectedError);
+        global.expect(() => ObjectUtils.formatProperties(data, formatter)).toThrow(expectedError);
       });
     });
     global.describe('can translate with a literal', () => {
@@ -2151,7 +2151,7 @@ describe('ObjectUtils', () => {
           { station: 'B', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
           { station: 'B', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({ station: 'B' }));
+        const result = ObjectUtils.formatProperties(data, ({ station: 'B' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('with one number literal', () => {
@@ -2165,7 +2165,7 @@ describe('ObjectUtils', () => {
           { station: 20, isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' },
           { station: 20, isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({ station: 20 }));
+        const result = ObjectUtils.formatProperties(data, ({ station: 20 }));
         global.expect(result).toStrictEqual(expected);
       });
     });
@@ -2181,7 +2181,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '0123456' },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({ temp: 'string' }));
+        const result = ObjectUtils.formatProperties(data, ({ temp: 'string' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('ellipsis', () => {
@@ -2202,7 +2202,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '0123456' },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '01234567890123456789012345678901234567890123456789…' }
         ];
-        const result = objectUtils.formatProperties(data, ({ descr: 'ellipsis' }));
+        const result = ObjectUtils.formatProperties(data, ({ descr: 'ellipsis' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('ellipsis(5)', () => {
@@ -2216,7 +2216,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: '99', type: 'F', descr: '01234…' },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: '100', type: 'F', descr: '01234…' }
         ];
-        const result = objectUtils.formatProperties(data, ({ descr: 'ellipsis(5)' }));
+        const result = ObjectUtils.formatProperties(data, ({ descr: 'ellipsis(5)' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('number', () => {
@@ -2230,7 +2230,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
         ];
-        const result = objectUtils.formatProperties(data, ({ descr: 'number' }));
+        const result = ObjectUtils.formatProperties(data, ({ descr: 'number' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('float', () => {
@@ -2244,7 +2244,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
         ];
-        const result = objectUtils.formatProperties(data, ({ descr: 'float' }));
+        const result = ObjectUtils.formatProperties(data, ({ descr: 'float' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('int', () => {
@@ -2258,7 +2258,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
         ];
-        const result = objectUtils.formatProperties(data, ({ descr: 'int' }));
+        const result = ObjectUtils.formatProperties(data, ({ descr: 'int' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('integer', () => {
@@ -2272,7 +2272,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: 123456 },
           { station: 'A', isFahreinheit: 'true', offset: '3', temp: 100, type: 'F', descr: 123456789 }
         ];
-        const result = objectUtils.formatProperties(data, ({ descr: 'integer' }));
+        const result = ObjectUtils.formatProperties(data, ({ descr: 'integer' }));
         global.expect(result).toStrictEqual(expected);
       });
       global.it('boolean', () => {
@@ -2286,7 +2286,7 @@ describe('ObjectUtils', () => {
           { station: 'A', isFahreinheit: true, offset: '2', temp: 99, type: 'F', descr: '0123456' },
           { station: 'A', isFahreinheit: false, offset: '3', temp: 100, type: 'F', descr: '0123456789' }
         ];
-        const result = objectUtils.formatProperties(data, ({ isFahreinheit: 'boolean' }));
+        const result = ObjectUtils.formatProperties(data, ({ isFahreinheit: 'boolean' }));
         global.expect(result).toStrictEqual(expected);
       });
     });
@@ -2294,20 +2294,112 @@ describe('ObjectUtils', () => {
       global.it('if null is passed for a collection', () => {
         const data = null;
         const expected = [];
-        const result = objectUtils.formatProperties(data, ({ station: 20 }));
+        const result = ObjectUtils.formatProperties(data, ({ station: 20 }));
         global.expect(result).toStrictEqual(expected);
       });
     });
     global.describe('can format a single object', () => {
       const data = { station: 'A', isFahreinheit: 'true', offset: '2', temp: 99, type: 'F', descr: '0123456' };
       const expected = [{ station: 'A', isFahreinheit: true, offset: 2, temp: 37.2252, type: 'C', descr: '0123456' }];
-      const result = objectUtils.formatProperties(data, ({
+      const result = ObjectUtils.formatProperties(data, ({
         type: 'C',
         offset: 'number',
         isFahreinheit: 'boolean',
         temp: (val) => (val - 32) * 0.5556
       }));
       global.expect(result).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('propertyValueSample', () => {
+    global.describe('can describe', () => {
+      global.it('with one object', () => {
+        const collection = {
+          first: 'first',
+          age: 23
+        };
+        const expected = new Map([
+          ['first', 'first'],
+          ['age', 23]
+        ]);
+        const results = ObjectUtils.propertyValueSample(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with multiple objects', () => {
+        const collection = [{
+          first: 'firstVal',
+          age: 23
+        }, {
+          last: 'lastVal'
+        }];
+        const expected = new Map([
+          ['first', 'firstVal'],
+          ['age', 23],
+          ['last', 'lastVal']
+        ]);
+        const results = ObjectUtils.propertyValueSample(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with multiple objects duplicating values', () => {
+        const collection = [{
+          first: 'firstVal',
+          age: 23
+        }, {
+          first: 'ignore',
+          last: 'lastVal',
+          age: 99
+        }];
+        const expected = new Map([
+          ['first', 'firstVal'],
+          ['age', 23],
+          ['last', 'lastVal']
+        ]);
+        const results = ObjectUtils.propertyValueSample(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with null values', () => {
+        const collection = [{
+          first: 'firstVal',
+          age: 23
+        }, null, {
+          first: 'ignore',
+          last: 'lastVal',
+          age: 99
+        }];
+        const expected = new Map([
+          ['first', 'firstVal'],
+          ['age', 23],
+          ['last', 'lastVal']
+        ]);
+        const results = ObjectUtils.propertyValueSample(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with number values', () => {
+        const collection = [{
+          first: 'firstVal',
+          age: 23
+        }, 23, {
+          first: 'ignore',
+          last: 'lastVal',
+          age: 99
+        }];
+        const expected = new Map([
+          ['first', 'firstVal'],
+          ['age', 23],
+          ['last', 'lastVal']
+        ]);
+        const results = ObjectUtils.propertyValueSample(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('if object collection is not passed', () => {
+        const collection = null;
+        
+        global.expect(
+          () => ObjectUtils.propertyValueSample(collection)
+        ).toThrow('propertyValueSample(objectCollection): objectCollection is required');
+      });
     });
   });
 });

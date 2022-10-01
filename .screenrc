@@ -6,6 +6,7 @@
 screen -X title "notebooks"
 screen -X stuff "cd ../^M"
 screen -X number 0
+screen -X sessionname "ijsutils"
 
 # uncomment below to make the tabs only run those commands
 # but note that restarting will lose that tab

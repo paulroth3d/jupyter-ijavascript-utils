@@ -1298,4 +1298,71 @@ global.describe('format', () => {
       });
     });
   });
+
+  global.describe('isEmptyValue', () => {
+    global.describe('can detect a value', () => {
+      global.it('number 0', () => {
+        const val = 0;
+        const expected = false;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('number 1', () => {
+        const val = 1;
+        const expected = false;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('number 99', () => {
+        const val = 99;
+        const expected = false;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('string abc', () => {
+        const val = 'abc';
+        const expected = false;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('array with one item', () => {
+        const val = [0];
+        const expected = false;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('array with two items', () => {
+        const val = [0, 'a'];
+        const expected = false;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+    });
+    global.describe('can detect an empty value', () => {
+      global.it('null', () => {
+        const val = null;
+        const expected = true;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('undefined', () => {
+        const val = undefined;
+        const expected = true;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('empty string', () => {
+        const val = '';
+        const expected = true;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+      global.it('empty array', () => {
+        const val = [];
+        const expected = true;
+        const results = FormatUtils.isEmptyValue(val);
+        global.expect(results).toBe(expected);
+      });
+    });
+  });
 });
