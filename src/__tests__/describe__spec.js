@@ -294,6 +294,78 @@ global.describe('DescribeUtil', () => {
     });
   });
 
+  global.describe('DateDescription', () => {
+    global.describe('can describe', () => {
+      global.it('can work with a single integer', () => {
+        const collection = 1664743997857;
+        const result = DescribeUtil.describeDates(collection);
+        const expected = {
+          count: 1,
+          max: new Date(1664743997857),
+          min: new Date(1664743997857),
+          mean: new Date(1664743997857)
+        };
+        global.expect(result).toMatchObject(expected);
+      });
+      global.it('can work with a single date', () => {
+        const collection = new Date(1664743997857);
+        const result = DescribeUtil.describeDates(collection);
+        const expected = {
+          count: 1,
+          max: new Date(1664743997857),
+          min: new Date(1664743997857),
+          mean: new Date(1664743997857)
+        };
+        global.expect(result).toMatchObject(expected);
+      });
+      global.it('can work with mixed dates', () => {
+        const collection = [new Date(1664743997857), 1664744188041];
+        const result = DescribeUtil.describeDates(collection);
+        const expected = {
+          count: 2,
+          max: new Date(1664744188041),
+          min: new Date(1664743997857),
+          mean: new Date(1664744092949)
+        };
+        global.expect(result).toMatchObject(expected);
+      });
+      global.it('can work with null', () => {
+        const collection = [null];
+        const result = DescribeUtil.describeDates(collection);
+        const expected = {
+          count: 0,
+          max: null,
+          min: null,
+          mean: null
+        };
+        global.expect(result).toMatchObject(expected);
+      });
+      global.it('can work with values + null', () => {
+        const collection = 1664743997857;
+        const result = DescribeUtil.describeDates(collection);
+        const expected = {
+          count: 1,
+          max: new Date(1664743997857),
+          min: new Date(1664743997857),
+          mean: new Date(1664743997857)
+        };
+        global.expect(result).toMatchObject(expected);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('if the value is not a date', () => {
+        const collection = ['a'];
+        global.expect(() => DescribeUtil.describeDates(collection))
+          .toThrow('describe: Value passed(a) - expected to be type:Date');
+      });
+      global.it('if one of the values in the list is not a date', () => {
+        const collection = [new Date(), 23, 'a'];
+        global.expect(() => DescribeUtil.describeDates(collection))
+          .toThrow('describe: Value passed(a) - expected to be type:Date');
+      });
+    });
+  });
+
   global.describe('stdDeviation', () => {
     global.it('for one number', () => {
       const series = [1];

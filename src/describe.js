@@ -88,6 +88,45 @@ class SeriesDescription {
 }
 
 /**
+ * Describes a series of Boolean Values
+ */
+class BooleanDescription extends SeriesDescription {
+  /**
+   * Mean sum as expressed
+   * @type {number}
+   */
+  mean;
+
+  constructor() {
+    super();
+    this.reset();
+  }
+
+  reset() {
+    super.reset();
+    this.mean = 0.0;
+  }
+
+  check(value) {
+    if (FormatUtils.isEmptyValue(value)) return;
+
+    this.count += 1;
+    const cleanValue = FormatUtils.parseBoolean(value)
+      ? 1 : 0;
+    
+    const oldMean = this.mean;
+    this.mean += (cleanValue - oldMean) / this.count;
+
+    if (this.max === null && cleanValue === 1) this.max = 1;
+    if (this.min === null && cleanValue === 0) this.min = 0;
+  }
+
+  finalize() {
+    super.finalize();
+  }
+}
+
+/**
  * Describes a series of Numbers
  */
 class NumberDescription extends SeriesDescription {
@@ -226,7 +265,7 @@ class StringDescription extends SeriesDescription {
 /**
  * Describes a series of Dates
  */
-class BooleanDescription extends SeriesDescription {
+class DateDescription extends SeriesDescription {
   /**
    * Mean sum as expressed
    * @type {number}
@@ -240,25 +279,36 @@ class BooleanDescription extends SeriesDescription {
 
   reset() {
     super.reset();
-    this.mean = 0.0;
+    this.mean = null;
   }
 
   check(value) {
     if (FormatUtils.isEmptyValue(value)) return;
 
+    let cleanValue;
+    if (value instanceof Date) {
+      cleanValue = value.getTime();
+    } else if (typeof value === 'number') {
+      cleanValue = value;
+    } else {
+      throw Error(`describe: Value passed(${value}) - expected to be type:Date`);
+    }
+
     this.count += 1;
-    const cleanValue = FormatUtils.parseBoolean(value)
-      ? 1 : 0;
     
     const oldMean = this.mean;
     this.mean += (cleanValue - oldMean) / this.count;
 
-    if (this.max === null && cleanValue === 1) this.max = 1;
-    if (this.min === null && cleanValue === 0) this.min = 0;
+    if (this.max === null || cleanValue > this.max) this.max = cleanValue;
+    if (this.min === null || cleanValue < this.min) this.min = cleanValue;
   }
 
   finalize() {
     super.finalize();
+
+    if (!FormatUtils.isEmptyValue(this.min)) this.min = new Date(this.min);
+    if (!FormatUtils.isEmptyValue(this.max)) this.max = new Date(this.max);
+    if (!FormatUtils.isEmptyValue(this.mean)) this.mean = new Date(this.mean);
   }
 }
 
@@ -286,6 +336,16 @@ DescribeUtil.describeBoolean = function describeBoolean(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
 
   const result = new BooleanDescription();
+  cleanCollection.forEach((value) => result.check(value));
+  result.finalize();
+
+  return result;
+};
+
+DescribeUtil.describeDates = function describeDates(collection) {
+  const cleanCollection = Array.isArray(collection) ? collection : [collection];
+
+  const result = new DateDescription();
   cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
