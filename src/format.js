@@ -844,3 +844,25 @@ module.exports.isEmptyValue = (val) =>
   //-- allow for 0s
   val === null || val === undefined || val === ''
   || (Array.isArray(val) && val.length === 0);
+
+/**
+ * Determines if a value is a boolean true value.
+ * 
+ * Matches for:
+ * 
+ * * boolean TRUE
+ * * number 1
+ * * string 'TRUE'
+ * * string 'True'
+ * * string 'true'
+ * 
+ * @param {any} val - the value to be tested
+ * @returns {Boolean} - TRUE if the value matches
+ */
+module.exports.parseBoolean = function parseBoolean(val) {
+  return val === true
+    || val === 1
+    || val === 'TRUE'
+    || val === 'True'
+    || val === 'true';
+};

@@ -87,6 +87,9 @@ class SeriesDescription {
   }
 }
 
+/**
+ * Describes a series of Numbers
+ */
 class NumberDescription extends SeriesDescription {
   /**
    * Mean sum as expressed
@@ -147,6 +150,9 @@ class NumberDescription extends SeriesDescription {
   }
 }
 
+/**
+ * Describes a series of string values
+ */
 class StringDescription extends SeriesDescription {
   /**
    * Map of unique values
@@ -217,6 +223,45 @@ class StringDescription extends SeriesDescription {
   }
 }
 
+/**
+ * Describes a series of Dates
+ */
+class BooleanDescription extends SeriesDescription {
+  /**
+   * Mean sum as expressed
+   * @type {number}
+   */
+  mean;
+
+  constructor() {
+    super();
+    this.reset();
+  }
+
+  reset() {
+    super.reset();
+    this.mean = 0.0;
+  }
+
+  check(value) {
+    if (FormatUtils.isEmptyValue(value)) return;
+
+    this.count += 1;
+    const cleanValue = FormatUtils.parseBoolean(value)
+      ? 1 : 0;
+    
+    const oldMean = this.mean;
+    this.mean += (cleanValue - oldMean) / this.count;
+
+    if (this.max === null && cleanValue === 1) this.max = 1;
+    if (this.min === null && cleanValue === 0) this.min = 0;
+  }
+
+  finalize() {
+    super.finalize();
+  }
+}
+
 DescribeUtil.describeStrings = function describeStrings(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
   
@@ -231,6 +276,16 @@ DescribeUtil.describeNumbers = function describeNumbers(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
   
   const result = new NumberDescription();
+  cleanCollection.forEach((value) => result.check(value));
+  result.finalize();
+
+  return result;
+};
+
+DescribeUtil.describeBoolean = function describeBoolean(collection) {
+  const cleanCollection = Array.isArray(collection) ? collection : [collection];
+
+  const result = new BooleanDescription();
   cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 

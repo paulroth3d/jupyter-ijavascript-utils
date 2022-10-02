@@ -223,6 +223,77 @@ global.describe('DescribeUtil', () => {
     });
   });
 
+  global.describe('BooleanDescription', () => {
+    global.describe('can describe', () => {
+      global.it('a single boolean value: true', () => {
+        const collection = true;
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 1,
+          max: 1,
+          min: null,
+          mean: 1
+        };
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('a single boolean value: [false]', () => {
+        const collection = [false];
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 1,
+          max: null,
+          min: 0,
+          mean: 0
+        };
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('two boolean values', () => {
+        const collection = ['true', false];
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 2,
+          max: 1,
+          min: 0,
+          mean: 0.5
+        };
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('multiple boolean values: true true', () => {
+        const collection = ['TRUE', 'True'];
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 2,
+          max: 1,
+          min: null,
+          mean: 1
+        };
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('with null', () => {
+        const collection = ['TRUE', null, undefined, 'True'];
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 2,
+          max: 1,
+          min: null,
+          mean: 1
+        };
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('multiple mixed values', () => {
+        const collection = ['TRUE', 'false', 'true', 'No', 'True'];
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 5,
+          max: 1,
+          min: 0,
+          mean: 0.6
+        };
+        global.expect(results).toMatchObject(expected);
+      });
+    });
+  });
+
   global.describe('stdDeviation', () => {
     global.it('for one number', () => {
       const series = [1];

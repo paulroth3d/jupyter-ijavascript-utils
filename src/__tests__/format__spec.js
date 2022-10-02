@@ -1365,4 +1365,71 @@ global.describe('format', () => {
       });
     });
   });
+
+  global.describe('parseBoolean', () => {
+    global.describe('captures true', () => {
+      global.it('boolean TRUE', () => {
+        const val = true;
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('number 1', () => {
+        const val = 1;
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string TRUE', () => {
+        const val = 'TRUE';
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string True', () => {
+        const val = 'True';
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string true', () => {
+        const val = 'TRUE';
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('captures false', () => {
+      global.it('boolean false', () => {
+        const val = false;
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('number 0', () => {
+        const val = 0;
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string FALSE', () => {
+        const val = 'FALSE';
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string False', () => {
+        const val = 'False';
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string false', () => {
+        const val = 'false';
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+  });
 });
