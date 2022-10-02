@@ -3,20 +3,6 @@ const DescribeUtil = require('../describe');
 global.describe('DescribeUtil', () => {
   global.describe('StringDescription', () => {
     global.describe('fails', () => {
-      global.it('if the collection is null', () => {
-        const collection = null;
-        
-        global.expect(() => {
-          DescribeUtil.describeStrings(collection);
-        }).toThrow('describeStrings(collection): collection must be an array of strings');
-      });
-      global.it('if the collection is empty', () => {
-        const collection = [];
-        
-        global.expect(() => {
-          DescribeUtil.describeStrings(collection);
-        }).toThrow('describeStrings(collection): collection must be an array of strings');
-      });
       global.it('if the collection is not full of numbers', () => {
         const collection = [0];
         
@@ -86,25 +72,35 @@ global.describe('DescribeUtil', () => {
         const results = DescribeUtil.describeStrings(collection);
         global.expect(results).toMatchObject(expected);
       });
+      global.it('if the collection is null', () => {
+        const collection = null;
+        const expected = {
+          count: 0,
+          max: null,
+          min: null,
+          top: null,
+          topFrequency: null
+        };
+        const results = DescribeUtil.describeStrings(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('if the collection is empty', () => {
+        const collection = [];
+        const expected = {
+          count: 0,
+          max: null,
+          min: null,
+          top: null,
+          topFrequency: null
+        };
+        const results = DescribeUtil.describeStrings(collection);
+        global.expect(results).toMatchObject(expected);
+      });
     });
   });
 
   global.describe('NumberDescription', () => {
     global.describe('fails', () => {
-      global.it('if the collection is null', () => {
-        const collection = null;
-        
-        global.expect(() => {
-          DescribeUtil.describeNumbers(collection);
-        }).toThrow('describeNumbers(collection): collection must be an array of numbers');
-      });
-      global.it('if the collection is empty', () => {
-        const collection = [];
-        
-        global.expect(() => {
-          DescribeUtil.describeNumbers(collection);
-        }).toThrow('describeNumbers(collection): collection must be an array of numbers');
-      });
       global.it('if the collection is not full of numbers', () => {
         const collection = ['a'];
         
@@ -114,6 +110,28 @@ global.describe('DescribeUtil', () => {
       });
     });
     global.describe('can describe', () => {
+      global.it('if the collection is null', () => {
+        const collection = null;
+        const expected = {
+          count: 0,
+          max: null,
+          min: null,
+          stdDeviation: 0
+        };
+        const results = DescribeUtil.describeNumbers(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('if the collection is empty', () => {
+        const collection = [];
+        const expected = {
+          count: 0,
+          max: null,
+          min: null,
+          stdDeviation: 0
+        };
+        const results = DescribeUtil.describeNumbers(collection);
+        global.expect(results).toMatchObject(expected);
+      });
       global.it('a number of one', () => {
         const collection = [1];
         const expected = {
@@ -127,8 +145,20 @@ global.describe('DescribeUtil', () => {
         global.expect(results).toMatchObject(expected);
       });
       
-      global.it('a pair of numbers', () => {
+      global.it('a pair of numbers: 1,3', () => {
         const collection = [1, 3];
+        const expected = {
+          count: 2,
+          max: 3,
+          min: 1,
+          mean: 2,
+          stdDeviation: 1
+        };
+        const results = DescribeUtil.describeNumbers(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('a pair of numbers: 3,1', () => {
+        const collection = [3, 1];
         const expected = {
           count: 2,
           max: 3,

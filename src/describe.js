@@ -204,7 +204,7 @@ class StringDescription extends SeriesDescription {
   finalize() {
     super.finalize();
 
-    let currentTop;
+    let currentTop = null;
     let currentTopFrequency = null;
     for (const [key, count] of this.uniqueMap.entries()) {
       if (currentTopFrequency == null || count > currentTopFrequency) {
@@ -218,24 +218,20 @@ class StringDescription extends SeriesDescription {
 }
 
 DescribeUtil.describeStrings = function describeStrings(collection) {
-  if (!Array.isArray(collection) || collection.length < 1) {
-    throw Error('describeStrings(collection): collection must be an array of strings');
-  }
-
+  const cleanCollection = Array.isArray(collection) ? collection : [collection];
+  
   const result = new StringDescription();
-  collection.forEach((value) => result.check(value));
+  cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
   return result;
 };
 
 DescribeUtil.describeNumbers = function describeNumbers(collection) {
-  if (!Array.isArray(collection) || collection.length < 1) {
-    throw Error('describeNumbers(collection): collection must be an array of numbers');
-  }
-
+  const cleanCollection = Array.isArray(collection) ? collection : [collection];
+  
   const result = new NumberDescription();
-  collection.forEach((value) => result.check(value));
+  cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
   return result;
