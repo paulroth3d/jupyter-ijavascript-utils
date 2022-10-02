@@ -125,6 +125,7 @@ class NumberDescription extends SeriesDescription {
     @see https://stackoverflow.com/a/1348615
     @see https://lingpipe-blog.com/2009/03/19/computing-sample-mean-variance-online-one-pass/
     @see https://lingpipe-blog.com/2009/07/07/welford-s-algorithm-delete-online-mean-variance-deviation/
+    @see https://www.calculator.net/standard-deviation-calculator.html
     */
     const oldMean = this.mean;
     this.mean += (value - oldMean) / this.count;
@@ -243,20 +244,12 @@ DescribeUtil.describeNumbers = function describeNumbers(collection) {
   return result;
 };
 
-DescribeUtil.welford = function welford(series) {
-  let M = 0;
-  let S = 0;
-  const N = series.length;
-  for (let k = 1; k <= series.length; k += 1) {
-    const x = series[k - 1];
-    const oldM = M;
-    M = M + (x - M) / k; // eslint-disable-line
-    S = S + (x - M) * (x - oldM); // eslint-disable-line
-    // console.log(`x:${x}, k:${k}, M:${M}, S:${S}, oldM:${oldM}`);
-  }
-  return N > 1 ? S / (N) : 0.0;
-};
-
+/**
+ * Sanity check for standard deviation
+ * @param {Number[]} series - collection of numbers
+ * @returns {Number} - standard deviation of the numbers
+ * @private
+ */
 DescribeUtil.stdDeviation = function stdDeviation(series) {
   let avg = 0;
 

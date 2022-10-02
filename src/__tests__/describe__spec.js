@@ -163,5 +163,17 @@ global.describe('DescribeUtil', () => {
       const expected = 1;
       global.expect(result).toBe(expected);
     });
+    global.it('for four numbers: 1, 3, 5, 7', () => {
+      const series = [1, 3, 5, 7];
+      const result = DescribeUtil.stdDeviation(series);
+      const expected = 2.23606797749979;
+      global.expect(result).toBeCloseTo(expected);
+    });
+    global.it('for five numbers: 3, 5, 7, 9, 11', () => {
+      const series = [3, 5, 7, 9, 11];
+      const result = DescribeUtil.stdDeviation(series);
+      const expected = 2.8284271247461903;
+      global.expect(result).toBeCloseTo(expected);
+    });
   });
 });
