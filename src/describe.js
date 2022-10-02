@@ -128,10 +128,8 @@ class NumberDescription extends SeriesDescription {
     */
     const oldMean = this.mean;
     this.mean += (value - oldMean) / this.count;
-    // const nextMean = this.mean + (value - this.mean) / this.count;
     this.m2 += (value - oldMean) * (value - this.mean);
     // console.log(`value:${value}, this.mean:${this.mean}, oldMean:${oldMean}, stdDeviation:${this.stdDeviation}`);
-    // this.mean = nextMean;
   }
 
   finalize() {
