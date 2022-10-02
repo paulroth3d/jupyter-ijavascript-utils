@@ -59,7 +59,7 @@ class SeriesDescription {
 
     const valueType = typeof value;
     if (valueType !== expectedType) {
-      throw Error(`Value passed(${value}) expected to be:${expectedType}, but was: ${valueType}`);
+      throw Error(`describe: Value passed(${value}) expected to be:${expectedType}, but was: ${valueType}`);
     }
 
     this.count += 1;
@@ -217,11 +217,8 @@ class StringDescription extends SeriesDescription {
   }
 }
 
-DescribeUtil.NumberDescription = NumberDescription;
-DescribeUtil.StringDescription = StringDescription;
-
 DescribeUtil.describeStrings = function describeStrings(collection) {
-  if (!Array.isArray(collection) || collection.length < 1 || typeof collection[0] !== 'string') {
+  if (!Array.isArray(collection) || collection.length < 1) {
     throw Error('describeStrings(collection): collection must be an array of strings');
   }
 
@@ -233,7 +230,7 @@ DescribeUtil.describeStrings = function describeStrings(collection) {
 };
 
 DescribeUtil.describeNumbers = function describeNumbers(collection) {
-  if (!Array.isArray(collection) || collection.length < 1 || typeof collection[0] !== 'number') {
+  if (!Array.isArray(collection) || collection.length < 1) {
     throw Error('describeNumbers(collection): collection must be an array of numbers');
   }
 
@@ -243,6 +240,8 @@ DescribeUtil.describeNumbers = function describeNumbers(collection) {
 
   return result;
 };
+
+//-- Testing Internal items
 
 /**
  * Sanity check for standard deviation
@@ -264,3 +263,15 @@ DescribeUtil.stdDeviation = function stdDeviation(series) {
 
   return s2;
 };
+
+/**
+ * Number Description - used for testing
+ * @private
+ */
+DescribeUtil.NumberDescription = NumberDescription;
+
+/**
+ * String Description - used for testing
+ * @private
+ */
+DescribeUtil.StringDescription = StringDescription;

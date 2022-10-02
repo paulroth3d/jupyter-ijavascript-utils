@@ -22,7 +22,7 @@ global.describe('DescribeUtil', () => {
         
         global.expect(() => {
           DescribeUtil.describeStrings(collection);
-        }).toThrow('describeStrings(collection): collection must be an array of strings');
+        }).toThrow('describe: Value passed(0) expected to be:string, but was: number');
       });
     });
     global.describe('can describe', () => {
@@ -40,6 +40,30 @@ global.describe('DescribeUtil', () => {
       });
       global.it('a string of multiple different strings', () => {
         const collection = ['a', 'apple', 'bin'];
+        const expected = {
+          count: 3,
+          max: 'apple',
+          min: 'a',
+          top: 'a',
+          topFrequency: 1
+        };
+        const results = DescribeUtil.describeStrings(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('with undefined in the list', () => {
+        const collection = ['a', 'apple', undefined, 'bin'];
+        const expected = {
+          count: 3,
+          max: 'apple',
+          min: 'a',
+          top: 'a',
+          topFrequency: 1
+        };
+        const results = DescribeUtil.describeStrings(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('with an empty string in the list', () => {
+        const collection = ['a', 'apple', '', 'bin'];
         const expected = {
           count: 3,
           max: 'apple',
@@ -86,7 +110,7 @@ global.describe('DescribeUtil', () => {
         
         global.expect(() => {
           DescribeUtil.describeNumbers(collection);
-        }).toThrow('describeNumbers(collection): collection must be an array of numbers');
+        }).toThrow('describe: Value passed(a) expected to be:number, but was: string');
       });
     });
     global.describe('can describe', () => {
@@ -115,6 +139,31 @@ global.describe('DescribeUtil', () => {
         const results = DescribeUtil.describeNumbers(collection);
         global.expect(results).toMatchObject(expected);
       });
+      global.it('with null', () => {
+        const collection = [1, null, 3];
+        const expected = {
+          count: 2,
+          max: 3,
+          min: 1,
+          mean: 2,
+          stdDeviation: 1
+        };
+        const results = DescribeUtil.describeNumbers(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+      global.it('with undefined', () => {
+        const collection = [1, undefined, 3];
+        const expected = {
+          count: 2,
+          max: 3,
+          min: 1,
+          mean: 2,
+          stdDeviation: 1
+        };
+        const results = DescribeUtil.describeNumbers(collection);
+        global.expect(results).toMatchObject(expected);
+      });
+
       global.it('multiple numbers:1, 3, 5, 7', () => {
         const collection = [1, 3, 5, 7];
         const expected = {
