@@ -13,15 +13,32 @@ module.exports = {};
 const DescribeUtil = module.exports;
 
 /**
+ * @typedef {Object} DescribeOptions
+ * @property {Boolean} uniqueStrings - whether unique strings / frequency should be captured
+ */
+
+/**
  * Base Description for a series of values
  * @class
  */
 class SeriesDescription {
-  constructor(what, type) {
+  /**
+   * Constructor
+   * @param {String} what - description of what is being described
+   * @param {DescribeOptions} options - options for how things are described
+   */
+  constructor(what, type, options) {
     this.reset();
     this.what = what;
     this.type = type;
+    // this.options = options || {};
   }
+
+  /**
+   * Options used for describing
+   * @type {DescribeOptions}
+   */
+  // options;
 
   /**
    * What is being described
@@ -118,8 +135,13 @@ class BooleanDescription extends SeriesDescription {
    */
   mean;
 
-  constructor(what) {
-    super(what, 'boolean');
+  /**
+   * 
+   * @param {String} what - what is being described
+   * @param {DescribeOptions} options - options used for describing
+   */
+  constructor(what, options) {
+    super(what, 'boolean', options);
     this.reset();
   }
 
@@ -180,8 +202,13 @@ class NumberDescription extends SeriesDescription {
    */
   stdDeviation;
 
-  constructor(what) {
-    super(what, 'number');
+  /**
+   * Constructor
+   * @param {String} what - What is being described
+   * @param {DescribeOptions} options -
+   */
+  constructor(what, options) {
+    super(what, 'number', options);
     this.reset();
   }
 
@@ -260,8 +287,13 @@ class StringDescription extends SeriesDescription {
    */
   topFrequency;
 
-  constructor(what) {
-    super(what, 'string');
+  /**
+   * Constructor
+   * @param {String} what - What is being described
+   * @param {DescribeOptions} options -
+   */
+  constructor(what, options) {
+    super(what, 'string', options);
     this.uniqueMap = null;
     this.reset();
   }
@@ -328,8 +360,13 @@ class DateDescription extends SeriesDescription {
    */
   mean;
 
-  constructor(what) {
-    super(what, 'Date');
+  /**
+   * Constructor
+   * @param {String} what - What is being described
+   * @param {DescribeOptions} options -
+   */
+  constructor(what, options) {
+    super(what, 'Date', options);
     this.reset();
   }
 
@@ -376,6 +413,12 @@ class DateDescription extends SeriesDescription {
   }
 }
 
+/**
+ * 
+ * @param {Object[]} collection - Collection of objects to be described
+ * @param {Object} options - options to be 
+ * @returns 
+ */
 module.exports.describeObjects = function describeObjects(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
 
@@ -447,12 +490,13 @@ module.exports.describeObjects = function describeObjects(collection, options) {
 /**
  * Describes a series of numbers
  * @param {String[]} collection - collection of string values to describe
+ * @param {Object} options - options for describing strings
  * @returns {StringDescription} - Description of the list of strings
  */
-module.exports.describeStrings = function describeStrings(collection) {
+module.exports.describeStrings = function describeStrings(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
   
-  const result = new StringDescription();
+  const result = new StringDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
@@ -462,12 +506,13 @@ module.exports.describeStrings = function describeStrings(collection) {
 /**
  * Describes a series of numbers
  * @param {Number[]} collection - Array of numbers
+ * @param {Object} options - options for describing numbers
  * @returns {NumberDescription}
  */
-module.exports.describeNumbers = function describeNumbers(collection) {
+module.exports.describeNumbers = function describeNumbers(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
   
-  const result = new NumberDescription();
+  const result = new NumberDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
@@ -486,13 +531,14 @@ module.exports.describeNumbers = function describeNumbers(collection) {
  * * String true
  * 
  * @param {Boolean[] | String[] | Number[]} collection - Array of Boolean Values
+ * @param {Object} options - options for describing boolean values
  * @returns {BooleanDescription}
  * @see {@link module:format.parseBooleanValue}
  */
-module.exports.describeBoolean = function describeBoolean(collection) {
+module.exports.describeBoolean = function describeBoolean(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
 
-  const result = new BooleanDescription();
+  const result = new BooleanDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
@@ -503,12 +549,13 @@ module.exports.describeBoolean = function describeBoolean(collection) {
  * Describes a series of Date / Epoch Numbers
  * 
  * @param {Date[] | Number[]} collection - Array of Dates / Epoch Numbers
+ * @param {Object} options - options for describing dates
  * @returns {DateDescription}
  */
-module.exports.describeDates = function describeDates(collection) {
+module.exports.describeDates = function describeDates(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
 
-  const result = new DateDescription();
+  const result = new DateDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
   result.finalize();
 
