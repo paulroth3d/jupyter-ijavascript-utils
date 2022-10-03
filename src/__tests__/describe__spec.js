@@ -398,4 +398,49 @@ global.describe('DescribeUtil', () => {
       global.expect(result).toBeCloseTo(expected);
     });
   });
+
+  global.describe('describeObjects', () => {
+    global.describe('can describe', () => {
+      global.it('a single simple object', () => {
+        const collection = {
+          first: 'john',
+          last: 'doe',
+          age: 23
+        };
+        const expected = [{
+          count: 1,
+          max: 'john',
+          min: 'john',
+          top: 'john',
+          topFrequency: 1,
+          type: 'string',
+          unique: 1,
+          uniqueMap: null,
+          what: 'first'
+        },
+        {
+          count: 1,
+          max: 'doe',
+          min: 'doe',
+          top: 'doe',
+          topFrequency: 1,
+          type: 'string',
+          unique: 1,
+          what: 'last'
+        },
+        {
+          count: 1,
+          max: 23,
+          mean: 23,
+          min: 23,
+          stdDeviation: 0,
+          type: 'number',
+          what: 'age'
+        }];
+        
+        const result = DescribeUtil.describeObjects(collection);
+        global.expect(result).toMatchObject(expected);
+      });
+    });
+  });
 });

@@ -1,20 +1,39 @@
 /* eslint-disable max-classes-per-file, class-methods-use-this */
 
 const FormatUtils = require('./format');
+const ObjectUtils = require('./object');
 
 /**
  * Module to describe objects or sets of data
+ * 
+ * @module describe
+ * @exports describe
  */
 module.exports = {};
 const DescribeUtil = module.exports;
 
 /**
  * Base Description for a series of values
+ * @class
  */
 class SeriesDescription {
-  constructor() {
+  constructor(what, type) {
     this.reset();
+    this.what = what;
+    this.type = type;
   }
+
+  /**
+   * What is being described
+   * @type {String}
+   */
+  what;
+
+  /**
+   * The type of thing being described
+   * @type {String}
+   */
+  type;
 
   /**
    * The number of entries reviewed
@@ -89,6 +108,8 @@ class SeriesDescription {
 
 /**
  * Describes a series of Boolean Values
+ * @augments SeriesDescription
+ * @class
  */
 class BooleanDescription extends SeriesDescription {
   /**
@@ -97,14 +118,27 @@ class BooleanDescription extends SeriesDescription {
    */
   mean;
 
-  constructor() {
-    super();
+  constructor(what) {
+    super(what, 'boolean');
     this.reset();
   }
 
   reset() {
     super.reset();
     this.mean = 0.0;
+  }
+
+  /**
+   * Whether the value can be described with this
+   * @param {any} value - value to check
+   * @returns {Boolean} - true if the value matches
+   */
+  static matchesType(value) {
+    return FormatUtils.parseBoolean(value)
+      || value === false
+      || value === 'FALSE'
+      || value === 'False'
+      || value === 'false';
   }
 
   check(value) {
@@ -146,8 +180,8 @@ class NumberDescription extends SeriesDescription {
    */
   stdDeviation;
 
-  constructor() {
-    super();
+  constructor(what) {
+    super(what, 'number');
     this.reset();
   }
 
@@ -156,6 +190,15 @@ class NumberDescription extends SeriesDescription {
     this.mean = 0.0;
     this.m2 = 0.0;
     this.stdDeviation = 0.0;
+  }
+
+  /**
+   * Whether the value can be described with this
+   * @param {any} value - value to check
+   * @returns {Boolean} - true if the value matches
+   */
+  static matchesType(value) {
+    return (typeof value) === 'number';
   }
 
   check(value) {
@@ -217,8 +260,9 @@ class StringDescription extends SeriesDescription {
    */
   topFrequency;
 
-  constructor() {
-    super();
+  constructor(what) {
+    super(what, 'string');
+    this.uniqueMap = null;
     this.reset();
   }
 
@@ -228,6 +272,15 @@ class StringDescription extends SeriesDescription {
     this.unique = null;
     this.top = null;
     this.topFrequency = null;
+  }
+
+  /**
+   * Whether the value can be described with this
+   * @param {any} value - value to check
+   * @returns {Boolean} - true if the value matches
+   */
+  static matchesType(value) {
+    return (typeof value) === 'string';
   }
 
   check(value) {
@@ -259,6 +312,9 @@ class StringDescription extends SeriesDescription {
     }
     this.top = currentTop;
     this.topFrequency = currentTopFrequency;
+    this.unique = this.uniqueMap.size;
+
+    this.uniqueMap = null;
   }
 }
 
@@ -272,14 +328,23 @@ class DateDescription extends SeriesDescription {
    */
   mean;
 
-  constructor() {
-    super();
+  constructor(what) {
+    super(what, 'Date');
     this.reset();
   }
 
   reset() {
     super.reset();
     this.mean = null;
+  }
+
+  /**
+   * Whether the value can be described with this
+   * @param {any} value - value to check
+   * @returns {Boolean} - true if the value matches
+   */
+  static matchesType(value) {
+    return (value instanceof Date); // || (typeof value) === 'number';
   }
 
   check(value) {
@@ -299,8 +364,7 @@ class DateDescription extends SeriesDescription {
     const oldMean = this.mean;
     this.mean += (cleanValue - oldMean) / this.count;
 
-    if (this.max === null || cleanValue > this.max) this.max = cleanValue;
-    if (this.min === null || cleanValue < this.min) this.min = cleanValue;
+    super.checkMinMax(cleanValue);
   }
 
   finalize() {
@@ -312,7 +376,80 @@ class DateDescription extends SeriesDescription {
   }
 }
 
-DescribeUtil.describeStrings = function describeStrings(collection) {
+module.exports.describeObjects = function describeObjects(collection, options) {
+  const cleanCollection = Array.isArray(collection) ? collection : [collection];
+
+  const cleanOptions = options ? options : {};
+
+  cleanOptions.include = cleanOptions.include ? new Set(cleanOptions.include) : null;
+  cleanOptions.exclude = new Set(cleanOptions.exclude || []);
+
+  const results = new Map();
+  if (cleanOptions.results) {
+    ObjectUtils.keys(cleanOptions.results)
+      .forEach((key) => {
+        const keyValue = cleanOptions.results[key];
+        if (keyValue === 'string') {
+          results.set(key, new StringDescription(key));
+        } else if (keyValue === 'number') {
+          results.set(key, new NumberDescription(key));
+        } else if (keyValue === 'date') {
+          results.set(key, new DateDescription(key));
+        } else if (keyValue === 'boolean' || keyValue === 'bool') {
+          results.set(key, new StringDescription(key));
+        }
+      });
+  }
+  let val;
+  // let describer;
+
+  cleanCollection.forEach((obj) => {
+    ObjectUtils.keys(obj)
+      .forEach((key) => {
+        val = obj[key];
+        
+        if (cleanOptions.include && !cleanOptions.include.has(key)) {
+          //-- ignore
+        } else if (cleanOptions.exclude.has(key)) {
+          //-- ignore
+        } else if (FormatUtils.isEmptyValue(val)) {
+          //-- do nothing
+        } else {
+          if (Object.prototype.hasOwnProperty.call(results, key)) {
+            //-- describer already found
+          } else if (StringDescription.matchesType(val)) {
+            results[key] = new StringDescription(key);
+          } else if (DateDescription.matchesType(val)) {
+            results[key] = new DateDescription(key);
+          } else if (NumberDescription.matchesType(val)) {
+            results[key] = new NumberDescription(key);
+          } else if (BooleanDescription.matchesType(val)) {
+            results[key] = new BooleanDescription(key);
+          } else {
+            //-- ignore?
+            results[key] = new SeriesDescription(key, typeof val);
+          }
+          results[key].check(val);
+        }
+      });
+  });
+
+  const resultArray = [];
+  ObjectUtils.keys(results)
+    .forEach((key) => {
+      results[key].finalize();
+      resultArray.push(results[key]);
+    });
+  
+  return resultArray;
+};
+
+/**
+ * Describes a series of numbers
+ * @param {String[]} collection - collection of string values to describe
+ * @returns {StringDescription} - Description of the list of strings
+ */
+module.exports.describeStrings = function describeStrings(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
   
   const result = new StringDescription();
@@ -322,7 +459,12 @@ DescribeUtil.describeStrings = function describeStrings(collection) {
   return result;
 };
 
-DescribeUtil.describeNumbers = function describeNumbers(collection) {
+/**
+ * Describes a series of numbers
+ * @param {Number[]} collection - Array of numbers
+ * @returns {NumberDescription}
+ */
+module.exports.describeNumbers = function describeNumbers(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
   
   const result = new NumberDescription();
@@ -332,7 +474,22 @@ DescribeUtil.describeNumbers = function describeNumbers(collection) {
   return result;
 };
 
-DescribeUtil.describeBoolean = function describeBoolean(collection) {
+/**
+ * Describes a series of boolean values.
+ * 
+ * Note, that the following are considered TRUE:
+ * 
+ * * Boolean true
+ * * Number 1
+ * * String TRUE
+ * * String True
+ * * String true
+ * 
+ * @param {Boolean[] | String[] | Number[]} collection - Array of Boolean Values
+ * @returns {BooleanDescription}
+ * @see {@link module:format.parseBooleanValue}
+ */
+module.exports.describeBoolean = function describeBoolean(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
 
   const result = new BooleanDescription();
@@ -342,7 +499,13 @@ DescribeUtil.describeBoolean = function describeBoolean(collection) {
   return result;
 };
 
-DescribeUtil.describeDates = function describeDates(collection) {
+/**
+ * Describes a series of Date / Epoch Numbers
+ * 
+ * @param {Date[] | Number[]} collection - Array of Dates / Epoch Numbers
+ * @returns {DateDescription}
+ */
+module.exports.describeDates = function describeDates(collection) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
 
   const result = new DateDescription();
