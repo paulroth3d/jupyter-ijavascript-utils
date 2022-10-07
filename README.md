@@ -46,6 +46,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.18 - tie to vega-datasets avoiding esmodules until ijavascript can support them
 * 1.17 - provide object.propertyValueSample - as a way to list 'non-empty' property values
 * 1.16 - provide file.matchFiles - as a way to find files or directories
 * 1.15 - provide object.formatProperties - as a way to quickly convert to string, number, etc.

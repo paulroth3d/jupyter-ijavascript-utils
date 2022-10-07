@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
@@ -52,7 +52,7 @@
     "svgdom": "^0.1.10",
     "uuid": "^8.3.2",
     "vega": "^5.22.0",
-    "vega-datasets": "^2.3.0",
+    "vega-datasets": "2.3.0",
     "vega-lite": "^5.2.0",
     "vega-lite-api": "^5.0.0"
   }
