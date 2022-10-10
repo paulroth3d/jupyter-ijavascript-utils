@@ -120,6 +120,9 @@ class SeriesDescription {
    * Finalizes the review
    */
   finalize() { // eslint-disable-line
+    const result = { ...this };
+    delete result.options;
+    return result;
   }
 }
 
@@ -178,7 +181,8 @@ class BooleanDescription extends SeriesDescription {
   }
 
   finalize() {
-    super.finalize();
+    const result = super.finalize();
+    return result;
   }
 }
 
@@ -246,8 +250,6 @@ class NumberDescription extends SeriesDescription {
   }
 
   finalize() {
-    super.finalize();
-
     let newDeviation;
     if (this.count > 1) {
       newDeviation = Math.sqrt(this.m2 / this.count);
@@ -256,6 +258,10 @@ class NumberDescription extends SeriesDescription {
     }
     // console.log(`updated m2:${this.m2}, stdDeviation:${this.stdDeviation}, count:${this.count}, newDeviation:${newDeviation}`);
     this.stdDeviation = newDeviation;
+
+    const result = super.finalize();
+    delete result.m2;
+    return result;
   }
 }
 
@@ -347,6 +353,10 @@ class StringDescription extends SeriesDescription {
     this.unique = this.uniqueMap.size;
 
     this.uniqueMap = null;
+
+    const result = super.finalize();
+    delete result.uniqueMap;
+    return result;
   }
 }
 
@@ -405,11 +415,12 @@ class DateDescription extends SeriesDescription {
   }
 
   finalize() {
-    super.finalize();
-
     if (!FormatUtils.isEmptyValue(this.min)) this.min = new Date(this.min);
     if (!FormatUtils.isEmptyValue(this.max)) this.max = new Date(this.max);
     if (!FormatUtils.isEmptyValue(this.mean)) this.mean = new Date(this.mean);
+
+    const result = super.finalize();
+    return result;
   }
 }
 
@@ -433,13 +444,13 @@ module.exports.describeObjects = function describeObjects(collection, options) {
       .forEach((key) => {
         const keyValue = cleanOptions.results[key];
         if (keyValue === 'string') {
-          results.set(key, new StringDescription(key));
+          results.set(key, new StringDescription(key, cleanOptions));
         } else if (keyValue === 'number') {
-          results.set(key, new NumberDescription(key));
+          results.set(key, new NumberDescription(key, cleanOptions));
         } else if (keyValue === 'date') {
-          results.set(key, new DateDescription(key));
+          results.set(key, new DateDescription(key, cleanOptions));
         } else if (keyValue === 'boolean' || keyValue === 'bool') {
-          results.set(key, new StringDescription(key));
+          results.set(key, new StringDescription(key, cleanOptions));
         }
       });
   }
@@ -477,12 +488,8 @@ module.exports.describeObjects = function describeObjects(collection, options) {
       });
   });
 
-  const resultArray = [];
-  ObjectUtils.keys(results)
-    .forEach((key) => {
-      results[key].finalize();
-      resultArray.push(results[key]);
-    });
+  const resultArray = ObjectUtils.keys(results)
+    .map((key) => results[key].finalize());
   
   return resultArray;
 };
@@ -498,9 +505,7 @@ module.exports.describeStrings = function describeStrings(collection, options) {
   
   const result = new StringDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
-  result.finalize();
-
-  return result;
+  return result.finalize();
 };
 
 /**
@@ -514,9 +519,7 @@ module.exports.describeNumbers = function describeNumbers(collection, options) {
   
   const result = new NumberDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
-  result.finalize();
-
-  return result;
+  return result.finalize();
 };
 
 /**
@@ -540,9 +543,7 @@ module.exports.describeBoolean = function describeBoolean(collection, options) {
 
   const result = new BooleanDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
-  result.finalize();
-
-  return result;
+  return result.finalize();
 };
 
 /**
@@ -557,9 +558,7 @@ module.exports.describeDates = function describeDates(collection, options) {
 
   const result = new DateDescription(null, options);
   cleanCollection.forEach((value) => result.check(value));
-  result.finalize();
-
-  return result;
+  return result.finalize();
 };
 
 //-- Testing Internal items

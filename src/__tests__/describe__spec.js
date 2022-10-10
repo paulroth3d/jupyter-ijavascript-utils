@@ -415,7 +415,6 @@ global.describe('DescribeUtil', () => {
           topFrequency: 1,
           type: 'string',
           unique: 1,
-          uniqueMap: null,
           what: 'first'
         },
         {
@@ -438,6 +437,88 @@ global.describe('DescribeUtil', () => {
           what: 'age'
         }];
         
+        const result = DescribeUtil.describeObjects(collection);
+        global.expect(result).toMatchObject(expected);
+      });
+      global.describe('a single complex object', () => {
+        const collection = {
+          name: 'john',
+          age: 23,
+          isStudent: true,
+          date: new Date('2022-08-09T09:00:00.000Z')
+        };
+        const expected = [
+          {
+            count: 1,
+            max: 'john',
+            min: 'john',
+            top: 'john',
+            topFrequency: 1,
+            type: 'string',
+            unique: 1,
+            what: 'name',
+          },
+          {
+            count: 1,
+            max: 23,
+            mean: 23,
+            min: 23,
+            stdDeviation: 0,
+            type: 'number',
+            what: 'age',
+          },
+          {
+            count: 1,
+            max: 1,
+            mean: 1,
+            min: null,
+            type: 'boolean',
+            what: 'isStudent',
+          },
+          {
+            count: 1,
+            max: new Date('2022-08-09T09:00:00.000Z'),
+            mean: new Date('2022-08-09T09:00:00.000Z'),
+            min: new Date('2022-08-09T09:00:00.000Z'),
+            type: 'Date',
+            what: 'date',
+          },
+        ];
+        
+        const result = DescribeUtil.describeObjects(collection);
+        global.expect(result).toMatchObject(expected);
+      });
+      global.describe('a collection with only numbers', () => {
+        const collection = [{
+          age: 23,
+          height: 6.0
+        }, {
+          age: 24,
+          height: 6.1,
+        }, {
+          age: 25,
+          height: 6.2,
+        }];
+        const expected = [
+          {
+            count: 3,
+            max: 25,
+            mean: 24,
+            min: 23,
+            stdDeviation: 0.816496580927726,
+            type: 'number',
+            what: 'age'
+          },
+          {
+            count: 3,
+            max: 6.2,
+            mean: 6.1,
+            min: 6,
+            stdDeviation: 0.08164965809277276,
+            type: 'number',
+            what: 'height'
+          }
+        ];
         const result = DescribeUtil.describeObjects(collection);
         global.expect(result).toMatchObject(expected);
       });
