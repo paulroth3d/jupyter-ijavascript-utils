@@ -76,6 +76,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 | {@link module:file}           | Read and write data/text to files.                                                                  |
 | {@link module:format}         | Formatting and massage data to be legible.                                                          |
 | {@link module:group}          | Group/Reduce Hierarchies of Object - generating Maps of records ({@link SourceMap})                 |
+| {@link module:hashMap}        | Modify JavaScript HashMaps (ex new Map())             |
 | {@link module:ijs}            | Extend iJavaScript to support await, and new types of rendering - like {@tutorial htmlScript} and markdown|
 | {@link module:latex}          | Render Math Notation with <a href="www.latex-project.org">LaTeX<a> and <a href="katex.org">KaTeX</a>|
 | {@link module:leaflet}        | Render maps with <a href="leaflet.org">Leaflet</a>                                                  |
