@@ -6,6 +6,14 @@ const ObjectUtils = require('./object');
 /**
  * Module to describe objects or sets of data
  * 
+ * Describe an array of objects
+ *  * {@link module:describe.describeObjects|describeObjects(collection, options)} - given a list of objects, describes each of the fields
+ * Describe an array of values (assuming all are the same type)
+ *  * {@link module:describe.describeBoolean|describeBoolean(collection, options)} - describes a series of booleans
+ *  * {@link module:describe.describeStrings|describeStrings(collection, options)} - describes a series of strings
+ *  * {@link module:describe.describeNumbers|describeNumbers(collection, options)} - describes a series of numbers
+ *  * {@link module:describe.describeDates|describeDates(collection, options)} - describes a series of dates
+ * 
  * @module describe
  * @exports describe
  */
@@ -94,7 +102,7 @@ class SeriesDescription {
     }
 
     const valueType = typeof value;
-    if (valueType !== expectedType) {
+    if (expectedType && valueType !== expectedType) {
       throw Error(`describe: Value passed(${value}) expected to be:${expectedType}, but was: ${valueType}`);
     }
 
@@ -121,7 +129,7 @@ class SeriesDescription {
    */
   finalize() { // eslint-disable-line
     const result = { ...this };
-    delete result.options;
+    // delete result.options;
     return result;
   }
 }
@@ -159,11 +167,7 @@ class BooleanDescription extends SeriesDescription {
    * @returns {Boolean} - true if the value matches
    */
   static matchesType(value) {
-    return FormatUtils.parseBoolean(value)
-      || value === false
-      || value === 'FALSE'
-      || value === 'False'
-      || value === 'false';
+    return FormatUtils.parseBoolean(value);
   }
 
   check(value) {
@@ -425,10 +429,85 @@ class DateDescription extends SeriesDescription {
 }
 
 /**
+ * Describes a collection of objects.
  * 
+ * For example, given the following collection:
+ * 
+ * ```
+ *  collection = [{
+ *      first: 'john',
+ *      last: 'doe',
+ *      age: 23,
+ *      enrolled: new Date('2022-01-01')
+ *    }, {
+ *      first: 'john',
+ *      last: 'doe',
+ *      age: 24,
+ *      enrolled: new Date('2022-01-03')
+ *    }, {
+ *      first: 'jan',
+ *      last: 'doe',
+ *      age: 25,
+ *      enrolled: new Date('2022-01-05')
+ *    }];
+ *  ```
+ * 
+ * Running `utils.describe.describeObjects(collection);` gives:
+ * 
+ *  ```
+ *  [{
+ *      "count": 3,
+ *      "max": "john",
+ *      "min": "jan",
+ *      "top": "john",
+ *      "topFrequency": 2,
+ *      "type": "string",
+ *      "unique": 2,
+ *      "what": "first"
+ *    }, {
+ *      "count": 3,
+ *      "max": "doe",
+ *      "min": "doe",
+ *      "top": "doe",
+ *      "topFrequency": 3,
+ *      "type": "string",
+ *      "unique": 1,
+ *      "what": "last"
+ *    }, {
+ *      "count": 3,
+ *      "max": 25,
+ *      "min": 23,
+ *      "mean": 24,
+ *      "stdDeviation": 0.816496580927726,
+ *      "type": "number",
+ *      "what": "age"
+ *    }, {
+ *      "count": 3,
+ *      "max": "2022-01-05T00:00:00.000Z",
+ *      "min": "2022-01-01T00:00:00.000Z",
+ *      "mean": "2022-01-03T00:00:00.000Z",
+ *      "type": "Date",
+ *      "what": "enrolled"
+ *  }]
+ *  ```
+ *
+ *  Or Rendered to a table: `utils.table(results).render()`:
+ *
+ *  what    |type  |count|max                     |min                     |mean                    |top |topFrequency|unique
+ *  --      |--    |--   |--                      |--                      |--                      |--  |--          |--    
+ *  first   |string|3    |john                    |jan                     |                        |john|2           |2     
+ *  last    |string|3    |doe                     |doe                     |                        |doe |3           |1     
+ *  age     |number|3    |25                      |23                      |24                      |    |            |      
+ *  enrolled|Date  |3    |2022-01-05T00:00:00.000Z|2022-01-01T00:00:00.000Z|2022-01-03T00:00:00.000Z|    |            |         
+ *  
  * @param {Object[]} collection - Collection of objects to be described
- * @param {Object} options - options to be 
- * @returns 
+ * @param {Object} options - options to be used
+ * @param {String[]} options.include - string list of fields to include in the description
+ * @param {String[]} options.exclude - string list of fields to exclude in the description
+ * @param {Object} options.overridePropertyType - object with property:type values (string|number|date|boolean)
+ *      - that will override how that property is parsed.
+ * @param {Number} maxRows - max rows to consider before halting
+ * @returns {SeriesDescription[]} - collection of descriptions - one for each property
  */
 module.exports.describeObjects = function describeObjects(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
@@ -437,12 +516,17 @@ module.exports.describeObjects = function describeObjects(collection, options) {
 
   cleanOptions.include = cleanOptions.include ? new Set(cleanOptions.include) : null;
   cleanOptions.exclude = new Set(cleanOptions.exclude || []);
+  cleanOptions.maxRows = cleanOptions.maxRows || -1;
+
+  // cleanOptions.prepareFn = typeof cleanOptions.prepareFn === 'function'
+  //   ? cleanOptions.prepareFn
+  //   : (val) => val;
 
   const results = new Map();
-  if (cleanOptions.results) {
-    ObjectUtils.keys(cleanOptions.results)
+  if (cleanOptions.overridePropertyType) {
+    ObjectUtils.keys(cleanOptions.overridePropertyType)
       .forEach((key) => {
-        const keyValue = cleanOptions.results[key];
+        const keyValue = cleanOptions.overridePropertyType[key];
         if (keyValue === 'string') {
           results.set(key, new StringDescription(key, cleanOptions));
         } else if (keyValue === 'number') {
@@ -457,7 +541,12 @@ module.exports.describeObjects = function describeObjects(collection, options) {
   let val;
   // let describer;
 
-  cleanCollection.forEach((obj) => {
+  cleanCollection.every((obj, index) => {
+    if (cleanOptions.maxRows > 0 && index >= cleanOptions.maxRows) {
+      return false;
+    }
+    //-- handles null objects
+    // obj = cleanOptions.prepareFn(obj);
     ObjectUtils.keys(obj)
       .forEach((key) => {
         val = obj[key];
@@ -486,6 +575,7 @@ module.exports.describeObjects = function describeObjects(collection, options) {
           results[key].check(val);
         }
       });
+    return true;
   });
 
   const resultArray = ObjectUtils.keys(results)
