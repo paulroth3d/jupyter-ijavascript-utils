@@ -74,7 +74,7 @@ class SeriesDescription {
 
   /**
    * The maximum value found
-   * @type {any{}}
+   * @type {any}
    */
   max;
 
@@ -293,7 +293,7 @@ class StringDescription extends SeriesDescription {
 
   /**
    * The frequency of the most common string
-   * @type {Number]}
+   * @type {Number}
    */
   topFrequency;
 

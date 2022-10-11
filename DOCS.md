@@ -72,6 +72,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 | {@link module:array}          | Massage, sort, reshape arrays.                                                                      |
 | {@link module:base64}         | Convert to and from base64 encoding of strings                                                      |
 | {@link module:datasets}       | Load example <a href="https://github.com/vega/vega-datasets">datasets provided by the vega team</a> |
+| {@link module:describe}       | Similar to Pandas describe, provides statistics on a set of values / objects |
 | {@link module:file}           | Read and write data/text to files.                                                                  |
 | {@link module:format}         | Formatting and massage data to be legible.                                                          |
 | {@link module:group}          | Group/Reduce Hierarchies of Object - generating Maps of records ({@link SourceMap})                 |
