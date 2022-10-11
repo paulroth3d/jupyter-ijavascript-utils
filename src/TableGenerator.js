@@ -1008,7 +1008,7 @@ class TableGenerator {
     keys = keys.filter((key) => this.#columnsToExclude.indexOf(key) === -1);
 
     //-- identify the formatter to use
-    const cleanFormatter = this.#formatterFn ? this.#formatterFn : ({ value }) => value;
+    const cleanFormatter = this.#formatterFn ? this.#formatterFn : ({ value }) => value === undefined ? '' : value;
 
     const translateHeader = (key) => {
       if (Object.prototype.hasOwnProperty.call(this.#labels, key)) {

@@ -15,6 +15,8 @@
  *   * {@link module:format.capitalize|format.capitalize} - Capitalizes only the first character in the string (ex: 'John paul');
  *   * {@link module:format.capitalizeAll|format.capitalizeAll} - Capitalizes all the words in a string (ex: 'John Paul')
  *   * {@link module:format.ellipsify|format.ellipsify} - Truncates a string if the length is 'too long'
+ *   * {@link module:format.limitLines|format.limitLines(string, toLine, fromLine, lineSeparator)} - selects only a subset of lines in a string
+ *   * {@link module:format.consoleLines|format.consoleLines(...)} - same as limit lines, only console.logs the string out.
  * * Formatting Time
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values
@@ -844,3 +846,78 @@ module.exports.isEmptyValue = (val) =>
   //-- allow for 0s
   val === null || val === undefined || val === ''
   || (Array.isArray(val) && val.length === 0);
+
+/**
+ * Determines if a value is a boolean true value.
+ * 
+ * Matches for:
+ * 
+ * * boolean TRUE
+ * * number 1
+ * * string 'TRUE'
+ * * string 'True'
+ * * string 'true'
+ * 
+ * @param {any} val - the value to be tested
+ * @returns {Boolean} - TRUE if the value matches
+ */
+module.exports.parseBoolean = function parseBoolean(val) {
+  return val === true
+    || val === 1
+    || val === 'TRUE'
+    || val === 'True'
+    || val === 'true';
+};
+
+/**
+ * Narrows to only fromLine - toLine (inclusive) within a string.
+ * 
+ * @see {@link module:format.consoleLines|format.consoleLines()} - to console the values out
+ * @param {String|Object} str - string to be limited, or object to be json.stringify-ied
+ * @param {Number} toLine 
+ * @param {Number} [fromLine=0] - starting line number (starts at 0)
+ * @param {String} [lineSeparator='\n'] - separator for lines
+ * @returns {String}
+ * @example
+ * str = '1\n2\n\3';
+ * utils.format.limitLines(str, 2); // '1\n2'
+ * 
+ * str = '1\n2\n3';
+ * utils.format.limitLines(str, 3, 2); // '2\n3'
+ * 
+ * str = '1\n2\n3';
+ * utils.format.limitLines(str, undefined, 2); // '2\n3'
+ */
+module.exports.limitLines = function limitLines(str, toLine, fromLine, lineSeparator) {
+  const cleanStr = typeof str === 'string'
+    ? str
+    : JSON.stringify(str || '', FormatUtils.mapReplacer, 2);
+  const cleanLine = lineSeparator || '\n';
+
+  return cleanStr.split(cleanLine)
+    .slice(fromLine || 0, toLine)
+    .join(cleanLine);
+};
+
+/**
+ * Same as {@link module:format.limitLines|limitLines()} - only prints to the console.
+ * 
+ * @see {@link module:format.limitLines|format.limitLines}
+ * @param {String|Object} str - string to be limited, or object to be json.stringify-ied
+ * @param {Number} toLine 
+ * @param {Number} [fromLine=0] - starting line number (starts at 0)
+ * @param {String} [lineSeparator='\n'] - separator for lines
+ * @returns {String}
+ * @example
+ * str = '1\n2\n\3';
+ * utils.format.limitLines(str, 2); // '1\n2'
+ * 
+ * str = '1\n2\n3';
+ * utils.format.limitLines(str, 3, 2); // '2\n3'
+ * 
+ * str = '1\n2\n3';
+ * utils.format.limitLines(str, undefined, 2); // '2\n3'
+ */
+module.exports.consoleLines = function consoleLines(str, toLine, fromLine, lineSeparator) {
+  console.log(FormatUtils.limitLines(str, toLine, fromLine, lineSeparator));
+};

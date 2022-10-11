@@ -2,6 +2,7 @@ const aggregate = require('./aggregate');
 const array = require('./array');
 const base64 = require('./base64');
 const datasets = require('./datasets');
+const describe = require('./describe');
 const group = require('./group');
 const hashMap = require('./hashMap');
 const ijsUtils = require('./ijs');
@@ -30,41 +31,43 @@ const table = function table(...rest) {
  * @private
  */
 module.exports = {
-  /** @see module:aggregate */
+  /** @see {@link module:aggregate} */
   aggregate,
   agg: aggregate,
-  /** @see module:array */
+  /** @see {@link module:array} */
   array,
-  /** @see module:base64 */
+  /** @see {@link module:base64} */
   base64,
-  /** @see module:datasets */
+  /** @see {@link module:datasets} */
   datasets,
   dataset: datasets,
-  /** @see module:file */
+  /** @see {@link module:describe} */
+  describe,
+  /** @see {@link module:file} */
   file,
-  /** @see module:group */
+  /** @see {@link module:group} */
   group,
-  /** @see modue:hashMap */
+  /** @see {@link module:hashMap} */
   hashMap,
-  /** @see module:format */
+  /** @see {@link module:format} */
   format,
-  /** @see IJSUtils */
+  /** @see {@link IJSUtils} */
   ijs: ijsUtils,
-  /** @see module:latex */
+  /** @see {@link module:latex} */
   latex,
-  /** @see module:leaflet */
+  /** @see {@link module:leaflet} */
   leaflet,
-  /** @see module:object */
+  /** @see {@link module:object} */
   object,
   /** @see {@link module:plantuml} */
   plantuml,
-  /** @see module:random */
+  /** @see {@link module:random} */
   random,
-  /** @see module:set */
+  /** @see {@link module:set} */
   set,
-  /** @see module:svg */
+  /** @see {@link module:svg} */
   svg,
-  /** @see module:vega */
+  /** @see {@link module:vega} */
   vega,
 
   /** @see SourceMap */

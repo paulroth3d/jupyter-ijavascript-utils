@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 
 const FormatUtils = require('../format');
+const { mockConsole, removeConsoleMock } = require('../__testHelper__/ijsContext');
 
 global.describe('format', () => {
   global.describe('printValue', () => {
@@ -1363,6 +1364,197 @@ global.describe('format', () => {
         const results = FormatUtils.isEmptyValue(val);
         global.expect(results).toBe(expected);
       });
+    });
+  });
+
+  global.describe('parseBoolean', () => {
+    global.describe('captures true', () => {
+      global.it('boolean TRUE', () => {
+        const val = true;
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('number 1', () => {
+        const val = 1;
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string TRUE', () => {
+        const val = 'TRUE';
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string True', () => {
+        const val = 'True';
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string true', () => {
+        const val = 'TRUE';
+        const expected = true;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('captures false', () => {
+      global.it('boolean false', () => {
+        const val = false;
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('number 0', () => {
+        const val = 0;
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string FALSE', () => {
+        const val = 'FALSE';
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string False', () => {
+        const val = 'False';
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('string false', () => {
+        const val = 'false';
+        const expected = false;
+        const result = FormatUtils.parseBoolean(val);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+  });
+  global.describe('limitLines', () => {
+    global.describe('can limit', () => {
+      global.describe('strings', () => {
+        global.it('empty', () => {
+          const target = '';
+          const expected = '';
+          const results = FormatUtils.limitLines(target, 2, undefined, '\n');
+          global.expect(results).toBe(expected);
+        });
+        global.it('4 lines, sliced to 2', () => {
+          const target = '1\n2\n3\n4';
+          const expected = '1\n2';
+          const results = FormatUtils.limitLines(target, 2, undefined, '\n');
+          global.expect(results).toBe(expected);
+        });
+        global.it('4 lines, sliced to 1:2', () => {
+          const target = '1\n2\n3\n4';
+          const expected = '2';
+          const results = FormatUtils.limitLines(target, 2, 1, '\n');
+          global.expect(results).toBe(expected);
+        });
+        global.it('4 lines, sliced to 1:2', () => {
+          const target = '1\n2\n3\n4';
+          const expected = '3\n4';
+          const results = FormatUtils.limitLines(target, undefined, 2, '\n');
+          global.expect(results).toBe(expected);
+        });
+      });
+      global.describe('object', () => {
+        global.it('simple object', () => {
+          const target = { first: 1, second: 2, third: 3 };
+          const expected = '{\n  "first": 1,';
+          const results = FormatUtils.limitLines(target, 2, undefined, '\n');
+          global.expect(results).toBe(expected);
+        });
+      });
+      global.describe('standard datatypes', () => {
+        global.it('number', () => {
+          const target = 4;
+          global.expect(() => FormatUtils.limitLines(target, 1, 0, '\n')).not.toThrow();
+        });
+      });
+      global.describe('line separator', () => {
+        global.it('explicitly set', () => {
+          const target = '1\n2\n3\n4';
+          const expected = '2';
+          const results = FormatUtils.limitLines(target, 2, 1, '\n');
+          global.expect(results).toBe(expected);
+        });
+        global.it('explicitly set', () => {
+          const target = '1\n2\n3\n4';
+          const expected = '2';
+          const results = FormatUtils.limitLines(target, 2, 1);
+          global.expect(results).toBe(expected);
+        });
+      });
+      global.describe('invalid values', () => {
+        global.it('null string', () => {
+          const target = null;
+          const expected = '';
+          const results = FormatUtils.limitLines(target, 3, 5);
+          global.expect(results).toBe(expected);
+        });
+        global.it('string out of bounds 1', () => {
+          const target = null;
+          const expected = '';
+          const results = FormatUtils.limitLines(target, 3, 5);
+          global.expect(results).toBe(expected);
+        });
+        global.it('string out of bounds 2', () => {
+          const target = '1\n2';
+          const expected = '';
+          const results = FormatUtils.limitLines(target, 3, 5);
+          global.expect(results).toBe(expected);
+        });
+        global.it('string in bounds', () => {
+          const target = '1\n2';
+          const expected = '1\n2';
+          const results = FormatUtils.limitLines(target, 2);
+          global.expect(results).toBe(expected);
+        });
+        global.it('string partially in bounds', () => {
+          const target = '1\n2';
+          const expected = '1\n2';
+          const results = FormatUtils.limitLines(target, 4);
+          global.expect(results).toBe(expected);
+        });
+      });
+    });
+  });
+  global.describe('consoleLines', () => {
+    const ORIGINAL_CONSOLE = global.console;
+
+    global.beforeEach(() => {
+      // prepareWindow();
+      mockConsole();
+    });
+    global.afterEach(() => {
+      // restoreWindow();
+      removeConsoleMock();
+    });
+    global.afterAll(() => {
+      global.console = ORIGINAL_CONSOLE;
+    });
+    global.it('can detect console', () => {
+      console.log('test');
+      global.expect(console.log).toHaveBeenCalled();
+    });
+    global.it('can detect it not being called', () => {
+      global.expect(console.log).not.toHaveBeenCalled();
+    });
+    global.it('can console a value', () => {
+      global.expect(console.log).not.toHaveBeenCalled();
+
+      const target = '1\n2\n3\n4';
+      const expected = '2';
+      const results = FormatUtils.limitLines(target, 2, 1, '\n');
+      global.expect(results).toBe(expected);
+
+      FormatUtils.consoleLines(target, 2, 1, '\n');
+
+      global.expect(console.log).toHaveBeenCalled();
     });
   });
 });

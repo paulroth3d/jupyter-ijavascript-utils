@@ -3,6 +3,7 @@
 # sets a screen session for the current project
 
 # sets the current window's name
+# screen -X sessionname "ijsutils"
 screen -X title "notebooks"
 screen -X stuff "cd ../^M"
 screen -X number 0

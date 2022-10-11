@@ -55,7 +55,6 @@ global.describe('hashmap', () => {
   ]
 }`;
       const results = HashMapUtil.stringify(target, 2);
-      console.log(results);
       global.expect(results).toBe(expected);
     });
   });

@@ -46,6 +46,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 ## What's New
 
+* 1.19 - add in {@link module:describe|describe} and {@link module:hashMap|hashMap} modules, along with {@link module:format.limitLines|format.limitLines}
 * 1.18 - tie to vega-datasets avoiding esmodules until ijavascript can support them
 * 1.17 - provide object.propertyValueSample - as a way to list 'non-empty' property values
 * 1.16 - provide file.matchFiles - as a way to find files or directories
@@ -73,6 +74,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 | {@link module:array}          | Massage, sort, reshape arrays.                                                                      |
 | {@link module:base64}         | Convert to and from base64 encoding of strings                                                      |
 | {@link module:datasets}       | Load example <a href="https://github.com/vega/vega-datasets">datasets provided by the vega team</a> |
+| {@link module:describe}       | Similar to Pandas describe, provides statistics on a set of values / objects |
 | {@link module:file}           | Read and write data/text to files.                                                                  |
 | {@link module:format}         | Formatting and massage data to be legible.                                                          |
 | {@link module:group}          | Group/Reduce Hierarchies of Object - generating Maps of records ({@link SourceMap})                 |

@@ -144,8 +144,8 @@ global.describe('tableGenerator', () => {
         const expected = ({
           headers: ['id', 'city', 'month', 'precip'],
           data: [
-            [1, 'Seattle', 'Aug', undefined],
-            [0, 'Seattle', 'Apr', undefined],
+            [1, 'Seattle', 'Aug', ''],
+            [0, 'Seattle', 'Apr', ''],
             [2, 'Seattle', 'Dec', 5.31]
           ]
         });
