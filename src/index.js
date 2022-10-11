@@ -3,6 +3,7 @@ const array = require('./array');
 const base64 = require('./base64');
 const datasets = require('./datasets');
 const group = require('./group');
+const hashMap = require('./hashMap');
 const ijsUtils = require('./ijs');
 const file = require('./file');
 const vega = require('./vega');
@@ -43,6 +44,8 @@ module.exports = {
   file,
   /** @see module:group */
   group,
+  /** @see modue:hashMap */
+  hashMap,
   /** @see module:format */
   format,
   /** @see IJSUtils */
