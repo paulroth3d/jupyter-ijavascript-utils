@@ -206,25 +206,49 @@ describe('ObjectUtils', () => {
       const found = ObjectUtils.keys({ first: 'john', last: 'doe' });
       expect(found).toEqual(expected);
     });
-    it('can get keys off an array', () => {
-      const expected = ['first', 'last', 'cuca'];
-      const found = ObjectUtils.keys([
-        { first: 'john', last: 'doe' },
-        { first: 'jane', last: 'doe' },
-        { first: 'robin', last: 'lloyd', cuca: 'monga' }
-      ]);
-      expect(found).toEqual(expected);
-    });
-    it('can get keys off an array, including nulls', () => {
-      const expected = ['first', 'last', 'cuca'];
-      const found = ObjectUtils.keys([
-        { first: 'john', last: 'doe' },
-        { first: 'jane', last: 'doe' },
-        { first: 'robin', last: 'lloyd', cuca: 'monga' },
-        null,
-        { first: 'becky', last: 'sternhoffer' }
-      ]);
-      expect(found).toEqual(expected);
+    global.describe('without max rows', () => {
+      it('can get keys off an array', () => {
+        const expected = ['first', 'last', 'cuca'];
+        const found = ObjectUtils.keys([
+          { first: 'john', last: 'doe' },
+          { first: 'jane', last: 'doe' },
+          { first: 'robin', last: 'lloyd', cuca: 'monga' }
+        ]);
+        expect(found).toEqual(expected);
+      });
+      it('can get keys off an array, including nulls', () => {
+        const expected = ['first', 'last', 'cuca'];
+        const found = ObjectUtils.keys([
+          { first: 'john', last: 'doe' },
+          { first: 'jane', last: 'doe' },
+          { first: 'robin', last: 'lloyd', cuca: 'monga' },
+          null,
+          { first: 'becky', last: 'sternhoffer' }
+        ]);
+        expect(found).toEqual(expected);
+      });
+      global.describe('with max rows', () => {
+        it('can get keys off an array', () => {
+          const expected = ['first', 'last'];
+          const found = ObjectUtils.keys([
+            { first: 'john', last: 'doe' },
+            { first: 'jane', last: 'doe' },
+            { first: 'robin', last: 'lloyd', cuca: 'monga' }
+          ], 2);
+          expect(found).toEqual(expected);
+        });
+        it('can get keys off an array, including nulls', () => {
+          const expected = ['first', 'last', 'cuca'];
+          const found = ObjectUtils.keys([
+            { first: 'john', last: 'doe' },
+            { first: 'jane', last: 'doe' },
+            { first: 'robin', last: 'lloyd', cuca: 'monga' },
+            null,
+            { first: 'becky', last: 'sternhoffer', score: 4 }
+          ], 4);
+          expect(found).toEqual(expected);
+        });
+      });
     });
   });
   global.describe('clean properties', () => {

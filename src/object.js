@@ -220,17 +220,43 @@ module.exports.mapByProperty = function mapByProperty(collection, propertyOrFn) 
 
 /**
  * Safely gets the keys from an object or array of objects
- * NOTE: much faster on object, as it will assume it needs to check all items in the aray
- * @param {(Object|Array)} objOrArray -
- * @returns {String[]} - list of all the keys found
+ * NOTE: much faster on object, as it will assume it needs to check all items in the array.
+ * 
+ * This can be quite helpful to understand a list of objects that are not uniform in properties.
+ * @param {(Object|Array)} objOrArray - a collection of objects (or a single object)
+ * @param {Number} [maxRows=-1] - optional param - maximum number of rows to investigate
+ *  for new keys if array passed. (ex: 2 means only investigate the first two rows)
+ * @returns {String[]} - array of all the keys found
+ * @see {@link module:describe.describeObjects}
+ * @example
+ * 
+ * //-- finding all properties from a heterogeneous list
+ * collection = [{ name: 'john', age: 23 }, { name: 'jane', age: 24, score: 4.0 }];
+ * utils.object.keys(collection); // ['name', 'age', 'score']
+ * 
+ * //-- or using map on those keys
+ * result = { name: 'john', age: 23, score: 4.0 };
+ * utils.object.keys(result)
+ *    .map(key => `${key}:${result[key]}`);  //-- you can now run map methods on those keys
  */
-module.exports.keys = function keys(objOrArray = {}) {
+module.exports.keys = function keys(objOrArray = {}, maxRows = -1) {
   if (!Array.isArray(objOrArray)) {
     return keysFromObject(objOrArray);
   }
 
   const result = new Set();
-  objOrArray.forEach((item) => setAddAll(keysFromObject(item), result));
+  if (maxRows < 1) {
+    objOrArray.every((item, index) => setAddAll(keysFromObject(item), result));
+  } else {
+    //-- check 
+    objOrArray.every((item, index) => {
+      if (index >= maxRows) {
+        return false;
+      }
+      setAddAll(keysFromObject(item), result);
+      return true;
+    });
+  }
   return Array.from(result);
 };
 
