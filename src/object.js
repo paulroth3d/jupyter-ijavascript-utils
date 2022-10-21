@@ -107,7 +107,7 @@ module.exports.MAX_COLLAPSE_DEPTH = 50;
  * @param {any} value -
  * @returns {Object}
  */
-module.exports.objAssign = function objAssign(obj, propertyName, value, ...propertyNameValues) {
+module.exports.assign = function objAssign(obj, propertyName, value, ...propertyNameValues) {
   if ((propertyName === null || propertyName === undefined)) {
     throw Error('Expecting at least one property name to be passed');
   } else if (typeof propertyName !== 'string') {
@@ -123,6 +123,7 @@ module.exports.objAssign = function objAssign(obj, propertyName, value, ...prope
 
   return obj;
 };
+module.exports.objAssign = module.exports.assign;
 
 /**
  * Assigns multiple object entities [[property, value], [property, value], ...];
@@ -131,7 +132,7 @@ module.exports.objAssign = function objAssign(obj, propertyName, value, ...prope
  * @param {Array} entities - 2d array [[property, value], ...]
  * @returns {Object}
  */
-module.exports.objAssignEntities = function objAssignEntities(obj, entities) {
+module.exports.assignEntities = function objAssignEntities(obj, entities) {
   if (!obj) obj = {};
 
   if (!Array.isArray(entities)) {
@@ -146,6 +147,7 @@ module.exports.objAssignEntities = function objAssignEntities(obj, entities) {
 
   return obj;
 };
+module.exports.objAssignEntities = module.exports.assignEntities;
 
 /**
  * Runs a map over a collection, and adds properties the the objects.

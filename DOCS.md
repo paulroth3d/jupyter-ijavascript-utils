@@ -46,6 +46,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 ## What's New
 
+* 1.21 - include {@link module:chain|chain} - simple monoid
 * 1.20 - fix vega dependency
 * 1.19 - add in {@link module:describe|describe} and {@link module:hashMap|hashMap} modules, along with {@link module:format.limitLines|format.limitLines}
 * 1.18 - tie to vega-datasets avoiding esmodules until ijavascript can support them
