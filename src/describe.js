@@ -167,7 +167,7 @@ class BooleanDescription extends SeriesDescription {
    * @returns {Boolean} - true if the value matches
    */
   static matchesType(value) {
-    return FormatUtils.parseBoolean(value);
+    return FormatUtils.isBoolean(value);
   }
 
   check(value) {

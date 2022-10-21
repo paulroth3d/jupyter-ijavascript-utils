@@ -869,6 +869,14 @@ module.exports.parseBoolean = function parseBoolean(val) {
     || val === 'true';
 };
 
+module.exports.isBoolean = function isBoolean(val) {
+  return val === true || val === false
+    || val === 1 || val === 0
+    || val === 'TRUE' || val === 'FALSE'
+    || val === 'True' || val === 'False'
+    || val === 'true' || val === 'false';
+};
+
 /**
  * Narrows to only fromLine - toLine (inclusive) within a string.
  * 

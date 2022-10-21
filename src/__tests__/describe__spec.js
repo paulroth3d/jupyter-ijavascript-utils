@@ -247,6 +247,17 @@ global.describe('DescribeUtil', () => {
         };
         global.expect(results).toMatchObject(expected);
       });
+      global.it('multiple boolean values: [false, false, false]', () => {
+        const collection = [false, false, false];
+        const results = DescribeUtil.describeBoolean(collection);
+        const expected = {
+          count: 3,
+          max: null,
+          min: 0,
+          mean: 0
+        };
+        global.expect(results).toMatchObject(expected);
+      });
       global.it('two boolean values', () => {
         const collection = ['true', false];
         const results = DescribeUtil.describeBoolean(collection);
@@ -827,6 +838,40 @@ global.describe('DescribeUtil', () => {
           }
         ];
         const results = DescribeUtil.describeObjects(collection, { overridePropertyType: override });
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('properties with false as boolean', () => {
+        const collection = [{
+          name: 'john',
+          isBoolean: false
+        }, {
+          name: 'jane',
+          isBoolean: false
+        }, {
+          name: 'judith',
+          isBoolean: false
+        }];
+        const expected = [
+          {
+            count: 3,
+            max: 'judith',
+            min: 'john',
+            top: 'john',
+            topFrequency: 1,
+            type: 'string',
+            unique: 3,
+            what: 'name',
+          },
+          {
+            count: 3,
+            max: null,
+            min: 0,
+            mean: 0,
+            type: 'boolean',
+            what: 'isBoolean',
+          },
+        ];
+        const results = DescribeUtil.describeObjects(collection);
         global.expect(results).toStrictEqual(expected);
       });
     });

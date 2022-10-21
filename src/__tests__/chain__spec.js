@@ -40,7 +40,7 @@ global.describe('Chain', () => {
         .value;
       
       global.expect(result).toBe(expected);
-    })
+    });
   });
   global.describe('debug', () => {
     const ORIGINAL_CONSOLE = global.console;
