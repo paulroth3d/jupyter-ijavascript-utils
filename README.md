@@ -9,6 +9,9 @@
     <a href="https://github.com/paulroth3d/jupyter-ijavascript-utils" alt="npm">
         <img src="https://img.shields.io/badge/npm-%5E1.15-red" />
     </a>
+    <a href="https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main" alt="Launch Binder">
+		<img src="https://mybinder.org/badge_logo.svg" />
+    </a>
 </p>
 
 # Overview
@@ -22,6 +25,9 @@ Notebooks are a way to explore and experiment, in addition to write and explain 
 **All of the tutorials provided here, including this one, was written as a notebook and simply exported.**
 
 ![Screenshot](docResources/img/started_jupyterSideBySide.jpg)
+
+See Example binder here:
+[![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 # Documentation
 

@@ -1,3 +1,3 @@
 # syntax=docker/dockerfile:1
 
-FROM darkbluestudios/jupyter-ijavascript-utils:1.0.0
+FROM darkbluestudios/jupyter-ijavascript-utils:amd_1.0.1
