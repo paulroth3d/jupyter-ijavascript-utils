@@ -1,3 +1,22 @@
+<p align="center">
+    <a href="https://jupyter-ijavascript-utils.onrender.com/" alt="Documentation">
+        <img src="https://img.shields.io/badge/Documentation-here-informational" />
+    </a>
+    <a href="https://jupyter-ijavascript-utils.onrender.com/LICENSE" alt="License">
+        <img src="https://img.shields.io/badge/License-MIT-green" />
+    </a>
+    <img src="https://img.shields.io/badge/Coverage-98-green" />
+    <a href="https://www.npmjs.com/package/jupyter-ijavascript-utils" alt="npm">
+        <img src="https://img.shields.io/badge/npm-%5E1.X-red" />
+    </a>
+    <a href="https://github.com/paulroth3d/jupyter-ijavascript-utils" alt="npm">
+        <img src="https://img.shields.io/badge/github-here-black" />
+    </a>
+    <a href="https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main" alt="Launch Binder">
+                <img src="https://mybinder.org/badge_logo.svg" />
+    </a>
+</p>
+
 # Overview
 
 This is a library to help people that understand JavaScript

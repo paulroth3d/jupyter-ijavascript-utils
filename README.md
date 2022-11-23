@@ -6,11 +6,14 @@
         <img src="https://img.shields.io/badge/License-MIT-green" />
     </a>
     <img src="https://img.shields.io/badge/Coverage-98-green" />
+    <a href="https://www.npmjs.com/package/jupyter-ijavascript-utils" alt="npm">
+        <img src="https://img.shields.io/badge/npm-%5E1.X-red" />
+    </a>
     <a href="https://github.com/paulroth3d/jupyter-ijavascript-utils" alt="npm">
-        <img src="https://img.shields.io/badge/npm-%5E1.15-red" />
+        <img src="https://img.shields.io/badge/github-here-black" />
     </a>
     <a href="https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main" alt="Launch Binder">
-		<img src="https://mybinder.org/badge_logo.svg" />
+                <img src="https://mybinder.org/badge_logo.svg" />
     </a>
 </p>
 
