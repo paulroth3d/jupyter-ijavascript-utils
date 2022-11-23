@@ -188,4 +188,214 @@ global.describe('Chain', () => {
       global.expect(console.log.mock.calls[0][0]).toBe(7);
     });
   });
+  global.describe('close', () => {
+    global.it('returns the value', () => {
+      const value = 234;
+      const expected = 234;
+      const result = chain(value).close();
+      global.expect(result).toBe(expected);
+    });
+  });
+  global.describe('errorHandler', () => {
+    const ORIGINAL_CONSOLE = global.console;
+
+    global.beforeEach(() => {
+      // prepareWindow();
+      mockConsole();
+    });
+    global.afterEach(() => {
+      // restoreWindow();
+      removeConsoleMock();
+    });
+    global.afterAll(() => {
+      global.console = ORIGINAL_CONSOLE;
+    });
+    global.it('still closes even if no error handler', () => {
+      const customError = Error('CustomError');
+      const throwError = () => {
+        throw customError;
+      };
+
+      const value = 2;
+      const c = chain(value);
+      
+      global.expect(
+        () => c.chain(throwError)
+      ).toThrow('CustomError');
+    });
+    global.it('can use custom error handling', () => {
+      let customErrorFlag = false;
+      const catchCustomError = jest.fn(() => {
+        customErrorFlag = true;
+      });
+      const customError = Error('CustomError');
+      const throwError = () => {
+        throw customError;
+      };
+
+      const value = 2;
+      const c = chain(value)
+        .errorHandler(catchCustomError);
+      
+      global.expect(
+        () => c.chain(throwError)
+      ).toThrow('CustomError');
+
+      global.expect(catchCustomError).toHaveBeenCalled();
+      global.expect(catchCustomError.mock.calls[0][0]).toBe(customError);
+
+      global.expect(customErrorFlag).toBe(true);
+    });
+    global.describe('errorHandlers are passed down', () => {
+      global.it('onChain', () => {
+        let customErrorFlag = false;
+        const catchCustomError = jest.fn(() => {
+          customErrorFlag = true;
+        });
+        const customError = Error('CustomError');
+        const throwError = () => {
+          throw customError;
+        };
+
+        const identity = (v) => v;
+
+        const value = 2;
+        const c = chain(value)
+          .chain(identity)
+          .errorHandler(catchCustomError);
+        
+        global.expect(
+          () => c.chain(throwError)
+        ).toThrow('CustomError');
+
+        global.expect(catchCustomError).toHaveBeenCalled();
+        global.expect(catchCustomError.mock.calls[0][0]).toBe(customError);
+
+        global.expect(customErrorFlag).toBe(true);
+      });
+      global.it('on chainMap', () => {
+        let customErrorFlag = false;
+        const catchCustomError = jest.fn(() => {
+          customErrorFlag = true;
+        });
+        const customError = Error('CustomError');
+        const throwError = () => {
+          throw customError;
+        };
+
+        const identity = (v) => v;
+
+        const value = [2];
+        const c = chain(value)
+          .chainMap(identity)
+          .errorHandler(catchCustomError);
+        
+        global.expect(
+          () => c.chain(throwError)
+        ).toThrow('CustomError');
+
+        global.expect(catchCustomError).toHaveBeenCalled();
+        global.expect(catchCustomError.mock.calls[0][0]).toBe(customError);
+
+        global.expect(customErrorFlag).toBe(true);
+      });
+      global.it('on chainReduce', () => {
+        let customErrorFlag = false;
+        const catchCustomError = jest.fn(() => {
+          customErrorFlag = true;
+        });
+        const customError = Error('CustomError');
+        const throwError = () => {
+          throw customError;
+        };
+
+        const value = [2];
+        const c = chain(value)
+          .chainReduce((result, v) => result + v, 0)
+          .errorHandler(catchCustomError);
+        
+        global.expect(
+          () => c.chain(throwError)
+        ).toThrow('CustomError');
+
+        global.expect(catchCustomError).toHaveBeenCalled();
+        global.expect(catchCustomError.mock.calls[0][0]).toBe(customError);
+
+        global.expect(customErrorFlag).toBe(true);
+      });
+    });
+  });
+  global.describe('clone', () => {
+    global.describe('errorHandler', () => {
+      const ORIGINAL_CONSOLE = global.console;
+  
+      global.beforeEach(() => {
+        // prepareWindow();
+        mockConsole();
+      });
+      global.afterEach(() => {
+        // restoreWindow();
+        removeConsoleMock();
+      });
+      global.afterAll(() => {
+        global.console = ORIGINAL_CONSOLE;
+      });
+      global.it('passes the value along', () => {
+        const value = 234;
+        const expected = 234;
+        
+        const c = chain(value);
+
+        const c2 = c.clone();
+
+        const result = c2.close();
+
+        global.expect(result).toBe(expected);
+      });
+      global.it('can use custom error handling', () => {
+        let customErrorFlag = false;
+        const catchCustomError = jest.fn(() => {
+          customErrorFlag = true;
+        });
+        const customError = Error('CustomError');
+        const throwError = () => {
+          throw customError;
+        };
+  
+        const value = 2;
+        const c = chain(value)
+          .errorHandler(catchCustomError);
+
+        const c2 = c.clone();
+        
+        global.expect(
+          () => c2.chain(throwError)
+        ).toThrow('CustomError');
+  
+        global.expect(catchCustomError).toHaveBeenCalled();
+        global.expect(catchCustomError.mock.calls[0][0]).toBe(customError);
+  
+        global.expect(customErrorFlag).toBe(true);
+      });
+    });
+  });
+  global.describe('console to string overrides', () => {
+    global.it('toString', () => {
+      const val = 2;
+      const expected = '{"value":2}';
+      const results = chain(val).toString();
+      global.expect(results).toBe(expected);
+    });
+    global.it('inspect', () => {
+      const val = 2;
+      const expected = '{"value":2}';
+      const results = chain(val).inspect();
+      global.expect(results).toBe(expected);
+    });
+    global.it('toJSON', () => {
+      const val = 2;
+      const results = chain(val).toJSON();
+      global.expect(results.value).toBe(val);
+    });
+  });
 });

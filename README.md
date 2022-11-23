@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.22 - make chain iJavaScript aware, but still able to work outside of Jupyter
 * 1.21 - include chain - simple monoid
 * 1.20 - fix vega dependency
 * 1.19 - add in describe and hashMap modules, along with format.limitLines

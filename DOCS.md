@@ -65,6 +65,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 ## What's New
 
+* 1.22 - make chain iJavaScript aware, but still able to work outside of Jupyter
 * 1.21 - include {@link module:chain|chain} - simple monoid
 * 1.20 - fix vega dependency
 * 1.19 - add in {@link module:describe|describe} and {@link module:hashMap|hashMap} modules, along with {@link module:format.limitLines|format.limitLines}
@@ -94,6 +95,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 | {@link module:aggregate}      | Aggregate collections or collections of objects (ex: min, max, unique, contains, etc.               |
 | {@link module:array}          | Massage, sort, reshape arrays.                                                                      |
 | {@link module:base64}         | Convert to and from base64 encoding of strings                                                      |
+| {@link module:chain}          | Simple wrapper (Monad-ish) that allows for chaining statements together                             |
 | {@link module:datasets}       | Load example <a href="https://github.com/vega/vega-datasets">datasets provided by the vega team</a> |
 | {@link module:describe}       | Similar to Pandas describe, provides statistics on a set of values / objects |
 | {@link module:file}           | Read and write data/text to files.                                                                  |
