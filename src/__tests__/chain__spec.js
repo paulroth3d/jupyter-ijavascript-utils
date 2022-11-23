@@ -42,6 +42,89 @@ global.describe('Chain', () => {
       global.expect(result).toBe(expected);
     });
   });
+  global.describe('chainMap', () => {
+    global.it('can apply a map to an array', () => {
+      const addTwo = (value) => value + 2;
+      global.expect(addTwo(2)).toBe(4);
+
+      const value = [1, 2, 3];
+      const expected = [3, 4, 5];
+      const result = chain(value)
+        .chainMap(addTwo)
+        .value;
+
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('throws an error with a single value', () => {
+      const addTwo = (value) => value + 2;
+      const value = 3;
+      const expectedError = 'chainMap expected an array, but was passed:3';
+
+      global.expect(() => chain(value).chainMap(addTwo))
+        .toThrow(expectedError);
+    });
+    global.it('can chain a map after a value', () => {
+      const initializeCount = (size) => Array.from(Array(size)).map((val, index) => index);
+      global.expect(initializeCount(3)).toStrictEqual([0, 1, 2]);
+      const addTwo = (value) => value + 2;
+      global.expect(addTwo(2)).toBe(4);
+
+      const value = 3;
+      const expected = [2, 3, 4];
+      const result = chain(value)
+        .chain(initializeCount)
+        .chainMap(addTwo)
+        .value;
+
+      global.expect(result).toStrictEqual(expected);
+    });
+  });
+  global.describe('chainReduce', () => {
+    global.it('reduce works as expected', () => {
+      const reduceArray = (result, value) => result + value;
+      const value = [1, 2, 3];
+      global.expect(value.reduce(reduceArray, 0)).toBe(6);
+    });
+    global.it('can reduce an array', () => {
+      const reduceArray = (result, value) => result + value;
+      
+      const value = [1, 2, 3];
+      global.expect(value.reduce(reduceArray, 0)).toBe(6);
+
+      const expected = 6;
+      const result = chain(value)
+        .chainReduce(reduceArray, 0)
+        .value;
+
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('throws an error with a single value', () => {
+      const reduceArray = (result, value) => result + value;
+      const value = 3;
+      const expectedError = 'chainReduce expected an array, but was passed:3';
+
+      global.expect(() => chain(value).chainReduce(reduceArray))
+        .toThrow(expectedError);
+    });
+    global.it('can chain a map after a value', () => {
+      const initializeCount = (size) => Array.from(Array(size)).map((val, index) => index);
+      global.expect(initializeCount(3)).toStrictEqual([0, 1, 2]);
+      const reduceArray = (result, value) => result + value;
+      global.expect([1, 2, 3].reduce(reduceArray, 0)).toBe(6);
+      const addTwo = (value) => value + 2;
+      global.expect(addTwo(2)).toBe(4);
+
+      const value = 3;
+      const expected = 9;
+      const result = chain(value)
+        .chain(initializeCount)
+        .chainMap(addTwo)
+        .chainReduce(reduceArray, 0)
+        .value;
+
+      global.expect(result).toStrictEqual(expected);
+    });
+  });
   global.describe('debug', () => {
     const ORIGINAL_CONSOLE = global.console;
 
