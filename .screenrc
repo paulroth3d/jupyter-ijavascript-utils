@@ -17,8 +17,8 @@ screen -X defdynamictitle off
 
 screen -t "ijsUtils"
 screen -p ijsUtils -X stuff "cd ../jupyter-ijavascript-utils^M"
-screen -t "jsUtils"
-screen -p jsUtils -X stuff "cd ../jupyterJsUtils^M"
+screen -t "docker"
+screen -p docker -X stuff "cd ../docker_jupyter-ijavascript-utils^M"
 screen -t "scratchpad"
 screen -p scratchpad -X stuff "cd ../jupyterScratchpad^M"
 
