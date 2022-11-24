@@ -1,11 +1,15 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.22.3",
+  "version": "1.22.4",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
+    "prebuild": "npm run lint && npm run test:coverage",
+    "build": "npm run doc && npm run docker && npm install",
+    "package:version:get": "npm pkg get version",
+    "docker": "node -e \"console.log('# syntax=docker/dockerfile:1\\n\\nFROM darkbluestudios/jupyter-ijavascript-utils:binder_${npm_package_version}');\" > ./Dockerfile",
     "lint": "esw src",
     "lint:watch": "npm run lint -- --watch",
     "test": "TZ=UTC jest src",
