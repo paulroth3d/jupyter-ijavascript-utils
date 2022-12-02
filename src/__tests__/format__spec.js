@@ -1433,6 +1433,228 @@ global.describe('format', () => {
       });
     });
   });
+  global.describe('parseNumber', () => {
+    global.describe('null', () => {
+      global.it('parses correctly', () => {
+        const val = null;
+        const expected = null;
+        const result = FormatUtils.parseNumber(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('undefined', () => {
+      global.it('parses correctly', () => {
+        const val = undefined;
+        const expected = undefined;
+        const result = FormatUtils.parseNumber(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('bigInt', () => {
+      global.it('parses correctly', () => {
+        const val = BigInt(10);
+        const expected = 10;
+        const result = FormatUtils.parseNumber(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('number', () => {
+      global.it('parses correctly', () => {
+        const val = 10;
+        const expected = 10;
+        const result = FormatUtils.parseNumber(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('0', () => {
+        const val = 0;
+        const expected = 0;
+        const result = FormatUtils.parseNumber(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('-1', () => {
+        const val = -1;
+        const expected = -1;
+        const result = FormatUtils.parseNumber(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('string', () => {
+      global.describe('default locale', () => {
+        global.it('0', () => {
+          const val = '0';
+          const expected = 0;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('1', () => {
+          const val = '1';
+          const expected = 1;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('1000', () => {
+          const val = '1000';
+          const expected = 1000;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('1000.00', () => {
+          const val = '1000.00';
+          const expected = 1000.0;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('10.5', () => {
+          const val = '10.5';
+          const expected = 10.5;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('-1', () => {
+          const val = '-1';
+          const expected = -1;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('-10.5', () => {
+          const val = '-10.5';
+          const expected = -10.5;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+        global.it('-1,000.0', () => {
+          const val = '-1,000.0';
+          const expected = -1000.0;
+          const result = FormatUtils.parseNumber(val);
+          global.expect(result).toBe(expected);
+        });
+      });
+      global.describe('en-us', () => {
+        global.it('us: 1', () => {
+          const locale = 'en-US';
+          const val = '1';
+          const expected = 1;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: 1.234', () => {
+          const locale = 'en-US';
+          const val = '1.234';
+          const expected = 1.234;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: 1,234', () => {
+          const locale = 'en-US';
+          const val = '1,234';
+          const expected = 1234;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: 1,234.56', () => {
+          const locale = 'en-US';
+          const val = '1,234.56';
+          const expected = 1234.56;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: -1,234.56', () => {
+          const locale = 'en-US';
+          const val = '-1,234.56';
+          const expected = -1234.56;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: twice', () => {
+          const locale = 'en-US';
+          let val = '-1,234.56';
+          let expected = -1234.56;
+          let result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+
+          val = '-1,000.5';
+          expected = -1000.5;
+          result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: us + fr', () => {
+          let locale = 'en-US';
+          let val = '-1,234.56';
+          let expected = -1234.56;
+          let result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+
+          locale = 'fr-FR';
+          val = '-1 000,5';
+          expected = -1000.5;
+          result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+      });
+      global.describe('fr-FR', () => {
+        global.it('us: 1', () => {
+          const locale = 'fr-FR';
+          const val = '1';
+          const expected = 1;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: 1,234', () => {
+          const locale = 'fr-FR';
+          const val = '1,234';
+          const expected = 1.234;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: 1 234', () => {
+          const locale = 'fr-FR';
+          const val = '1 234';
+          const expected = 1234;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: 1 234,56', () => {
+          const locale = 'fr-FR';
+          const val = '1 234,56';
+          const expected = 1234.56;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: -1 234,56', () => {
+          const locale = 'fr-FR';
+          const val = '-1 234,56';
+          const expected = -1234.56;
+          const result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('fr: twice', () => {
+          const locale = 'fr-FR';
+          let val = '-1 234,56';
+          let expected = -1234.56;
+          let result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+
+          val = '-1 000,5';
+          expected = -1000.5;
+          result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+        global.it('us: fr + us', () => {
+          let locale = 'fr-FR';
+          let val = '-1 000,5';
+          let expected = -1000.5;
+          let result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+          
+          locale = 'en-US';
+          val = '-1,234.56';
+          expected = -1234.56;
+          result = FormatUtils.parseNumber(val, locale);
+          global.expect(result).toBe(expected);
+        });
+      });
+    });
+  });
   global.describe('limitLines', () => {
     global.describe('can limit', () => {
       global.describe('strings', () => {
