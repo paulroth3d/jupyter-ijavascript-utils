@@ -204,6 +204,127 @@ const IJSUtils = require('./ijs');
  * 
  * ---
  * 
+ * # FAQ
+ * 
+ * The following are a series of common questions / issues, put here for visibility.
+ * 
+ * ## Passing Objects to vega-lite-api
+ * 
+ * Note that there are some things that are not supported by the vega-lite-api <br />
+ * ([such as grouping](https://github.com/vega/vega-lite/issues/4703))
+ * 
+ * This is only a problem with the vega-lite-api, as it writes the spec used for vega-lite
+ * 
+ * In these cases, you can send an object within many of the methods,
+ * as it no longer needs to translate how that object should look.
+ * 
+ * (like sending `mark( type:'bar')` instead of `.markBar()` - to allow for tooltips <br />
+ * or passing an object to encode to support grouping)
+ * 
+ * ```
+ * simpleData = [{fruit:'Apples',yield:20,year:'2020'},{fruit:'Apples',yield:22,year:'2021'},
+ *   {fruit:'Bananas',yield:15,year:'2020'},{fruit:'Bananas',yield:12,year:'2021'},
+ *   {fruit:'Pears',yield:18,year:'2020'},{fruit:'Pears',yield:19,year:'2021'}];
+ *  
+ * utils.vega.svg((vl) => vl
+ *   // render as points
+ *   .mark({ type: 'bar', tooltip: true})
+ *   .data(simpleData)
+ *   .title('Fruit by Yield')
+ *   .width(100)
+ *   .encode({
+ *     "x": {"field": "fruit"},
+ *     "y": {"field": "yield", "type": "quantitative"},
+ *     "xOffset": {"field": "year"},
+ *     "color": {"field": "year"}
+ *   })
+ * );
+ * ```
+ * 
+ * ![Screenshot](img/vega_groupedBarCharts.jpg)
+ * 
+ * ---
+ * 
+ * ## Chart Series
+ * 
+ * Instead of grouping values, you can also create a series of charts instead.
+ * 
+ * ```
+ * utils.vega.svg((vl) => vl
+ *   // render as points
+ *   .mark({ type: 'arc', innerRadius: 30, tooltip: true})
+ *       .data(simpleData)
+ *       .title('Fruit by Yield')
+ *       .width(100)
+ *       .encode(
+ *         // define the arc on the graph with the Qualitative / Numerical 'yield' property
+ *         vl.theta().fieldQ('yield'),
+ *         // define the y axis as the based on the Qualitative / Numerical 'year' property
+ *         vl.color().fieldN('year'),
+ *         // define the color series Nominative / TextBased 'fruit' property
+ *         vl.column().fieldN('fruit')
+ *       )
+ * );
+ * ```
+ * 
+ * ![Screenshot](img/vega_chartColumns.jpg)
+ * 
+ * Other examples can be found [under the vega-lite examples](https://vega.github.io/vega-lite/examples/#repeat--concatenation)
+ * and rendered with {@link vega.svgFromSpec|svgFromSpec} or {@link vega.ßembedFromSpec|embedFromSpec}
+ * 
+ * ---
+ * 
+ * ## Object Formatting / Conversion
+ * 
+ * Note that vega-lite examples use data at the mark level:
+ * 
+ * ```
+ * [{fruit:'Apples',yield:20,year:'2020'},{fruit:'Apples',yield:22,year:'2021'},
+ *   {fruit:'Bananas',yield:15,year:'2020'},{fruit:'Bananas',yield:12,year:'2021'},
+ *   {fruit:'Pears',yield:18,year:'2020'},{fruit:'Pears',yield:19,year:'2021'}];
+ * ```
+ * 
+ * not at the series level:
+ * 
+ * ```
+ * [{ year:'2020', apples:20, bananas:15, pears:18 },
+ *  { year:'2021', apples:22, bananas:12, pears:19 }];
+ * ```
+ * 
+ * If your data is at the series level, you can:
+ * 
+ * * Transform the data with the {@link group#separateByFields|group.separateByFields}
+ * * or using the [vega-lite fold transform](https://vega.github.io/vega-lite/docs/fold.html)
+ * 
+ * ```
+ * fruitSeriesData = [{ year:'2020', apples:20, bananas:15, pears:18 },
+ *   { year:'2021', apples:22, bananas:12, pears:19 }];
+ * 
+ * utils.vega.svg((vl) => vl
+ *   .mark({ type: 'arc', innerRadius: 30, tooltip: true})
+ *     .data(fruitSeriesData)
+ * 
+ *     //-- apples, bananas and pears will now be separate records
+ *     //-- with the new `key` field as either 'apple', 'banana', or 'pears'
+ *     //-- and the new `value` field storing the value of those fields.
+ *     .transform([{ fold: ['apples', 'bananas', 'pears']}])
+ * 
+ *     .title('Fruit by Yield')
+ *     .width(100)
+ *     .encode(
+ *       // define the arc on the graph with the Qualitative / Numerical 'yield' property
+ *       vl.theta().fieldQ('value'),
+ *       // define the y axis as the Nominative / TextBased 'fruit' property
+ *       vl.color().fieldN('year'),
+ *       // define the color series based on the Qualitative / Numerical 'year' property
+ *       vl.column().fieldN('key')
+ *     )
+ * )
+ * ```
+ * ![Screenshot](img/vega_chartColumns.jpg)
+ * 
+ * ---
+ * 
  * For more:
  * 
  * * Check out the {@tutorial vegaLite1} tutorials
