@@ -75,7 +75,7 @@ Give it a try here:
 
 ## What's New
 
-* 1.23 - add format.parseNumber and update vega examples
+* 1.23 - add format.parseNumber and TableGenerator.styleColumn
 * 1.22 - make chain iJavaScript aware, but still able to work outside of Jupyter
 * 1.21 - include {@link module:chain|chain} - simple monoid
 * 1.20 - fix vega dependency
