@@ -83,12 +83,12 @@ global.describe('group', () => {
         { city: 'New York', min: 3.58, max: 4.13 },
         { city: 'Chicago', min: 2.56, max: 3.98 }];
       const expected = [
-        { city: 'Seattle', min: 0.87, max: 5.31, _field: 'min', _value: 0.87 },
-        { city: 'New York', min: 3.58, max: 4.13, _field: 'min', _value: 3.58 },
-        { city: 'Chicago', min: 2.56, max: 3.98, _field: 'min', _value: 2.56 },
-        { city: 'Seattle', min: 0.87, max: 5.31, _field: 'max', _value: 5.31 },
-        { city: 'New York', min: 3.58, max: 4.13, _field: 'max', _value: 4.13 },
-        { city: 'Chicago', min: 2.56, max: 3.98, _field: 'max', _value: 3.98 }];
+        { city: 'Seattle', min: 0.87, max: 5.31, key: 'min', value: 0.87 },
+        { city: 'New York', min: 3.58, max: 4.13, key: 'min', value: 3.58 },
+        { city: 'Chicago', min: 2.56, max: 3.98, key: 'min', value: 2.56 },
+        { city: 'Seattle', min: 0.87, max: 5.31, key: 'max', value: 5.31 },
+        { city: 'New York', min: 3.58, max: 4.13, key: 'max', value: 4.13 },
+        { city: 'Chicago', min: 2.56, max: 3.98, key: 'max', value: 3.98 }];
       const results = GroupUtils.separateByFields(data, 'min', 'max');
       global.expect(results).toEqual(expected);
     });
