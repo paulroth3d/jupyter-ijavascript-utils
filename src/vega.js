@@ -293,8 +293,11 @@ const IJSUtils = require('./ijs');
  * 
  * If your data is at the series level, you can:
  * 
- * * Transform the data with the {@link group#separateByFields|group.separateByFields}
+ * * Transform the data with the {@link module:group.separateByFields|group.separateByFields}
+ *     * utils.group.separateByFields(fruitSeriesData, 'apples', 'bananas', 'pears');
+ *     * this makes a new field called 'key' that will have values of either apples, bananas or pears
  * * or using the [vega-lite fold transform](https://vega.github.io/vega-lite/docs/fold.html)
+ *     * by adding in the `.transform()` into the spec - like below
  * 
  * ```
  * fruitSeriesData = [{ year:'2020', apples:20, bananas:15, pears:18 },

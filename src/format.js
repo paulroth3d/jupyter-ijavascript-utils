@@ -30,7 +30,7 @@
  *   * {@link module:format.safeConvertInteger|format.safeConvertInteger} - converts a value to a Number (123), or uses a default for any error or NaN
  *   * {@link module:format.safeConvertBoolean|format.safeConvertBoolean} - converts a value to a boolean
  * * Parsing values
- *   * {@link module:format.parseNumber|format.parseBoolean(val)} - converts a value to a boolean value
+ *   * {@link module:format.parseBoolean|format.parseBoolean(val)} - converts a value to a boolean value
  *   * {@link module:format.parseNumber|format.parseNumber(val, locale)} - converts a value to a number
  * * Identifying values
  *   * {@link module:format.isEmptyValue|format.isEmptyValue} - determine if a value is not 'empty'
