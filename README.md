@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.23 - add format.parseNumber and TableGenerator.styleColumn, align group.separateByFields to vega-lite fold transform
 * 1.22 - make chain iJavaScript aware, but still able to work outside of Jupyter
 * 1.21 - include chain - simple monoid
 * 1.20 - fix vega dependency
@@ -104,14 +105,13 @@ Steps Overview:
 
 ## Running on Binder
 
-!TODO
-
 [mybinder.org](https://mybinder.org/) is a great place to run a Jupyter Notebook online.
 
-We are still attempting to sort out a suitable link that will work for everyone
-(without overloading their service)
+It means you can run Jupyter Notebooks with additional kernels without having to install anything,
+and can try right in your browser.
 
-(Please see [Issue #4](https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/4))
+Give it a try here:
+[![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 # For Example
 

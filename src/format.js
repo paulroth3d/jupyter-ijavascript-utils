@@ -29,6 +29,9 @@
  *   * {@link module:format.safeConvertFloat|format.safeConvertFloat} - converts a value to a Number (123.4), or uses a default for any error or NaN
  *   * {@link module:format.safeConvertInteger|format.safeConvertInteger} - converts a value to a Number (123), or uses a default for any error or NaN
  *   * {@link module:format.safeConvertBoolean|format.safeConvertBoolean} - converts a value to a boolean
+ * * Parsing values
+ *   * {@link module:format.parseNumber|format.parseBoolean(val)} - converts a value to a boolean value
+ *   * {@link module:format.parseNumber|format.parseNumber(val, locale)} - converts a value to a number
  * * Identifying values
  *   * {@link module:format.isEmptyValue|format.isEmptyValue} - determine if a value is not 'empty'
  * 
@@ -875,6 +878,51 @@ module.exports.isBoolean = function isBoolean(val) {
     || val === 'TRUE' || val === 'FALSE'
     || val === 'True' || val === 'False'
     || val === 'true' || val === 'false';
+};
+
+FormatUtils.parseLocaleCache = new Map();
+
+/**
+ * Parses a given number, based on a {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat|Intl.NumberFormat}
+ * 
+ * If the locale is not passed (ex: 'fr-FR'), then 'en-US' is assumed
+ * 
+ * @param {any} val - value to parse
+ * @returns {Number} - parsed number
+ * @example
+ * 
+ * utils.format.parseNumber(10); // 10
+ * utils.format.parseNumber('10'); // 10
+ * utils.format.parseNumber('1,000'); // 1000
+ * utils.format.parseNumber('1,000.5'); // 1000.5
+ * utils.format.parseNumber('1,000', 'en-US'); // 1000
+ * utils.format.parseNumber('1,000.5', 'en-US'); // 1000.5
+ * utils.format.parseNumber('1 000', 'fr-FR'); // 1000
+ * utils.format.parseNumber('1 000,5', 'fr-FR'); // 1000.5
+ */
+module.exports.parseNumber = function parseNumber(val, locale = 'en-US') {
+  const valType = typeof val;
+  if (valType === 'number') {
+    return val;
+  } else if (valType === 'string') {
+    let separator;
+    if (FormatUtils.parseLocaleCache.has(locale)) {
+      separator = FormatUtils.parseLocaleCache.get(locale);
+    } else {
+      const example = Intl.NumberFormat(locale).format('1.1');
+      separator = example.charAt(1);
+      FormatUtils.parseLocaleCache.set(locale, separator);
+    }
+
+    const cleanPattern = new RegExp(`[^-+0-9${separator}]`, 'g');
+    const cleaned = val.replace(cleanPattern, '');
+    const normalized = cleaned.replace(separator, '.');
+
+    return parseFloat(normalized);
+  } else if (!val) {
+    return val;
+  }
+  return parseFloat(val);
 };
 
 /**
