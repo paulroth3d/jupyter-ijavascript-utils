@@ -112,6 +112,7 @@ const { createSort } = require('./array');
  * * style the table
  *   * {@link TableGenerator#styleTable|styleTable(string)} - css style for the table
  *   * {@link TableGenerator#styleHeader|styleHeader(string)} - css styles for the header row
+ *   * {@link TableGenerator#styleColumn|styleColumn(object)} - Function to style cells based on the column
  *   * {@link TableGenerator#styleRow|styleRow(fn)} - Function to style rows
  *   * {@link TableGenerator#styleCell|styleCell(fn)} - Function to style cells
  *   * {@link TableGenerator#border|border(string)} - Apply a border to the table data cells
@@ -230,6 +231,12 @@ class TableGenerator {
   #styleRow = null;
 
   /**
+   * Style to apply at the column level
+   * @type {Function}
+   */
+  #styleColumn = null;
+
+  /**
    * Style to apply at the cell
    * @type {Function}
    */
@@ -287,6 +294,7 @@ class TableGenerator {
     this.#styleTable = '';
     this.#styleHeader = '';
     this.#styleRow = null;
+    this.#styleColumn = null;
     this.#styleCell = null;
     this.#isTransposed = false;
   }
@@ -386,6 +394,7 @@ class TableGenerator {
    * As this adds additional CSS, the styling applied:
    *   * {@link TableGenerator#styleTable|to the whole table}
    *   * or {@link TableGenerator#styleRow|to the rows}
+   *   * or {@link TableGenerator#styleColumn|to the column}
    *   * or {@link TableGenerator#styleCell|to the data cells} will be affected
    * 
    * For example:
@@ -883,9 +892,97 @@ class TableGenerator {
   }
 
   /**
+   * Function that can apply a style to a given column
+   * 
+   * (rowIndex, ({ columnHeader, columnIndex, record, row, rowIndex, value })) => string
+   * 
+   * note: see {@link TableGenerator#styleCell} for another way to do style a cell.
+   * 
+   * ```
+   * dataSet = [
+   *   {reg: 'z', source: 'A', temp: 10},
+   *   {reg: 'z', source: 'B', temp: 98},
+   *   {reg: 'z', source: 'A', temp: 100}
+   * ];
+   * 
+   * utils.table(dataSet)
+   *   .styleColumn({
+   *     //-- we want to make the background color of the color red, if the temp > 50
+   *     temp: (temp) => temp > 50 ? 'background-color:pink' : '',
+   * 
+   *     //-- we want to make the source bold if the source is B
+   *     source: (source) => source === 'B' ? 'font-weight:bold' : ''
+   *   })
+   *   .render();
+   * ```
+   * <table cellspacing="0px" >
+   * <tr ><th>reg</th><th>source</th><th>temp</th></tr>
+   * <tr ><td >z</td><td >A</td><td >10</td></tr>
+   * <tr ><td >z</td><td style="font-weight:bold;">B</td><td style="background-color:pink;">98</td></tr>
+   * <tr ><td >z</td><td >A</td><td style="background-color:pink;">100</td></tr>
+   * </table>
+   * 
+   * Or you could style the cell based on information in other columns.
+   * 
+   * ```
+   * dataSet = [
+   *   {reg: 'z', source: 'A', tempFormat: 'c', temp: 42},
+   *   {reg: 'z', source: 'B', tempFormat: 'f', temp: 98},
+   *   {reg: 'z', source: 'A', tempFormat: 'f', temp: 100}
+   * ];
+   * 
+   * utils.table(dataSet)
+   *   .styleColumn({
+   *     //-- we want to make the background color of the color red, if the temp > 50
+   *     temp: (temp, { record }) => convertToKelvin(temp, record.tempFormat) > 283
+   *       ? 'background-color:pink'
+   *       : ''
+   *   })
+   *   .render();
+   * ```
+   * 
+   * <table cellspacing="0px" >
+   * <tr ><th>reg</th><th>source</th><th>tempFormat</th><th>temp</th></tr>
+   * <tr ><td >z</td><td >A</td><td >c</td><td style="background-color:pink;">10</td></tr>
+   * <tr ><td >z</td><td >B</td><td >f</td><td style="background-color:pink;">98</td></tr>
+   * <tr ><td >z</td><td >A</td><td >f</td><td style="background-color:pink;">100</td></tr>
+   * </table>
+   * 
+   * @param {object} styleObj - object with properties matching the column header label
+   * @param {function(value, contextObj)} styleObj.property - Function to evaluate for each row returning the inline css styles to apply.
+   * 
+   * When it runs it will get passed the value and context,
+   * and should return the css inline styles to apply
+   * 
+   * @param {any} styleObj.property.value - the value for a given row for that column
+   * @param {any}    styleObj.property.context.value - destructured value of the cell
+   * @param {Number} styleObj.property.context.columnIndex - destructured 0 index column of the cell
+   * @param {Number} styleObj.property.context.rowIndex - destructured 0 index row of the cell
+   * @param {Array}  styleObj.property.context.row - destructured full row provided
+   * @param {Array}  styleObj.property.context.record - destructured original record
+   * @returns {TableGenerator} - chainable instance
+   */
+  styleColumn(styleObj) {
+    if (!styleObj) {
+      this.#styleColumn = null;
+      return this;
+    }
+
+    if (typeof styleObj !== 'object') {
+      throw Error('styleColumn(styleObj): expects an object with properties matching the column LABELs');
+    }
+
+    this.#styleColumn = styleObj;
+
+    return this;
+  }
+
+  /**
    * Function that can apply a style to a given cell
    * 
    * (value, columnIndex, rowIndex, row, record) => string
+   * 
+   * Note: see {@link TableGenerator#styleColumn} for another way to do style a cell.
    * 
    * ```
    * dataSet = [
@@ -914,13 +1011,14 @@ class TableGenerator {
    * ```
    * ![Screenshot of styling the cell](img/Table_StyleCell.png)
    * 
-   * @param {function(*):any} formatterFn - Translation function to apply to all cells.
    * 
    * When it runs, you will receive a single parameter representing the current cell and row.
    * 
    * Return what the new value should be.
+   * @param {function(*):any} formatterFn - Translation function to apply to all cells.
    * @param {any}    formatterFn.value - destructured value of the cell
    * @param {Number} formatterFn.columnIndex - destructured 0 index column of the cell
+   * @param {Number} formatterFn.columnHeader - destructured header of the column
    * @param {Number} formatterFn.rowIndex - destructured 0 index row of the cell
    * @param {Array}  formatterFn.row - destructured full row provided
    * @param {Array}  formatterFn.record - destructured original record
@@ -1061,6 +1159,7 @@ class TableGenerator {
     const styleTable = this.#styleTable;
     const styleHeader = this.#styleHeader;
     const styleRowFn = this.#styleRow;
+    const styleColumnObj = this.#styleColumn;
     const styleCellFn = this.#styleCell;
     const printOptions = this.#printOptions;
     const borderCSS = this.#borderCSS;
@@ -1099,14 +1198,20 @@ class TableGenerator {
 
         return `<tr ${printInlineCSS(rowStyle)}>\n\t`
           + dataRow.map((value, columnIndex) => {
+            const columnHeader = results.headers[columnIndex];
             //-- style for the cell
-            const cellStyle = !styleCellFn ? '' : styleCellFn({ value, columnIndex, rowIndex, row: dataRow, record });
+            const cellData = { value, columnIndex, columnHeader, rowIndex, row: dataRow, record };
+            const cellStyle = !styleCellFn ? '' : styleCellFn(cellData);
+            const columnStyle = !styleColumnObj || !styleColumnObj[columnHeader] || !typeof styleColumnObj[columnHeader] === 'function'
+              ? ''
+              : styleColumnObj[columnHeader](value, cellData);
 
             return `<td ${
               printInlineCSS(
                 borderCSS,
                 //-- could be inline, but not as clear
-                cellStyle
+                cellStyle,
+                columnStyle
               )
             }>${
               cleanFn(value, printOptions)

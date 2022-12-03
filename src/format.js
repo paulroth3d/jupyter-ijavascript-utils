@@ -888,7 +888,6 @@ FormatUtils.parseLocaleCache = new Map();
  * If the locale is not passed (ex: 'fr-FR'), then 'en-US' is assumed
  * 
  * @param {any} val - value to parse
- * @param {String} locale - any {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat|navigator.language} value, ex: 'en', 'en-US', 'fr-FR', etc.
  * @returns {Number} - parsed number
  * @example
  * 

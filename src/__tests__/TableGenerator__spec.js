@@ -3,7 +3,7 @@
 const ArrayUtils = require('../array');
 
 // eslint-disable-next-line no-unused-vars
-// const FileUtil = require('../file');
+const FileUtil = require('../file');
 
 const TableGenerator = require('../TableGenerator');
 
@@ -909,6 +909,407 @@ state|IL   |IL    `;
           .generateHTML();
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
+      });
+    });
+    global.describe('styleColumn', () => {
+      global.it('can style a column based on the value of the cell', () => {
+        const weather = initializeWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td style="background-color:blue;">Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+<tr >
+\t<td >2</td>
+\t<td >Seattle</td>
+\t<td >Dec</td>
+\t<td >5.31</td>
+</tr>
+<tr >
+\t<td >3</td>
+\t<td >New York</td>
+\t<td >Apr</td>
+\t<td >3.94</td>
+</tr>
+<tr >
+\t<td >4</td>
+\t<td >New York</td>
+\t<td style="background-color:blue;">Aug</td>
+\t<td >4.13</td>
+</tr>
+<tr >
+\t<td >5</td>
+\t<td >New York</td>
+\t<td >Dec</td>
+\t<td >3.58</td>
+</tr>
+<tr >
+\t<td >6</td>
+\t<td >Chicago</td>
+\t<td >Apr</td>
+\t<td >3.62</td>
+</tr>
+<tr >
+\t<td >8</td>
+\t<td >Chicago</td>
+\t<td >Dec</td>
+\t<td >2.56</td>
+</tr>
+<tr >
+\t<td >7</td>
+\t<td >Chicago</td>
+\t<td style="background-color:blue;">Aug</td>
+\t<td >3.98</td>
+</tr>
+</table>`;
+        const monthFn = jest.fn((value) => value === 'Aug' ? 'background-color:blue' : '');
+        const results = new TableGenerator(weather)
+          .styleColumn({ month: monthFn })
+          .generateHTML();
+        //FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('works with styling rows and columns together', () => {
+        const weather = [{ id: 1 }, { id: 2 }, { id: 3 }];
+        const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr style="font-weight:bold;">\n\t<td style="background-color:blue;">1</td>\n</tr>
+<tr style="font-weight:bold;">\n\t<td >2</td>\n</tr>
+<tr >\n\t<td >3</td>\n</tr>
+</table>`;
+        const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+        const rowFn = jest.fn(({ rowIndex }) => rowIndex < 2 ? 'font-weight:bold' : '');
+        const results = new TableGenerator(weather)
+          .styleColumn({ id: testFn })
+          .styleRow(rowFn)
+          .generateHTML();
+        
+        global.expect(testFn).toHaveBeenCalled();
+        global.expect(testFn).toHaveBeenCalledTimes(3); //-- per row
+
+        global.expect(rowFn).toHaveBeenCalled();
+        global.expect(rowFn).toHaveBeenCalledTimes(3);
+
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('works with styling cells and columns together', () => {
+        const weather = [{ id: 1 }, { id: 2 }, { id: 3 }];
+        const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr >\n\t<td style="font-weight:bold; background-color:blue;">1</td>\n</tr>
+<tr >\n\t<td style="font-weight:bold;">2</td>\n</tr>
+<tr >\n\t<td >3</td>\n</tr>
+</table>`;
+        const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+        const cellFn = jest.fn(({ rowIndex }) => rowIndex < 2 ? 'font-weight:bold' : '');
+        const results = new TableGenerator(weather)
+          .styleColumn({ id: testFn })
+          .styleCell(cellFn)
+          .generateHTML();
+        
+        global.expect(testFn).toHaveBeenCalled();
+        global.expect(testFn).toHaveBeenCalledTimes(3); //-- per row
+
+        global.expect(cellFn).toHaveBeenCalled();
+        global.expect(cellFn).toHaveBeenCalledTimes(3);
+
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.describe('fails', () => {
+        global.it('if we call styleColumn with a function', () => {
+          const weather = [{ id: 1 }, { id: 2 }];
+          const expectedError = 'styleColumn(styleObj): expects an object with properties matching the column LABELs';
+          const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr >\n\t<td style="background-color:blue;">1</td>\n</tr>
+<tr >\n\t<td >2</td>\n</tr>
+</table>`;
+          const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+          let results;
+
+          //-- break it
+          global.expect(
+            () => {
+              results = new TableGenerator(weather)
+                .styleColumn(testFn)
+                .generateHTML();
+            }
+          ).toThrow(expectedError);
+
+          //-- fix it
+          results = new TableGenerator(weather)
+            .styleColumn({ id: testFn })
+            .generateHTML();
+          
+          global.expect(testFn).toHaveBeenCalled();
+          global.expect(testFn).toHaveBeenCalledTimes(2); //-- per row
+
+          // FileUtil.writeFileStd('./tmp/tmp', results);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if we call styleColumn with a null', () => {
+          const weather = [{ id: 1 }, { id: 2 }];
+          const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr >\n\t<td >1</td>\n</tr>
+<tr >\n\t<td >2</td>\n</tr>
+</table>`;
+          const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+          
+          //-- fix it
+          const results = new TableGenerator(weather)
+            .styleColumn({ id: testFn })
+            .styleColumn(null) //-- negates the style
+            .generateHTML();
+          
+          global.expect(testFn).not.toHaveBeenCalled();
+          
+          // FileUtil.writeFileStd('./tmp/tmp', results);
+          global.expect(results).toBe(expected);
+        });
+      });
+
+      global.it('demo in help 1', () => {
+        const weather = [
+          { reg: 'z', source: 'A', temp: 10 },
+          { reg: 'z', source: 'B', temp: 98 },
+          { reg: 'z', source: 'A', temp: 100 }
+        ];
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>reg</th>
+\t<th>source</th>
+\t<th>temp</th>
+</tr>
+<tr >
+\t<td >z</td>
+\t<td >A</td>
+\t<td >10</td>
+</tr>
+<tr >
+\t<td >z</td>
+\t<td style="font-weight:bold;">B</td>
+\t<td style="background-color:pink;">98</td>
+</tr>
+<tr >
+\t<td >z</td>
+\t<td >A</td>
+\t<td style="background-color:pink;">100</td>
+</tr>
+</table>`;
+        const results = new TableGenerator(weather)
+          .styleColumn({
+            //-- we want to make the background color of the color red, if the temp > 50
+            temp: (temp) => temp > 50 ? 'background-color:pink' : '',
+
+            //-- we want to make the source bold if the source is B
+            source: (source) => source === 'B' ? 'font-weight:bold' : ''
+          })
+          .generateHTML();
+        
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('demo in help 2', () => {
+        const weather = [
+          { reg: 'z', source: 'A', tempFormat: 'c', temp: 10 },
+          { reg: 'z', source: 'B', tempFormat: 'f', temp: 98 },
+          { reg: 'z', source: 'A', tempFormat: 'f', temp: 100 }
+        ];
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>reg</th>
+\t<th>source</th>
+\t<th>tempFormat</th>
+\t<th>temp</th>
+</tr>
+<tr >
+\t<td >z</td>
+\t<td >A</td>
+\t<td >c</td>
+\t<td style="background-color:pink;">10</td>
+</tr>
+<tr >
+\t<td >z</td>
+\t<td >B</td>
+\t<td >f</td>
+\t<td style="background-color:pink;">98</td>
+</tr>
+<tr >
+\t<td >z</td>
+\t<td >A</td>
+\t<td >f</td>
+\t<td style="background-color:pink;">100</td>
+</tr>
+</table>`;
+        const convertToKelvin = (temp, format) => {
+          if (format === 'k') {
+            return temp;
+          } else if (format === 'c') {
+            return 273.15 + temp;
+          } else if (format === 'f') {
+            return (459.67 + temp) * (5 / 9);
+          }
+          return undefined;
+        };
+        global.expect(convertToKelvin(50, 'f')).toBeCloseTo(283.15);
+        const results = new TableGenerator(weather)
+          .styleColumn({
+            //-- we want to make the background color of the color red, if the temp > 50
+            temp: (temp, { record }) => convertToKelvin(temp, record.tempFormat) > 283
+              ? 'background-color:pink'
+              : ''
+          })
+          .generateHTML();
+        
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.describe('calling the styleFn', () => {
+        global.it('actually calls the function', () => {
+          const weather = [{ id: 1 }, { id: 2 }];
+          const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr >\n\t<td style="background-color:blue;">1</td>\n</tr>
+<tr >\n\t<td >2</td>\n</tr>
+</table>`;
+          const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+          const results = new TableGenerator(weather)
+            .styleColumn({ id: testFn })
+            .generateHTML();
+          
+          global.expect(testFn).toHaveBeenCalled();
+          global.expect(testFn).toHaveBeenCalledTimes(2); //-- per row
+
+          // FileUtil.writeFileStd('./tmp/tmp', results);
+          global.expect(results).toBe(expected);
+        });
+        global.it('does not call if no matching property found', () => {
+          const weather = [{ id: 1 }, { id: 2 }];
+          const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr >\n\t<td >1</td>\n</tr>
+<tr >\n\t<td >2</td>\n</tr>
+</table>`;
+          const testFn = jest.fn((value) => value === 'Aug' ? 'background-color:blue' : '');
+          const results = new TableGenerator(weather)
+            .styleColumn({ month: testFn })
+            .generateHTML();
+          
+          global.expect(testFn).not.toHaveBeenCalled();
+
+          // FileUtil.writeFileStd('./tmp/tmp', results);
+          global.expect(results).toBe(expected);
+        });
+        global.it('has the properties expected passed', () => {
+          const weather = [{ id: 1 }, { id: 2 }];
+          const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n</tr>
+<tr >\n\t<td style="background-color:blue;">1</td>\n</tr>
+<tr >\n\t<td >2</td>\n</tr>
+</table>`;
+          const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+          const results = new TableGenerator(weather)
+            .styleColumn({ id: testFn })
+            .generateHTML();
+          
+          global.expect(testFn).toHaveBeenCalled();
+          global.expect(testFn).toHaveBeenCalledTimes(2); //-- per row
+
+          const call1 = testFn.mock.calls[0];
+          const expectedCall1Arguments = [
+            1, // value
+            {
+              columnHeader: 'id',
+              columnIndex: 0,
+              record: { id: 1 },
+              row: [1],
+              rowIndex: 0,
+              value: 1
+            }
+          ];
+          global.expect(call1).toEqual(expectedCall1Arguments);
+
+          const call2 = testFn.mock.calls[1];
+          const expectedCall2Arguments = [
+            2, // value
+            {
+              columnHeader: 'id',
+              columnIndex: 0,
+              record: { id: 2 },
+              row: [2],
+              rowIndex: 1,
+              value: 2
+            }
+          ];
+          global.expect(call2).toEqual(expectedCall2Arguments);
+
+          // FileUtil.writeFileStd('./tmp/tmp', results);
+          global.expect(results).toBe(expected);
+        });
+        global.it('properties passed with multiple columns', () => {
+          const weather = [{ id: 1, label: 'a' }, { id: 2, label: 'b' }];
+          const expected = `<table cellspacing="0px" >
+<tr >\n\t<th>id</th>\n\t<th>label</th>\n</tr>
+<tr >\n\t<td style="background-color:blue;">1</td>\n\t<td >a</td>\n</tr>
+<tr >\n\t<td >2</td>\n\t<td >b</td>\n</tr>
+</table>`;
+          const testFn = jest.fn((value) => value === 1 ? 'background-color:blue' : '');
+          const results = new TableGenerator(weather)
+            .styleColumn({ id: testFn })
+            .generateHTML();
+          
+          //-- NOT called because it didn't match the property name
+          global.expect(testFn).toHaveBeenCalled();
+          global.expect(testFn).toHaveBeenCalledTimes(2); //-- per row
+
+          const call1 = testFn.mock.calls[0];
+          const expectedCall1Arguments = [
+            1, // value
+            {
+              columnHeader: 'id',
+              columnIndex: 0,
+              record: { id: 1, label: 'a' },
+              row: [1, 'a'],
+              rowIndex: 0,
+              value: 1
+            }
+          ];
+          global.expect(call1).toEqual(expectedCall1Arguments);
+
+          const call2 = testFn.mock.calls[1];
+          const expectedCall2Arguments = [
+            2, // value
+            {
+              columnHeader: 'id',
+              columnIndex: 0,
+              record: { id: 2, label: 'b' },
+              row: [2, 'b'],
+              rowIndex: 1,
+              value: 2
+            }
+          ];
+          global.expect(call2).toEqual(expectedCall2Arguments);
+
+          // FileUtil.writeFileStd('./tmp/tmp', results);
+          global.expect(results).toBe(expected);
+        });
       });
     });
     global.describe('styleCell', () => {
