@@ -8,6 +8,9 @@ const IJSUtils = require('./ijs');
 /**
  * Helper for working with [Vega-Lite](https://vega.github.io/vega-lite/) (and [Vega](https://vega.github.io/vega/)) within iJavaScript notebooks.
  * 
+ * * [Vega-Lite Example Gallery](https://vega.github.io/vega-lite/examples/)
+ * * [Vega Example Gallery](https://vega.github.io/vega/examples/)
+ * 
  * ([Vega-Lite-Api](https://vega.github.io/vega-lite-api/):
  * creates -> [Vega-Lite JSON specifications](https://vega.github.io/vega-lite/tutorials/getting_started.html):
  * creates -> [Vega charting specifications](https://vega.github.io/):
@@ -25,6 +28,39 @@ const IJSUtils = require('./ijs');
  * * Rendering specifications through the Jupyter Lab mime-type
  *   * {@link module:vega.vegaMimeType|vega.vegaMimeType(Object | String)} - render the chart using the Vega mime-type (as png)
  *   * {@link module:vega.vegaLiteMimeType|vega.vegaLiteMimeType(Object | String)} - render the chart using the Vega-Lite mime-type (as png)
+ * 
+ * For example, this is a very simple demonstration for writing a vega-lite chart (the simplest way to get started)
+ * 
+ * ```
+ *  simpleData = [{fruit:'Apples',yield:20,year:'2020'},{fruit:'Apples',yield:22,year:'2021'},
+ *    {fruit:'Bananas',yield:15,year:'2020'},{fruit:'Bananas',yield:12,year:'2021'},
+ *    {fruit:'Pears',yield:18,year:'2020'},{fruit:'Pears',yield:19,year:'2021'}];
+ *  
+ *  utils.vega.svg(
+ *  // accept the reference to the vega-lite instance passed
+ *  (vl) => vl
+ *    // render as points
+ *    .markPoint()
+ *        // use simpleData as the data source
+ *        .data(simpleData)
+ *        // title
+ *        .title('Fruit by Yield')
+ *        .width(100)
+ *        .encode(
+ *            // define the x axis as the Qualitative / Numerical 'yield' property
+ *            vl.y().fieldQ('yield'),
+ *            // define the y axis as the Nominative / TextBased 'fruit' property
+ *            vl.x().fieldN('fruit'),
+ *            // define the color series based on the Qualitative / Numerical 'year' property
+ *            vl.color().fieldN('year')
+ *        )
+ *  );
+ *  ```
+ * ![Screenshot](img/vegaSimpleChart.jpg)
+ * 
+ * and with simple changes, convert it to a bar graph
+ * 
+ * ![Screenshot](img/fruitYieldByYearBar.png)
  * -----
  * 
  * * Check out the {@tutorial vegaLite1} tutorials
@@ -155,6 +191,7 @@ const IJSUtils = require('./ijs');
  *     "x": {"field": "Horsepower", "type": "quantitative"},
  *     "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
  *     "color": {"field": "Origin", "type": "nominal"},
+ *     //-- simply by adding the tooltip encoding here
  *     "tooltip": {"field": "Name", "type": "nominal"},
  *     "href": {"field": "url", "type": "nominal"}
  *   }
@@ -162,6 +199,8 @@ const IJSUtils = require('./ijs');
  * ```
  * 
  * ![Screenshot for tooltips](img/vegaScript_tooltips.png)
+ * 
+ * or through the vega lite
  * 
  * ---
  * 
