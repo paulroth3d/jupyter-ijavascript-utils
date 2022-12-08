@@ -494,4 +494,57 @@ describe('ArrayUtils', () => {
       global.expect(results).toStrictEqual(expected);
     });
   });
+
+  global.describe('generateSequenceNumber', () => {
+    global.describe('can generate', () => {
+      global.it('example case', () => {
+        const createRecord = (primaryKey, group, value) => ({ primaryKey, group, value });
+        const list = [
+          createRecord('1', 'A', 'alpha'),
+          createRecord('2', 'A', 'bravo'),
+          createRecord('3', 'A', 'charlie'),
+          createRecord('1', 'B', 'delta'),
+          createRecord('2', 'B', 'epsilon'),
+          createRecord('3', 'B', 'foxtrot')
+        ];
+
+        const expected = [
+          { primaryKey: '1', group: 'A', value: 'alpha',    _sort: 'A.1', sequence: 0 },
+          { primaryKey: '2', group: 'A', value: 'bravo',    _sort: 'A.2', sequence: 1 },
+          { primaryKey: '3', group: 'A', value: 'charlie',  _sort: 'A.3', sequence: 2 },
+          { primaryKey: '1', group: 'B', value: 'delta',    _sort: 'B.1', sequence: 0 },
+          { primaryKey: '2', group: 'B', value: 'epsilon',  _sort: 'B.2', sequence: 1 },
+          { primaryKey: '3', group: 'B', value: 'foxtrot',  _sort: 'B.3', sequence: 2 }
+        ];
+        
+        const results = ArrayUtils.generateSequenceNumber(list, ['group', 'primaryKey'], 'group', 'sequence');
+
+        global.expect(results).toEqual(expected);
+      });
+      global.it('mixed up order', () => {
+        const createRecord = (primaryKey, group, value) => ({ primaryKey, group, value });
+        const list = [
+          createRecord('1', 'A', 'alpha'),
+          createRecord('3', 'A', 'charlie'),
+          createRecord('2', 'B', 'epsilon'),
+          createRecord('3', 'B', 'foxtrot'),
+          createRecord('2', 'A', 'bravo'),
+          createRecord('1', 'B', 'delta')
+        ];
+
+        const expected = [
+          { primaryKey: '1', group: 'A', value: 'alpha',    _sort: 'A.1', sequence: 0 },
+          { primaryKey: '2', group: 'A', value: 'bravo',    _sort: 'A.2', sequence: 1 },
+          { primaryKey: '3', group: 'A', value: 'charlie',  _sort: 'A.3', sequence: 2 },
+          { primaryKey: '1', group: 'B', value: 'delta',    _sort: 'B.1', sequence: 0 },
+          { primaryKey: '2', group: 'B', value: 'epsilon',  _sort: 'B.2', sequence: 1 },
+          { primaryKey: '3', group: 'B', value: 'foxtrot',  _sort: 'B.3', sequence: 2 }
+        ];
+        
+        const results = ArrayUtils.generateSequenceNumber(list, ['group', 'primaryKey'], 'group', 'sequence');
+
+        global.expect(results).toEqual(expected);
+      });
+    });
+  });
 });

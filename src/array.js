@@ -389,4 +389,89 @@ module.exports.reshape = function reshape(sourceArray, numColumns) {
   return results;
 };
 
+ArrayUtils.generateSequenceNumber = function generateSequenceNumber(list, propertyToSortBy, propertyToGroupBy, sequencePropertyName) {
+  const signature = 'array.generateSequenceNumber(list, propertyToSortBy, propertyToGroupBy, propertyName)';
+
+  if (!list || !Array.isArray(list)) {
+    throw Error(`${signature}: list is not an array`);
+  }
+
+  //-- modify in place
+  let cleanList = list;
+
+  // let cleanList = list.map((record, index) => ({
+  //   record,
+  //   sortValue: undefined,
+  //   groupValue: undefined
+  // }));
+
+  let cleanPropertyToSortBy = propertyToSortBy;
+  let cleanPropertyToGroupBy = propertyToGroupBy;
+
+  /* eslint-disable no-param-reassign, no-underscore-dangle */
+
+  //-- sort
+  if (!cleanPropertyToSortBy) {
+    //-- do nothing;
+  } else if (Array.isArray(propertyToSortBy)) {
+    // cleanList.forEach(r => {
+    //   r.sortValue = propertyToSortBy.map((field) => r.record[field]).join('.');
+    // });
+    cleanList.forEach((record) => {
+      record._sort = propertyToSortBy.map((field) => record[field]).join('.');
+    });
+    cleanPropertyToSortBy = '_sort';
+  } else if (typeof propertyToSortBy === 'function') {
+    cleanList.forEach((record) => {
+      record._sort = propertyToSortBy(record);
+    });
+    cleanPropertyToSortBy = '_sort';
+  } else if (typeof cleanPropertyToSortBy !== 'string') {
+    throw Error(`${signature}: propertyToSortBy should either be null or the name of the property to sort by`);
+  }
+
+  //-- group
+  if (Array.isArray(propertyToGroupBy)) {
+    cleanList.forEach((record) => {
+      record._sort = propertyToGroupBy.map((field) => record[field]).join('.');
+    });
+    cleanPropertyToGroupBy = '_group';
+  } else if (typeof propertyToGroupBy === 'function') {
+    cleanList.forEach((record) => {
+      record._sort = propertyToGroupBy(record);
+    });
+    cleanPropertyToGroupBy = '_group';
+  } else if (typeof cleanPropertyToGroupBy !== 'string') {
+    throw Error(`${signature}: propertyToGroupBy should either be null or the name of the property to monitor for changes`);
+  }
+  
+  //-- sort the list to put it in the right order
+  if (cleanPropertyToSortBy) {
+    cleanList = cleanList.sort(ArrayUtils.createSort(cleanPropertyToSortBy));
+  }
+
+  //-- update
+  let lastKey;
+  let lastIndex = -1;
+  
+  //-- modify inline
+  cleanList.forEach((record) => {
+    const currentKey = record[cleanPropertyToGroupBy];
+    const currentIndex = (currentKey === lastKey)
+      ? lastIndex + 1
+      : 0;
+    
+    record[sequencePropertyName] = currentIndex;
+
+    lastKey = currentKey;
+    lastIndex = currentIndex;
+  });
+
+  /* eslint-enable no-param-reassign, no-underscore-dangle */
+
+  // console.log(JSON.stringify(cleanList));
+
+  return cleanList;
+};
+
 //-- collection utilities

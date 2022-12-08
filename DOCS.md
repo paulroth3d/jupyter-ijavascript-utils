@@ -75,6 +75,7 @@ Give it a try here:
 
 ## What's New
 
+* 1.25 - array.generateSequenceNumber
 * 1.24 - format.stripHtmlTags, TableGenerator.offset, chain.chainFlatMap, chain.chainFilter
 * 1.23 - add format.parseNumber and TableGenerator.styleColumn, align group.separateByFields to vega-lite fold transform
 * 1.22 - make chain iJavaScript aware, but still able to work outside of Jupyter
