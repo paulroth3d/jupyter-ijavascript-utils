@@ -541,6 +541,58 @@ global.describe('tableGenerator', () => {
         global.expect(results).toStrictEqual(expected);
       });
     });
+    global.describe('offset', () => {
+      global.it('can offset 7 records', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(weather)
+          .offset(7)
+          .prepare();
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can offset beyond the number of records', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+          ] });
+        const results = new TableGenerator(weather)
+          .offset(100)
+          .prepare();
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can offset -2 records', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(weather)
+          .offset(-2)
+          .prepare();
+        global.expect(results).toStrictEqual(expected);
+      });
+      /*
+      global.it('can offset below the number of records', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+          ] });
+        const results = new TableGenerator(weather)
+          .offset(-100)
+          .prepare();
+        global.expect(results).toStrictEqual(expected);
+      });
+      */
+    });
     global.describe('printOptions', () => {
       global.it('can influence dates through print options', () => {
         const data = [

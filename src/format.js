@@ -15,6 +15,7 @@
  *   * {@link module:format.capitalize|format.capitalize} - Capitalizes only the first character in the string (ex: 'John paul');
  *   * {@link module:format.capitalizeAll|format.capitalizeAll} - Capitalizes all the words in a string (ex: 'John Paul')
  *   * {@link module:format.ellipsify|format.ellipsify} - Truncates a string if the length is 'too long'
+ *   * {@link module:format.stripHtmlTags|format.stripHtmlTags} - removes html / xml tags from strings.
  *   * {@link module:format.limitLines|format.limitLines(string, toLine, fromLine, lineSeparator)} - selects only a subset of lines in a string
  *   * {@link module:format.consoleLines|format.consoleLines(...)} - same as limit lines, only console.logs the string out.
  * * Formatting Time
@@ -976,4 +977,22 @@ module.exports.limitLines = function limitLines(str, toLine, fromLine, lineSepar
  */
 module.exports.consoleLines = function consoleLines(str, toLine, fromLine, lineSeparator) {
   console.log(FormatUtils.limitLines(str, toLine, fromLine, lineSeparator));
+};
+
+/**
+ * Strips any html or xml tags from a string.
+ * 
+ * Note, if you want to remove html entities (ex: `&nbsp;` or `&#8209;`), please consider [other libraries](https://www.npmjs.com/search?q=html%20entities)
+ * 
+ * @param {String} str - string to strip html / xml entities from
+ * @returns {String}
+ * @example 
+ * 
+ * utils.format.stripHtmlTags('Hello <br />Nice to see <b>you</b>'); // 'Hello Nice to see you'
+ * utils.format.stripHtmlTags('example string'); // 'example string' -- untouched
+ */
+module.exports.stripHtmlTags = function stripHtmlTags(str) {
+  if (!str) return str;
+
+  return str.replace(/<[^>]+>/g, '');
 };

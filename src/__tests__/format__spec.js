@@ -1779,4 +1779,73 @@ global.describe('format', () => {
       global.expect(console.log).toHaveBeenCalled();
     });
   });
+  global.describe('stripHtmlTags', () => {
+    global.describe('can remove tags', () => {
+      global.it('single tag should be replaced', () => {
+        const str = '<br />';
+        const expected = '';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('single tag in text - should be replaced', () => {
+        const str = 'hello <br /> there';
+        const expected = 'hello  there';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('paired tags - should be replaced', () => {
+        const str = 'I said <b>Hello There</b>';
+        const expected = 'I said Hello There';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('unclosed tags - should be replaced', () => {
+        const str = 'I said <b>Hello There';
+        const expected = 'I said Hello There';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+    });
+    global.describe('can leave strings alone', () => {
+      global.it('2 + 2 < 5', () => {
+        const str = '2 + 2 < 5';
+        const expected = '2 + 2 < 5';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('some example text - should be left alone', () => {
+        const str = 'some example text';
+        const expected = 'some example text';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('single_word - should be left alone', () => {
+        const str = 'single_word';
+        const expected = 'single_word';
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('passes unchanged if null', () => {
+        const str = null;
+        const expected = null;
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('passes unchanged if undefined', () => {
+        const str = undefined;
+        const expected = undefined;
+        const results = FormatUtils.stripHtmlTags(str);
+
+        global.expect(results).toBe(expected);
+      });
+    });
+  });
 });

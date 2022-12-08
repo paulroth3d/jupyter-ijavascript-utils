@@ -13,6 +13,9 @@
  * * {@link ChainContainer#close|.close()} - gets the value of the current chain
  * * {@link ChainContainer#chain|.chain(function)} - where it is passed the value, and returns a new Chain with that value.
  * * {@link ChainContainer#chainMap|.chainMap(function)} - where it treats value as an array, and maps function on every item in the array
+ * * {@link ChainContainer#chainFlatMap|.chainFlatMap(function)} - where it treats value as an array, and maps function on every item in the array,
+ *        flattening the results
+ * * {@link ChainContainer#chainFilter|.chainFilter(function)} - where it treats the value as an array, and filters values based on the result
  * * {@link ChainContainer#chainReduce|.chainReduce(function, initialValue)} - where it treats value as an array, and reduces the value array
  * * {@link ChainContainer#errorHandler|.errorHandler(fn)} - custom function called if an error is ever thrown
  * * {@link ChainContainer#debug|.debug()} - console.logs the current value, and continues the chain with that value
@@ -156,6 +159,69 @@ class ChainContainer {
     if (!Array.isArray(this.value)) throw Error(`chainMap expected an array, but was passed:${this.value}`);
 
     return this.chain((value) => value.map(fn));
+  }
+
+  /**
+   * Assuming that value is an array, performs a
+   * [javaScript flatMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap)
+   * against the results.
+   * 
+   * This can be very helpful in expanding the list of items in an array, or removing items from an array.
+   * 
+   * ```
+   * // expanding size of the array
+   * initializeArray = (size) => Array.from(Array(size)).map((val, index) => index);
+   * initializeArray(3); // [0, 1, 2]
+   * 
+   * utils.chain([1, 2, 3, 4])
+   *  .chainFlatMap(initializeArray)
+   *  .close();
+   * 
+   * // [1, 1, 2, 1, 2, 3, 1, 2, 3, 4];
+   * ```
+   * 
+   * or similar to {@link ChainContainer#chainFilter|chainFilter}
+   * 
+   * ```
+   * // reducing the size of the array
+   * filterOdd = (value) => value % 2 === 0 ? [value] : [];
+   * filterOdd(2); // [2]
+   * filterOdd(1); // []
+   * 
+   * chain([1, 2, 3, 4, 5])
+   *  .chainFlatMap(filterOdd)
+   *  .close();
+   * 
+   * // [2, 4];
+   * ```
+   * 
+   * @param {function(any):any} fn - function that can either return a value or array of values.
+   * @returns {ChainContainer}
+   * @see {@link ChainContainer#chainFilter} - for other options in filtering
+   */
+  chainFlatMap(fn) {
+    if (!Array.isArray(this.value)) throw Error(`chainFlatMap expects an array, but was passed:${this.value}`);
+
+    return this.chain((value) => value.flatMap(fn));
+  }
+
+  /**
+   * Assuming that value is an array, this maps fn to filter the results in the array.
+   * 
+   * ```
+   * chain([1,2,3,4])
+   *    .chainFilter((value) => value < 3)
+   *    .close();
+   * // [1, 2]
+   * ```
+   * 
+   * @param {function(any):Boolean} fn - Function accepting a value and returning whether it should be included (true) or not (false)
+   * @returns {ChainContainer}
+   */
+  chainFilter(fn) {
+    if (!Array.isArray(this.value)) throw Error(`chainFilter expects an array, but was passed:${this.value}`);
+
+    return this.chain((value) => value.filter(fn));
   }
 
   /**
@@ -361,6 +427,9 @@ class ChainContainer {
  * * {@link ChainContainer#close|.close()} - gets the value of the current chain
  * * {@link ChainContainer#chain|.chain(function)} - where it is passed the value, and returns a new Chain with that value.
  * * {@link ChainContainer#chainMap|.chainMap(function)} - where it treats value as an array, and maps function on every item in the array
+ * * {@link ChainContainer#chainFlatMap|.chainFlatMap(function)} - where it treats value as an array, and maps function on every item in the array,
+ *        flattening the results
+ * * {@link ChainContainer#chainFilter|.chainFilter(function)} - where it treats the value as an array, and filters values based on the result
  * * {@link ChainContainer#chainReduce|.chainReduce(function, initialValue)} - where it treats value as an array, and reduces the value array
  * * {@link ChainContainer#errorHandler|.errorHandler(fn)} - custom function called if an error is ever thrown
  * * {@link ChainContainer#debug|.debug()} - console.logs the current value, and continues the chain with that value

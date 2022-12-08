@@ -1,3 +1,4 @@
+const { utils } = require('@svgdotjs/svg.js'); // eslint-disable-line
 const chain = require('../chain');
 const { mockConsole, removeConsoleMock } = require('../__testHelper__/ijsContext');
 
@@ -396,6 +397,112 @@ global.describe('Chain', () => {
       const val = 2;
       const results = chain(val).toJSON();
       global.expect(results.value).toBe(val);
+    });
+  });
+
+  global.describe('chainFilter', () => {
+    global.it('filters values', () => {
+      const val = [0, 1, 2, 3, 4];
+      const expected = [2, 3, 4];
+
+      const filterLessThan2 = (value) => value >= 2;
+      global.expect(filterLessThan2(1)).toBe(false);
+      global.expect(filterLessThan2(2)).toBe(true);
+      global.expect(filterLessThan2(3)).toBe(true);
+
+      const result = chain(val)
+        .chainFilter(filterLessThan2)
+        .close();
+
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('example', () => {
+      const val = [1, 2, 3, 4];
+      const expected = [1, 2];
+
+      const exampleFilter = (value) => value < 3;
+      global.expect(exampleFilter(1)).toBe(true);
+      global.expect(exampleFilter(2)).toBe(true);
+      global.expect(exampleFilter(3)).toBe(false);
+
+      const result = chain(val)
+        .chainFilter(exampleFilter)
+        .close();
+
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('fails if not an array', () => {
+      const expectedError = 'chainFilter expects an array, but was passed:2';
+      const val = 2;
+      const filterLessThan2 = (value) => value >= 2;
+      global.expect(filterLessThan2(1)).toBe(false);
+      global.expect(filterLessThan2(2)).toBe(true);
+      global.expect(filterLessThan2(3)).toBe(true);
+
+      global.expect(() => chain(val).chainFilter(filterLessThan2))
+        .toThrow(expectedError);
+    });
+  });
+
+  global.describe('chainFlatMap', () => {
+    global.it('fails if not an array', () => {
+      const expectedError = 'chainFlatMap expects an array, but was passed:2';
+      const val = 2;
+
+      const exampleFn = (value) => value;
+
+      global.expect(() => chain(val).chainFlatMap(exampleFn))
+        .toThrow(expectedError);
+    });
+    global.it('can chain returning a literal value', () => {
+      const val = [3];
+      const expected = [3];
+
+      const exampleFn = (value) => value;
+
+      global.expect(exampleFn(3)).toStrictEqual(3);
+
+      const results = chain(val).chainFlatMap(exampleFn).close();
+
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can chain filtering values', () => {
+      const val = [0, 1, 2, 3, 4, 5];
+      const expected = [0, 2, 4];
+
+      const exampleFn = (value) => value % 2 === 0 ? [value] : [];
+      global.expect(exampleFn(0)).toStrictEqual([0]);
+      global.expect(exampleFn(1)).toStrictEqual([]);
+      global.expect(exampleFn(2)).toStrictEqual([2]);
+      global.expect(exampleFn(3)).toStrictEqual([]);
+      global.expect(exampleFn(4)).toStrictEqual([4]);
+      global.expect(exampleFn(5)).toStrictEqual([]);
+
+      const results = chain(val).chainFlatMap(exampleFn).close();
+
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can chain returning an array', () => {
+      const val = [3];
+      const expected = [0, 1, 2];
+
+      const exampleFn = (size) => Array.from(Array(size)).map((_, index) => index);
+      global.expect(exampleFn(3)).toStrictEqual([0, 1, 2]);
+
+      const results = chain(val).chainFlatMap(exampleFn).close();
+
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can chain expanding the results', () => {
+      const val = [1, 2, 3];
+      const expected = [0, 0, 1, 0, 1, 2];
+
+      const exampleFn = (size) => Array.from(Array(size)).map((_, index) => index);
+      global.expect(exampleFn(3)).toStrictEqual([0, 1, 2]);
+
+      const results = chain(val).chainFlatMap(exampleFn).close();
+
+      global.expect(results).toStrictEqual(expected);
     });
   });
 });

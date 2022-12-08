@@ -105,6 +105,7 @@ const { createSort } = require('./array');
  * * sort and limit the output
  *   * {@link TableGenerator#filter|filter(fn)} - determine which rows to include or not
  *   * {@link TableGenerator#limit|limit(number)} - limit only specific # of rows
+ *   * {@link TableGenerator#offset|offset(number)} - starts results only after an offset number of rows
  *   * {@link TableGenerator#sortFn|sortFn(fn)} - Standard Array sort function
  *   * {@link TableGenerator#sort|sort(field, field, ...)} - sorts by fields, or descending with '-'
  * * transpose the output
@@ -198,6 +199,17 @@ class TableGenerator {
   #limit = 0;
 
   /**
+   * The number of rows to skip before showing results.
+   * 
+   * 10 : means start showing results only after the first 10 records
+   * 
+   * -10 : means only show the last 10
+   * 
+   * @type {Number}
+   */
+  #offset = 0;
+
+  /**
    * PrintValue options to use when rendering the table values
    * @type {PrintOptions}
    **/
@@ -289,6 +301,7 @@ class TableGenerator {
     this.#formatterFn = null;
     this.#labels = {};
     this.#limit = 0;
+    this.#offset = 0;
     this.#printOptions = null;
     this.#sortFn = null;
     this.#styleTable = '';
@@ -674,6 +687,21 @@ class TableGenerator {
    */
   limit(limitRecords) {
     this.#limit = limitRecords;
+    return this;
+  }
+
+  /**
+   * The number of rows to skip before showing any records.
+   * 
+   * 10 : means start showing results only after the first 10 records
+   * 
+   * -10 : means only show the last 10
+   * 
+   * @param {Number} offsetRecords - the number of rows to skip 
+   * @returns {TableGenerator} - chainable interface
+   */
+  offset(offsetRecords) {
+    this.#offset = offsetRecords;
     return this;
   }
 
@@ -1130,8 +1158,12 @@ class TableGenerator {
 
     if (this.#limit < 0) {
       data = data.reverse().slice(0, -this.#limit);
+    } else if (this.#offset < 0) {
+      data = data.slice(this.#offset);
     } else if (this.#limit > 0) {
-      data = data.slice(0, this.#limit);
+      data = data.slice(this.#offset, this.#offset + this.#limit);
+    } else if (this.#offset > 0) {
+      data = data.slice(this.#offset);
     }
 
     if (this.#isTransposed) {
