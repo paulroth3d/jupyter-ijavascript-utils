@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.25 - Additional chain methods and documentation
 * 1.24 - format.stripHtmlTags, TableGenerator.offset, chain.chainFlatMap, chain.chainFilter
 * 1.23 - add format.parseNumber and TableGenerator.styleColumn, align group.separateByFields to vega-lite fold transform
 * 1.22 - make chain iJavaScript aware, but still able to work outside of Jupyter

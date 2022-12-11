@@ -1,3 +1,5 @@
+/* eslint-disable prefer-destructuring */
+
 const { utils } = require('@svgdotjs/svg.js'); // eslint-disable-line
 const chain = require('../chain');
 const { mockConsole, removeConsoleMock } = require('../__testHelper__/ijsContext');
@@ -78,6 +80,127 @@ global.describe('Chain', () => {
         .value;
 
       global.expect(result).toStrictEqual(expected);
+    });
+  });
+  global.describe('chainForEach', () => {
+    global.describe('can execute', () => {
+      global.it('calls jest fn and returns value', () => {
+        const fn = jest.fn(() => 'a');
+        const result = fn();
+        const expected = 'a';
+        global.expect(result).toBe(expected);
+        global.expect(fn).toHaveBeenCalled();
+        global.expect(fn).toHaveBeenCalledTimes(1);
+      });
+      global.it('calls the functions', () => {
+        const fn = jest.fn(() => 'a');
+        const values = [11, 12, 13];
+        const expected = [11, 12, 13]; // results from fn never are applied.
+
+        const results = chain(values)
+          .chainForEach(fn)
+          .close();
+        
+        global.expect(results).toEqual(expected);
+        global.expect(fn).toHaveBeenCalled();
+        global.expect(fn).toHaveBeenCalledTimes(values.length);
+
+        let call = fn.mock.calls[0];
+        let callExpect = [11, 0, [11, 12, 13]];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[1];
+        callExpect = [12, 1, [11, 12, 13]];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[2];
+        callExpect = [13, 2, [11, 12, 13]];
+        global.expect(call).toEqual(callExpect);
+      });
+      global.it('works if you pass a set', () => {
+        const fn = jest.fn(() => 'a');
+        const values = new Set([11, 12, 13]);
+        const expected = new Set([11, 12, 13]); // results from fn never are applied.
+
+        const results = chain(values)
+          .chainForEach(fn)
+          .close();
+        
+        global.expect(results).toEqual(expected);
+        global.expect(fn).toHaveBeenCalled();
+        global.expect(fn).toHaveBeenCalledTimes(3);
+
+        let call = fn.mock.calls[0];
+        let callExpect = [11, 11, new Set([11, 12, 13])];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[1];
+        callExpect = [12, 12, new Set([11, 12, 13])];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[2];
+        callExpect = [13, 13, new Set([11, 12, 13])];
+        global.expect(call).toEqual(callExpect);
+      });
+      global.it('works if you pass a set', () => {
+        const fn = jest.fn(() => 'a');
+        const values = new Set([11, 12, 13]);
+        const expected = new Set([11, 12, 13]); // results from fn never are applied.
+
+        const results = chain(values)
+          .chainForEach(fn)
+          .close();
+        
+        global.expect(results).toEqual(expected);
+        global.expect(fn).toHaveBeenCalled();
+        global.expect(fn).toHaveBeenCalledTimes(3);
+
+        let call = fn.mock.calls[0];
+        let callExpect = [11, 11, new Set([11, 12, 13])];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[1];
+        callExpect = [12, 12, new Set([11, 12, 13])];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[2];
+        callExpect = [13, 13, new Set([11, 12, 13])];
+        global.expect(call).toEqual(callExpect);
+      });
+      global.it('works if you pass a map', () => {
+        const fn = jest.fn(() => 'a');
+        const values = new Map([['eleven', 11], ['twelve', 12], ['thirteen', 13]]);
+        const expected = new Map([['eleven', 11], ['twelve', 12], ['thirteen', 13]]); // results from fn never are applied.
+
+        const results = chain(values)
+          .chainForEach(fn)
+          .close();
+        
+        global.expect(results).toEqual(expected);
+        global.expect(fn).toHaveBeenCalled();
+        global.expect(fn).toHaveBeenCalledTimes(3);
+
+        let call = fn.mock.calls[0];
+        let callExpect = [11, 'eleven', new Map([['eleven', 11], ['twelve', 12], ['thirteen', 13]])];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[1];
+        callExpect = [12, 'twelve', new Map([['eleven', 11], ['twelve', 12], ['thirteen', 13]])];
+        global.expect(call).toEqual(callExpect);
+
+        call = fn.mock.calls[2];
+        callExpect = [13, 'thirteen', new Map([['eleven', 11], ['twelve', 12], ['thirteen', 13]])];
+        global.expect(call).toEqual(callExpect);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('if the value passed is a string', () => {
+        const fn = jest.fn(() => 'a');
+        const values = 1;
+        const expectedError = 'chainForEach expects an array, but was passed:1';
+
+        global.expect(() => chain(values).chainForEach(fn)).toThrow(expectedError);
+      });
     });
   });
   global.describe('chainReduce', () => {
@@ -503,6 +626,44 @@ global.describe('Chain', () => {
       const results = chain(val).chainFlatMap(exampleFn).close();
 
       global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('execute', () => {
+    global.it('calls jest fn and returns value', () => {
+      const fn = jest.fn(() => 'a');
+      const result = fn();
+      const expected = 'a';
+      global.expect(result).toBe(expected);
+      global.expect(fn).toHaveBeenCalled();
+      global.expect(fn).toHaveBeenCalledTimes(1);
+    });
+    global.it('can execute a value without modifying the value', () => {
+      const value = 3;
+      const fn = jest.fn(() => 9);
+      const expected = 3;
+
+      const results = chain(value)
+        .execute(fn)
+        .close();
+
+      global.expect(results).toBe(expected);
+
+      global.expect(fn).toHaveBeenCalled();
+      global.expect(fn).toHaveBeenCalledTimes(1);
+
+      const callArgs = fn.mock.calls[0];
+      const callExpected = [3];
+      global.expect(callArgs).toEqual(callExpected);
+    });
+  });
+  global.describe('replace', () => {
+    global.it('can replace the value in the chain', () => {
+      const value = 3;
+      const expected = 9;
+      const results = chain(value)
+        .replace(expected)
+        .close();
+      global.expect(results).toBe(expected);
     });
   });
 });
