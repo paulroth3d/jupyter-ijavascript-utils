@@ -266,6 +266,51 @@ class SourceMap extends Map {
     return results;
   }
 
+  updateGroups(updateFn) {
+    SourceMap.updateGroup(this, updateFn, {});
+  }
+
+  static updateGroup(sourceMap, updateFn, currentObj = {}) {
+    if (!(sourceMap instanceof SourceMap)) {
+      throw (Error('updateGroup only works on arrays or sourceMaps'));
+    }
+
+    sourceMap.forEach((childEntries, key) => {
+      if (childEntries instanceof SourceMap) {
+        return SourceMap.updateGroup(childEntries, updateFn, addObjectProperty(currentObj, childEntries.source, key));
+      } if (!Array.isArray(childEntries)) {
+        return;
+      }
+
+      //-- childEntries is an array
+      const newEntries = updateFn(childEntries, key, currentObj, sourceMap);
+      //const newEntries = childEntries.map((entry, index) => updateFn(childEntries, key, currentObj, sourceMap);
+      sourceMap.set(key, newEntries);
+    });
+  }
+
+  updateLeafEntries(updateFn) {
+    SourceMap.updateLeafEntry(this, updateFn, {});
+  }
+
+  static updateLeafEntry(sourceMap, updateFn, currentObj = {}) {
+    if (!(sourceMap instanceof SourceMap)) {
+      throw (Error('updateLeafEntries only works on arrays or sourceMaps'));
+    }
+
+    sourceMap.forEach((childEntries, key) => {
+      if (childEntries instanceof SourceMap) {
+        return SourceMap.updateLeafEntry(childEntries, updateFn, addObjectProperty(currentObj, childEntries.source, key));
+      } if (!Array.isArray(childEntries)) {
+        return;
+      }
+
+      //-- childEntries is an array
+      const newEntries = childEntries.map((entry, index) => updateFn(entry, index, key, currentObj, sourceMap));
+      sourceMap.set(key, newEntries);
+    });
+  }
+
   /**
    * Reduces, but puts each aggregate value on a separate record.
    * 

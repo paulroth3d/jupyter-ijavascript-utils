@@ -1,5 +1,6 @@
 /* eslint-disable prefer-template */
 
+const ArrayUtils = require('../array');
 const SourceMap = require('../SourceMap');
 // const FileUtil = require('../file');
 
@@ -25,17 +26,17 @@ const generateMultiSourceMap = () => {
   seattle.source = 'month';
 
   const newYorkData = [
-    ['Aug', [{ id: 1, city: 'Seattle', month: 'Aug', precip: 0.87 }]],
-    ['Apr', [{ id: 0, city: 'Seattle', month: 'Apr', precip: 2.68 }]],
-    ['Dec', [{ id: 2, city: 'Seattle', month: 'Dec', precip: 5.31 }]]
+    ['Aug', [{ id: 1, city: 'New York', month: 'Aug', precip: 0.87 }]],
+    ['Apr', [{ id: 0, city: 'New York', month: 'Apr', precip: 2.68 }]],
+    ['Dec', [{ id: 2, city: 'New York', month: 'Dec', precip: 5.31 }]]
   ];
   const newYork = new SourceMap(newYorkData);
   newYork.source = 'month';
 
   const chicagoData = [
-    ['Aug', [{ id: 1, city: 'Seattle', month: 'Aug', precip: 0.87 }]],
-    ['Apr', [{ id: 0, city: 'Seattle', month: 'Apr', precip: 2.68 }]],
-    ['Dec', [{ id: 2, city: 'Seattle', month: 'Dec', precip: 5.31 }]]
+    ['Aug', [{ id: 1, city: 'Chicago', month: 'Aug', precip: 0.87 }]],
+    ['Apr', [{ id: 0, city: 'Chicago', month: 'Apr', precip: 2.68 }]],
+    ['Dec', [{ id: 2, city: 'Chicago', month: 'Dec', precip: 5.31 }]]
   ];
   const chicago = new SourceMap(chicagoData);
   chicago.source = 'month';
@@ -60,23 +61,55 @@ const generateLongSourceMap = () => {
     [
       'New York',
       [
-        { id: 1, city: 'Seattle', month: 'Aug', precip: 0.87 },
-        { id: 0, city: 'Seattle', month: 'Apr', precip: 2.68 },
-        { id: 2, city: 'Seattle', month: 'Dec', precip: 5.31 }
+        { id: 1, city: 'New York', month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'New York', month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'New York', month: 'Dec', precip: 5.31 }
       ]
     ],
     [
       'Chicago',
       [
-        { id: 1, city: 'Seattle', month: 'Aug', precip: 0.87 },
-        { id: 0, city: 'Seattle', month: 'Apr', precip: 2.68 },
-        { id: 2, city: 'Seattle', month: 'Dec', precip: 5.31 }
+        { id: 1, city: 'Chicago', month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Chicago', month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Chicago', month: 'Dec', precip: 5.31 }
       ]
     ]
   ];
   const results = new SourceMap(data);
   results.source = 'city';
   return results;
+};
+
+const generateDatedWeather = () => {
+  const datedWeather = [
+    [
+      'Seattle',
+      [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 }
+      ]
+    ],
+    [
+      'New York',
+      [
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 },
+        { id: 4, city: 'New York', month: 'Aug', precip: 4.13, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 },
+        { id: 5, city: 'New York', month: 'Dec', precip: 3.58, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 }
+      ]
+    ],
+    [
+      'Chicago',
+      [
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 },
+        { id: 8, city: 'Chicago',  month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 },
+        { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 }
+      ]
+    ]
+  ];
+  const datedWeatherSM = new SourceMap(datedWeather);
+  datedWeatherSM.source = 'city';
+  return datedWeatherSM;
 };
 
 const peek = (a) => Array.isArray(a) && a.length > 0 ? a[0] : null;
@@ -136,13 +169,13 @@ global.describe('SourceMap', () => {
         + '["Apr",[{"id":0,"city":"Seattle","month":"Apr","precip":2.68}]],'
         + '["Dec",[{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]]]}],'
         + '["New York",{"dataType":"SourceMap","source":"month","data":'
-        + '[["Aug",[{"id":1,"city":"Seattle","month":"Aug","precip":0.87}]],'
-        + '["Apr",[{"id":0,"city":"Seattle","month":"Apr","precip":2.68}]],'
-        + '["Dec",[{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]]]}],'
+        + '[["Aug",[{"id":1,"city":"New York","month":"Aug","precip":0.87}]],'
+        + '["Apr",[{"id":0,"city":"New York","month":"Apr","precip":2.68}]],'
+        + '["Dec",[{"id":2,"city":"New York","month":"Dec","precip":5.31}]]]}],'
         + '["Chicago",{"dataType":"SourceMap","source":"month","data":'
-        + '[["Aug",[{"id":1,"city":"Seattle","month":"Aug","precip":0.87}]],'
-        + '["Apr",[{"id":0,"city":"Seattle","month":"Apr","precip":2.68}]],'
-        + '["Dec",[{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]]]}]]}';
+        + '[["Aug",[{"id":1,"city":"Chicago","month":"Aug","precip":0.87}]],'
+        + '["Apr",[{"id":0,"city":"Chicago","month":"Apr","precip":2.68}]],'
+        + '["Dec",[{"id":2,"city":"Chicago","month":"Dec","precip":5.31}]]]}]]}';
       // FileUtil.writeFileStd('./tmp/SourceMap', results);
       global.expect(results).toBe(expected);
     });
@@ -201,13 +234,13 @@ global.describe('SourceMap', () => {
         + '["Apr",[{"id":0,"city":"Seattle","month":"Apr","precip":2.68}]],'
         + '["Dec",[{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]]]}],'
         + '["New York",{"dataType":"SourceMap","source":"month","data":'
-        + '[["Aug",[{"id":1,"city":"Seattle","month":"Aug","precip":0.87}]],'
-        + '["Apr",[{"id":0,"city":"Seattle","month":"Apr","precip":2.68}]],'
-        + '["Dec",[{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]]]}],'
+        + '[["Aug",[{"id":1,"city":"New York","month":"Aug","precip":0.87}]],'
+        + '["Apr",[{"id":0,"city":"New York","month":"Apr","precip":2.68}]],'
+        + '["Dec",[{"id":2,"city":"New York","month":"Dec","precip":5.31}]]]}],'
         + '["Chicago",{"dataType":"SourceMap","source":"month","data":'
-        + '[["Aug",[{"id":1,"city":"Seattle","month":"Aug","precip":0.87}]],'
-        + '["Apr",[{"id":0,"city":"Seattle","month":"Apr","precip":2.68}]],'
-        + '["Dec",[{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]]]}]]}';
+        + '[["Aug",[{"id":1,"city":"Chicago","month":"Aug","precip":0.87}]],'
+        + '["Apr",[{"id":0,"city":"Chicago","month":"Apr","precip":2.68}]],'
+        + '["Dec",[{"id":2,"city":"Chicago","month":"Dec","precip":5.31}]]]}]]}';
       // FileUtil.writeFileStd('./tmp/SourceMap', results);
       global.expect(results).toBe(expected);
     });
@@ -479,6 +512,144 @@ global.describe('SourceMap', () => {
       const results = source.map((r) => r.length);
       global.expect(JSON.stringify(results)).toEqual(JSON.stringify(expected));
       global.expect(results).toStrictEqual(expected);
+    });
+  });
+  global.describe('updateGroup', () => {
+    global.it('can generate dated weather', () => {
+      const datedWeather = generateDatedWeather();
+      const expected = 3;
+      const results = datedWeather.get('Chicago').length;
+      global.expect(results).toBe(expected);
+      global.expect(datedWeather.source).toBe('city');
+    });
+    global.describe('updates', () => {
+      global.it('with a simple list', () => {
+        const datedWeather = generateDatedWeather();
+        // childEntries, key, currentObj, sourceMap)
+        const updateGroupFn = jest.fn((childEntries) => childEntries.sort(ArrayUtils.createSort('-t')));
+        
+        const chicagoExpected = [
+          { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 },
+          { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 },
+          { id: 6, city: 'Chicago', month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 }
+        ];
+        datedWeather.updateGroups(updateGroupFn);
+        const results = datedWeather.get('Chicago');
+
+        /// console.log(JSON.stringify(results));
+
+        global.expect(results).toStrictEqual(chicagoExpected);
+      });
+      global.it('with a complex list', () => {
+        const datedWeather = generateMultiSourceMap();
+        // childEntries, key, currentObj, sourceMap)
+        const updateFn = jest.fn((childEntries) => childEntries.sort(ArrayUtils.createSort('-t')));
+        
+        const chicagoExpected = [
+          { id: 0, city: 'Chicago', month: 'Apr', precip: 2.68 }
+        ];
+        datedWeather.updateGroups(updateFn);
+        const results = datedWeather.get('Chicago').get('Apr');
+
+        // console.log(JSON.stringify(results));
+
+        global.expect(results).toStrictEqual(chicagoExpected);
+      });
+      global.it('ignores non array entries', () => {
+        const datedWeather = generateDatedWeather();
+        datedWeather.set('cuca', 'monga');
+        // childEntries, key, currentObj, sourceMap)
+        const updateGroupFn = jest.fn((childEntries) => childEntries.sort(ArrayUtils.createSort('-t')));
+        
+        const chicagoExpected = [
+          { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 },
+          { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 },
+          { id: 6, city: 'Chicago', month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 }
+        ];
+        datedWeather.updateGroups(updateGroupFn);
+        const results = datedWeather.get('Chicago');
+
+        /// console.log(JSON.stringify(results));
+
+        global.expect(results).toStrictEqual(chicagoExpected);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('updateGroup not on sourcemap', () => {
+        const expectedError = 'updateGroup only works on arrays or sourceMaps';
+        const datedWeather = 4;
+        global.expect(() => SourceMap.updateGroup(datedWeather, () => {}))
+          .toThrow(expectedError);
+      });
+    });
+  });
+  global.describe('updateLeafEntries', () => {
+    global.it('can generate dated weather', () => {
+      const datedWeather = generateDatedWeather();
+      const expected = 3;
+      const results = datedWeather.get('Chicago').length;
+      global.expect(results).toBe(expected);
+      global.expect(datedWeather.source).toBe('city');
+    });
+    global.describe('updates', () => {
+      global.it('with a simple list', () => {
+        const datedWeather = generateDatedWeather();
+        // childEntries, key, currentObj, sourceMap)
+        const updateFn = jest.fn((leafEntry, index) => ({ ...leafEntry, index }));
+        
+        const chicagoExpected = [
+          { id: 6, city: 'Chicago', month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000, index: 0 },
+          { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000, index: 1 },
+          { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000, index: 2 }
+        ];
+        datedWeather.updateLeafEntries(updateFn);
+        const results = datedWeather.get('Chicago');
+
+        // console.log(JSON.stringify(results));
+
+        global.expect(results).toStrictEqual(chicagoExpected);
+      });
+      global.it('with a complex list', () => {
+        const datedWeather = generateMultiSourceMap();
+        // childEntries, key, currentObj, sourceMap)
+        const updateFn = jest.fn((leafEntry, index) => ({ ...leafEntry, index }));
+        
+        const chicagoExpected = [
+          { id: 0, city: 'Chicago', month: 'Apr', precip: 2.68, index: 0 }
+        ];
+        datedWeather.updateLeafEntries(updateFn);
+        const results = datedWeather.get('Chicago').get('Apr');
+
+        // console.log(JSON.stringify(results));
+
+        global.expect(results).toStrictEqual(chicagoExpected);
+      });
+      global.it('with a simple list', () => {
+        const datedWeather = generateDatedWeather();
+        datedWeather.set('cuca', 'monga');
+        // childEntries, key, currentObj, sourceMap)
+        const updateFn = jest.fn((leafEntry, index) => ({ ...leafEntry, index }));
+        
+        const chicagoExpected = [
+          { id: 6, city: 'Chicago', month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000, index: 0 },
+          { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000, index: 1 },
+          { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000, index: 2 }
+        ];
+        datedWeather.updateLeafEntries(updateFn);
+        const results = datedWeather.get('Chicago');
+
+        // console.log(JSON.stringify(results));
+
+        global.expect(results).toStrictEqual(chicagoExpected);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('updateLeafEntries not on sourcemap', () => {
+        const expectedError = 'updateLeafEntries only works on arrays or sourceMaps';
+        const datedWeather = 4;
+        global.expect(() => SourceMap.updateLeafEntry(datedWeather, () => {}))
+          .toThrow(expectedError);
+      });
     });
   });
 });
