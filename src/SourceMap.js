@@ -266,41 +266,19 @@ class SourceMap extends Map {
     return results;
   }
 
-  updateGroups(updateFn) {
-    SourceMap.updateGroup(this, updateFn, {});
+  finish adding in docs here
+  mapEntries(updateFn) {
+    SourceMap.mapEntry(this, updateFn, {});
   }
 
-  static updateGroup(sourceMap, updateFn, currentObj = {}) {
+  static mapEntry(sourceMap, updateFn, currentObj = {}) {
     if (!(sourceMap instanceof SourceMap)) {
-      throw (Error('updateGroup only works on arrays or sourceMaps'));
+      throw (Error('mapEntries only works on arrays or sourceMaps'));
     }
 
     sourceMap.forEach((childEntries, key) => {
       if (childEntries instanceof SourceMap) {
-        return SourceMap.updateGroup(childEntries, updateFn, addObjectProperty(currentObj, childEntries.source, key));
-      } if (!Array.isArray(childEntries)) {
-        return;
-      }
-
-      //-- childEntries is an array
-      const newEntries = updateFn(childEntries, key, currentObj, sourceMap);
-      //const newEntries = childEntries.map((entry, index) => updateFn(childEntries, key, currentObj, sourceMap);
-      sourceMap.set(key, newEntries);
-    });
-  }
-
-  updateLeafEntries(updateFn) {
-    SourceMap.updateLeafEntry(this, updateFn, {});
-  }
-
-  static updateLeafEntry(sourceMap, updateFn, currentObj = {}) {
-    if (!(sourceMap instanceof SourceMap)) {
-      throw (Error('updateLeafEntries only works on arrays or sourceMaps'));
-    }
-
-    sourceMap.forEach((childEntries, key) => {
-      if (childEntries instanceof SourceMap) {
-        return SourceMap.updateLeafEntry(childEntries, updateFn, addObjectProperty(currentObj, childEntries.source, key));
+        return SourceMap.mapEntry(childEntries, updateFn, addObjectProperty(currentObj, childEntries.source, key));
       } if (!Array.isArray(childEntries)) {
         return;
       }
@@ -578,7 +556,7 @@ class SourceMap extends Map {
   }
 
   /**
-   * Implementatin for map.
+   * Implementation for map.
    * @private
    */
   static mapCollection(sourceMap, mapFn, currentObj = {}) {

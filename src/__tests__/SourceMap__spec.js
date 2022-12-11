@@ -1,6 +1,5 @@
 /* eslint-disable prefer-template */
 
-const ArrayUtils = require('../array');
 const SourceMap = require('../SourceMap');
 // const FileUtil = require('../file');
 
@@ -514,76 +513,7 @@ global.describe('SourceMap', () => {
       global.expect(results).toStrictEqual(expected);
     });
   });
-  global.describe('updateGroup', () => {
-    global.it('can generate dated weather', () => {
-      const datedWeather = generateDatedWeather();
-      const expected = 3;
-      const results = datedWeather.get('Chicago').length;
-      global.expect(results).toBe(expected);
-      global.expect(datedWeather.source).toBe('city');
-    });
-    global.describe('updates', () => {
-      global.it('with a simple list', () => {
-        const datedWeather = generateDatedWeather();
-        // childEntries, key, currentObj, sourceMap)
-        const updateGroupFn = jest.fn((childEntries) => childEntries.sort(ArrayUtils.createSort('-t')));
-        
-        const chicagoExpected = [
-          { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 },
-          { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 },
-          { id: 6, city: 'Chicago', month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 }
-        ];
-        datedWeather.updateGroups(updateGroupFn);
-        const results = datedWeather.get('Chicago');
-
-        /// console.log(JSON.stringify(results));
-
-        global.expect(results).toStrictEqual(chicagoExpected);
-      });
-      global.it('with a complex list', () => {
-        const datedWeather = generateMultiSourceMap();
-        // childEntries, key, currentObj, sourceMap)
-        const updateFn = jest.fn((childEntries) => childEntries.sort(ArrayUtils.createSort('-t')));
-        
-        const chicagoExpected = [
-          { id: 0, city: 'Chicago', month: 'Apr', precip: 2.68 }
-        ];
-        datedWeather.updateGroups(updateFn);
-        const results = datedWeather.get('Chicago').get('Apr');
-
-        // console.log(JSON.stringify(results));
-
-        global.expect(results).toStrictEqual(chicagoExpected);
-      });
-      global.it('ignores non array entries', () => {
-        const datedWeather = generateDatedWeather();
-        datedWeather.set('cuca', 'monga');
-        // childEntries, key, currentObj, sourceMap)
-        const updateGroupFn = jest.fn((childEntries) => childEntries.sort(ArrayUtils.createSort('-t')));
-        
-        const chicagoExpected = [
-          { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000 },
-          { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000 },
-          { id: 6, city: 'Chicago', month: 'Apr', precip: 3.62, d: '2022-05-01T00:00:00.000Z', t: 1651363200000 }
-        ];
-        datedWeather.updateGroups(updateGroupFn);
-        const results = datedWeather.get('Chicago');
-
-        /// console.log(JSON.stringify(results));
-
-        global.expect(results).toStrictEqual(chicagoExpected);
-      });
-    });
-    global.describe('fails', () => {
-      global.it('updateGroup not on sourcemap', () => {
-        const expectedError = 'updateGroup only works on arrays or sourceMaps';
-        const datedWeather = 4;
-        global.expect(() => SourceMap.updateGroup(datedWeather, () => {}))
-          .toThrow(expectedError);
-      });
-    });
-  });
-  global.describe('updateLeafEntries', () => {
+  global.describe('mapEntries', () => {
     global.it('can generate dated weather', () => {
       const datedWeather = generateDatedWeather();
       const expected = 3;
@@ -602,7 +532,7 @@ global.describe('SourceMap', () => {
           { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000, index: 1 },
           { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000, index: 2 }
         ];
-        datedWeather.updateLeafEntries(updateFn);
+        datedWeather.mapEntries(updateFn);
         const results = datedWeather.get('Chicago');
 
         // console.log(JSON.stringify(results));
@@ -617,7 +547,7 @@ global.describe('SourceMap', () => {
         const chicagoExpected = [
           { id: 0, city: 'Chicago', month: 'Apr', precip: 2.68, index: 0 }
         ];
-        datedWeather.updateLeafEntries(updateFn);
+        datedWeather.mapEntries(updateFn);
         const results = datedWeather.get('Chicago').get('Apr');
 
         // console.log(JSON.stringify(results));
@@ -635,7 +565,7 @@ global.describe('SourceMap', () => {
           { id: 8, city: 'Chicago', month: 'Dec', precip: 2.56, d: '2023-01-01T00:00:00.000Z', t: 1672531200000, index: 1 },
           { id: 7, city: 'Chicago', month: 'Aug', precip: 3.98, d: '2022-09-01T00:00:00.000Z', t: 1661990400000, index: 2 }
         ];
-        datedWeather.updateLeafEntries(updateFn);
+        datedWeather.mapEntries(updateFn);
         const results = datedWeather.get('Chicago');
 
         // console.log(JSON.stringify(results));
@@ -644,10 +574,10 @@ global.describe('SourceMap', () => {
       });
     });
     global.describe('fails', () => {
-      global.it('updateLeafEntries not on sourcemap', () => {
-        const expectedError = 'updateLeafEntries only works on arrays or sourceMaps';
+      global.it('mapEntries not on sourcemap', () => {
+        const expectedError = 'mapEntries only works on arrays or sourceMaps';
         const datedWeather = 4;
-        global.expect(() => SourceMap.updateLeafEntry(datedWeather, () => {}))
+        global.expect(() => SourceMap.mapEntry(datedWeather, () => {}))
           .toThrow(expectedError);
       });
     });
