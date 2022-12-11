@@ -18,8 +18,8 @@ const logger = require('./logger');
  * (or storing and loading json data)
  * 
  * * Writing files
- *   * {@link module:file.writeFile|writeFile(path, string)} - write a file as plain text
- *   * {@link module:file.writeJSON|writeJSON(path, any)} - write data as JSON
+ *   * {@link module:file.writeFile|writeFile(path, string)} - write or append to file with plain text
+ *   * {@link module:file.writeJSON|writeJSON(path, any)} - write or append to a file with objects converted to JSON
  * * reading files
  *   * {@link module:file.readFile|readFile(path, string)} - read a file as plain text
  *   * {@link module:file.readJSON|readJSON(path, any)} - read data as JSON
@@ -179,11 +179,7 @@ module.exports.readFile = function readFile(filePath, fsOptions = {}) {
  * 
  * NOTE that this uses `utf-8` as the default encoding
  * 
- * @param {string} filePath - path of the file to write
- * @param {Object} fsOptions - options to pass for fsRead (ex: { encoding: 'utf-8' })
- * @param {string} contents - contents of the file
- * @see {@link module:file.readJSON|readJSON(filePath, fsOptions)} - for reading
- * @example
+ * ```
  * const weather = [
  *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
  *   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
@@ -199,16 +195,52 @@ module.exports.readFile = function readFile(filePath, fsOptions = {}) {
  * 
  * const myWeather = utils.file.readJSON('./data/weather.json');
  * myWeather.length; // 9
+ * ```
+ * 
+ * Note, passing `append:true` in the options, will let you append text before writing,
+ * useful for dealing with large and complex files.
+ * 
+ * ```
+ * weatherEntry1 = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+ * weatherEntry2 = { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 };
+ * weatherEntry3 = { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 };
+ * 
+ * utils.file.writeJSON('./data/weather2.json', weatherEntry1, { prefix: '[' });
+ * utils.file.writeJSON('./data/weather2.json', weatherEntry2, { append: true, prefix: ', ' });
+ * utils.file.writeJSON('./data/weather2.json', weatherEntry3, { append: true, prefix: ', ', suffix: ']' });
+ * 
+ * utils.file.readJSON('./data/weather.json');
+ * 
+ * //-- single line shown here on multiple lines for clarity
+ * // [{"id":1,"city":"Seattle","month":"Aug","precip":0.87}
+ * // ,{"id":0,"city":"Seattle","month":"Apr","precip":2.68}
+ * // ,{"id":2,"city":"Seattle","month":"Dec","precip":5.31}]
+ * 
+ * @param {string} filePath - path of the file to write
+ * @param {string} contents - contents of the file
+ * @param {Object} fsOptions - [nodejs fs writeFileSync, appendFileSync options](https://nodejs.org/api/fs.html)
+ * @param {Boolean} fsOptions.append - if true, will append the text to the file
+ * @param {Boolean} fsOptions.prefix - string to add before writing the json, like an opening bracket '[' or comma ','
+ * @param {Boolean} fsOptions.prefix - string to add before writing the json, like a closing bracket ']'
+ * @param {String} fsOptions.encoding - encoding to use when writing the file.
+ * @see {@link module:file.readJSON|readJSON(filePath, fsOptions)} - for reading
  */
 module.exports.writeJSON = function writeJSON(filePath, contents, fsOptions = {}) {
   //-- if it isn't desired, simply pass as a string.
   const jsonContents = JSON.stringify(contents, null, 2);
   const optionsDefaults = { encoding: 'utf-8' };
   const cleanedOptions = { ...optionsDefaults, ...fsOptions };
+  const isAppend = cleanedOptions.append === true;
+  const prefix = cleanedOptions.prefix || '';
+  const suffix = cleanedOptions.suffix || '';
 
   // const resolvedPath = path.resolve(filePath);
   try {
-    fs.writeFileSync(filePath, jsonContents, cleanedOptions);
+    if (isAppend) {
+      fs.appendFileSync(filePath, prefix + jsonContents + suffix, cleanedOptions);
+    } else {
+      fs.writeFileSync(filePath, prefix + jsonContents + suffix, cleanedOptions);
+    }
   } catch (err) {
     logger.error(`unable to write to file: ${filePath}`);
   }
@@ -219,23 +251,35 @@ module.exports.writeJSON = function writeJSON(filePath, contents, fsOptions = {}
  * 
  * Note that this uses `utf-8` as the encoding by default
  * 
- * @param {string} filePath - path of the file to write
- * @param {string} contents - contents of the file
- * @see {@link module:file.readFile|readFile(filePath, fsOptions)} - for reading
- * @example
+ * ```
  * const myString = `hello`;
  * utils.file.writeFile('./tmp', myString);
  * const newString = utils.file.readFile('./tmp');
  * newString; // 'hello';
+ * ```
+ * 
+ * Note, you can append to the file by passing `{append:true}` in the options.
+ * 
+ * @param {string} filePath - path of the file to write
+ * @param {string} contents - contents of the file
+ * @param {Object} fsOptions - [nodejs fs writeFileSync, appendFileSync options](https://nodejs.org/api/fs.html)
+ * @param {Boolean} fsOptions.append - if true, will append the text to the file
+ * @param {String} fsOptions.encoding - encoding to use when writing the file.
+ * @see {@link module:file.readFile|readFile(filePath, fsOptions)} - for reading
  */
 module.exports.writeFile = function writeFile(filePath, contents, fsOptions = {}) {
   const resolvedPath = path.resolve(filePath);
   const optionsDefaults = { encoding: 'utf-8' };
   const cleanedOptions = { ...optionsDefaults, ...fsOptions };
+  const isAppend = cleanedOptions.append === true;
 
   try {
     // fsStd.writeFileSync(resolvedPath, contents, { encoding: 'utf-8' });
-    fs.writeFileSync(resolvedPath, contents, cleanedOptions);
+    if (isAppend) {
+      fs.appendFileSync(resolvedPath, contents, cleanedOptions);
+    } else {
+      fs.writeFileSync(resolvedPath, contents, cleanedOptions);
+    }
   } catch (err) {
     logger.error(`unable to write to file: ${filePath}`);
     logger.error('err.message', err.message);

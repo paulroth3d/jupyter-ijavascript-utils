@@ -1,3 +1,3 @@
 # syntax=docker/dockerfile:1
 
-FROM darkbluestudios/jupyter-ijavascript-utils:binder_1.25.0
+FROM darkbluestudios/jupyter-ijavascript-utils:binder_1.26.0

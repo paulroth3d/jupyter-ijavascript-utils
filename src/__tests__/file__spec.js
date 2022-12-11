@@ -109,76 +109,169 @@ global.describe('FileUtil', () => {
   });
 
   global.describe('writeJSON', () => {
-    global.it('writes text', () => {
-      const path = './tmp/sampleFile';
-      const message = { message: 'success' };
-      const expected = JSON.stringify(message, null, 2);
+    global.describe('writes text', () => {
+      global.it('writes text', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+        const expected = JSON.stringify(message, null, 2);
 
-      fsExtra.writeFileSync.mockReturnValue(true);
+        fsExtra.writeFileSync.mockReturnValue(true);
 
-      FileUtil.writeJSON(path, message);
+        FileUtil.writeJSON(path, message);
 
-      const result = fsExtra.writeFileSync.mock.calls[0][1];
-      global.expect(result).toBe(expected);
-    });
-    global.it('provides an error message if the file cannot be written', () => {
-      const path = './tmp/sampleFile';
-      const message = { message: 'success' };
-
-      fsExtra.writeFileSync.mockImplementation(() => {
-        throw (new Error('Example Error'));
+        const result = fsExtra.writeFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
       });
+      global.it('appends if appends is true', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+        const expected = '{\n  "message": "success"\n}';
+        const args = { append: true };
 
-      FileUtil.writeJSON(path, message);
-    });
-    global.it('shows an error if the file could not be written', () => {
-      const path = './tmp/sampleFile';
-      const message = { message: 'success' };
+        fsExtra.writeFileSync.mockReturnValue(true);
 
-      fsExtra.writeFileSync.mockImplementationOnce(() => {
-        throw Error('throw an error if the file could not be read');
+        FileUtil.writeJSON(path, message, args);
+
+        global.expect(fsExtra.writeFileSync).not.toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalledTimes(1);
+
+        const result = fsExtra.appendFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
       });
+      global.it('appends with a prefix', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+        const expected = '[{\n  "message": "success"\n}';
+        const args = { append: true, prefix: '[' };
 
-      FileUtil.writeJSON(path, message);
+        fsExtra.writeFileSync.mockReturnValue(true);
 
-      global.expect(pino.mockInstance.error).toHaveBeenCalled();
+        FileUtil.writeJSON(path, message, args);
+
+        global.expect(fsExtra.writeFileSync).not.toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalledTimes(1);
+
+        const result = fsExtra.appendFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
+      });
+      global.it('appends with a suffix', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+        const expected = '{\n  "message": "success"\n}]';
+        const args = { append: true, suffix: ']' };
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        FileUtil.writeJSON(path, message, args);
+
+        global.expect(fsExtra.writeFileSync).not.toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalledTimes(1);
+
+        const result = fsExtra.appendFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
+      });
+      global.it('appends with a prefix and a suffix', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+        const expected = '[{\n  "message": "success"\n}]';
+        const args = { append: true, prefix: '[', suffix: ']' };
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        FileUtil.writeJSON(path, message, args);
+
+        global.expect(fsExtra.writeFileSync).not.toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalledTimes(1);
+
+        const result = fsExtra.appendFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('fails', () => {
+      global.it('provides an error message if the file cannot be written', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+
+        fsExtra.writeFileSync.mockImplementation(() => {
+          throw (new Error('Example Error'));
+        });
+
+        FileUtil.writeJSON(path, message);
+      });
+      global.it('shows an error if the file could not be written', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
+
+        fsExtra.writeFileSync.mockImplementationOnce(() => {
+          throw Error('throw an error if the file could not be read');
+        });
+
+        FileUtil.writeJSON(path, message);
+
+        global.expect(pino.mockInstance.error).toHaveBeenCalled();
+      });
     });
   });
 
   global.describe('writeFile', () => {
-    global.it('writes text', () => {
-      const path = './tmp/sampleFile';
-      const message = 'Success';
-      const expected = message;
+    global.describe('writes text', () => {
+      global.it('synchronously', () => {
+        const path = './tmp/sampleFile';
+        const message = 'Success';
+        const expected = message;
 
-      fsExtra.writeFileSync.mockReturnValue(true);
+        fsExtra.writeFileSync.mockReturnValue(true);
 
-      FileUtil.writeFile(path, message);
+        FileUtil.writeFile(path, message);
 
-      const result = fsExtra.writeFileSync.mock.calls[0][1];
-      global.expect(result).toBe(expected);
-    });
-    global.it('provides an error message if the file cannot be written', () => {
-      const path = './tmp/sampleFile';
-      const message = { message: 'success' };
-
-      fsExtra.writeFileSync.mockImplementation(() => {
-        throw (new Error('Example Error'));
+        const result = fsExtra.writeFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
       });
+      global.it('appends text', () => {
+        const path = './tmp/sampleFile';
+        const message = 'Success';
+        const expected = message;
+        const options = { append: true };
 
-      FileUtil.writeFile(path, message);
-    });
-    global.it('shows an error if the file could not be written', () => {
-      const path = './tmp/sampleFile';
-      const message = 'success';
+        fsExtra.writeFileSync.mockReturnValue(true);
 
-      fsExtra.writeFileSync.mockImplementationOnce(() => {
-        throw Error('throw an error if the file could not be read');
+        FileUtil.writeFile(path, message, options);
+
+        global.expect(fsExtra.writeFileSync).not.toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalled();
+        global.expect(fsExtra.appendFileSync).toHaveBeenCalledTimes(1);
+
+        const result = fsExtra.appendFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expected);
       });
+    });
+    global.describe('fails', () => {
+      global.it('provides an error message if the file cannot be written', () => {
+        const path = './tmp/sampleFile';
+        const message = { message: 'success' };
 
-      FileUtil.writeFile(path, message);
+        fsExtra.writeFileSync.mockImplementation(() => {
+          throw (new Error('Example Error'));
+        });
 
-      global.expect(pino.mockInstance.error).toHaveBeenCalled();
+        FileUtil.writeFile(path, message);
+      });
+      global.it('shows an error if the file could not be written', () => {
+        const path = './tmp/sampleFile';
+        const message = 'success';
+
+        fsExtra.writeFileSync.mockImplementationOnce(() => {
+          throw Error('throw an error if the file could not be read');
+        });
+
+        FileUtil.writeFile(path, message);
+
+        global.expect(pino.mockInstance.error).toHaveBeenCalled();
+      });
     });
   });
 

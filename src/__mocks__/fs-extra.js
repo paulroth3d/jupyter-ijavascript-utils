@@ -21,6 +21,8 @@ const fsMock = ({
     fsMock.writeFileSync.mockReset();
     fsMock.ensureDirSync.mockReset();
     fsMock.readdirSync.mockReset();
+    fsMock.appendFileSync.mockReset();
+    fsMock.appendFile.mockReset();
   },
   readdirSync: jest.fn(),
   ensureDirSync: jest.fn(),
@@ -29,7 +31,9 @@ const fsMock = ({
   readJsonSync: jest.fn(),
   writeStreamMock,
   readFileSync:  jest.fn(),
-  createWriteStream: jest.fn().mockImplementation((targetPath) => writeStreamMock)
+  createWriteStream: jest.fn().mockImplementation((targetPath) => writeStreamMock),
+  appendFile: jest.fn(),
+  appendFileSync: jest.fn()
 });
 
 module.exports = fsMock;
