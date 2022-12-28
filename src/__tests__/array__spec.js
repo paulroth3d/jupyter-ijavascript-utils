@@ -494,4 +494,120 @@ describe('ArrayUtils', () => {
       global.expect(results).toStrictEqual(expected);
     });
   });
+
+  global.describe('clone', () => {
+    global.describe('can clone', () => {
+      global.it('literal value 2', () => {
+        const targetValue = 2;
+        const expectedValue = 2;
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('[]', () => {
+        const targetValue = [];
+        const expectedValue = [];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('[2]', () => {
+        const targetValue = [2];
+        const expectedValue = [2];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('[2, 4, 5]', () => {
+        const targetValue = [2, 4, 5];
+        const expectedValue = [2, 4, 5];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('[[0, 1, 2], [3, 4, 5]]', () => {
+        const targetValue = [[0, 1, 2], [3, 4, 5]];
+        const expectedValue = [[0, 1, 2], [3, 4, 5]];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('2', () => {
+        const targetValue = '2';
+        const expectedValue = '2';
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('["2"]', () => {
+        const targetValue = ['2'];
+        const expectedValue = ['2'];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('["2", "4", "5"]', () => {
+        const targetValue = ['2', '4', '5'];
+        const expectedValue = ['2', '4', '5'];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+      global.it('[["0", "1", "2"], ["3", "4", "5"]]', () => {
+        const targetValue = [['0', '1', '2'], ['3', '4', '5']];
+        const expectedValue = [['0', '1', '2'], ['3', '4', '5']];
+        const result = ArrayUtils.clone(targetValue);
+        global.expect(result).toEqual(expectedValue);
+      });
+    });
+  });
+
+  global.describe('arangeMulti', () => {
+    global.it('can arrange a zero dimension cube', () => {
+      const args = [];
+      const expected = [];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 1 dimension cube: 0', () => {
+      const args = [0];
+      const expected = [];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 1 dimension cube: 2', () => {
+      const args = [2];
+      const expected = [0, 1];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 1 dimension cube: 4', () => {
+      const args = [4];
+      const expected = [0, 1, 2, 3];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 2 dimension cube: 2,2', () => {
+      const args = [2, 2];
+      const expected = [[0, 1], [0, 1]];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 2 dimension cube: 2,4', () => {
+      const args = [2, 4];
+      const expected = [[0, 1, 2, 3], [0, 1, 2, 3]];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 3 dimension cube: 2,2,2', () => {
+      const args = [2, 2, 2];
+      const expected = [[[0, 1], [0, 1]], [[0, 1], [0, 1]]];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('can arrange a 3 dimension cube: 2, 2,4', () => {
+      const args = [2, 2, 4];
+      const expected = [[[0, 1, 2, 3], [0, 1, 2, 3]], [[0, 1, 2, 3], [0, 1, 2, 3]]];
+      const results = ArrayUtils.arrangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('arrange is synonym of arrange', () => {
+      const args = [2, 2, 4];
+      const expected = [[[0, 1, 2, 3], [0, 1, 2, 3]], [[0, 1, 2, 3], [0, 1, 2, 3]]];
+      const results = ArrayUtils.arangeMulti.apply(this, args);
+      global.expect(results).toEqual(expected);
+    });
+  });
 });

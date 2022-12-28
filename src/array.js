@@ -11,6 +11,8 @@ require('./_types/global');
  * * Generate Array
  *   * {@link module:array.size|array.size(size, default)} - generate array of a specific size and CONSISTENT default value
  *   * {@link module:array.arrange|array.arrange(size, start, step)} - generate array of a size, and INCREASING default value
+ *   * {@link module:array.arrangeMulti|array.arrangeMulti(n, m, ...)} - generate a multi-dimensional array
+ *   * {@link module:array.clone|array.clone(array)} - deep clones arrays
  * * Sorting
  *   * {@link module:array.createSort|array.createSort(sortIndex, sortIndex, ...)} - generates a sorting function
  *   * {@link module:array.SORT_ASCENDING|array.SORT_ASCENDING} - common ascending sorting function for array.sort()
@@ -388,5 +390,81 @@ module.exports.reshape = function reshape(sourceArray, numColumns) {
 
   return results;
 };
+
+/**
+ * Deep clones multi-dimensional arrays.
+ * 
+ * If you want to just deep clone a 1d array, use [...target] instead
+ * 
+ * NOTE: this only deep clones Arrays, and not the values within the arrays.
+ * 
+ * ```
+ * const sourceArray = [[0, 1], [2, 3]];
+ * const targetArray = utils.array.clone(sourceArray);
+ * 
+ * targetArray[0][0] = 99;
+ * 
+ * console.log(targetArray); // [[99, 1], [2, 3]];
+ * console.log(sourceArray); // [[0, 1], [2, 3]];
+ * ```
+ * 
+ * @param {any | Array} target - Array to be cloned
+ * @returns New deep-cloned array
+ */
+module.exports.clone = function clone(target) {
+  if (!Array.isArray(target)) return target;
+
+  return target.map((item) => Array.isArray(item) ? ArrayUtils.clone(item) : item);
+};
+
+/**
+ * Creates an array for multiple dimensions of varying sizes.
+ * 
+ * (In order from higher order dimensions to lower)
+ * 
+ * ```
+ * utils.array.arangeMulti(0); // []
+ * utils.array.arangeMulti(2); // [0, 1]
+ * utils.array.arangeMulti(4); // [0, 1, 2, 3]
+ * utils.array.arangeMulti(2, 2); // [[0, 1], [0, 1]]
+ * utils.array.arangeMulti(2, 2, 2); // [[[0, 1], [0, 1]], [[0, 1], [0, 1]]]
+ * utils.array.arangeMulti(2, 2, 4); // [[[0, 1, 2, 3], [0, 1, 2, 3]], [[0, 1, 2, 3], [0, 1, 2, 3]]]
+ * ```
+ * 
+ * Note that this can help with laying items out within a grid
+ * 
+ * ```
+ * gridPositions = utils.array.arangeMulti(4, 4)
+ *   .reduce((result, row, rowIndex) => [ ...result,
+ *      ...row.reduce((rowReduce, value, columnIndex) => [...rowReduce, [rowIndex, columnIndex]], [])
+ *   ], []);
+ * // [
+ * //   [ 0, 0 ], [ 0, 1 ], [ 0, 2 ], [ 0, 3 ],
+ * //   [ 1, 0 ], [ 1, 1 ], [ 1, 2 ], [ 1, 3 ],
+ * //   [ 2, 0 ], [ 2, 1 ], [ 2, 2 ], [ 2, 3 ],
+ * //   [ 3, 0 ], [ 3, 1 ], [ 3, 2 ], [ 3, 3 ]
+ * // ]
+ * 
+ * myList.forEach((value, index) => {
+ *   const [x, y] = gridPositions[index];
+ *   console.log(`placing ${value} in row:${x}, column:${y}`);
+ * });
+ * ```
+ * 
+ * @param  {...any} dimensions - sizes of each dimension to create
+ * @returns Multi-dimensional array 
+ */
+module.exports.arrangeMulti = function arangeMulti(...dimensions) {
+  if (dimensions.length < 1) {
+    return [];
+  } else if (dimensions.length === 1) {
+    return ArrayUtils.arange(dimensions[0]);
+  }
+  const currentDimension = dimensions[0];
+  const remainderDimensions = dimensions.slice(1);
+  const childDimensionalValue = ArrayUtils.arangeMulti.apply(this, remainderDimensions);
+  return ArrayUtils.size(currentDimension, () => ArrayUtils.clone(childDimensionalValue));
+};
+module.exports.arangeMulti = module.exports.arrangeMulti;
 
 //-- collection utilities

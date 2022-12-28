@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.27 - Multi-Dimensional arange (initialize array along multiple dimensions)
 * 1.26 - Support for file.writeFile and file.writeJSON to append
 * 1.25 - Additional chain methods and documentation
 * 1.24 - format.stripHtmlTags, TableGenerator.offset, chain.chainFlatMap, chain.chainFilter
