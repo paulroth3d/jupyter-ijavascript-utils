@@ -1804,7 +1804,7 @@ state|IL   |IL    `;
         const results = htmlSpy.mock.calls[0][0];
         // FileUtil.writeFileStd('./tmp/tmp', results);
 
-        global.expect(results).toContain(`<div class="sticky-table" style="max-height: 50vh">`);
+        global.expect(results).toContain('<div class="sticky-table" style="max-height: 50vh">');
       });
       global.it('can render a table with a custom 50px height', () => {
         const htmlSpy = jest.spyOn(global.$$, 'html');
@@ -1818,7 +1818,7 @@ state|IL   |IL    `;
         const results = htmlSpy.mock.calls[0][0];
         // FileUtil.writeFileStd('./tmp/tmp', results);
 
-        global.expect(results).toContain(`<div class="sticky-table" style="max-height: 50px">`);
+        global.expect(results).toContain('<div class="sticky-table" style="max-height: 50px">');
       });
       global.it('can render a table with a custom 100vh height', () => {
         const htmlSpy = jest.spyOn(global.$$, 'html');
@@ -1832,7 +1832,7 @@ state|IL   |IL    `;
         const results = htmlSpy.mock.calls[0][0];
         // FileUtil.writeFileStd('./tmp/tmp', results);
 
-        global.expect(results).toContain(`<div class="sticky-table" style="max-height: 100vh">`);
+        global.expect(results).toContain('<div class="sticky-table" style="max-height: 100vh">');
       });
       global.it('can render a result without error', () => {
         const htmlSpy = jest.spyOn(global.$$, 'html');

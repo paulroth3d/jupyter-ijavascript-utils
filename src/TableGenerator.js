@@ -197,7 +197,7 @@ class TableGenerator {
    * Max height (css) of the table when rendered. (Defaults to 50vh)
    * @type {String}
    */
-  #height = `50vh`;
+  #height = '50vh';
 
   /**
    * Optional labels for columns by the property Name
@@ -317,7 +317,7 @@ class TableGenerator {
     this.#fetch = null;
     this.#filterFn = null;
     this.#formatterFn = null;
-    this.#height = `50vh`;
+    this.#height = '50vh';
     this.#labels = {};
     this.#limit = 0;
     this.#offset = 0;
