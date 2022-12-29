@@ -1793,6 +1793,47 @@ state|IL   |IL    `;
         
         global.expect(() => instance.render()).toThrow();
       });
+      global.it('can render a table with a default height', () => {
+        const htmlSpy = jest.spyOn(global.$$, 'html');
+        const data = initializeSmallWeather();
+        new TableGenerator(data)
+          .render();
+        
+        global.expect(htmlSpy).toHaveBeenCalled();
+
+        const results = htmlSpy.mock.calls[0][0];
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+
+        global.expect(results).toContain(`<div class="sticky-table" style="max-height: 50vh">`);
+      });
+      global.it('can render a table with a custom 50px height', () => {
+        const htmlSpy = jest.spyOn(global.$$, 'html');
+        const data = initializeSmallWeather();
+        new TableGenerator(data)
+          .height('50px')
+          .render();
+        
+        global.expect(htmlSpy).toHaveBeenCalled();
+
+        const results = htmlSpy.mock.calls[0][0];
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+
+        global.expect(results).toContain(`<div class="sticky-table" style="max-height: 50px">`);
+      });
+      global.it('can render a table with a custom 100vh height', () => {
+        const htmlSpy = jest.spyOn(global.$$, 'html');
+        const data = initializeSmallWeather();
+        new TableGenerator(data)
+          .height('100vh')
+          .render();
+        
+        global.expect(htmlSpy).toHaveBeenCalled();
+
+        const results = htmlSpy.mock.calls[0][0];
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+
+        global.expect(results).toContain(`<div class="sticky-table" style="max-height: 100vh">`);
+      });
       global.it('can render a result without error', () => {
         const htmlSpy = jest.spyOn(global.$$, 'html');
         const data = initializeSmallWeather();
@@ -1800,7 +1841,14 @@ state|IL   |IL    `;
           .render();
         
         global.expect(htmlSpy).toHaveBeenCalled();
-        const expected = `<table cellspacing="0px" >
+        const expected = `<span class="sticky-table-marker" ></span>
+<style type='text/css'>
+.sticky-table table { text-align: left; position: relative; border-collapse: collapse; }
+.sticky-table td { border: 1px solid #cccccc; }
+.sticky-table th { background: #676c87; color: white; position: sticky; top: 0; box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); }
+</style>
+<div class="sticky-table" style="max-height: 50vh">
+<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -1819,7 +1867,8 @@ state|IL   |IL    `;
 \t<td >Apr</td>
 \t<td >2.68</td>
 </tr>
-</table>`;
+</table>
+</div>`;
         const results = htmlSpy.mock.calls[0][0];
         // FileUtil.writeFileStd('./tmp/tmp', results);
 

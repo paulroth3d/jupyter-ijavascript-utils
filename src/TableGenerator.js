@@ -27,6 +27,8 @@ const { createSort } = require('./array');
 /**
  * Generates and or Renders Tables (Markdown, CSS, HTML, or plain arrays)
  * 
+ * NOTE: `utils.table(...)` is the same as `new utils.TableGenerator(...)`
+ * 
  * For example:
  * 
  * ```
@@ -71,9 +73,9 @@ const { createSort } = require('./array');
  *    })
  * 
  *    //-- high light rows and cells based on data
- *    .styleCell(({columnIndex, value}) => columnIndex === 1 && value > 10
- *             ? 'background-color: #AAFFAA;' : ''
- *    )
+ *    .styleColumn({
+ *      "Km/L": (value) => value > 10 ? 'background-color: #AAFFAA' : ''
+ *    })
  *    .styleRow(({record}) => record.Name.includes('diesel')
  *             ? 'color: green;' : ''
  *    )
@@ -82,6 +84,16 @@ const { createSort } = require('./array');
  * ```
  * 
  * ![Screenshot of complex example](img/TableGenerator_complex.png)
+ * 
+ * When rendering the table, you can also explicitly set the height - allowing for sticky headers.
+ * 
+ * ```
+ * utils.table(cars)
+ *   .height('300px')
+ *   .render();
+ * ```
+ * 
+ * ![Screenshot of sticky headers](img/renderTableFrozenHeaders.jpg)
  * 
  * ```
  * //-- note, `utils.table(...)`
@@ -180,6 +192,12 @@ class TableGenerator {
    * @type {Function}
    */
   #formatterFn = null;
+
+  /**
+   * Max height (css) of the table when rendered. (Defaults to 50vh)
+   * @type {String}
+   */
+  #height = `50vh`;
 
   /**
    * Optional labels for columns by the property Name
@@ -299,6 +317,7 @@ class TableGenerator {
     this.#fetch = null;
     this.#filterFn = null;
     this.#formatterFn = null;
+    this.#height = `50vh`;
     this.#labels = {};
     this.#limit = 0;
     this.#offset = 0;
@@ -672,6 +691,17 @@ class TableGenerator {
    */
   formatterFn(fn) {
     this.#formatterFn = fn;
+    return this;
+  }
+
+  /**
+   * Set the css max-height of the table when calling `render`. (Not used in generating html)
+   * 
+   * @param {String} maxHeightCSS - css to apply when rendering the table in html
+   * @returns {TableGenerator}
+   */
+  height(maxHeightCSS) {
+    this.#height = maxHeightCSS;
     return this;
   }
 
@@ -1422,6 +1452,8 @@ class TableGenerator {
     return [[...results.headers], ...results.data];
   }
 
+  static hasRenderedCSS = false;
+
   /**
    * Renders the html table in the cell results.
    * 
@@ -1451,7 +1483,26 @@ class TableGenerator {
       throw (Error('Not in iJavaScript, no $$ variable available'));
     }
 
-    context.$$.html(this.generateHTML());
+    const stickyCss = `<span class="sticky-table-marker" ></span>
+<style type='text/css'>
+.sticky-table table { text-align: left; position: relative; border-collapse: collapse; }
+.sticky-table td { border: 1px solid #cccccc; }
+.sticky-table th { background: #676c87; color: white; position: sticky; top: 0; box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); }
+</style>
+`;
+
+    let inlineCss = '';
+    //-- @TODO: figure out alternative option than to continually redefine the styles
+    //-- we cannot do something like below, as it will fail as soon as that one cell is re-rendered
+    //-- we don't want to link to an external css page (on some 3rd party server)
+    //-- and unfortunately, it seems any css provided in the libary would be unaccessible
+    //-- the only other option is to place it in the jupyter custom folder, for everyone using it.
+
+    // if (!TableGenerator.hasRenderedCSS) {
+    inlineCss = stickyCss;
+    TableGenerator.hasRenderedCSS = true;
+    
+    context.$$.html(`${inlineCss}<div class="sticky-table" style="max-height: ${this.#height}">\n${this.generateHTML()}\n</div>`);
   }
 
   /**
