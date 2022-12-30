@@ -63,7 +63,7 @@ const { createSort } = require('./array');
  *    .columns('Name', 'Kilometer_per_Litre', 'Cylinders', 'Displacement', 'Acceleration', 'Year')
  * 
  *    //-- format how a field / column is rendered by ({ property: fn })
- *    .formatter({
+ *    .format({
  *        Year: (value) => value ? value.slice(0,4) : value
  *    })
  * 
@@ -85,7 +85,8 @@ const { createSort } = require('./array');
  * 
  * ![Screenshot of complex example](img/TableGenerator_complex.png)
  * 
- * When rendering the table, you can also explicitly set the height - allowing for sticky headers.
+ * Note that sticky headers are available when using the {@link TableGenerator#render|render()} method.
+ * By default, it sets the height to `50vh` - but this can be configured through {@link TableGenerator#height|height()}.
  * 
  * ```
  * utils.table(cars)
@@ -110,7 +111,7 @@ const { createSort } = require('./array');
  *   * {@link TableGenerator#columnsToExclude|columnsToExclude(field, ...)} - specify fields not to show
  *   * {@link TableGenerator#labels|lables(obj)} - labels for field headers
  * * augment and change the values (non-destructively)
- *   * {@link TableGenerator#formatter|formatter(obj)} - adjust values of specific fields
+ *   * {@link TableGenerator#format|format(obj)} - adjust values of specific fields
  *   * {@link TableGenerator#formatterFn|formatterFn(fn)} - row, column aware adjustment
  *   * {@link TableGenerator#printOptions|printOptions(object)} - options for value rendering
  *   * {@link TableGenerator#augment|augment(obj)} - add fields to table
@@ -129,6 +130,7 @@ const { createSort } = require('./array');
  *   * {@link TableGenerator#styleRow|styleRow(fn)} - Function to style rows
  *   * {@link TableGenerator#styleCell|styleCell(fn)} - Function to style cells
  *   * {@link TableGenerator#border|border(string)} - Apply a border to the table data cells
+ *   * {@link TableGenerator#height|height(cssString)} - set the height of the table (defaults to 50vh)
  * * generate output
  *   * {@link TableGenerator#generateHTML|generateHTML()} - returns html table with the results
  *   * {@link TableGenerator#generateMarkdown|generateMarkdown()} - returns markdown with the results
@@ -601,7 +603,7 @@ class TableGenerator {
    * 
    * //-- simple example where the temp property is converted, and type property overwritten
    * new TableGenerator(data)
-   *  .formatter({
+   *  .format({
    *    //-- property 'station' not mentioned, so no change
    *    
    *    //-- convert temperature to celsius
@@ -631,7 +633,7 @@ class TableGenerator {
    * ];
    * 
    * utils.table(data)
-   *   .formatter({
+   *   .format({
    *     //-- convert Prop A to Number - so render with Locale Number Formatting
    *     propA: 'number',
    *     //-- conver PropB to String - so render without Locale Number Formatting
@@ -652,7 +654,7 @@ class TableGenerator {
    * 
    * @returns {TableGenerator}
    */
-  formatter(obj) {
+  format(obj) {
     if (!obj) {
       this.#formatterFn = null;
       return this;
@@ -672,6 +674,18 @@ class TableGenerator {
   }
 
   /**
+   * Legacy version of {@link TableGenerator#format|format}
+   * @private
+   * @param {Object} obj - object with properties storing arrow functions
+   * @param {Function} obj.PropertyToTranslate - (value) => result
+   * 
+   * @returns {TableGenerator}
+   */
+  formatter(obj) {
+    return this.format(obj);
+  }
+
+  /**
    * Function that can format a value for a given row, cell
    * 
    * (value, cellIndex, header, rowIndex, row, record) => string
@@ -686,6 +700,7 @@ class TableGenerator {
    * @param {String} fn.property - destructured property used for that column
    * @param {Number} fn.rowIndex - destructured 0 index row of the cell
    * @param {Array}  fn.record - destructured original record
+   * @see {@link TableGenerator#format|format(obj)} to format per property of the objects
    * 
    * @returns {TableGenerator}
    */
@@ -696,6 +711,8 @@ class TableGenerator {
 
   /**
    * Set the css max-height of the table when calling `render`. (Not used in generating html)
+   * 
+   * Defaults to '50vh' unless updated here.
    * 
    * @param {String} maxHeightCSS - css to apply when rendering the table in html
    * @returns {TableGenerator}

@@ -513,6 +513,138 @@ global.describe('tableGenerator', () => {
         */
       });
     });
+
+    global.describe('format', () => {
+      global.it('can format with an object', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'SEA', 'aug', 0.87],
+            [0, 'SEA', 'apr', 2.68],
+            [2, 'SEA', 'dec', 5.31],
+            [3, 'NY_', 'apr', 3.94],
+            [4, 'NY_', 'aug', 4.13],
+            [5, 'NY_', 'dec', 3.58],
+            [6, 'CHI', 'apr', 3.62],
+            [8, 'CHI', 'dec', 2.56],
+            [7, 'CHI', 'aug', 3.98]
+          ] });
+        const cityMap = new Map([['Seattle', 'SEA'], ['Chicago', 'CHI'], ['New York', 'NY_']]);
+        global.expect(cityMap.get('New York')).toBe('NY_');
+        const formatObj = ({
+          city: (value) => cityMap.has(value) ? cityMap.get(value) : value,
+          month: (value) => value ? value.toLowerCase() : value
+        });
+        const results = new TableGenerator(weather)
+          .format(formatObj)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('clears the formatter if you send it again with null', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(weather)
+          .format({})
+          .format(null)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('throws an error if an invalid formatter is sent', () => {
+        try {
+          new TableGenerator(initializeSmallWeather())
+            .format(() => {})
+            .prepare();
+          global.expect(true).toBe('an exception thrown');
+        } catch (err) {
+          // do nothing
+        }
+      });
+      global.describe('basic type conversion', () => {
+        global.it('string 1', () => {
+          const weather = initializeWeather();
+          const expected = ({
+            headers: ['id', 'city', 'month', 'precip'],
+            data: [
+              [1, 'Seattle',  'Aug', '0.87'],
+              [0, 'Seattle',  'Apr', '2.68'],
+              [2, 'Seattle',  'Dec', '5.31'],
+              [3, 'New York', 'Apr', '3.94'],
+              [4, 'New York', 'Aug', '4.13'],
+              [5, 'New York', 'Dec', '3.58'],
+              [6, 'Chicago',  'Apr', '3.62'],
+              [8, 'Chicago',  'Dec', '2.56'],
+              [7, 'Chicago',  'Aug', '3.98']
+            ] });
+          const results = new TableGenerator(weather)
+            .format({ precip: 'string' })
+            .prepare();
+          global.expect(results.headers).toStrictEqual(expected.headers);
+          global.expect(results.data).toStrictEqual(expected.data);
+        });
+        global.it('string 2', () => {
+          const weather = initializeWeather()
+            .map((r) => ({ ...r, precip: String(r.precip) }));
+          const expected = ({
+            headers: ['id', 'city', 'month', 'precip'],
+            data: [
+              [1, 'Seattle',  'Aug', 0.87],
+              [0, 'Seattle',  'Apr', 2.68],
+              [2, 'Seattle',  'Dec', 5.31],
+              [3, 'New York', 'Apr', 3.94],
+              [4, 'New York', 'Aug', 4.13],
+              [5, 'New York', 'Dec', 3.58],
+              [6, 'Chicago',  'Apr', 3.62],
+              [8, 'Chicago',  'Dec', 2.56],
+              [7, 'Chicago',  'Aug', 3.98]
+            ] });
+
+          global.expect(weather[0].precip).toBe('0.87');
+          const results = new TableGenerator(weather)
+            .format({ precip: 'number' })
+            .prepare();
+          global.expect(results.headers).toStrictEqual(expected.headers);
+          global.expect(results.data).toStrictEqual(expected.data);
+        });
+        global.it('boolean', () => {
+          const weather = initializeWeather()
+            .map((r) => ({ ...r, isHot: r.precip >= 4 }));
+          const expected = ({
+            headers: ['id', 'city', 'month', 'precip', 'isHot'],
+            data: [
+              [1, 'Seattle',  'Aug', 0.87, false],
+              [0, 'Seattle',  'Apr', 2.68, false],
+              [2, 'Seattle',  'Dec', 5.31, true],
+              [3, 'New York', 'Apr', 3.94, false],
+              [4, 'New York', 'Aug', 4.13, true],
+              [5, 'New York', 'Dec', 3.58, false],
+              [6, 'Chicago',  'Apr', 3.62, false],
+              [8, 'Chicago',  'Dec', 2.56, false],
+              [7, 'Chicago',  'Aug', 3.98, false]
+            ] });
+
+          const results = new TableGenerator(weather)
+            .format({ isHot: 'boolean' })
+            .prepare();
+          global.expect(results.headers).toStrictEqual(expected.headers);
+          global.expect(results.data).toStrictEqual(expected.data);
+        });
+      });
+    });
     global.describe('limit', () => {
       global.it('can limit to 2 records', () => {
         const weather = initializeWeather();

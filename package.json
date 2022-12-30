@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.28.1",
+  "version": "1.29.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "docdash": "^1.2.0",
     "eslint": "^7.29.0",
     "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-watch": "^7.0.0",
     "jest": "^27.0.6",
     "jsdoc": "^3.6.10",
