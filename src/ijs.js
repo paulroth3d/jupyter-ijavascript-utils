@@ -390,6 +390,7 @@ module.exports.htmlScript = function htmlScripts(
     debug: renderDebug = false,
     console: renderConsole = true,
     html = '',
+    html2 = '',
     data,
     utilityFunctions = {}
   } = options;
@@ -398,6 +399,7 @@ module.exports.htmlScript = function htmlScripts(
     width,
     height,
     uuid: rootUUID,
+    style = '',
     scripts: scriptAddresses,
     css: stylesheetAddresses,
     onReady: onReadyCode
@@ -405,7 +407,7 @@ module.exports.htmlScript = function htmlScripts(
 
   //-- verify the options sent are expected
   const validKeys = new Set(['debug', 'console', 'width', 'height',
-    'uuid', 'scripts', 'css', 'html', 'data', 'onReady', 'utilityFunctions'
+    'uuid', 'scripts', 'css', 'html', 'data', 'onReady', 'utilityFunctions', 'style', 'html2'
   ]);
   const sentOptions = Object.keys(options);
   const invalidOptions = sentOptions.filter((k) => !validKeys.has(k));
@@ -504,7 +506,17 @@ module.exports.htmlScript = function htmlScripts(
   
         ${!renderDebug ? '' : 'debugger;'}
   
-        const rootEl = document.querySelector('div[uuid="${rootUUID}"]');
+        const baseEl = document.querySelector('div[uuid="${rootUUID}"]');
+        const rootShadow = baseEl.attachShadow({ mode: "open" });
+        
+        const rootEl = document.createElement('div');
+        rootShadow.appendChild(rootEl);
+
+        const styleEl = document.createElement("style");
+        styleEl.textContent = \`${style}\`
+        rootShadow.appendChild(styleEl);    
+        
+        rootEl.innerHTML = \`${html2}\`;
 
         const options = {
           uuid: '${rootUUID}',
