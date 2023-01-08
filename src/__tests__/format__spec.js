@@ -1848,4 +1848,462 @@ global.describe('format', () => {
       });
     });
   });
+  global.describe('wordWrap', () => {
+    global.describe('can wrap a string', () => {
+      global.describe('short string', () => {
+        global.it('with null options', () => {
+          const str = '0123456789';
+          const options = null;
+          const expected = ['0123456789'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+      });
+      global.describe('long string', () => {
+        global.it('with null options', () => {
+          const str = '012345678901234567890123456789012345678901234567890123456789';
+          const options = null;
+          const expected = ['012345678901234567890123456789012345678901234567890123456789'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 10 - cut', () => {
+          const str = '012345678901234567890123456789012345678901234567890123456789';
+          const options = { width: 10, cut: true };
+          const expected = ['0123456789', '0123456789', '0123456789', '0123456789', '0123456789', '0123456789'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 10 - cut not defined', () => {
+          const str = '012345678901234567890123456789012345678901234567890123456789';
+          const options = { width: 10 };
+          const expected = ['012345678901234567890123456789012345678901234567890123456789'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 10 - no cut', () => {
+          const str = '012345678901234567890123456789012345678901234567890123456789';
+          const options = { width: 10, cut: false };
+          const expected = ['012345678901234567890123456789012345678901234567890123456789'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+      });
+      global.describe('lorem ipsum', () => {
+        global.it('example 1', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation';
+          const options = null;
+          const expected = [
+            'Lorem ipsum dolor sit amet, consectetur adipiscing',
+            'elit, sed do eiusmod tempor incididunt ut labore',
+            'et dolore magna aliqua. Ut enim ad minim veniam,',
+            'quis nostrud exercitation'
+          ];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('example 2', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation';
+          const options = { cut: true, width: 70 };
+          const expected = [
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo',
+            'd tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim',
+            'veniam, quis nostrud exercitation'
+          ];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with null options', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = null;
+          const expected = [
+            'Lorem ipsum dolor sit amet, consectetur adipiscing',
+            'elit, sed do eiusmod tempor incididunt ut labore',
+            'et dolore magna aliqua. Ut enim ad minim veniam,',
+            'quis nostrud exercitation ullamco laboris nisi ut',
+            'aliquip ex ea commodo consequat. Duis aute irure',
+            'dolor in reprehenderit in voluptate velit esse',
+            'cillum dolore eu fugiat nulla pariatur. Excepteur',
+            'sint occaecat cupidatat non proident, sunt in',
+            'culpa qui officia deserunt mollit anim id est',
+            'laborum.'
+          ];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 30, no cut', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = { width: 10, cut: false };
+          const expected = ['Lorem', 'ipsum', 'dolor sit', 'amet,', 'consectetur', 'adipiscing', 'elit, sed',
+            'do eiusmod', 'tempor', 'incididunt', 'ut labore', 'et dolore', 'magna', 'aliqua. Ut', 'enim ad',
+            'minim', 'veniam,', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi ut', 'aliquip ex',
+            'ea commodo', 'consequat.', 'Duis aute', 'irure', 'dolor in', 'reprehenderit', 'in', 'voluptate',
+            'velit esse', 'cillum', 'dolore eu', 'fugiat', 'nulla', 'pariatur.', 'Excepteur', 'sint', 'occaecat',
+            'cupidatat', 'non', 'proident,', 'sunt in', 'culpa qui', 'officia', 'deserunt', 'mollit', 'anim id',
+            'est', 'laborum.'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 30, cut not defined', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = { width: 10 };
+          const expected = ['Lorem', 'ipsum', 'dolor sit', 'amet,', 'consectetur', 'adipiscing', 'elit, sed',
+            'do eiusmod', 'tempor', 'incididunt', 'ut labore', 'et dolore', 'magna', 'aliqua. Ut', 'enim ad',
+            'minim', 'veniam,', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi ut', 'aliquip ex',
+            'ea commodo', 'consequat.', 'Duis aute', 'irure', 'dolor in', 'reprehenderit', 'in', 'voluptate',
+            'velit esse', 'cillum', 'dolore eu', 'fugiat', 'nulla', 'pariatur.', 'Excepteur', 'sint', 'occaecat',
+            'cupidatat', 'non', 'proident,', 'sunt in', 'culpa qui', 'officia', 'deserunt', 'mollit', 'anim id',
+            'est', 'laborum.'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 30, cut', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = { width: 10, cut: true };
+          const expected = [
+            'Lorem ipsu',
+            'm dolor si',
+            't amet, co',
+            'nsectetur',
+            'adipiscing',
+            'elit, sed',
+            'do eiusmo',
+            'd tempor i',
+            'ncididunt',
+            'ut labore',
+            'et dolore',
+            'magna aliq',
+            'ua. Ut eni',
+            'm ad minim',
+            'veniam, q',
+            'uis nostru',
+            'd exercita',
+            'tion ullam',
+            'co laboris',
+            'nisi ut a',
+            'liquip ex',
+            'ea commodo',
+            'consequat',
+            '. Duis aut',
+            'e irure do',
+            'lor in rep',
+            'rehenderit',
+            'in volupt',
+            'ate velit',
+            'esse cillu',
+            'm dolore e',
+            'u fugiat n',
+            'ulla paria',
+            'tur. Excep',
+            'teur sint',
+            'occaecat c',
+            'upidatat n',
+            'on proiden',
+            't, sunt in',
+            'culpa qui',
+            'officia d',
+            'eserunt mo',
+            'llit anim',
+            'id est lab',
+            'orum.',
+          ];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+
+        global.it('with width of 30, trimmed', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = { width: 10, trim: true };
+          const expected = ['Lorem', 'ipsum', 'dolor sit', 'amet,', 'consectetur', 'adipiscing', 'elit, sed',
+            'do eiusmod', 'tempor', 'incididunt', 'ut labore', 'et dolore', 'magna', 'aliqua. Ut', 'enim ad',
+            'minim', 'veniam,', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi ut', 'aliquip ex',
+            'ea commodo', 'consequat.', 'Duis aute', 'irure', 'dolor in', 'reprehenderit', 'in', 'voluptate',
+            'velit esse', 'cillum', 'dolore eu', 'fugiat', 'nulla', 'pariatur.', 'Excepteur', 'sint', 'occaecat',
+            'cupidatat', 'non', 'proident,', 'sunt in', 'culpa qui', 'officia', 'deserunt', 'mollit', 'anim id',
+            'est', 'laborum.'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 30, trim not defined', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = { width: 10 };
+          const expected = ['Lorem', 'ipsum', 'dolor sit', 'amet,', 'consectetur', 'adipiscing', 'elit, sed',
+            'do eiusmod', 'tempor', 'incididunt', 'ut labore', 'et dolore', 'magna', 'aliqua. Ut', 'enim ad',
+            'minim', 'veniam,', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi ut', 'aliquip ex',
+            'ea commodo', 'consequat.', 'Duis aute', 'irure', 'dolor in', 'reprehenderit', 'in', 'voluptate',
+            'velit esse', 'cillum', 'dolore eu', 'fugiat', 'nulla', 'pariatur.', 'Excepteur', 'sint', 'occaecat',
+            'cupidatat', 'non', 'proident,', 'sunt in', 'culpa qui', 'officia', 'deserunt', 'mollit', 'anim id',
+            'est', 'laborum.'];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+        global.it('with width of 30, no trim', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+          + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation '
+          + 'ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in '
+          + 'voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+          + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+          const options = { width: 20, trim: false };
+          const expected = [
+            'Lorem ipsum dolor ',
+            'sit amet, ',
+            'consectetur ',
+            'adipiscing elit, sed ',
+            'do eiusmod tempor ',
+            'incididunt ut labore ',
+            'et dolore magna ',
+            'aliqua. Ut enim ad ',
+            'minim veniam, quis ',
+            'nostrud exercitation ',
+            'ullamco laboris nisi ',
+            'ut aliquip ex ea ',
+            'commodo consequat. ',
+            'Duis aute irure ',
+            'dolor in ',
+            'reprehenderit in ',
+            'voluptate velit esse ',
+            'cillum dolore eu ',
+            'fugiat nulla ',
+            'pariatur. Excepteur ',
+            'sint occaecat ',
+            'cupidatat non ',
+            'proident, sunt in ',
+            'culpa qui officia ',
+            'deserunt mollit anim ',
+            'id est laborum.',
+          ];
+
+          const results = FormatUtils.wordWrap(str, options);
+          global.expect(results).toEqual(expected);
+        });
+      });
+    });
+    global.describe('handles non-strings', () => {
+      global.it('null', () => {
+        const str = undefined;
+        const options = null;
+        const expected = undefined;
+
+        const results = FormatUtils.wordWrap(str, options);
+        global.expect(results).toBe(expected);
+      });
+
+      global.it('null', () => {
+        const str = null;
+        const options = null;
+        const expected = null;
+
+        const results = FormatUtils.wordWrap(str, options);
+        global.expect(results).toBe(expected);
+      });
+      global.it('number 4', () => {
+        const str = 4;
+        const options = null;
+        const expected = 4;
+
+        const results = FormatUtils.wordWrap(str, options);
+        global.expect(results).toBe(expected);
+      });
+      global.it('emptyString', () => {
+        const str = '';
+        const options = null;
+        const expected = '';
+
+        const results = FormatUtils.wordWrap(str, options);
+        global.expect(results).toBe(expected);
+      });
+    });
+  });
+
+  global.describe('lineCount', () => {
+    global.describe('for non strings', () => {
+      global.it('undefined', () => {
+        const str = undefined;
+        const newLine = null;
+        const expected = 0;
+        const result = FormatUtils.lineCount(str, newLine);
+
+        global.expect(result).toEqual(expected);
+      });
+      global.it('null', () => {
+        const str = null;
+        const newLine = null;
+        const expected = 0;
+        const result = FormatUtils.lineCount(str, newLine);
+
+        global.expect(result).toEqual(expected);
+      });
+      global.it('number 4', () => {
+        const str = 4;
+        const newLine = null;
+        const expected = 0;
+        const result = FormatUtils.lineCount(str, newLine);
+
+        global.expect(result).toEqual(expected);
+      });
+    });
+    global.describe('can count lines', () => {
+      global.it('example 1', () => {
+        const str = 'single line';
+        const expected = 1;
+        const results = FormatUtils.lineCount(str);
+        global.expect(results).toBe(expected);
+      });
+      global.it('example 2', () => {
+        const str = `line 1
+          line 2
+          line 3`;
+        const expected = 3;
+        const results = FormatUtils.lineCount(str);
+        global.expect(results).toBe(expected);
+      });
+      global.describe('default newline', () => {
+        global.it('one line', () => {
+          const str = 'line1';
+          const newLine = null;
+          const expected = 1;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('one line, no newline', () => {
+          const str = 'line1';
+          const expected = 1;
+          const result = FormatUtils.lineCount(str);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('two line', () => {
+          const str = 'line1\nline2';
+          const newLine = null;
+          const expected = 2;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('one line, no newline', () => {
+          const str = 'line1\nline2';
+          const expected = 2;
+          const result = FormatUtils.lineCount(str);
+
+          global.expect(result).toEqual(expected);
+        });
+      });
+      global.describe('\\n', () => {
+        global.it('one line', () => {
+          const str = 'line1';
+          const newLine = '\n';
+          const expected = 1;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('one line, no newline', () => {
+          const str = 'line1';
+          const expected = 1;
+          const result = FormatUtils.lineCount(str);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('two line', () => {
+          const str = 'line1\nline2';
+          const newLine = '\n';
+          const expected = 2;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('one line, no newline', () => {
+          const str = 'line1\nline2';
+          const expected = 2;
+          const result = FormatUtils.lineCount(str);
+
+          global.expect(result).toEqual(expected);
+        });
+      });
+      global.describe('\\r', () => {
+        global.it('one line', () => {
+          const str = 'line1';
+          const newLine = '\r';
+          const expected = 1;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('two line', () => {
+          const str = 'line1\rline2';
+          const newLine = '\r';
+          const expected = 2;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+      });
+      global.describe('\\r\\n', () => {
+        global.it('one line', () => {
+          const str = 'line1';
+          const newLine = '\r\n';
+          const expected = 1;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('two line', () => {
+          const str = 'line1\r\nline2';
+          const newLine = '\r\n';
+          const expected = 2;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+        global.it('three line', () => {
+          const str = 'line1\r\nline2\r\nline3';
+          const newLine = '\r\n';
+          const expected = 3;
+          const result = FormatUtils.lineCount(str, newLine);
+
+          global.expect(result).toEqual(expected);
+        });
+      });
+    });
+  });
 });

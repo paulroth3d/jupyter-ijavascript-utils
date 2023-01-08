@@ -18,6 +18,8 @@
  *   * {@link module:format.stripHtmlTags|format.stripHtmlTags} - removes html / xml tags from strings.
  *   * {@link module:format.limitLines|format.limitLines(string, toLine, fromLine, lineSeparator)} - selects only a subset of lines in a string
  *   * {@link module:format.consoleLines|format.consoleLines(...)} - same as limit lines, only console.logs the string out.
+ *   * {@link module:format.wordWrap|format.wordWrap(str, options)} - breaks apart string by line length
+ *   * {@link module:format.lineCount|format.lineCount(str, options)} - counts the number of lines in a string
  * * Formatting Time
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values
@@ -995,4 +997,83 @@ module.exports.stripHtmlTags = function stripHtmlTags(str) {
   if (!str) return str;
 
   return str.replace(/<[^>]+>/g, '');
+};
+
+/**
+ * Breaks apart a string into an array of strings by a new line character.
+ * 
+ * @param {String} str - string to be broken apart into lines
+ * @param {Object} options - options to apply
+ * @param {Number} [options.width=50] - width of lines to cut
+ * @param {boolean} [options.cut=false] - whether to cut words in the middle
+ * @param {boolean} [options.trim=true] - whether to trim the whitespace at ends of lines - after splitting.
+ * @returns {String[]} - array of strings
+ * @example
+ * 
+ * const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor '
+ * + 'incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation';
+ * 
+ * //-- does not cut the line by default, and width of 50
+ * utils.format.wordWrap(str);
+ * // [
+ * //   'Lorem ipsum dolor sit amet, consectetur adipiscing',
+ * //   'elit, sed do eiusmod tempor incididunt ut labore',
+ * //   'et dolore magna aliqua. Ut enim ad minim veniam,',
+ * //   'quis nostrud exercitation'
+ * // ];
+ * 
+ * //-- you can also set the width, and whether to cut in the middle of the line
+ * utils.format.wordWrap(str, { cut: true, width: 70 });
+ * const expected = [
+ *   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmo',
+ *   'd tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim',
+ *   'veniam, quis nostrud exercitation'
+ * ];
+ */
+module.exports.wordWrap = function wordWrap(str, options) {
+  const cleanOptions = options || {};
+  const {
+    width = 50,
+    cut = false,
+    trim = true
+  } = cleanOptions;
+
+  if (!str || !(typeof str === 'string')) return str;
+
+  let rexStr = `.{1,${width}}`;
+  if (cut !== true) {
+    rexStr += '([\\s\u200B]+|$)|[^\\s\u200B]+?([\\s\u200B]+|$)';
+  }
+  const rex = new RegExp(rexStr, 'g');
+
+  /* istanbul ignore next */
+  let lines = str.match(rex) || [];
+
+  if (trim) {
+    lines = lines.map((line) => line.trim());
+  }
+  return lines;
+};
+
+/**
+ * Determines the number of lines in a string
+ * 
+ * @param {String} str - String to be checked for number of lines
+ * @param {String} [newlineCharacter='\n'] - the newline character to use
+ * @returns {Number} - Number of lines found
+ * @see {@link module:format.wordWrap|wordWap(str, options})} for other options.
+ * @example
+ * 
+ * utils.format.lineCount('single line'); // 1
+ * utils.format.lineCount(`line 1
+ *   line 2
+ *   line 3`); // 3
+ * utils.format.lineCount('line 1\rLine2\rLine3', '\r'); // 3
+ */
+module.exports.lineCount = function lineCount(str, newlineCharacter = '\n') {
+  const cleanNewLine = newlineCharacter || '\n';
+  if (!str || !(typeof str === 'string')) return 0;
+  const rex = new RegExp(`${cleanNewLine}`, 'g');
+  const match = str.match(rex);
+  return match ? match.length + 1 : 1;
 };

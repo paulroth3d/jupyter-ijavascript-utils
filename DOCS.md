@@ -75,6 +75,7 @@ Give it a try here:
 
 ## What's New
 
+* 1.30 - add Format.wordWrap and Format.lineCount
 * 1.29 - Updated TableGenerator.format method
 * 1.28 - Sticky table headers for table.render
 * 1.27 - Multi-Dimensional arange (initialize array along multiple dimensions)
