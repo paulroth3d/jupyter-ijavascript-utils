@@ -512,6 +512,9 @@ module.exports.htmlScript = function htmlScripts(
         const rootEl = document.createElement('div');
         rootShadow.appendChild(rootEl);
 
+        const cssLinks = document.createElement('div');
+        cssLinks.innerHTML = \`${cssCode}\`;
+
         const styleEl = document.createElement("style");
         styleEl.textContent = \`${style}\`
         rootShadow.appendChild(styleEl);    
