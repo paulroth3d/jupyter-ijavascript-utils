@@ -466,5 +466,3 @@ module.exports.arrangeMulti = function arangeMulti(...dimensions) {
   return ArrayUtils.size(currentDimension, () => ArrayUtils.clone(childDimensionalValue));
 };
 module.exports.arangeMulti = module.exports.arrangeMulti;
-
-//-- collection utilities
