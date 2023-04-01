@@ -1829,6 +1829,36 @@ state|IL   |IL    `;
       global.expect(results).toBe(expected);
     });
   });
+  global.describe('generateTSV', () => {
+    global.it('can render tsv', () => {
+      const weather = initializeWeather().slice(0, 2);
+      //eslint-disable-next-line quotes
+      const expected = `"id"\t"city"\t"month"\n"1"\t"Seattle"\t"Aug"\n"0"\t"Seattle"\t"Apr"`;
+      const results = new TableGenerator(weather)
+        .columns('id', 'city', 'month')
+        .generateTSV();
+      // console.log(JSON.stringify(results));
+      // console.log(results);
+      global.expect(results).toBeTruthy();
+      global.expect(results).toBe(expected);
+    });
+    global.it('can render tsv', () => {
+      const weather = initializeWeather().slice(0, 2)
+        .map((r) => ({ ...r, badText: 'He said "what?"' }));
+      //eslint-disable-next-line quotes
+      const expected = `"id"\t"city"\t"month"\t"Bad ""Text"
+"1"\t"Seattle"\t"Aug"\t"He said ""what?"""
+"0"\t"Seattle"\t"Apr"\t"He said ""what?"""`;
+      const results = new TableGenerator(weather)
+        .columns('id', 'city', 'month', 'badText')
+        .labels({ badText: 'Bad "Text' })
+        .generateTSV();
+      // console.log(JSON.stringify(results));
+      // console.log(results);
+      global.expect(results).toBeTruthy();
+      global.expect(results).toBe(expected);
+    });
+  });
   global.describe('generateArray', () => {
     global.it('can prepare a table without any arguments', () => {
       const weather = initializeWeather();
@@ -2062,6 +2092,54 @@ state|IL   |IL    `;
 + `"id","city","month","precip"
 "1","Seattle","Aug","0.87"
 "0","Seattle","Apr","2.68"`;
+        const results = consoleSpy.mock.calls[0][0];
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+
+        global.expect(results).toBe(expected);
+      });
+    });
+
+    global.describe('renderTSV', () => {
+      global.it('has ijs context by default', () => {
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+      });
+      global.it('throws an error if not in IJS', () => {
+        delete global.$$;
+        const data = initializeSmallWeather();
+        const instance = new TableGenerator(data);
+        
+        global.expect(() => instance.renderTSV()).toThrow();
+      });
+      global.it('can render a result without error', () => {
+        const consoleSpy = jest.spyOn(global.console, 'log');
+        const data = initializeSmallWeather()
+          .map((r) => ({ ...r, badText: 'he said "what?"' }));
+        new TableGenerator(data)
+          .labels({ badText: 'bad "text' })
+          .renderTSV();
+        
+        global.expect(consoleSpy).toHaveBeenCalled();
+        const expected = ''
++ `"id"\t"city"\t"month"\t"precip"\t"bad ""text"
+"1"\t"Seattle"\t"Aug"\t"0.87"\t"he said ""what?"""
+"0"\t"Seattle"\t"Apr"\t"2.68"\t"he said ""what?"""`;
+        const results = consoleSpy.mock.calls[0][0];
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+
+        global.expect(results).toBe(expected);
+      });
+      global.it('can render an object without error', () => {
+        const consoleSpy = jest.spyOn(global.console, 'log');
+        const data = initializeSmallWeather()
+          .map((r) => ({ ...r, obj: { first: 'name' } }));
+        new TableGenerator(data)
+          .renderTSV();
+        
+        global.expect(consoleSpy).toHaveBeenCalled();
+        const expected = `"id"\t"city"\t"month"\t"precip"\t"obj"
+"1"\t"Seattle"\t"Aug"\t"0.87"\t"{""first"":""name""}"
+"0"\t"Seattle"\t"Apr"\t"2.68"\t"{""first"":""name""}"`;
         const results = consoleSpy.mock.calls[0][0];
         // FileUtil.writeFileStd('./tmp/tmp', results);
 

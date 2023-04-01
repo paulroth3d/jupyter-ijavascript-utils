@@ -1399,6 +1399,43 @@ class TableGenerator {
   }
 
   /**
+   * Generates a TSV Table
+   * @see {@link TableGenerator#renderCSV}
+   */
+  generateTSV() {
+    const results = this.prepare();
+
+    const printOptions = this.#printOptions;
+    
+    const escapeString = (val) => {
+      //-- always return as string values to preserve formatting
+      return `"${
+        printValue(val, printOptions)
+          .replace(/"/g, '""')
+      }"`;
+    };
+    const tsvify = (a) => a.map(escapeString)
+      .join('\t');
+
+    const printHeader = (headers, style) => tsvify(headers)
+      + '\n';
+
+    const printBody = (collection) => collection
+      .map((dataRow) => tsvify(dataRow))
+      .join('\n');
+    
+    // const cleanFn = printValue;
+    // .map((dataRow) => tsvify(dataRow.map((value) =>
+    //   cleanFn(value, printOptions))
+    // )).join('\n');
+    
+    const tableResults = printHeader(results.headers, '')
+      + printBody(results.data);
+
+    return tableResults;
+  }
+
+  /**
    * @typedef {Object} TableArray
    * @property {String} headers -
    * @property {any[][]} data -
@@ -1600,6 +1637,44 @@ class TableGenerator {
     }
 
     context.console.log(this.generateCSV());
+  }
+
+  /**
+   * Renders Markdown in the cell results
+   * @see {@link TableGenerator#generateTSV}
+   * @example
+   * weather = [
+   *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+   *   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+   *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 },
+   *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+   *   { id: 4, city: 'New York', month: 'Aug', precip: 4.13 },
+   *   { id: 5, city: 'New York', month: 'Dec', precip: 3.58 },
+   *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 },
+   *   { id: 8, city: 'Chicago',  month: 'Dec', precip: 2.56 },
+   *   { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98 }
+   * ];
+   * utils.table(weather)
+   *     .renderTSV();
+   * 
+   * // "id","city","month","precip"
+   * // "1","Seattle","Aug","0.87"
+   * // "0","Seattle","Apr","2.68"
+   * // "2","Seattle","Dec","5.31"
+   * // "3","New York","Apr","3.94"
+   * // "4","New York","Aug","4.13"
+   * // "5","New York","Dec","3.58"
+   * // "6","Chicago","Apr","3.62"
+   * // "8","Chicago","Dec","2.56"
+   * // "7","Chicago","Aug","3.98"
+   */
+  renderTSV() {
+    const context = IJSUtils.detectContext();
+    if (!context) {
+      throw (Error('Not in iJavaScript, no $$ variable available'));
+    }
+
+    context.console.log(this.generateTSV());
   }
 }
 
