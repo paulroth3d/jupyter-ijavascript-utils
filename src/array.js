@@ -26,6 +26,8 @@ require('./_types/global');
  *   * {@link module:array.pickRows|array.pickRows} - picks a row from a 2d array
  *   * {@link module:array.pickColumns|array.pickColumns} - picks a column from a 2d array
  *   * {@link module:array.pick|array.pick} - picks either/or rows and columns
+ * * Understanding Values
+ *   * {@link module:array.isMultiDimensional|array.isMultiDimensional} - determines if an array is multi-dimensional
  * 
  * @module array
  * @exports array

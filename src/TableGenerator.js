@@ -135,10 +135,14 @@ const { createSort } = require('./array');
  *   * {@link TableGenerator#generateHTML|generateHTML()} - returns html table with the results
  *   * {@link TableGenerator#generateMarkdown|generateMarkdown()} - returns markdown with the results
  *   * {@link TableGenerator#generateCSV|generateCSV()} - generates a CSV with the results
+ *   * {@link TableGenerator#generateCSV|generateCSV()} - generates a TSV with the results
  *   * {@link TableGenerator#generateArray|generateArray()} - generates an array of headers and data for further process
  *   * {@link TableGenerator#generateArray2|generateArray2()} - generates a single array for further process
  * * render in jupyter
  *   * {@link TableGenerator#render|render()} - renders the results in a table within jupyter
+ *   * {@link TableGenerator#renderCSV|renderCSV()} - renders the generateCSV results in a table within jupyter
+ *   * {@link TableGenerator#renderTSV|renderTSV()} - renders the generateTSV results in a table within jupyter
+ *   * {@link TableGenerator#renderMarkdown|renderMarkdown()} - renders the generateMarkdown results in a table within jupyter
  * 
  */
 class TableGenerator {
