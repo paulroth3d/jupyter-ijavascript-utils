@@ -316,10 +316,24 @@ module.exports.arange = module.exports.arrange;
  * @returns {Boolean} - if the targetArray has any values that are multi-dimensional
  */
 module.exports.isMultiDimensional = function isMultiDimensional(targetArray) {
-  if (!targetArray || !Array.targetArray) {
+  if (!targetArray || !Array.isArray(targetArray)) {
     return false;
   }
   return targetArray.find((v) => Array.isArray(v)) !== undefined;
+};
+
+/**
+ * Determines the depth of a two dimensional array
+ * @param {Array} targetArray - two dimensional array
+ * @returns {Number}
+ * @private
+ */
+module.exports.arrayLength2d = function arrayLength2d(targetArray) {
+  return (targetArray || [])
+    .reduce((max, line) => {
+      const len = (line || []).length;
+      return (len > max) ? len : max;
+    }, 0);
 };
 
 /**
@@ -351,7 +365,7 @@ module.exports.transpose = function transpose(matrix) {
 
   //-- for speed, we use for loops.
   const rows = matrix.length;
-  const cols = matrix[0].length;
+  const cols = ArrayUtils.arrayLength2d(matrix); // matrix[0].length; 
   let colI;
   let rowI;
 

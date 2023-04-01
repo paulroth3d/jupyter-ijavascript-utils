@@ -443,12 +443,175 @@ describe('ArrayUtils', () => {
     });
   });
 
+  global.describe('isMultiDimensional', () => {
+    global.describe('is', () => {
+      global.it('if sent a two dimensional array', () => {
+        const testValue = [[0, 1], [2, 3]];
+        const expected = true;
+        const result = ArrayUtils.isMultiDimensional(testValue);
+        global.expect(result).toBe(expected);
+      });
+      global.it('if sent a semi two dimensional array', () => {
+        const testValue = [0, 1, [2, 3]];
+        const expected = true;
+        const result = ArrayUtils.isMultiDimensional(testValue);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('is not', () => {
+      global.it('if sent a non array', () => {
+        const testValue = 0;
+        const expected = false;
+        const result = ArrayUtils.isMultiDimensional(testValue);
+        global.expect(result).toBe(expected);
+      });
+      global.it('if sent undefined', () => {
+        const testValue = undefined;
+        const expected = false;
+        const result = ArrayUtils.isMultiDimensional(testValue);
+        global.expect(result).toBe(expected);
+      });
+      global.it('if sent null', () => {
+        const testValue = null;
+        const expected = false;
+        const result = ArrayUtils.isMultiDimensional(testValue);
+        global.expect(result).toBe(expected);
+      });
+    });
+  });
+
+  global.describe('arrayLength2d', () => {
+    global.describe('has a length of zero', () => {
+      global.it('if the target array is not an array', () => {
+        const testValue = null;
+        const expected = 0;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('if the target array is an empty array', () => {
+        const testValue = [];
+        const expected = 0;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('if the target array is an empty 2d array', () => {
+        const testValue = [[]];
+        const expected = 0;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('if the target array is an mixed 2d array', () => {
+        const testValue = [23, []];
+        const expected = 0;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+    });
+    global.describe('longest length', () => {
+      global.it('in mixed array 1', () => {
+        const testValue = [23, [1]];
+        const expected = 1;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('in mixed array 2', () => {
+        const testValue = [23, [1, 2]];
+        const expected = 2;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('in same sized arrays', () => {
+        const testValue = [[1, 2], [3, 4]];
+        const expected = 2;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('in different sized arrays', () => {
+        const testValue = [[1, 2, 3], [4, 5]];
+        const expected = 3;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('in different sized arrays 2', () => {
+        const testValue = [[1, 2], [3, 4, 5]];
+        const expected = 3;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('in different sized arrays with empty', () => {
+        const testValue = [[1, 2], [], [3, 4, 5]];
+        const expected = 3;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+      global.it('in different sized arrays with null', () => {
+        const testValue = [[1, 2], null, [3, 4, 5]];
+        const expected = 3;
+        const results = ArrayUtils.arrayLength2d(testValue);
+        global.expect(results).toBe(expected);
+      });
+    });
+  });
+
   global.describe('transpose', () => {
     global.it('transposes a 3x3 matrix', () => {
       const expected = [[0, 3, 6],
         [1, 4, 7],
         [2, 5, 8]];
       const matrix = [[0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8]];
+      const result = ArrayUtils.transpose(matrix);
+      expect(result).toStrictEqual(expected);
+    });
+    global.it('transposes a 3x4 matrix', () => {
+      const expected = [
+        [0, 4, 8],
+        [1, 5, 9],
+        [2, 6, 10],
+        [3, 7, 11]
+      ];
+      const matrix = [[0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [8, 9, 10, 11]];
+      const result = ArrayUtils.transpose(matrix);
+      expect(result).toStrictEqual(expected);
+    });
+    global.it('transposes a 4x3 matrix', () => {
+      const expected = [[0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [8, 9, 10, 11]
+      ];
+      const matrix = [
+        [0, 4, 8],
+        [1, 5, 9],
+        [2, 6, 10],
+        [3, 7, 11]
+      ];
+      const result = ArrayUtils.transpose(matrix);
+      expect(result).toStrictEqual(expected);
+    });
+    global.it('transposes a mixed matrix', () => {
+      const expected = [
+        [undefined, 0, 3, 6],
+        [undefined, 1, 4, 7],
+        [undefined, 2, 5, 8]];
+      const matrix = [[],
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8]];
+      const result = ArrayUtils.transpose(matrix);
+      expect(result).toStrictEqual(expected);
+    });
+    global.it('transposes a mixed matrix with null', () => {
+      const expected = [
+        [0, undefined, 3, 6],
+        [1, undefined, 4, 7],
+        [2, undefined, 5, 8]
+      ];
+      const matrix = [
+        [0, 1, 2],
+        [],
         [3, 4, 5],
         [6, 7, 8]];
       const result = ArrayUtils.transpose(matrix);
