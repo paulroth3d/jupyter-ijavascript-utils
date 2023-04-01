@@ -301,6 +301,28 @@ module.exports.arrange = function arange(len, start = 0, step = 1) {
 module.exports.arange = module.exports.arrange;
 
 /**
+ * Determine whether an array is multi-dimensional (an array of arrays)
+ * 
+ * For example:
+ * 
+ * ```
+ * utils.array.isMultiDimensional(0); // false
+ * utils.array.isMultiDimensional([0,1,2,3]); // false
+ * utils.array.isMultiDimensional([[0,1], [2,3]]); // true
+ * utils.array.isMultiDimensional([0, [1,2]]); // true
+ * ```
+ * 
+ * @param {Array} targetArray - array to check if multi-dimensional
+ * @returns {Boolean} - if the targetArray has any values that are multi-dimensional
+ */
+module.exports.isMultiDimensional = function isMultiDimensional(targetArray) {
+  if (!targetArray || !Array.targetArray) {
+    return false;
+  }
+  return targetArray.find((v) => Array.isArray(v)) !== undefined;
+};
+
+/**
  * Transposes a two dimensional array, so an NxM becomes MxN
  * @param {any[]} matrix - MxN array
  * @returns {any[]} - NxM array
