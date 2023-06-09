@@ -773,4 +773,196 @@ describe('ArrayUtils', () => {
       global.expect(results).toEqual(expected);
     });
   });
+
+  global.describe('indexify', () => {
+    const complexMarkdown = (`
+      Heading
+
+      # Overview
+      This entire list is a hierarchy of data.
+
+      # Section A
+      This describes section A
+
+      ## SubSection 1
+      With a subsection belonging to Section A
+
+      ## SubSection 2
+      And another subsection sibling to SubSection 1, but also under Section A.
+
+      # Section B
+      With an entirely unrelated section B, that is sibling to Section A
+
+      ## SubSection 1
+      And another subsection 1, but this time related to Section B.`)
+      .split('\n')
+      .filter((line) => line ? true : false)
+      .map((line) => line.trim());
+    
+    const isHeader1 = (str) => str.startsWith('# ');
+    const isHeader2 = (str) => str.startsWith('## ');
+
+    global.describe('can index', () => {
+      global.it('A list without indexers', () => {
+        const source = complexMarkdown;
+        const expected = [
+          { entry: 'Heading', section: [], subIndex: 1 },
+          { entry: '# Overview', section: [], subIndex: 2 },
+          {
+            entry: 'This entire list is a hierarchy of data.',
+            section: [],
+            subIndex: 3
+          },
+          { entry: '# Section A', section: [], subIndex: 4 },
+          { entry: 'This describes section A', section: [], subIndex: 5 },
+          { entry: '## SubSection 1', section: [], subIndex: 6 },
+          {
+            entry: 'With a subsection belonging to Section A',
+            section: [],
+            subIndex: 7
+          },
+          { entry: '## SubSection 2', section: [], subIndex: 8 },
+          {
+            entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
+            section: [],
+            subIndex: 9
+          },
+          { entry: '# Section B', section: [], subIndex: 10 },
+          {
+            entry: 'With an entirely unrelated section B, that is sibling to Section A',
+            section: [],
+            subIndex: 11
+          },
+          { entry: '## SubSection 1', section: [], subIndex: 12 },
+          {
+            entry: 'And another subsection 1, but this time related to Section B.',
+            section: [],
+            subIndex: 13
+          }
+        ];
+        const results = ArrayUtils.indexify(source);
+        // console.log(results);
+        global.expect(results).toStrictEqual(expected);
+      });
+
+      global.it('a list with one hierarchy level', () => {
+        const source = complexMarkdown;
+        const expected = [
+          { entry: 'Heading', section: [ 0 ], subIndex: 1 },
+          { entry: '# Overview', section: [ 1 ], subIndex: 0 },
+          {
+            entry: 'This entire list is a hierarchy of data.',
+            section: [ 1 ],
+            subIndex: 1
+          },
+          { entry: '# Section A', section: [ 2 ], subIndex: 0 },
+          { entry: 'This describes section A', section: [ 2 ], subIndex: 1 },
+          { entry: '## SubSection 1', section: [ 2 ], subIndex: 2 },
+          {
+            entry: 'With a subsection belonging to Section A',
+            section: [ 2 ],
+            subIndex: 3
+          },
+          { entry: '## SubSection 2', section: [ 2 ], subIndex: 4 },
+          {
+            entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
+            section: [ 2 ],
+            subIndex: 5
+          },
+          { entry: '# Section B', section: [ 3 ], subIndex: 0 },
+          {
+            entry: 'With an entirely unrelated section B, that is sibling to Section A',
+            section: [ 3 ],
+            subIndex: 1
+          },
+          { entry: '## SubSection 1', section: [ 3 ], subIndex: 2 },
+          {
+            entry: 'And another subsection 1, but this time related to Section B.',
+            section: [ 3 ],
+            subIndex: 3
+          }
+        ];
+        const results = ArrayUtils.indexify(source, isHeader1);
+        // console.log(results);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('a list with two hierarchy levels', () => {
+        const source = complexMarkdown;
+        const expected = [
+          { entry: 'Heading', section: [ 0, 0 ], subIndex: 1 },
+          { entry: '# Overview', section: [ 1, 0 ], subIndex: 0 },
+          {
+            entry: 'This entire list is a hierarchy of data.',
+            section: [ 1, 0 ],
+            subIndex: 1
+          },
+          { entry: '# Section A', section: [ 2, 0 ], subIndex: 0 },
+          { entry: 'This describes section A', section: [ 2, 0 ], subIndex: 1 },
+          { entry: '## SubSection 1', section: [ 2, 1 ], subIndex: 0 },
+          {
+            entry: 'With a subsection belonging to Section A',
+            section: [ 2, 1 ],
+            subIndex: 1
+          },
+          { entry: '## SubSection 2', section: [ 2, 2 ], subIndex: 0 },
+          {
+            entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
+            section: [ 2, 2 ],
+            subIndex: 1
+          },
+          { entry: '# Section B', section: [ 3, 0 ], subIndex: 0 },
+          {
+            entry: 'With an entirely unrelated section B, that is sibling to Section A',
+            section: [ 3, 0 ],
+            subIndex: 1
+          },
+          { entry: '## SubSection 1', section: [ 3, 1 ], subIndex: 0 },
+          {
+            entry: 'And another subsection 1, but this time related to Section B.',
+            section: [ 3, 1 ],
+            subIndex: 1
+          }
+        ];
+        const results = ArrayUtils.indexify(source, isHeader1, isHeader2);
+        // console.log(results);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can find all headers', () => {
+        const source = complexMarkdown;
+        const expected = [
+          { entry: '# Overview', section: [ 1, 0 ], subIndex: 0 },
+          { entry: '# Section A', section: [ 2, 0 ], subIndex: 0 },
+          { entry: '## SubSection 1', section: [ 2, 1 ], subIndex: 0 },
+          { entry: '## SubSection 2', section: [ 2, 2 ], subIndex: 0 },
+          { entry: '# Section B', section: [ 3, 0 ], subIndex: 0 },
+          { entry: '## SubSection 1', section: [ 3, 1 ], subIndex: 0 }
+        ];
+        const results = ArrayUtils.indexify(source, isHeader1, isHeader2)
+          .filter((element) => element.subIndex === 0);
+        // console.log(results);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+
+    global.describe('throws an error', () => {
+      global.it('if it is not passed an array', () => {
+        const expected = 'indexify(source, ...sectionIndicatorFunctions): source must be an array';
+        global.expect(() => {
+          ArrayUtils.indexify('cuca', isHeader1);
+        }).toThrow(expected);
+      });
+      global.it('if it is not passed a function to index', () => {
+        const expected = 'all section indicators passed must be functions';
+        global.expect(() => {
+          ArrayUtils.indexify(complexMarkdown, '# headers');
+        }).toThrow(expected);
+      });
+      global.it('if it is not passed all functions to index', () => {
+        const expected = 'all section indicators passed must be functions';
+        global.expect(() => {
+          ArrayUtils.indexify(complexMarkdown, isHeader1, '# headers');
+        }).toThrow(expected);
+      });
+    });
+  });
 });

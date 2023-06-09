@@ -17,6 +17,7 @@ require('./_types/global');
  *   * {@link module:array.createSort|array.createSort(sortIndex, sortIndex, ...)} - generates a sorting function
  *   * {@link module:array.SORT_ASCENDING|array.SORT_ASCENDING} - common ascending sorting function for array.sort()
  *   * {@link module:array.SORT_DESCENDING|array.SORT_DESCENDING} - common descending sorting function for array.sort()
+ *   * {@link module:array.indexify|array.indexify} - identify sections within a 1d array to create a hierarchy.
  * * Rearrange Array
  *   * {@link module:array.reshape|array.reshape} - reshapes an array to a size of rows and columns
  *   * {@link module:array.transpose|array.transpose} - transposes (flips - the array along the diagonal)
@@ -504,3 +505,181 @@ module.exports.arrangeMulti = function arangeMulti(...dimensions) {
   return ArrayUtils.size(currentDimension, () => ArrayUtils.clone(childDimensionalValue));
 };
 module.exports.arangeMulti = module.exports.arrangeMulti;
+
+/** 
+ * Create a unique number index for each element in an array,
+ * alternatively using additional functions to indicate hierarchies of data.
+ * 
+ * For example, markdown can be considered a hierarchy of data:
+ * 
+ * ```
+ * markdownList = `# Overview
+ * This entire list is a hierarchy of data.
+ * 
+ * # Section A
+ * This describes section A
+ * 
+ * ## SubSection 1
+ * With a subsection belonging to Section A
+ * 
+ * ## SubSection 2
+ * And another subsection sibling to SubSection 1, but also under Section A.
+ * 
+ * # Section B
+ * With an entirely unrelated section B, that is sibling to Section A
+ * 
+ * ## SubSection 1
+ * And another subsection 1, but this time related to Section B.`;
+ * ```
+ * 
+ * And we want to convert this 1d array into a hierarchy.
+ * 
+ * ```
+ * data = markdownList.split('\n')
+ *    .filter(line => line ? true : false); // check for empty lines
+ * 
+ * utils.format.consoleLines( data, 4);
+ * // ['# Overview',
+ * // 'This entire list is a hierarchy of data.',
+ * // '# Section A',
+ * // 'This describes section A',;
+ * 
+ * //-- functions that return True if we are in a new "group"
+ * isHeader1 = (str) => str.startsWith('# ');
+ * 
+ * isHeader1('# Overview'); // true
+ * isHeader1('This entire list is a hierarchy of data'); // false
+ * isHeader1('# Section A'); // true
+ * isHeader1('This describes section A'); // false
+ * 
+ * indexedData = utils.array.indexify(data, isHeader1);
+ * [
+ *   { entry: 'Heading', section: [ 0 ], subIndex: 1 },
+ *   { entry: '# Overview', section: [ 1 ], subIndex: 0 },
+ *   {
+ *     entry: 'This entire list is a hierarchy of data.',
+ *     section: [ 1 ],
+ *     subIndex: 1
+ *   },
+ *   { entry: '# Section A', section: [ 2 ], subIndex: 0 },
+ *   { entry: 'This describes section A', section: [ 2 ], subIndex: 1 },
+ *   { entry: '## SubSection 1', section: [ 2 ], subIndex: 2 },
+ *   {
+ *     entry: 'With a subsection belonging to Section A',
+ *     section: [ 2 ],
+ *     subIndex: 3
+ *   },
+ *   { entry: '## SubSection 2', section: [ 2 ], subIndex: 4 },
+ *   {
+ *     entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
+ *     section: [ 2 ],
+ *     subIndex: 5
+ *   },
+ *   { entry: '# Section B', section: [ 3 ], subIndex: 0 },
+ *   {
+ *     entry: 'With an entirely unrelated section B, that is sibling to Section A',
+ *     section: [ 3 ],
+ *     subIndex: 1
+ *   },
+ *   { entry: '## SubSection 1', section: [ 3 ], subIndex: 2 },
+ *   {
+ *     entry: 'And another subsection 1, but this time related to Section B.',
+ *     section: [ 3 ],
+ *     subIndex: 3
+ *   }
+ * ];
+ * ```
+ * 
+ * Note that this only indexes elements by the first header.
+ * 
+ * To index this with two levels of hierarchy, we can pass another function.
+ * 
+ * ```
+ * isHeader2 = (str) => str.startsWith('## ');
+ * 
+ * isHeader2('# Overview'); // false
+ * isHeader2('This entire list is a hierarchy of data'); // false
+ * isHeader2('# Section A'); // true
+ * isHeader2('This describes section A'); // false
+ * 
+ * indexedData = utils.array.indexify(data, isHeader1, isHeader2);
+ * // [
+ * //   { entry: 'Heading', section: [ 0, 0 ], subIndex: 1 },
+ * //   { entry: '# Overview', section: [ 1, 0 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'This entire list is a hierarchy of data.',
+ * //     section: [ 1, 0 ],
+ * //     subIndex: 1
+ * //   },
+ * //   { entry: '# Section A', section: [ 2, 0 ], subIndex: 0 },
+ * //   { entry: 'This describes section A', section: [ 2, 0 ], subIndex: 1 },
+ * //   { entry: '## SubSection 1', section: [ 2, 1 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'With a subsection belonging to Section A',
+ * //     section: [ 2, 1 ],
+ * //     subIndex: 1
+ * //   },
+ * //   { entry: '## SubSection 2', section: [ 2, 2 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
+ * //     section: [ 2, 2 ],
+ * //     subIndex: 1
+ * //   },
+ * //   { entry: '# Section B', section: [ 3, 0 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'With an entirely unrelated section B, that is sibling to Section A',
+ * //     section: [ 3, 0 ],
+ * //     subIndex: 1
+ * //   },
+ * //   { entry: '## SubSection 1', section: [ 3, 1 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'And another subsection 1, but this time related to Section B.',
+ * //     section: [ 3, 1 ],
+ * //     subIndex: 1
+ * //   }
+ * // ];
+ * ```
+ */
+module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions) {
+  const functionSignature = 'indexify(source, ...sectionIndicatorFunctions)';
+
+  const counters = new Array(sectionIndicatorFunctions.length).fill(0);
+  let subIndex = 0;
+  // counters[counters.length - 1] = -1;
+
+  //-- validate inputs
+  if (!Array.isArray(source)) {
+    throw new Error(`${functionSignature}: source must be an array`);
+  }
+  sectionIndicatorFunctions.forEach((fn) => {
+    if (typeof fn !== 'function') {
+      throw new Error(`${functionSignature}: all section indicators passed must be functions`);
+    }
+  });
+
+  const results = source.map((entry) => {
+    let isNewSectionTripped = false;
+
+    sectionIndicatorFunctions.forEach((fn, index) => {
+      if (isNewSectionTripped) {
+        counters[index] = 0;
+      } else {
+        isNewSectionTripped = fn(entry) ? true : false;
+
+        if (isNewSectionTripped) {
+          counters[index] += 1;
+        }
+      }
+    });
+
+    if (isNewSectionTripped) {
+      subIndex = 0;
+    } else {
+      subIndex += 1;
+    }
+
+    return ({ entry, section: [...counters], subIndex });
+  });
+
+  return results;
+};
