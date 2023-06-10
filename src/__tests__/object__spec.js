@@ -2426,4 +2426,539 @@ describe('ObjectUtils', () => {
       });
     });
   });
+  global.describe('cacheIterate', () => {
+    /*
+    const complexMarkdown = (`
+      Heading
+
+      # Overview
+      This entire list is a hierarchy of data.
+
+      # Section A
+      This describes section A
+
+      ## SubSection 1
+      With a subsection belonging to Section A
+
+      ## SubSection 2
+      And another subsection sibling to SubSection 1, but also under Section A.
+
+      # Section B
+      With an entirely unrelated section B, that is sibling to Section A
+
+      ## SubSection 1
+      And another subsection 1, but this time related to Section B.`)
+      .split('\n')
+      .filter((line) => line ? true : false)
+      .map((line) => line.trim());
+    const isHeader1 = (str) => str.startsWith('# ');
+    const isHeader2 = (str) => str.startsWith('## ');
+
+    const complexSource = complexMarkdown.map((r) => ({
+      text: r,
+      section: isHeader1(r) ? r.replace(/^\s?#+\s+/, '') : undefined,
+      subSection: isHeader2(r) ? r.replace(/^\s?#+\s+/, '') : undefined
+    })).map((r) => ({ ...r, isHeader: r.section || r.subSection ? true : false }));
+    */
+
+    const isHeader1 = (str) => str.startsWith('# ');
+    const isHeader2 = (str) => str.startsWith('## ');
+
+    const complexSource = [
+      {
+        text: 'Heading',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      },
+      {
+        text: '# Overview',
+        section: 'Overview',
+        subSection: undefined,
+        isHeader: true
+      },
+      {
+        text: 'This entire list is a hierarchy of data.',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      },
+      {
+        text: '# Section A',
+        section: 'Section A',
+        subSection: undefined,
+        isHeader: true
+      },
+      {
+        text: 'This describes section A',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      },
+      {
+        text: '## SubSection 1',
+        section: undefined,
+        subSection: 'SubSection 1',
+        isHeader: true
+      },
+      {
+        text: 'With a subsection belonging to Section A',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      },
+      {
+        text: '## SubSection 2',
+        section: undefined,
+        subSection: 'SubSection 2',
+        isHeader: true
+      },
+      {
+        text: 'And another subsection sibling to SubSection 1, but also under Section A.',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      },
+      {
+        text: '# Section B',
+        section: 'Section B',
+        subSection: undefined,
+        isHeader: true
+      },
+      {
+        text: 'With an entirely unrelated section B, that is sibling to Section A',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      },
+      {
+        text: '## SubSection 1',
+        section: undefined,
+        subSection: 'SubSection 1',
+        isHeader: true
+      },
+      {
+        text: 'And another subsection 1, but this time related to Section B.',
+        section: undefined,
+        subSection: undefined,
+        isHeader: false
+      }
+    ];
+
+    global.describe('can iterate', () => {
+      global.it('over a simple usecase', () => {
+        const source = complexSource; // .slice(0, 8);
+
+        //-- return undefined if the value should not persist
+        const result = ObjectUtils.augmentInherit(source, (entry) => ({
+          section: isHeader1(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined,
+          subSection: isHeader2(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined
+        }));
+
+        const expected = [
+          {
+            text: 'Heading',
+            section: undefined,
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '# Overview',
+            section: 'Overview',
+            subSection: undefined,
+            isHeader: true
+          },
+          {
+            text: 'This entire list is a hierarchy of data.',
+            section: 'Overview',
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '# Section A',
+            section: 'Section A',
+            subSection: undefined,
+            isHeader: true
+          },
+          {
+            text: 'This describes section A',
+            section: 'Section A',
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '## SubSection 1',
+            section: 'Section A',
+            subSection: 'SubSection 1',
+            isHeader: true
+          },
+          {
+            text: 'With a subsection belonging to Section A',
+            section: 'Section A',
+            subSection: 'SubSection 1',
+            isHeader: false
+          },
+          {
+            text: '## SubSection 2',
+            section: 'Section A',
+            subSection: 'SubSection 2',
+            isHeader: true
+          },
+          {
+            text: 'And another subsection sibling to SubSection 1, but also under Section A.',
+            section: 'Section A',
+            subSection: 'SubSection 2',
+            isHeader: false
+          },
+          {
+            text: '# Section B',
+            section: 'Section B',
+            subSection: undefined,
+            isHeader: true
+          },
+          {
+            text: 'With an entirely unrelated section B, that is sibling to Section A',
+            section: 'Section B',
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '## SubSection 1',
+            section: 'Section B',
+            subSection: 'SubSection 1',
+            isHeader: true
+          },
+          {
+            text: 'And another subsection 1, but this time related to Section B.',
+            section: 'Section B',
+            subSection: 'SubSection 1',
+            isHeader: false
+          }
+        ];
+
+        // console.log(source);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('even if a null is returned', () => {
+        const source = complexSource; // .slice(0, 8);
+
+        //-- return undefined if the value should not persist
+        const result = ObjectUtils.augmentInherit(source, (entry) => {
+          let entryResult = ({
+            section: isHeader1(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined,
+            subSection: isHeader2(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined
+          });
+
+          // console.log('entry:text:' + entry.text);
+          if ((entry.text || '').includes('Section A')) {
+            entryResult = null;
+          }
+
+          return entryResult;
+        });
+
+        const expected = [
+          {
+            text: 'Heading',
+            section: undefined,
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '# Overview',
+            section: 'Overview',
+            subSection: undefined,
+            isHeader: true
+          },
+          {
+            text: 'This entire list is a hierarchy of data.',
+            section: 'Overview',
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '# Section A',
+            section: 'Overview',
+            subSection: undefined,
+            isHeader: true
+          },
+          {
+            text: 'This describes section A',
+            section: 'Overview',
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '## SubSection 1',
+            section: 'Overview',
+            subSection: 'SubSection 1',
+            isHeader: true
+          },
+          {
+            text: 'With a subsection belonging to Section A',
+            section: 'Overview',
+            subSection: 'SubSection 1',
+            isHeader: false
+          },
+          {
+            text: '## SubSection 2',
+            section: 'Overview',
+            subSection: 'SubSection 2',
+            isHeader: true
+          },
+          {
+            text: 'And another subsection sibling to SubSection 1, but also under Section A.',
+            section: 'Overview',
+            subSection: 'SubSection 2',
+            isHeader: false
+          },
+          {
+            text: '# Section B',
+            section: 'Section B',
+            subSection: undefined,
+            isHeader: true
+          },
+          {
+            text: 'With an entirely unrelated section B, that is sibling to Section A',
+            section: 'Section B',
+            subSection: undefined,
+            isHeader: false
+          },
+          {
+            text: '## SubSection 1',
+            section: 'Section B',
+            subSection: 'SubSection 1',
+            isHeader: true
+          },
+          {
+            text: 'And another subsection 1, but this time related to Section B.',
+            section: 'Section B',
+            subSection: 'SubSection 1',
+            isHeader: false
+          }
+        ];
+
+        // console.log(source);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('Example within Docs', () => {
+        const source = [
+          { text: '# Overview' },
+          { text: 'This entire list is a hierarchy of data.' },
+          { text: '# Section A' },
+          { text: 'This describes section A' },
+          { text: '## SubSection 1' },
+          { text: 'With a subsection belonging to Section A' },
+          { text: '# Section B' },
+          { text: 'With an entirely unrelated section B, that is sibling to Section A' },
+          { text: '## SubSection 1' },
+          { text: 'And another subsection 1, but this time related to Section B.' }
+        ];
+        const inheritFn = (entry) => ({
+          section: isHeader1(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined,
+          subSection: isHeader2(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined
+        });
+        const expected = [
+          { text: '# Overview', section: 'Overview', subSection: undefined },
+          {
+            text: 'This entire list is a hierarchy of data.',
+            section: 'Overview',
+            subSection: undefined
+          },
+          { text: '# Section A', section: 'Section A', subSection: undefined },
+          {
+            text: 'This describes section A',
+            section: 'Section A',
+            subSection: undefined
+          },
+          {
+            text: '## SubSection 1',
+            section: 'Section A',
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'With a subsection belonging to Section A',
+            section: 'Section A',
+            subSection: 'SubSection 1'
+          },
+          { text: '# Section B', section: 'Section B', subSection: undefined },
+          {
+            text: 'With an entirely unrelated section B, that is sibling to Section A',
+            section: 'Section B',
+            subSection: undefined
+          },
+          {
+            text: '## SubSection 1',
+            section: 'Section B',
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'And another subsection 1, but this time related to Section B.',
+            section: 'Section B',
+            subSection: 'SubSection 1'
+          }
+        ];
+        const results = ObjectUtils.augmentInherit(source, inheritFn);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+
+    global.describe('cannot iterate', () => {
+      global.it('if the source is not an array', () => {
+        const inheritFn = (entry) => ({
+          section: isHeader1(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined,
+          subSection: isHeader2(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined
+        });
+
+        const expected = 'augmentInherit(source, augmentFn): source must be an array';
+
+        global.expect(() => ObjectUtils.augmentInherit('string', inheritFn)).toThrow(expected);
+      });
+      global.it('if the augmentFn is not a function', () => {
+        const source = complexSource; // .slice(0, 8);
+
+        const expected = 'augmentInherit(source, augmentFn): augmentFn must be a function of signature: (entry, lastValue) => obj';
+
+        global.expect(() => ObjectUtils.augmentInherit(source, 'string')).toThrow(expected);
+      });
+    });
+  });
+
+  global.describe('union', () => {
+    global.describe('can union', () => {
+      global.describe('with no overlap', () => {
+        global.it('simple arrays', () => {
+          const source1 = [{ first: 'john' }, { first: 'jane' }];
+          const source2 = [{ last: 'doe' }, { last: 'doh' }];
+          const expected = [
+            { first: 'john', last: 'doe' },
+            { first: 'jane', last: 'doh' }
+          ];
+          const results = ObjectUtils.union(source1, source2);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with source 1 as object', () => {
+          const source1 = { first: 'john' };
+          const source2 = [{ last: 'doe' }, { last: 'doh' }];
+          const expected = [
+            { first: 'john', last: 'doe' },
+            { first: 'john', last: 'doh' }
+          ];
+          const results = ObjectUtils.union(source1, source2);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with source 2 as object', () => {
+          const source1 = [{ first: 'john' }, { first: 'jane' }];
+          const source2 = { last: 'doe' };
+          const expected = [
+            { first: 'john', last: 'doe' },
+            { first: 'jane', last: 'doe' }
+          ];
+          const results = ObjectUtils.union(source1, source2);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with both as objects', () => {
+          const source1 = { first: 'john' };
+          const source2 = { last: 'doe' };
+          const expected = [
+            { first: 'john', last: 'doe' }
+          ];
+          const results = ObjectUtils.union(source1, source2);
+          global.expect(results).toStrictEqual(expected);
+        });
+      });
+
+      global.describe('if values overlap', () => {
+        global.describe('with arrays', () => {
+          global.it('source 1', () => {
+            const source1 = [{ first: 'john', last: 'unknown' }, { first: 'jane' }];
+            const source2 = [{ last: 'doe' }, { last: 'doh' }];
+            const expected = [
+              { first: 'john', last: 'doe' },
+              { first: 'jane', last: 'doh' }
+            ];
+            const results = ObjectUtils.union(source1, source2);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('source 2', () => {
+            const source1 = [{ first: 'john', age: 2 }, { first: 'jane' }];
+            const source2 = [{ first: 'johnny', last: 'doe' }, { last: 'doh' }];
+            const expected = [
+              { first: 'johnny', last: 'doe', age: 2 },
+              { first: 'jane', last: 'doh' }
+            ];
+            const results = ObjectUtils.union(source1, source2);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+        global.describe('with objects', () => {
+          global.it('source 1', () => {
+            const source1 = [{ first: 'john', last: 'unknown' }, { first: 'jane' }];
+            const source2 = { last: 'doe' };
+            const expected = [
+              { first: 'john', last: 'doe' },
+              { first: 'jane', last: 'doe' }
+            ];
+            const results = ObjectUtils.union(source1, source2);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('source 2', () => {
+            const source1 = { first: 'john' };
+            const source2 = [{ last: 'doe' }, { last: 'doh' }];
+            const expected = [
+              { first: 'john', last: 'doe' },
+              { first: 'john', last: 'doh' }
+            ];
+            const results = ObjectUtils.union(source1, source2);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('both', () => {
+            const source1 = { first: 'john' };
+            const source2 = { last: 'doe' };
+            const expected = [
+              { first: 'john', last: 'doe' }
+            ];
+            const results = ObjectUtils.union(source1, source2);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+      });
+      global.describe('if lengths are different', () => {
+        global.it('source 1', () => {
+          const source1 = [{ first: 'john' }];
+          const source2 = [{ last: 'doe' }, { last: 'doh' }];
+          const expected = [
+            { first: 'john', last: 'doe' },
+            { last: 'doh' }
+          ];
+          const results = ObjectUtils.union(source1, source2);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('source 2', () => {
+          const source1 = [{ first: 'john' }, { first: 'jane' }];
+          const source2 = [{ last: 'doh' }];
+          const expected = [
+            { first: 'john', last: 'doh' },
+            { first: 'jane' }
+          ];
+          const results = ObjectUtils.union(source1, source2);
+          global.expect(results).toStrictEqual(expected);
+        });
+      });
+    });
+    global.describe('cannot union', () => {
+      global.it('if source1 is not an object ', () => {
+        const source1 = 'string';
+        const source2 = [{ last: 'doe' }];
+        const expected = 'union(source1:object[], source2:object[]): source1 must be a collection of objects, or a single object';
+        global.expect(() => ObjectUtils.union(source1, source2)).toThrow(expected);
+      });
+      global.it('if source2 is not an object ', () => {
+        const source1 = [{ first: 'john' }];
+        const source2 = 'string';
+        const expected = 'union(source1:object[], source2:object[]): source2 must be a collection of objects, or a single object';
+        global.expect(() => ObjectUtils.union(source1, source2)).toThrow(expected);
+      });
+    });
+  });
 });

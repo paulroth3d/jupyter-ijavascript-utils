@@ -639,6 +639,11 @@ module.exports.arangeMulti = module.exports.arrangeMulti;
  * //   }
  * // ];
  * ```
+ * 
+ * @param {Array} source - list of values to index
+ * @param {...Function} sectionIndicatorFunctions - each function indicates a new section
+ * @returns {Object[]} - collection of objects, each with a new section (indicating the layers) 
+ *            and subIndex: unique value in the section (always 0 for header)
  */
 module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions) {
   const functionSignature = 'indexify(source, ...sectionIndicatorFunctions)';

@@ -16,12 +16,15 @@ const FormatUtils = require('./format');
  *   * {@link module:object.setPropertyDefaults|setPropertyDefaults()} - sets values for objects that don't currently have the property
  *   * {@link module:object.propertyValueSample|propertyValueSample(collection)} - finds non-empty values for all properties found in the collection
  * * Manipulating objects
- *   * {@link module:object.objAssign|objAssign()} -
- *   * {@link module:object.objAssignEntities|objAssignEntities()} -
+ *   * {@link module:object.assign|objAssign(object, property, value)} - Applies properties to an object in functional programming style.
+ *   * {@link module:object.assignEntities|objAssignEntities(object, [property, value])} - Applies properties to an object using Array values - [key,value]
+ *   * {@link module:object.augment|augment(object, augmentFn)} - Applies properties to an object similar to Map
+ *   * {@link module:object.augmentInherit|augmentInherit(object, augmentFn)} - Applies properties to a collection of objects, 'remembering' the last value - useful for 1d to *D lists.
  *   * {@link module:object.selectObjectProperties|selectObjectProperties()} - keep only specific properties
  *   * {@link module:object.filterObjectProperties|filterObjectProperties()} - remove specific properties
  *   * {@link module:object.mapProperties|mapProperties(collection, fn, ...properties)} - map multiple properties at once (like parseInt, or toString)
  *   * {@link module:object.formatProperties|formatProperties(collection, propertyTranslation)} - map specific properties (ex: toString, toNumber, etc)
+ *   * {@link module:object.union|union(objectList1, objectList2)} - Unites the properties of two collections of objects.
  * * Fetch child properties from related objects
  *   * {@link module:object.fetchObjectProperty|fetchObjectProperty(object, string)} - use dot notation to bring a child property onto a parent
  *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
@@ -1128,4 +1131,187 @@ module.exports.propertyValueSample = function propertyValueSample(objCollection)
   });
 
   return result;
+};
+
+/**
+ * Appends values to a collection of objects,
+ * where if the value `undefined` is provided, 
+ * then it "remembers" or "inherits" the value previously used.
+ * 
+ * This is VERY useful for converting a 1 dimensional list, into a hierarchical tree structure.
+ * 
+ * For example, say we got this from a previous successful scrape:
+ * 
+ * ```
+ * source = [
+ *   { text: '# Overview' },
+ *   { text: 'This entire list is a hierarchy of data.' },
+ *   { text: '# Section A' },
+ *   { text: 'This describes section A' },
+ *   { text: '## SubSection 1' },
+ *   { text: 'With a subsection belonging to Section A' },
+ *   { text: '# Section B' },
+ *   { text: 'With an entirely unrelated section B, that is sibling to Section A' }
+ * ];
+ * ```
+ * 
+ * We would like to know which heading1 and heading2 the texts belong to:
+ * 
+ * ```
+ * 
+ * const isHeader1 = (str) => str.startsWith('# ');
+ * const isHeader2 = (str) => str.startsWith('## ');
+ * 
+ * //-- note, return undefined for any property you don't want to have inherited.
+ * inheritFn = (entry) => ({
+ *   section: isHeader1(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined,
+ *   subSection: isHeader2(entry.text) ? entry.text.replace(/#+\s+/, '') : undefined
+ * });
+ * 
+ * results = utils.object.augmentInherit(source, inheritFn);
+ * ```
+ * 
+ * text                                                              |section  |subSection  
+ * --                                                                |--       |--          
+ * Overview                                                          |Overview |undefined            
+ * This entire list is a hierarchy of data.                          |Overview |undefined   
+ * Section A                                                         |Section A|undefined   
+ * This describes section A                                          |Section A|undefined   
+ * SubSection 1                                                      |Section A|SubSection 1
+ * With a subsection belonging to Section A                          |Section A|SubSection 1
+ * Section B                                                         |Section B|undefined   
+ * With an entirely unrelated section B, that is sibling to Section A|Section B|undefined   
+ * SubSection 1                                                      |Section B|SubSection 1
+ * And another subsection 1, but this time related to Section B.     |Section B|SubSection 1
+ * 
+ * So we pass the collection of results as the source, and an augment function,
+ * that returns the heading 1 value - that is then kept until the next heading 1.
+ * (Similar for subSection using heading 2)
+ * 
+ * @param {Object[]} source - the collection of objects to check and augment.
+ * @param {Function} augmentFn - function accepting each entry, and returning the properties to "inherit" <br /> or a property with a value of undefined - if it should not be preserved.
+ * @returns {Object[]} - new version of the source objects with the properties applied.
+ * 
+ *  @see {@link module:object.augment|augment()} - Applies properties to an object similar to Map
+ */
+module.exports.augmentInherit = function augmentInherit(source, augmentFn) {
+  const signature = 'augmentInherit(source, augmentFn)';
+  if (!Array.isArray(source)) {
+    throw new Error(`${signature}: source must be an array`);
+  } else if (typeof augmentFn !== 'function') {
+    throw new Error(`${signature}: augmentFn must be a function of signature: (entry, lastValue) => obj`);
+  }
+
+  let keys;
+
+  let lastValue = {};
+  return source.map((entry, index) => {
+    const fnResult = augmentFn(entry, lastValue);
+
+    //-- ignore all values that are undefined
+    const newValue = { ...lastValue };
+    let isFlipped = false;
+    keys = Object.keys(fnResult || {});
+    keys.forEach((key) => {
+      if (isFlipped) {
+        newValue[key] = undefined;
+      } else if (fnResult[key] !== undefined) {
+        newValue[key] = fnResult[key];
+        isFlipped = true;
+      }
+    });
+
+    // console.log(`index:${index}: entry:${JSON.stringify(entry)}, newValue:${JSON.stringify(newValue)}, lastValue:${JSON.stringify(lastValue)}`)
+    const result = ({ ...entry, ...newValue });
+    lastValue = newValue;
+    return result;
+  });
+};
+
+/**
+ * Unites the properties of two collections of objects.
+ * 
+ * For example:
+ * 
+ * ```
+ * source1 = [
+ *  { first: 'john' },
+ *  { first: 'jane' }
+ * ];
+ * source2 = [
+ *  { last: 'doe' },
+ *  { last: 'dough' }
+ * ];
+ * utils.object.union(source1, source2);
+ * // [{ first: 'john', last: 'doe' },
+ * //  { first: 'jane', last: 'dough' }];
+ * ```
+ * 
+ * Note that you can also pass a single object, to have it union to multiple.
+ * 
+ * ```
+ * source1 = [
+ *  { first: 'john' },
+ *  { first: 'jane' }
+ * ];
+ * //-- same object to be applied to all
+ * source2 = { last: 'doe' };
+ * 
+ * utils.object.union(source1, source2);
+ * // [{ first: 'john', last: 'doe' },
+ * //  { first: 'jane', last: 'doe' }];
+ * ```
+ * 
+ * @param {Object[]|Object} source1 - object or array of objects to union
+ * @param {Object[]|Object} source2 - object or array of objects to union
+ * @returns {Object[]} - collection of objects merging the values between the two sources
+ * 
+ * @see {@link module:object.join|join} - to instead join based on a value instead of index
+ * @see {@link module:object.filterObjectProperties|filterObjectProperties} - to remove properties from collection of objects.
+ */
+module.exports.union = function union(source1, source2) {
+  const signature = 'union(source1:object[], source2:object[])';
+  
+  let s1Iterator;
+  let s1Entry;
+  let s1Length;
+  let s2Iterator;
+  let s2Entry;
+  let s2Length;
+  
+  if (Array.isArray(source1)) {
+    s1Iterator = source1.entries();
+    s1Length = source1.length;
+  } else if (typeof source1 === 'object') {
+    s1Iterator = ({ next: () => ({ done: false, value: [0, source1] }) });
+    s1Length = 1;
+  } else {
+    throw new Error(`${signature}: source1 must be a collection of objects, or a single object`);
+  }
+
+  if (Array.isArray(source2)) {
+    s2Iterator = source2.entries();
+    s2Length = source2.length;
+  } else if (typeof source2 === 'object') {
+    s2Iterator = ({ next: () => ({ done: false, value: [0, source2] }) });
+    s2Length = 1;
+  } else {
+    throw new Error(`${signature}: source2 must be a collection of objects, or a single object`);
+  }
+
+  const len = Math.max(s1Length, s2Length);
+  const results = new Array(len);
+
+  for (let i = 0; i < len; i += 1) {
+    s1Entry = s1Iterator.next();
+    s1Entry = s1Entry.done ? {} : s1Entry.value[1];
+
+    s2Entry = s2Iterator.next();
+    s2Entry = s2Entry.done ? {} : s2Entry.value[1];
+
+    //console.log(`s1Entry: ${JSON.stringify(s1Entry)}, s2Entry: ${JSON.stringify(s2Entry)}`);
+    results[i] = { ...s1Entry, ...s2Entry };
+  }
+
+  return results;
 };

@@ -75,6 +75,7 @@ Give it a try here:
 
 ## What's New
 
+* 1.33 - Object.augmentInherit and Object.union
 * 1.32 - Array.indexify to identify sections within a 1d array into a hierarchy.
 * 1.31 - harden Array.transpose for arrays with nulls, and Table.generateTSV
 * 1.30 - add Format.wordWrap and Format.lineCount
