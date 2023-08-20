@@ -2762,4 +2762,383 @@ global.describe('format', () => {
       });
     });
   });
+
+  global.describe('replaceStrings', () => {
+    global.describe('can replace', () => {
+      global.describe('a set of strings', () => {
+        global.describe('with an array', () => {
+          global.it('of strings', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo']];
+            const expected = [
+              'john and ringo went up the hill',
+              'to fetch the pail of water',
+              'john fell down and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of strings with nulls', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              null,
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo']];
+            const expected = [
+              'john and ringo went up the hill',
+              null,
+              'john fell down and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of strings with unexpected replace values', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              null,
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo'], 23];
+            const expected = [
+              'john and ringo went up the hill',
+              null,
+              'john fell down and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of regexp', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [[/JACK/i, 'john'], [/\s+jill/, ' ringo']];
+            const expected = [
+              'john and ringo went up the hill',
+              'to fetch the pail of water',
+              'john fell down and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with empty', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['down ', '']];
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with undefined', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['down ']];
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with null', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['down ', null]];
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with a 1d array', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = ['down '];
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with a longer 1d array', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = ['down ', ' of water'];
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('mixed', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['jack', 'john'], [/\s+jill/i, ' ringo'], ' down'];
+            const expected = [
+              'john and ringo went up the hill',
+              'to fetch the pail of water',
+              'john fell and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+        global.describe('with a map', () => {
+          global.it('of strings', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = new Map([['jack', 'john'], ['jill', 'ringo']]);
+            const expected = [
+              'john and ringo went up the hill',
+              'to fetch the pail of water',
+              'john fell down and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with empty', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = new Map([['down ', '']]);
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with undefined', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = new Map([['down ', undefined]]);
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with null', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = new Map([['down ', null]]);
+            const expected = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+      });
+      global.describe('a single string', () => {
+        global.describe('with an array', () => {
+          global.it('of strings', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo']];
+            const expected = ['john and ringo went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of strings with nulls', () => {
+            const targetStrings = null;
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo']];
+            const expected = [];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of strings with unexpected replace values', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo'], 23];
+            const expected = ['john and ringo went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of regexp', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [[/JACK/i, 'john'], [/\s+jill/, ' ringo']];
+            const expected = ['john and ringo went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with empty', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [['down ', '']];
+            const expected = ['jack and jill went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with undefined', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [['down ']];
+            const expected = ['jack and jill went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with null', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [['down ', null]];
+            const expected = ['jack and jill went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with a 1d array', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = ['down '];
+            const expected = ['jack and jill went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with a longer 1d array', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [' the hill', ' of water'];
+            const expected = ['jack and jill went up to fetch the pail'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('mixed', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = [['jack', 'john'], [/\s+jill/i, ' ringo'], ' the hill'];
+            const expected = ['john and ringo went up to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+        global.describe('with a map', () => {
+          global.it('of strings', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = new Map([['jack', 'john'], ['jill', 'ringo']]);
+            const expected = ['john and ringo went up the hill to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove strings with empty', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = new Map([[' the hill', '']]);
+            const expected = ['jack and jill went up to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with undefined', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = new Map([[' the hill', undefined]]);
+            const expected = ['jack and jill went up to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('remove 2d strings with null', () => {
+            const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+            const replaceValues = new Map([[' the hill', null]]);
+            const expected = ['jack and jill went up to fetch the pail of water'];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+      });
+    });
+    global.describe('cannot replace', () => {
+      global.it('do nothing if not passed an array or map', () => {
+        const targetStrings = 'jack and jill went up the hill to fetch the pail of water';
+        const replaceValues = null;
+        const expected = ['jack and jill went up the hill to fetch the pail of water'];
+        const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('of strings', () => {
+        const targetStrings = [
+          'jack and jill went up the hill',
+          'to fetch a pail of water',
+          'jack fell down and broke his crown',
+          'and jill came tumbling after'
+        ];
+        const replaceValues = [[/.+/], ['jack', 'john']];
+        const expected = [
+          '',
+          '',
+          '',
+          ''
+        ];
+        const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
 });

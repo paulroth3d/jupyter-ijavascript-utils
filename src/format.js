@@ -397,6 +397,7 @@ module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rang
  * ```
  * require('esm-hook');
  * d3 = require('d3');
+ * utils = require('jupyter-ijavascript-utils');
  * 
  * //-- create a number generator using Normal / Gaussian distribution
  * randomGenerator = d3.randomNormal(
@@ -409,12 +410,14 @@ module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rang
  * 
  * randomDataset = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
  * 
+ * numPicks = 3; // increase to a larger number (ex: 1000) to better see distributions
+ * 
  * //-- create an array of 3 items, each with the results from randomGenerator
- * results = utils.array.size(3, () => randomGenerator());
+ * results = utils.array.size(numPicks, () => randomGenerator());
  * // [ 0.6235937672428706, 0.4991359903898883, 0.4279365561645624 ]
  * 
  * //-- map those values to the randomDataset
- * results.map(val => ({ pick: utils.format.mapArrayDomain(val, randomDataset) }));
+ * resultPicks = results.map(val => ({ pick: utils.format.mapArrayDomain(val, randomDataset) }));
  * // [ { pick: 'g' }, { pick: 'e' }, { pick: 'e' } ]
  * 
  * //-- group them by the pick field
@@ -430,7 +433,7 @@ module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rang
  *       .title('Distribution')
  *       .data(groupedResults)
  *       .encode(
- *         vl.x().fieldN('value'),
+ *         vl.x().fieldN('pick'),
  *         vl.y().fieldQ('count').scale({type: 'log'})
  *       );
  * });
@@ -1183,4 +1186,84 @@ module.exports.lineCount = function lineCount(str, newlineCharacter = '\n') {
   const rex = new RegExp(`${cleanNewLine}`, 'g');
   const match = str.match(rex);
   return match ? match.length + 1 : 1;
+};
+
+/**
+ * Performs a set of replacement against a string or list of strings.
+ * 
+ * The string replacements can either be [[search,replace],[search,replace]]
+ * or a map of Map([[search, replace], [search, replace]])
+ * 
+ * This is meant to provide a way to apply consistent string cleanups across projects.
+ * 
+ * example:
+ * 
+ * ```
+ * targetStrings = [
+ *   'jack and jill went up the hill',
+ *   'to fetch the pail of water',
+ *   'jack fell down and broke his crown',
+ *   'and jill came tumbling after'
+ * ];
+ * 
+ * //-- include an array of strings to all remove out
+ * utils.format.replaceStrings(targetStrings, ['down ', ' of water']);
+ * // [ 'jack and jill went up the hill',
+ * //   'to fetch the pail',
+ * //   'jack fell and broke his crown',
+ * //   'and jill came tumbling after' ]
+ *
+ * //-- or use tuplets of [find, replace] with regular expressions
+ * replaceValues = [['jack', 'john'], [/\s+jill/i, ' ringo'], ' down'];
+ * utils.format.replaceStrings(targetStrings, replaceValues);
+ * expected = [
+ *   'john and ringo went up the hill',
+ *   'to fetch the pail of water',
+ *   'john fell and broke his crown',
+ *   'and ringo came tumbling after'
+ * ];
+ * 
+ * //-- a map will do the same, but will not support regular expressions for keys
+ * replaceValues = new Map();
+ * replaceValues.set('jack', 'john');
+ * replaceValues.set('jill', 'ringo');
+ * utils.format.replaceStrings(targetStrings, replaceValues);
+ * expected = [
+ *   'john and ringo went up the hill',
+ *   'to fetch the pail of water',
+ *   'john fell down and broke his crown',
+ *   'and ringo came tumbling after'
+ * ];
+ * ```
+ * 
+ * @param {string|string[]} targetStr - the string to search for with the tuplets
+ * @param {Array|Map<string|RegExp,string>} stringTupletsOrMap - [[search, replace]] or Map<String|RegExp,String>
+ * @returns {string[]} - the resulting list of strings
+ */
+module.exports.replaceStrings = function replaceStrings(targetStr, stringTupletsOrMap) {
+  const cleanStrings = !targetStr ? [] : Array.isArray(targetStr) ? targetStr : [targetStr];
+  // const signature = 'replaceStrings(targetStrings, stringTupletsOrMap)';
+  const replacementEntries = [];
+
+  if (Array.isArray(stringTupletsOrMap)) {
+    stringTupletsOrMap.forEach((possibleReplacement) => {
+      if (typeof possibleReplacement === 'string') {
+        replacementEntries.push([possibleReplacement, '']);
+      } else if (Array.isArray(possibleReplacement)) {
+        const [replaceSearch, replaceWith] = possibleReplacement;
+        replacementEntries.push([replaceSearch, replaceWith || '']);
+      }
+    });
+  } else if (stringTupletsOrMap instanceof Map) {
+    [...stringTupletsOrMap.entries()]
+      .forEach(([replaceSearch, replaceWith]) => {
+        replacementEntries.push([replaceSearch, replaceWith || '']);
+      });
+  }
+
+  return cleanStrings.map((stringToClean) => !stringToClean
+    ? stringToClean
+    : replacementEntries.reduce((result, [replaceSearch, replaceWith]) => !result
+      ? result
+      : result.replace(replaceSearch, replaceWith), stringToClean));
 };

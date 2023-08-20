@@ -75,6 +75,7 @@ Give it a try here:
 
 ## What's New
 
+* 1.36 - {@link module:format.replaceStrings|format.replaceStrings} to allow for replacement dictionaries and tuplets
 * 1.35 - {@link module:object.extractObjectProperties|extractObjectProperties} / {@link module:object.extractObjectProperty|extractObjectProperty} - to do horizontal transposes on objects
 * 1.34 - {@link module:format.mapArrayDomain|format.mapArrayDomain} and add notes in the header of {@link module:random|random} on using non-uniform distributions.
 * 1.33 - Object.augmentInherit and Object.union
