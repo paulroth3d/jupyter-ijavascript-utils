@@ -31,6 +31,8 @@ const FormatUtils = require('./format');
  *   * {@link module:object.join|join(array, index, map, fn)} - join a collection against a map by a given index
  *   * {@link module:object.joinProperties|join(array, index, map, ...fields)} - join a collection, and copy properties over from the mapped object.
  *   * {@link module:object.propertyFromList|propertyFromList(array, propertyName)} - fetches a specific property from all objects in a list
+ *   * {@link module:object.extractObjectProperty|extractObjectProperty(list, propertyNameOrFn)} - extracts a property or fn across all objects in list.
+ *   * {@link module:object.extractObjectProperties|extractObjectProperties(list, propertyNameOrFnMap)} - extracts multiple propertie or fn across all objects in list.
  * * Rename properties
  *   * {@link module:object.cleanProperties|cleanProperties()} - correct inaccessible property names in a list of objects - in place
  *  *   * {@link module:object.cleanProperties2|cleanProperties2()} - correct inaccessible property names in a list of objects - on a cloned list
@@ -534,6 +536,100 @@ module.exports.fetchObjectProperties = function fetchObjectProperties(list, prop
     });
     return result;
   });
+};
+
+/**
+ * Similar to a transpose, this finds all the values of a particular property
+ * within a list of objects.
+ * 
+ * ```
+ * weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   null,
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+ * ];
+ * 
+ * utils.object.extractObjectProperty(weather, 'city');
+ * // [ 'Seattle', 'New York', 'Chicago'];
+ * ```
+ * 
+ * @param {Object|Object[]} objectList - list of objects to extract the property from
+ * @param {Function | String} propertyOrFn - Name of the property or accessor function
+ * @returns {Array} - single array the values stored in propertyOrFn across all objects in objectList.
+ * @see {@link module:aggregate.unique|unique()} to see all the unique values stored
+ * @see {@link module:object.extractObjectProperties|extractObjectProperties(list, propertyNameOrFnMap)} to see the values extracted into a single object / horizontal transpose.
+ */
+module.exports.extractObjectProperty = function extractObjectProperty(list, propertyOrFn) {
+  let cleanList = !list ? [] : Array.isArray(list) ? list : [list];
+  cleanList = cleanList.filter((r) => r);
+  const fn = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
+  return cleanList.map(fn);
+};
+
+/**
+ * Similar to a transpose, this finds all the values of a particular property
+ * within a list of objects.
+ * 
+ * ```
+ * weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   null,
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+ * ];
+ * 
+ * utils.object.extractObjectProperties(weather, ['city', 'month']);
+ * // { city: [ 'Seattle', 'New York', 'Chicago'], month: ['Aug', 'Apr', 'Apr'] }
+ * 
+ * // note you can also pass maps with property name strings, or functions.
+ * extractionMap = new Map();
+ * extractionMap.set('city', null); // default the property by the key name
+ * extractionMap.set('city2', 'city'); // specify the property to use
+ * extractionMap.set('city3', (r) => r.city); // specify a function
+ * 
+ * utils.object.extractObjectProperties(weather, extractionMap);
+ * // {
+ * //   city: ['Seattle', 'New York', 'Chicago'],
+ * //   city2: ['Seattle', 'New York', 'Chicago'],
+ * //   city3: ['Seattle', 'New York', 'Chicago']
+ * // };
+ * ```
+ * 
+ * @param {Object|Object[]} objectList - list of objects to extract the property from
+ * @param {Map<Function | String>} propertyOrFnMap - Name of the property or accessor function
+ * @returns {Object} - Object with the keys in the map as properties - extracting the values across all in list.
+ * @see {@link module:object.extractObjectProperty|extractObjectProperty(list, propertyNameOrFn)} to see all the values stored for a single property.
+ */
+module.exports.extractObjectProperties = function extractObjectProperties(list, propertyOrFnMap) {
+  let propertyEntries = [];
+  const signature = 'object.extractObjectProperties(list:Object[], propertyOrFnMap:Map<String, stringOrFn>)';
+
+  if (!propertyOrFnMap) {
+    return [];
+  } else if (Array.isArray(propertyOrFnMap)) {
+    for (let i = 0; i < propertyOrFnMap.length; i += 1) {
+      const propertyOrFnKey = propertyOrFnMap[i];
+
+      //-- only string properties are accepted as an array
+      if (typeof propertyOrFnKey === 'string') {
+        propertyEntries.push([propertyOrFnKey, propertyOrFnKey]);
+      }
+    }
+  } else if (propertyOrFnMap instanceof Map) {
+    propertyEntries = [...propertyOrFnMap.entries()];
+  } else {
+    throw Error(`${signature}: propertyOrFnMap must be a map of propertyName keys, with a function or property name as the value`);
+  }
+
+  const results = {};
+  propertyEntries.forEach(([propertyName, propertyOrFn]) => {
+    results[propertyName] = ObjectUtils.extractObjectProperty(list, propertyOrFn || propertyName);
+    // const fn = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
+    // results[propertyName] = cleanList.map(fn);
+  });
+
+  return results;
 };
 
 /**

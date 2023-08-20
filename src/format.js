@@ -387,7 +387,55 @@ module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rang
 /**
  * projects a value from a domain of expected values to an array - very useful for random distributions.
  * 
- * like mapping normal / gaussian distributions to an array of values.
+ * like mapping normal / gaussian distributions to an array of values with 
+ * [d3-random](https://observablehq.com/@d3/d3-random)
+ * as format.mapArrayDomain projects a value from between a range a value,
+ * and picks the corresponding value from an array.
+ * 
+ * For example:
+ * 
+ * ```
+ * require('esm-hook');
+ * d3 = require('d3');
+ * 
+ * //-- create a number generator using Normal / Gaussian distribution
+ * randomGenerator = d3.randomNormal(
+ *  0.5, // mu - or centerline
+ *  0.1 // sigma - or spread of values
+ * );
+ * 
+ * randomValue = randomGenerator();
+ * // randomValue - 0.4
+ * 
+ * randomDataset = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+ * 
+ * //-- create an array of 3 items, each with the results from randomGenerator
+ * results = utils.array.size(3, () => randomGenerator());
+ * // [ 0.6235937672428706, 0.4991359903898883, 0.4279365561645624 ]
+ * 
+ * //-- map those values to the randomDataset
+ * results.map(val => ({ pick: utils.format.mapArrayDomain(val, randomDataset) }));
+ * // [ { pick: 'g' }, { pick: 'e' }, { pick: 'e' } ]
+ * 
+ * //-- group them by the pick field
+ * //-- then add a new property called count - using the # of records with the same value
+ * groupedResults = utils.group.by(resultPicks, 'pick')
+ *     .reduce((list) => ({ count: list.length }));
+ * // [ { pick: 'g', count: 1 }, { pick: 'e', count: 2 } ]
+ * 
+ * //-- make a bar chart (only with 10k results)
+ * utils.vega.embed((vl) => {
+ *     return vl
+ *       .markBar()
+ *       .title('Distribution')
+ *       .data(groupedResults)
+ *       .encode(
+ *         vl.x().fieldN('value'),
+ *         vl.y().fieldQ('count').scale({type: 'log'})
+ *       );
+ * });
+ * ```
+ * ![Screenshot of the chart above](img/randomMap_normalDistribution.png)
  * 
  * @param {Number} val - value to be mapped
  * @param {Array} targetArray - array of values to pick from

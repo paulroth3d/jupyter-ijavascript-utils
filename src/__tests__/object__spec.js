@@ -2961,4 +2961,219 @@ describe('ObjectUtils', () => {
       });
     });
   });
+  global.describe('extractObjectProperty', () => {
+    global.describe('can extract', () => {
+      global.describe('from a list', () => {
+        global.it('a property name', () => {
+          const weather = [
+            { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+            null,
+            { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+            { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+          ];
+          const expected = ['Seattle', 'New York', 'Chicago'];
+          const results = ObjectUtils.extractObjectProperty(weather, 'city');
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('a function', () => {
+          const weather = [
+            { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+            null,
+            { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+            { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+          ];
+          const expected = ['Seattle', 'New York', 'Chicago'];
+          const results = ObjectUtils.extractObjectProperty(weather, (r) => r.city);
+          global.expect(results).toStrictEqual(expected);
+        });
+      });
+      global.describe('from an Object', () => {
+        global.it('a property name', () => {
+          const weather = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+          const expected = ['Seattle'];
+          const results = ObjectUtils.extractObjectProperty(weather, 'city');
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('a function', () => {
+          const weather = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+          const expected = ['Seattle'];
+          const results = ObjectUtils.extractObjectProperty(weather, (r) => r.city);
+          global.expect(results).toStrictEqual(expected);
+        });
+      });
+    });
+    global.describe('cannot extract', () => {
+      global.it('if the list is empty', () => {
+        const weather = [];
+        const expected = [];
+        const results = ObjectUtils.extractObjectProperty(weather, (r) => r.city);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if the list is null', () => {
+        const weather = null;
+        const expected = [];
+        const results = ObjectUtils.extractObjectProperty(weather, (r) => r.city);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+  global.describe('extractObjectProperties', () => {
+    global.describe('cannot extract', () => {
+      global.it('an empty array', () => {
+        const weather = [
+        ];
+        const expected = {
+          city: []
+        };
+        const results = ObjectUtils.extractObjectProperties(weather, ['city']);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if map is not set', () => {
+        const weather = [
+          { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+          null,
+          { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+          { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+        ];
+        const expected = [];
+        const results = ObjectUtils.extractObjectProperties(weather, null);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if map is not a map or array', () => {
+        const weather = [
+          { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+          null,
+          { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+          { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+        ];
+        const expected = 'object.extractObjectProperties(list:Object[], '
+          + 'propertyOrFnMap:Map<String, stringOrFn>): propertyOrFnMap must be '
+          + 'a map of propertyName keys, with a function or property name as the value';
+        global.expect(() => ObjectUtils.extractObjectProperties(weather, 2)).toThrow(expected);
+      });
+      global.it('if values other than strings are provded', () => {
+        const weather = [
+          { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+          null,
+          { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+          { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+        ];
+        const expected = {
+          city: ['Seattle', 'New York', 'Chicago']
+        };
+        const results = ObjectUtils.extractObjectProperties(weather, [1, 'city']);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can extract', () => {
+      global.describe('from a list', () => {
+        global.describe('with a list', () => {
+          global.it('a property name', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago']
+            };
+            const results = ObjectUtils.extractObjectProperties(weather, ['city']);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('multiple property names', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago'],
+              month: ['Aug', 'Apr', 'Apr']
+            };
+            const results = ObjectUtils.extractObjectProperties(weather, ['city', 'month']);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+        global.describe('with a map', () => {
+          global.it('a property name', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago']
+            };
+            const results = ObjectUtils.extractObjectProperties(weather, new Map([['city', 'city']]));
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('a function', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago']
+            };
+            const results = ObjectUtils.extractObjectProperties(weather, new Map([['city', (r) => r.city]]));
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('multiple property name', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago'],
+              month: ['Aug', 'Apr', 'Apr']
+            };
+            const results = ObjectUtils.extractObjectProperties(weather, new Map([['city', 'city'], ['month']]));
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('multiple functions', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago'],
+              month: ['Aug', 'Apr', 'Apr']
+            };
+            const results = ObjectUtils.extractObjectProperties(weather, new Map([['city', (r) => r.city], ['month', (r) => r.month]]));
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('mixed functions and strings', () => {
+            const weather = [
+              { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+              null,
+              { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+              { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+            ];
+            const propertyMap = new Map();
+            propertyMap.set('city', null);
+            propertyMap.set('city2', 'city');
+            propertyMap.set('city3', (r) => r.city);
+
+            const expected = {
+              city: ['Seattle', 'New York', 'Chicago'],
+              city2: ['Seattle', 'New York', 'Chicago'],
+              city3: ['Seattle', 'New York', 'Chicago']
+            };
+
+            const results = ObjectUtils.extractObjectProperties(weather, propertyMap);
+            global.expect(results).toStrictEqual(expected);
+          });
+        });
+      });
+    });
+  });
 });

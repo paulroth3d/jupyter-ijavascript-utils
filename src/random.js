@@ -89,7 +89,7 @@ const SimplexModule = require('./random_simplex');
  *       .data(groupedResults)
  *       .encode(
  *         vl.x().fieldN('value'),
- *         vl.y().fieldQ('count')
+ *         vl.y().fieldQ('count').scale({type: 'log'})
  *       );
  * });
  * ```

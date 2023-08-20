@@ -502,6 +502,7 @@ module.exports.unique = function unique(collection, accessor, uniquifierFn) {
 
   return Array.from(new Set(
     collection.map(cleanedFunc)
+      .reduce((result, val) => (val instanceof Set || Array.isArray(val)) ? [...result, ...val] : [...result, val], [])
   ));
 };
 

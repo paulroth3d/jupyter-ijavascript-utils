@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.35 - object.extractObjectProperties / object.extractObjectProperty - to do horizontal transposes on objects
 * 1.34 - format.mapArrayDomain and add notes in to random on using non-uniform distributions.
 * 1.33 - Object.augmentInherit and Object.union
 * 1.32 - Array.indexify to identify sections within a 1d array into a hierarchy.

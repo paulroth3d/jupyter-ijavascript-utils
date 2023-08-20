@@ -329,6 +329,24 @@ global.describe('AggregateUtils', () => {
       const results = AggregateUtils.unique(source, (r) => r.city);
       global.expect(results).toEqual(expected);
     });
+    global.it('finds the unique values, an array sent', () => {
+      const source = [{ values: [0, 1, 2] },
+        { values: [2, 3, 4] },
+        { values: [4, 5, 6] }
+      ];
+      const expected = [0, 1, 2, 3, 4, 5, 6];
+      const results = AggregateUtils.unique(source, 'values');
+      global.expect(results).toEqual(expected);
+    });
+    global.it('finds the unique values, an array of set values sent', () => {
+      const source = [{ values: new Set([0, 1, 2]) },
+        { values: new Set([2, 3, 4]) },
+        { values: new Set([4, 5, 6]) }
+      ];
+      const expected = [0, 1, 2, 3, 4, 5, 6];
+      const results = AggregateUtils.unique(source, 'values');
+      global.expect(results).toEqual(expected);
+    });
   });
 
   global.describe('distinct', () => {
