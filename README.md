@@ -99,6 +99,39 @@ found under the [docResources/notebooks](https://github.com/paulroth3d/jupyter-i
 simply create a package in the folder you will run the `jupyter lab` command
 - such as the sample one under [docResources/notebooks/package.json](https://github.com/paulroth3d/jupyter-ijavascript-utils/blob/main/docResources/notebooks/package.json))
 
+## ESM Modules + D3
+
+Note that we strongly recommend using this with other modules like D3 - that only support ESM modules now.
+
+There is a [known issue #210](https://github.com/n-riesco/ijavascript/issues/210) in the iJavaScript kernel.
+
+So if you try to import libraries like d3 [and get comments like this](https://github.com/n-riesco/ijavascript/issues/279)
+
+```
+$ node -e "import defaultExport from './test.mjs'"
+[eval]:1
+import defaultExport from './test.mjs'
+^^^^^^
+
+SyntaxError: Cannot use import statement outside a module
+    at new Script (vm.js:88:7)
+    at createScript (vm.js:263:10)
+    at Object.runInThisContext (vm.js:311:10)
+    at Object.<anonymous> ([eval]-wrapper:10:26)
+    at Module._compile (internal/modules/cjs/loader.js:1151:30)
+    at evalScript (internal/process/execution.js:94:25)
+    at internal/main/eval_string.js:23:3
+```
+
+### Use [esm-hook](https://github.com/alex-kinokon/esm-hook) as a workaround for now.
+
+```
+require("esm-hook"); // must come before requiring esm modules
+d3 = require('d3');  // import esm modules
+```
+
+More is found on the documentation for [issue #210](require("esm-hook"))
+
 ## Google Collab
 
 You can very easily use iJavaScript and the jupyter-ijavascript-utils within Google Collab.
