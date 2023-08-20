@@ -17,6 +17,8 @@ const SimplexModule = require('./random_simplex');
  * * Simplex Noise
  *     * {@link module:random.simplexGenerator|simplexGenerator(seed)} - Number generator between -1 and 1 given an x/y/z coordinate
  * 
+ * If leveraging 
+ * 
  * While generating a simple number between two values is common, it is very important - and useful in generating fake data.
  * 
  * ```
@@ -38,6 +40,60 @@ const SimplexModule = require('./random_simplex');
  * ![Screenshot of animation](img/noiseFinal.gif)
  * 
  * The possibilities are endless.
+ * 
+ * <hr />
+ * 
+ * <b>This library is meant to provide simple use cases.</b>
+ * Please use Standard libraries
+ * - like [d3-random](https://observablehq.com/@d3/d3-random) for additional alternatives
+ * 
+ * see {@link module:format.mapArrayDomain|format.mapArrayDomain} - as it projects a value
+ * from between a range a value, and picks the corresponding value from an array.
+ * 
+ * For example:
+ * 
+ * ```
+ * require('esm-hook');
+ * d3 = require('d3');
+ * 
+ * //-- create a number generator using Normal / Gaussian distribution
+ * randomGenerator = d3.randomNormal(
+ *  0.5, // mu - or centerline
+ *  0.1 // sigma - or spread of values
+ * );
+ * 
+ * randomValue = randomGenerator();
+ * // randomValue - 0.4
+ * 
+ * randomDataset = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+ * 
+ * //-- create an array of 3 items, each with the results from randomGenerator
+ * results = utils.array.size(3, () => randomGenerator());
+ * // [ 0.6235937672428706, 0.4991359903898883, 0.4279365561645624 ]
+ * 
+ * //-- map those values to the randomDataset
+ * results.map(val => ({ pick: utils.format.mapArrayDomain(val, randomDataset) }));
+ * // [ { pick: 'g' }, { pick: 'e' }, { pick: 'e' } ]
+ * 
+ * //-- group them by the pick field
+ * //-- then add a new property called count - using the # of records with the same value
+ * groupedResults = utils.group.by(resultPicks, 'pick')
+ *     .reduce((list) => ({ count: list.length }));
+ * // [ { pick: 'g', count: 1 }, { pick: 'e', count: 2 } ]
+ * 
+ * //-- make a bar chart (only with 10k results)
+ * utils.vega.embed((vl) => {
+ *     return vl
+ *       .markBar()
+ *       .title('Distribution')
+ *       .data(groupedResults)
+ *       .encode(
+ *         vl.x().fieldN('value'),
+ *         vl.y().fieldQ('count')
+ *       );
+ * });
+ * ```
+ * ![Screenshot of the chart above](img/randomMap_normalDistribution.png)
  * 
  * @module random
  */
@@ -65,13 +121,14 @@ module.exports.getSeed = function getSeed() {
 };
 
 /**
- * Generate a random integer 
+ * Generate a random integer (with uniform distribution)
  * @param {Number} [min = 0] - Minimum integer (inclusive) that could be generated
  * @param {Number} [max = 100] - Maximum integer (inclusive) number that could be generated
  * @returns {Number} - number between (and including) min and max
  * @example
  * utils.random.randomInteger(0, 100) // 40
  * utils.random.randomInteger(0, 100) // 96
+ * @see [d3-random](https://observablehq.com/@d3/d3-random) for additional alternatives
  */
 module.exports.randomInteger = function randomInteger(min = 0, max = 100) {
   //-- can only occur if the user exports to htmlScript
@@ -84,11 +141,12 @@ module.exports.randomInteger = function randomInteger(min = 0, max = 100) {
 };
 
 /**
- * Generates a random floating point number
+ * Generates a random floating point number (with uniform distribution)
  * @param {Number} [min = 0] - Minimum float (inclusive) that could be generated
  * @param {Number} [max = 100] - Maximum float (inclusive) number that the value will be less than
  * @returns {Number} - number between (and including) min and max
  * utils.random.randomInteger(0, 1) // 0.224223
+ * @see [d3-random](https://observablehq.com/@d3/d3-random) for additional alternatives
  */
 module.exports.random = function random(min = 0, max = 1) {
   //-- can only occur if the user exports to htmlScript
@@ -102,11 +160,12 @@ module.exports.random = function random(min = 0, max = 1) {
 };
 
 /**
- * Picks a random value from an array of values
+ * Picks a random value from an array of values (with uniform distribution)
  * @param {Array} targetArray - Array of values to pick from
  * @returns {any} - one of the values picked at random from the target array
  * @example
  * utils.random.pickRandom(['apple', 'orange', 'pear']); // 'pear'
+ * @see [d3-random](https://observablehq.com/@d3/d3-random) for additional alternatives
  */
 module.exports.pickRandom = function pickRandom(targetArray) {
   if (!targetArray || !Array.isArray(targetArray)) {

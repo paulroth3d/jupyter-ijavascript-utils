@@ -24,6 +24,7 @@
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values
  *   * {@link module:format.mapDomain|format.mapDomain} - projects a value from a domain of expected values to a range of output values, ex: 10% of 2 Pi
+ *   * {@link module:format.mapArrayDomain|format.mapArrayDomain} - projects a value from between a range a value, and picks the corresponding value from an array
  * * Identifying Time Periods
  *   * {@link module:format.timePeriod|format.timePeriod} - Converts a time to a time period, very helpful for animations
  *   * {@link module:format.timePeriodPercent|format.timePeriodPercent} - Determines the percent complete of the current time period
@@ -381,6 +382,64 @@ module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rang
   // (val - domainMin) * (rangeMax - rangeMin) / (domainMax - domainMin) = result - rangeMin;
   // (val - domainMin) * (rangeMax - rangeMin) / (domainMax - domainMin) + rangeMin = result
   return (((val - domainMin) * (rangeMax - rangeMin)) / (domainMax - domainMin)) + rangeMin;
+};
+
+/**
+ * projects a value from a domain of expected values to an array - very useful for random distributions.
+ * 
+ * like mapping normal / gaussian distributions to an array of values.
+ * 
+ * @param {Number} val - value to be mapped
+ * @param {Array} targetArray - array of values to pick from
+ * @param {Array} domain - [min, max] - domain of possible input values
+ * @param {Array} [domain.domainMin = 0] - minimum input value (anything at or below maps to rangeMin)
+ * @param {Array} [domain.domainMax = 1] - maximum input value (anything at or above maps to rangeMax)
+ * @returns Number
+ * @see {@link module:format.clampDomain|clampDomain(value, [min, max])}
+ * @example
+ * 
+ * //-- array of 10 values
+ * randomArray = ['a', 'b', 'c', 'd', 'e'];
+ * 
+ * format.mapArrayDomain(-1, randomArray, [0, 5]);
+ * // 'a'  - since it is below the minimum value
+ * format.mapArrayDomain(6, randomArray, [0, 5]);
+ * // 'e'   - since it is the minimum value
+ * 
+ * format.mapArrayDomain(0.9, randomArray, [0, 5]);
+ * // 'a'
+ * format.mapArrayDomain(1, randomArray, [0, 5]);
+ * // 'b'
+ * format.mapArrayDomain(2.5, randomArray, [0, 5]);
+ * // 'c' 
+ * 
+ * //-- or leaving the domain of possible values value can be out:
+ * format.mapArrayDomain(0.5, randomArray); // assumed [0, 1]
+ * // 'c'
+ */
+module.exports.mapArrayDomain = function mapArrayDomain(val, targetArray, domain = null) {
+  if (!targetArray || !Array.isArray(targetArray)) {
+    throw Error('mapArrayDomain: targetArray is not an array');
+  } else if (targetArray.length < 1) {
+    throw Error('mapArrayDomain: targetArray is not a populated array');
+  }
+
+  const cleanArray = domain || [];
+  const [domainMin = 0, domainMax = 1] = cleanArray;
+
+  if (val <= domainMin) {
+    return targetArray[0];
+  } else if (val >= domainMax) {
+    return targetArray[targetArray.length - 1];
+  }
+
+  const targetIndex = Math.floor(FormatUtils.mapDomain(
+    val,
+    [domainMin, domainMax],
+    [0, targetArray.length]
+  ));
+  // console.log(targetIndex);
+  return targetArray[targetIndex];
 };
 
 /**
