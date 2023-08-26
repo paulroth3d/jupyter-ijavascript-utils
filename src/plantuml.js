@@ -214,7 +214,7 @@ module.exports.render = function render(plantUMLText, plantUMLOptions) {
     const targetURL = this.generateURL(plantUMLText, plantUMLOptions);
     if (showURL || debug) console.log(`url:${targetURL}`);
 
-    const result = await fetch(targetURL);
+    const result = await global.fetch(targetURL);
 
     if (format === 'png') {
       const buf = await result.buffer();

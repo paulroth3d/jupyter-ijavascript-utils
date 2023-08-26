@@ -20,6 +20,9 @@
  *   * {@link module:format.consoleLines|format.consoleLines(...)} - same as limit lines, only console.logs the string out.
  *   * {@link module:format.wordWrap|format.wordWrap(str, options)} - breaks apart string by line length
  *   * {@link module:format.lineCount|format.lineCount(str, options)} - counts the number of lines in a string
+ * * Replacing values in Strings
+ *   * {@link module:format.replaceStrings|format.replaceStrings(stringsArray, stringTupletsOrMap)} - applies replace from a collection of [matcher, replacement] tuplets.
+ *   * {@link module:format.replaceString|format.replaceString(string, stringTupletsOrMap)}
  * * Formatting Time
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values
@@ -1266,4 +1269,17 @@ module.exports.replaceStrings = function replaceStrings(targetStr, stringTuplets
     : replacementEntries.reduce((result, [replaceSearch, replaceWith]) => !result
       ? result
       : result.replace(replaceSearch, replaceWith), stringToClean));
+};
+
+/**
+ * 
+ * @param {String} targetStr - String to apply the replacements to
+ * @param {Array|Map<string|RegExp,string>} stringTupletsOrMap - [[search, replace]] or Map<String|RegExp,String>
+ * @returns {string[]} - the resulting list of strings
+ */
+module.exports.replaceString = function replaceString(targetStr, stringTupletsOrMap) {
+  if (Array.isArray(targetStr)) {
+    throw Error('replaceString(targetStr, stringTupletsOrMap): targetStr was sent an array - please use replaceStrings instead');
+  }
+  return FormatUtils.replaceStrings([targetStr], stringTupletsOrMap)[0];
 };
