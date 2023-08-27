@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.37 - {@link module:format.replaceString|format.replaceString} as convenience for replacing only a single string.
 * 1.36 - replaceStrings to allow for replacement dictionaries and tuplets
 * 1.35 - object.extractObjectProperties / object.extractObjectProperty - to do horizontal transposes on objects
 * 1.34 - format.mapArrayDomain and add notes in to random on using non-uniform distributions.

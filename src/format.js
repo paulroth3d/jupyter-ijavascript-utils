@@ -20,6 +20,9 @@
  *   * {@link module:format.consoleLines|format.consoleLines(...)} - same as limit lines, only console.logs the string out.
  *   * {@link module:format.wordWrap|format.wordWrap(str, options)} - breaks apart string by line length
  *   * {@link module:format.lineCount|format.lineCount(str, options)} - counts the number of lines in a string
+ * * Replacing values in Strings
+ *   * {@link module:format.replaceString|format.replaceString(string, stringTupletsOrMap)} - applies replace from a collection of [matcher, replacement] tuplets or map based on key-> values
+ *   * {@link module:format.replaceStrings|format.replaceStrings(stringsArray, stringTupletsOrMap)} - applies replaceString on an array of values
  * * Formatting Time
  *   * {@link module:format.millisecondDuration|format.millisecondDuration}
  * * Mapping Values
@@ -1214,6 +1217,7 @@ module.exports.lineCount = function lineCount(str, newlineCharacter = '\n') {
  * //   'and jill came tumbling after' ]
  *
  * //-- or use tuplets of [find, replace] with regular expressions
+ * //-- and strings not in tuplets are simply removed.
  * replaceValues = [['jack', 'john'], [/\s+jill/i, ' ringo'], ' down'];
  * utils.format.replaceStrings(targetStrings, replaceValues);
  * expected = [
@@ -1266,4 +1270,19 @@ module.exports.replaceStrings = function replaceStrings(targetStr, stringTuplets
     : replacementEntries.reduce((result, [replaceSearch, replaceWith]) => !result
       ? result
       : result.replace(replaceSearch, replaceWith), stringToClean));
+};
+
+/**
+ * Conveience function for calling {@link module:format.replaceStrings|format.replaceStrings} -
+ * giving and receiving a single value (instead of an array of values).
+ * @param {String} targetStr - A Single string to replace values on.
+ * @param {Array|Map<string|RegExp,string>} stringTupletsOrMap - [[search, replace]] or Map<String|RegExp,String>
+ * @returns {string} - the targetStr with the values replaced
+ * @see {@link module:format.replaceStrings}
+ */
+module.exports.replaceString = function replaceString(targetStr, stringTupletsOrMap) {
+  if (Array.isArray(targetStr)) {
+    throw Error('replaceString(targetStr, stringTupletsOrMap): targetStr was sent an array - please use replaceStrings instead');
+  }
+  return FormatUtils.replaceStrings([targetStr], stringTupletsOrMap)[0];
 };
