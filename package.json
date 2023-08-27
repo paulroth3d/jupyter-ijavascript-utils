@@ -17,6 +17,7 @@
     "test:debug": "TZ=UTC node --inspect-brk node_modules/jest/bin/jest.js --runInBand",
     "test:coverage": "TZ=UTC jest src --collectCoverage",
     "test:watch:coverage": "TZ=UTC jest src --watch --collectCoverage",
+    "doc:taffy": "npm install taffydb && npm run doc",
     "docs": "npm run doc",
     "doc": "npm run prep:docdash && node_modules/.bin/jsdoc -c ./jsdoc.json -u ./tutorials ./DOCS.md",
     "prep:docdash": "cp docResources/docdash/layout.tmpl node_modules/docdash/tmpl/layout.tmpl && rm -rf docResources/notebooks/node_modules",
