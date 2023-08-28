@@ -499,46 +499,6 @@ module.exports.filterObjectProperties = function filterObjectProperties(list, pr
 };
 
 /**
- * Options for fetching object properties
- * @typedef {Object} FetchObjectOptions
- * @property {Boolean} safeAccess - whether to safely access, even if the path cannot be found
- * @property {Boolean} append - whether to only return the properties (default) or append
- */
-
-/**
- * Fetches multiple properties from an object or list of objects.
- * @param {Object | Object[]} list - collection of objects to reduce
- * @param {Map<String,any>} propertyNames - Object with the keys as the properties
- *    and the values using dot notation to access related records and properties
- *    (ex: {parentName: 'somePropertyObject.parent.parent.name', childName: 'child.Name'})
- * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions} 
- * @returns {Object[]} - objects with the properties resolved
- *    (ex: {parentname, childName, etc.})
- */
-module.exports.fetchObjectProperties = function fetchObjectProperties(list, propertyNames, options = {}) {
-  const {
-    //-- whether to safely access even if object path cannot be found
-    safeAccess = false,
-
-    //-- whether to fetch only those specific properties, or append to the object
-    append = false
-  } = options;
-
-  if (!list) return [];
-  const targetList = Array.isArray(list) ? list : [list];
-
-  const props = Object.getOwnPropertyNames(propertyNames);
-
-  return targetList.map((obj) => {
-    const result = append ? { ...obj } : {};
-    props.forEach((prop) => {
-      result[prop] = ObjectUtils.fetchObjectProperty(obj, propertyNames[prop], safeAccess);
-    });
-    return result;
-  });
-};
-
-/**
  * Similar to a transpose, this finds all the values of a particular property
  * within a list of objects.
  * 
@@ -633,6 +593,42 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
 };
 
 /**
+ * Options for fetching object properties
+ * @typedef {Object} FetchObjectOptions
+ * @property {Boolean} safeAccess - whether to safely access, even if the path cannot be found
+ */
+
+/**
+ * Fetches multiple properties from an object or list of objects.
+ * @param {Object | Object[]} list - collection of objects to reduce
+ * @param {Map<String,any>} propertyNames - Object with the keys as the properties
+ *    and the values using dot notation to access related records and properties
+ *    (ex: {parentName: 'somePropertyObject.parent.parent.name', childName: 'child.Name'})
+ * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions} 
+ * @returns {Object[]} - objects with the properties resolved
+ *    (ex: {parentname, childName, etc.})
+ */
+module.exports.fetchObjectProperties = function fetchObjectProperties(list, propertyNames, options = {}) {
+  if (!list) return [];
+  const targetList = Array.isArray(list) ? list : [list];
+  
+  const {
+    //-- whether to fetch only those specific properties, or append to the object
+    append = false
+  } = options;
+
+  const props = Object.getOwnPropertyNames(propertyNames);
+
+  return targetList.map((obj) => {
+    const result = append ? { ...obj } : {};
+    props.forEach((prop) => {
+      result[prop] = ObjectUtils.fetchObjectProperty(obj, propertyNames[prop], options);
+    });
+    return result;
+  });
+};
+
+/**
  * Accesses a property using a string
  * @param {Object} obj - object to access the properties on
  * @param {String} propertyAccess - dot notation for the property to access
@@ -640,15 +636,25 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
  * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions}
  * @returns {any} - the value accessed at the end ofthe property chain
  */
-module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyAccess, safeAccess) {
+module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyAccess, options = {}) {
   if (!obj || !propertyAccess) return null;
+  const {
+    //-- whether to safely access even if object path cannot be found
+    safeAccess = false
+  } = options;
 
   //-- @TODO - should we be safe or support elvis operators?
   return propertyAccess.split('.')
     .reduce((currentVal, prop) => {
+      let isElvis = false;
+      let cleanProp = prop;
+      if (prop && prop.length > 0 && prop[0] === '?') {
+        isElvis = true;
+        cleanProp = prop.slice(1);
+      }
       if (currentVal) {
-        return currentVal[prop];
-      } else if (safeAccess || prop[0] === '?') {
+        return currentVal[cleanProp];
+      } else if (safeAccess || isElvis) {
         return null;
       }
       throw Error(`Invalid property ${propertyAccess} [${prop}] does not exist - safeAccess:${safeAccess}`);

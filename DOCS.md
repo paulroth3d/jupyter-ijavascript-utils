@@ -75,6 +75,7 @@ Give it a try here:
 
 ## What's New
 
+* 1.38 - {@link module:array.extract|array.extract} / {@link module:array.apply|array.apply} and {@link module:object.extract|object.extract} / {@link module:object.apply|object.apply}
 * 1.37 - {@link module:format.replaceString|format.replaceString} as convenience for replacing only a single string.
 * 1.36 - {@link module:format.replaceStrings|format.replaceStrings} to allow for replacement dictionaries and tuplets
 * 1.35 - {@link module:object.extractObjectProperties|extractObjectProperties} / {@link module:object.extractObjectProperty|extractObjectProperty} - to do horizontal transposes on objects

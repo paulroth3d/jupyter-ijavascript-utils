@@ -990,7 +990,7 @@ describe('ObjectUtils', () => {
         }
       };
       //-- no exception to be thrown because we are safe
-      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty', { safeAccess: false });
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty', { safeAccess: true });
       global.expect(result).toBeFalsy();
     });
     global.it('will throw an error if we access past an invalid property is not found', () => {
@@ -1002,12 +1002,23 @@ describe('ObjectUtils', () => {
           name: 'Economy of Thought'
         }
       };
-      try {
+      const expected = 'Invalid property class.invalidProperty.invalidProperty2 [invalidProperty2] does not exist - safeAccess:false';
+      global.expect(() => {
         ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: false });
-        global.expect('an exception should have been thrown').toBe(true);
-      } catch (err) {
-        global.expect(err).toBeTruthy();
-      }
+      }).toThrow(expected);
+    });
+    global.it('will not throw an error if we access past an invalid property but is safe', () => {
+      const targetObj = {
+        first: 'john',
+        age: 24,
+        class: {
+          id: 'econ-101',
+          name: 'Economy of Thought'
+        }
+      };
+      const expected = null;
+      const results = ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: true });
+      global.expect(results).toBe(expected);
     });
     global.it('can support safe access of properties', () => {
       const targetObj = {
@@ -1022,7 +1033,21 @@ describe('ObjectUtils', () => {
       const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.invalidProperty.invalidProperty2', { safeAccess: true });
       global.expect(result).toBeFalsy();
     });
-    global.it('can support elvis operators', () => {
+    global.it('can support elvis operators with valid property', () => {
+      const targetObj = {
+        first: 'john',
+        age: 24,
+        class: {
+          id: 'econ-101',
+          name: 'Economy of Thought'
+        }
+      };
+      const expected = 'Economy of Thought';
+      //-- no exception to be thrown because we are safe
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.?name', { safeAccess: false });
+      global.expect(result).toBe(expected);
+    });
+    global.it('can support elvis operators with invalid property', () => {
       const targetObj = {
         first: 'john',
         age: 24,
