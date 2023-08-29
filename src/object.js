@@ -585,8 +585,6 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
   const results = {};
   propertyEntries.forEach(([propertyName, propertyOrFn]) => {
     results[propertyName] = ObjectUtils.extractObjectProperty(list, propertyOrFn || propertyName);
-    // const fn = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
-    // results[propertyName] = cleanList.map(fn);
   });
 
   return results;
@@ -643,8 +641,11 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
     safeAccess = false
   } = options;
 
-  //-- @TODO - should we be safe or support elvis operators?
-  return propertyAccess.split('.')
+  const cleanPropertyAccess = String(propertyAccess)
+    .replace(/\[/g, '.').replace(/\]/g, '.').replace(/[.]+/, '.')
+    .replace(/^[.]+/, '');
+
+  return cleanPropertyAccess.split('.')
     .reduce((currentVal, prop) => {
       let isElvis = false;
       let cleanProp = prop;
@@ -659,6 +660,65 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
       }
       throw Error(`Invalid property ${propertyAccess} [${prop}] does not exist - safeAccess:${safeAccess}`);
     }, obj);
+};
+
+module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value) {
+  const signature = 'applyPropertyValue(obj, path, value)';
+
+  if (!obj) return obj;
+  if (!path) return obj;
+
+  const cleanPath = String(path)
+    .replace(/\[/g, '.').replace(/\]/g, '.').replace(/[.]+/g, '.')
+    .replace(/^[.]+/, '');
+
+  const splitPath = cleanPath.split('.');
+  const terminalIndex = splitPath.length - 1;
+
+  return splitPath
+    .reduce((currentVal, prop, currentIndex) => {
+      if (!prop) throw Error(`${signature}:Unable to set value with path:${path}`);
+
+      const isLeaf = currentIndex === terminalIndex;
+      if (isLeaf) {
+        currentVal[prop] = value;
+        // if (value === undefined) {
+        //   delete currentVal[prop];
+        // } else {
+        //   currentVal[prop] = value;
+        // }
+        return obj;
+      }
+      //-- not a leaf
+      if (!currentVal[prop]) {
+        currentVal[prop] = {};
+      }
+      return currentVal[prop];
+    }, obj);
+};
+
+module.exports.applyPropertyValues = function applyPropertyValues(objectList, path, valueList) {
+  // const signature = 'applyPropertyValues(objectList, path, valueList)';
+  if (!objectList || !path) {
+    //-- do nothing
+    return objectList;
+  }
+
+  const cleanObjectList = Array.isArray(objectList) ? objectList : [objectList];
+  const cleanValueList = Array.isArray(valueList) ? valueList : Array(cleanObjectList.length).fill(valueList);
+
+  // if (cleanObjectList.length !== cleanValueList) throw Error(
+  //   `${signature}: objectList.length[${cleanObjectList.length}] does not match valueList.length[${cleanValueList.length}]`
+  // );
+  const minLength = Math.min(cleanObjectList.length, cleanValueList.length);
+
+  for (let i = 0; i < minLength; i += 1) {
+    const obj = cleanObjectList[i];
+    const val = cleanValueList[i];
+    ObjectUtils.applyPropertyValue(obj, path, val);
+  }
+
+  return objectList;
 };
 
 /**
