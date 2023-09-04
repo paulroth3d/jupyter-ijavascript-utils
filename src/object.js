@@ -662,6 +662,35 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
     }, obj);
 };
 
+/**
+ * Modifies a value in-place on an object using dot notation path.
+ * 
+ * This can be as simple as safely applying a value even if targetObj may be null
+ * ```
+ * targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+ * utils.object.applyPropertyValue(targetObj, 'state', 'WA');
+ * // { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, state: 'WA };
+ * ```
+ * 
+ * working with deeply nested objects
+ * ```
+ * targetObj = { name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer' }} };
+ * utils.object.applyPropertyValue(targetObj, 'class.professor.first_name', 'René');
+ * // { name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer', first_name: 'René' }} };
+ * ```
+ * 
+ * or safely working with arrays of values
+ * ```
+ * targetObj = { name: 'john smith', classes: [{ name: 'ECON_101' }] };
+ * utils.object.applyPropertyValue(targetObj, 'classes[0].grade', 'A');
+ * // { name: 'john smith', classes: [{ name: 'ECON_101', grade: 'A' }] };
+ * ```
+ * 
+ * @param {Object} obj - object to apply the value to
+ * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
+ * @param {any} value - value to set
+ * @returns {Object} - the object the value was applied to
+ */
 module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value) {
   const signature = 'applyPropertyValue(obj, path, value)';
 
@@ -697,6 +726,44 @@ module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value
     }, obj);
 };
 
+/**
+ * Converse from the extractPropertyValue, this takes a value / set of values
+ * and applies them along a given path on each of the target objects.
+ * 
+ * for example:
+ * 
+ * ```
+ * weather = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }];
+ * 
+ * cities = utils.object.extractObjectProperty('city');
+ * // ['Seattle', 'New York', 'Chicago'];
+ * 
+ * //-- async process to geocode
+ * geocodedCities = geocodeCity(cities);
+ * // [{ city: 'Seattle', state: 'WA', country: 'USA' },
+ * // { city: 'New York', state: 'NY', country: 'USA' },
+ * // { city: 'Chicago', state: 'IL', country: 'USA' }]
+ * 
+ * utils.applyPropertyValues(weather, 'geo', geocodedCities);
+ *  [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * 
+ * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+ * works best for if you are working with objects completely in memory.
+ * 
+ * But this helps quite a bit if the action of mapping / transforming values
+ * needs to be separate from the extraction / application of values back.
+ * 
+ * @param {Object} obj - object to apply the value to
+ * @param {String} path - dot notation property path to where value should be set
+ * @param {any} value - the value that should be set at that path.
+ * @returns {Object}
+ * @see {@link module:object.applyPropertyValue} - to apply a single value to a single object
+ * @see {@link module:object.extractObjectProperties} - to extract values from a list of objects
+ */
 module.exports.applyPropertyValues = function applyPropertyValues(objectList, path, valueList) {
   // const signature = 'applyPropertyValues(objectList, path, valueList)';
   if (!objectList || !path) {
