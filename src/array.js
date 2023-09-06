@@ -284,32 +284,73 @@ module.exports.pick = function pick(array2d, options) {
 module.exports.extract = module.exports.pick;
 
 /**
- * Applies a target value onto a source array safely - in-place using dot-notation paths.
+ * Applies deeply onto an array safely - in-place using dot-notation paths
+ * even if the child paths don't exist.
  * 
- * This can be as simple as safely applying a value even if targetObj may be null
+ * While tthis can be as simple as safely applying a value even if targetObj may be null
+ * 
  * ```
  * targetObj = [1, 2, null, 4, 5];
+ * 
  * utils.object.applyPropertyValue(targetObj, '[2]', 3);
  * // [1, 2, 3, 4, 5]
+ * // equivalent to targetObj[2] = 3;
  * ```
  * 
- * or safely working with deeply nested objects
+ * This is much more safely working with deeply nested objects
+ * 
  * ```
- * targetObj = [{ name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer' }} }];
+ * targetObj = [{
+ *  name: 'john smith',
+ *  class: {
+ *    name: 'ECON_101',
+ *    professor: {
+ *      last_name: 'Winklemeyer'
+ *    }
+ *   }
+ * }];
+ * 
  * utils.object.applyPropertyValue(targetObj, '[0].class.professor.first_name', 'René');
- * // [{ name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer', first_name: 'René' }} }];
+ * // [{
+ * //  name: 'john smith',
+ * //  class: {
+ * //    name: 'ECON_101',
+ * //    professor: {
+ * //      last_name: 'Winklemeyer',
+ * //      first_name: 'René' // <- Added
+ * //    }
+ * //   }
+ * // }];
  * ```
  * 
- * @param {Object} obj - object to apply the value to
+ * or creating intermediary objects along the path - if they did not exist first.
+ * 
+ * ```
+ * targetObj = [{
+ *  name: 'john smith'
+ * }];
+ * utils.object.applyPropertyValue(targetObj, '[0].class.professor.first_name', 'René');
+ * [{
+ *  name: 'john smith',
+ *  class: {
+ *    professor: {
+ *      first_name: 'René'
+ *    }
+ *   }
+ * }];
+ * ```
+ * 
+ * @param {Array} collection - array to apply the value to
  * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
  * @param {any} value - value to set
  * @returns {Array} - the base array
+ * @see {@link module:array.applyArrayValues|array.applyArrayValue}
  */
-module.exports.applyArrayValue = function applyArrayValue(obj, path, value) {
-  // const signature = 'applyArrayValue(obj, path, value)';
+module.exports.applyArrayValue = function applyArrayValue(collection, path, value) {
+  // const signature = 'applyArrayValue(collection, path, value)';
 
-  if (!obj) return obj;
-  if (!path) return obj;
+  if (!collection) return collection;
+  if (!path) return collection;
 
   const cleanPath = String(path)
     .replace(/\[/g, '.')
@@ -335,7 +376,7 @@ module.exports.applyArrayValue = function applyArrayValue(obj, path, value) {
         // } else {
         //   currentVal[prop] = value;
         // }
-        return obj;
+        return collection;
       }
       //-- not a leaf
       if (!currentVal[prop]) {
@@ -343,12 +384,12 @@ module.exports.applyArrayValue = function applyArrayValue(obj, path, value) {
         currentVal[prop] = {};
       }
       return currentVal[prop];
-    }, obj);
+    }, collection);
 };
 
 /**
  * Converse from the extractPropertyValue, this takes a value / set of values
- * and applies them along a given path on each of the target objects.
+ * and applies the values for each index in the collection.
  * 
  * for example:
  * 
@@ -367,9 +408,9 @@ module.exports.applyArrayValue = function applyArrayValue(obj, path, value) {
  * // { city: 'Chicago', state: 'IL', country: 'USA' }]
  * 
  * utils.applyArrayValues(weather, 'geo', geocodedCities);
- *  [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
- *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
- *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * // [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
+ * //  { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
+ * //  { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
  * 
  * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
  * works best for if you are working with objects completely in memory.
@@ -377,35 +418,35 @@ module.exports.applyArrayValue = function applyArrayValue(obj, path, value) {
  * But this helps quite a bit if the action of mapping / transforming values
  * needs to be separate from the extraction / application of values back.
  * 
- * @param {Object} obj - object to apply the value to
- * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
+ * @param {Array} collection - array to apply the value to on each index
+ * @param {string} path - dot notation path to set the value within each index, ex: 'geo', or 'states[0].prop'
  * @param {any} value - the value that should be set at that path.
  * @returns {Object}
  * @see {@link module:object.applyArrayValue} - to apply a single value to a single object
  * @see {@link module:object.extractObjectProperties} - to extract values from a list of objects
  */
-module.exports.applyArrayValues = function applyArrayValues(objectList, path, valueList) {
+module.exports.applyArrayValues = function applyArrayValues(collection, path, valueList) {
   // const signature = 'applyValue(objectList, path, valueList)';
-  if (!objectList || !path) {
+  if (!collection || !path) {
     //-- do nothing
-    return objectList;
+    return collection;
   }
 
-  const cleanObjectList = Array.isArray(objectList) ? objectList : [objectList];
-  const cleanValueList = Array.isArray(valueList) ? valueList : Array(cleanObjectList.length).fill(valueList);
+  const cleanCollection = Array.isArray(collection) ? collection : [collection];
+  const cleanValueList = Array.isArray(valueList) ? valueList : Array(cleanCollection.length).fill(valueList);
 
-  // if (cleanObjectList.length !== cleanValueList) throw Error(
-  //   `${signature}: objectList.length[${cleanObjectList.length}] does not match valueList.length[${cleanValueList.length}]`
+  // if (cleanCollection.length !== cleanValueList) throw Error(
+  //   `${signature}: objectList.length[${cleanCollection.length}] does not match valueList.length[${cleanValueList.length}]`
   // );
-  const minLength = Math.min(cleanObjectList.length, cleanValueList.length);
+  const minLength = Math.min(cleanCollection.length, cleanValueList.length);
 
   for (let i = 0; i < minLength; i += 1) {
-    const obj = cleanObjectList[i];
+    const obj = cleanCollection[i];
     const val = cleanValueList[i];
     ArrayUtils.applyArrayValue(obj, path, val);
   }
 
-  return objectList;
+  return collection;
 };
 
 /**
