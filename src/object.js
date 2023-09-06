@@ -642,8 +642,11 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
   } = options;
 
   const cleanPropertyAccess = String(propertyAccess)
-    .replace(/\[/g, '.').replace(/\]/g, '.').replace(/[.]+/, '.')
-    .replace(/^[.]+/, '');
+    .replace(/\[/g, '.')
+    .replace(/\]/g, '.')
+    .replace(/[.]+/g, '.')
+    .replace(/^[.]+/, '')
+    .replace(/[.]$/, '');
 
   return cleanPropertyAccess.split('.')
     .reduce((currentVal, prop) => {
@@ -663,7 +666,7 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
 };
 
 /**
- * Modifies a value in-place on an object using dot notation path.
+ * Applies a target value onto a source object in-place safely - using dot-notation paths.
  * 
  * This can be as simple as safely applying a value even if targetObj may be null
  * ```
@@ -710,6 +713,7 @@ module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value
 
       const isLeaf = currentIndex === terminalIndex;
       if (isLeaf) {
+        // eslint-disable-next-line no-param-reassign
         currentVal[prop] = value;
         // if (value === undefined) {
         //   delete currentVal[prop];
@@ -720,6 +724,7 @@ module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value
       }
       //-- not a leaf
       if (!currentVal[prop]) {
+        // eslint-disable-next-line no-param-reassign
         currentVal[prop] = {};
       }
       return currentVal[prop];
@@ -758,7 +763,7 @@ module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value
  * needs to be separate from the extraction / application of values back.
  * 
  * @param {Object} obj - object to apply the value to
- * @param {String} path - dot notation property path to where value should be set
+ * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
  * @param {any} value - the value that should be set at that path.
  * @returns {Object}
  * @see {@link module:object.applyPropertyValue} - to apply a single value to a single object

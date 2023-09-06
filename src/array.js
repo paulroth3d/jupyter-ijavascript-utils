@@ -251,6 +251,164 @@ module.exports.pick = function pick(array2d, options) {
 };
 
 /**
+ * Convenience function for picking specific rows and columns from a 2d array.
+ * 
+ * Alias of {@link module:array.pick|array.pick}
+ * 
+ * Please also see [Danfo.js](https://danfo.jsdata.org/) for working with DataFrames.
+ * 
+ * @param {Array} array2d - 2d array to pick from [row][column]
+ * @param {Object} options - options on which to pick
+ * @param {Number[]} [options.rows = null] - indices of the rows to pick
+ * @param {Number[]} [options.columns = null] - indices of the columns to pick.
+ * @returns {Array} - 2d array of only the rows and columns chosen.
+ * @see {@link module:Array.pickRows} - picking rows
+ * @see {@link module:Array.pickColumns} - picking columns
+ * @returns - 2dArray of the columns and rows requested
+ * @example
+ * data = [
+ *  ['john', 23, 'purple'],
+ *  ['jane', 32, 'red'],
+ *  ['ringo', 27, 'green']
+ * ];
+ * 
+ * utils.array.pick(data, {rows: [0, 1]});
+ * //-- [['john', 23, 'purple'], ['jane', 32, 'red']];
+ * 
+ * utils.array.pick(data, {columns: [0, 2]});
+ * //-- [['john', 'purple'], ['jane', 'red'], ['ringo', 'green']];
+ * 
+ * utils.array.pick(data, {rows:[0, 1], columns:[0, 2]});
+ * //-- [['john', 'purple'], ['jane', 'red']];
+ */
+module.exports.extract = module.exports.pick;
+
+/**
+ * Applies a target value onto a source array safely - in-place using dot-notation paths.
+ * 
+ * This can be as simple as safely applying a value even if targetObj may be null
+ * ```
+ * targetObj = [1, 2, null, 4, 5];
+ * utils.object.applyPropertyValue(targetObj, '[2]', 3);
+ * // [1, 2, 3, 4, 5]
+ * ```
+ * 
+ * or safely working with deeply nested objects
+ * ```
+ * targetObj = [{ name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer' }} }];
+ * utils.object.applyPropertyValue(targetObj, '[0].class.professor.first_name', 'René');
+ * // [{ name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer', first_name: 'René' }} }];
+ * ```
+ * 
+ * @param {Object} obj - object to apply the value to
+ * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
+ * @param {any} value - value to set
+ * @returns {Array} - the base array
+ */
+module.exports.applyArrayValue = function applyArrayValue(obj, path, value) {
+  // const signature = 'applyArrayValue(obj, path, value)';
+
+  if (!obj) return obj;
+  if (!path) return obj;
+
+  const cleanPath = String(path)
+    .replace(/\[/g, '.')
+    .replace(/\]/g, '.')
+    .replace(/[.]+/g, '.')
+    .replace(/^[.]+/, '')
+    .replace(/[.]$/, '');
+
+  const splitPath = cleanPath.split('.');
+  const terminalIndex = splitPath.length - 1;
+
+  return splitPath
+    .reduce((currentVal, prop, currentIndex) => {
+      //-- can no longer occur
+      // if (!prop) throw Error(`${signature}:Unable to set value with path:${path}`);
+
+      const isLeaf = currentIndex === terminalIndex;
+      if (isLeaf) {
+        // eslint-disable-next-line no-param-reassign
+        currentVal[prop] = value;
+        // if (value === undefined) {
+        //   delete currentVal[prop];
+        // } else {
+        //   currentVal[prop] = value;
+        // }
+        return obj;
+      }
+      //-- not a leaf
+      if (!currentVal[prop]) {
+        // eslint-disable-next-line no-param-reassign
+        currentVal[prop] = {};
+      }
+      return currentVal[prop];
+    }, obj);
+};
+
+/**
+ * Converse from the extractPropertyValue, this takes a value / set of values
+ * and applies them along a given path on each of the target objects.
+ * 
+ * for example:
+ * 
+ * ```
+ * weather = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }];
+ * 
+ * cities = utils.object.extractObjectProperty('city');
+ * // ['Seattle', 'New York', 'Chicago'];
+ * 
+ * //-- async process to geocode
+ * geocodedCities = geocodeCity(cities);
+ * // [{ city: 'Seattle', state: 'WA', country: 'USA' },
+ * // { city: 'New York', state: 'NY', country: 'USA' },
+ * // { city: 'Chicago', state: 'IL', country: 'USA' }]
+ * 
+ * utils.applyArrayValues(weather, 'geo', geocodedCities);
+ *  [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * 
+ * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+ * works best for if you are working with objects completely in memory.
+ * 
+ * But this helps quite a bit if the action of mapping / transforming values
+ * needs to be separate from the extraction / application of values back.
+ * 
+ * @param {Object} obj - object to apply the value to
+ * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
+ * @param {any} value - the value that should be set at that path.
+ * @returns {Object}
+ * @see {@link module:object.applyArrayValue} - to apply a single value to a single object
+ * @see {@link module:object.extractObjectProperties} - to extract values from a list of objects
+ */
+module.exports.applyArrayValues = function applyArrayValues(objectList, path, valueList) {
+  // const signature = 'applyValue(objectList, path, valueList)';
+  if (!objectList || !path) {
+    //-- do nothing
+    return objectList;
+  }
+
+  const cleanObjectList = Array.isArray(objectList) ? objectList : [objectList];
+  const cleanValueList = Array.isArray(valueList) ? valueList : Array(cleanObjectList.length).fill(valueList);
+
+  // if (cleanObjectList.length !== cleanValueList) throw Error(
+  //   `${signature}: objectList.length[${cleanObjectList.length}] does not match valueList.length[${cleanValueList.length}]`
+  // );
+  const minLength = Math.min(cleanObjectList.length, cleanValueList.length);
+
+  for (let i = 0; i < minLength; i += 1) {
+    const obj = cleanObjectList[i];
+    const val = cleanValueList[i];
+    ArrayUtils.applyArrayValue(obj, path, val);
+  }
+
+  return objectList;
+};
+
+/**
  * Creates an array of a specific size and default value
  * 
  * Especially useful for forLoops, map or reduce

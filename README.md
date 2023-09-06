@@ -55,7 +55,9 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
-* 1.38 - array.extract / array.apply and object.extract / object.apply
+* 1.40 - array.extract and array.applyArrayValue to allow for extracting values from arrays, transforming them on a separate process and applying them back
+* 1.39 - format.exportWords - to identify distinct words in strings using unicode character properties
+* 1.38 - object.extract / object.apply
 * 1.37 - {@link module:format.replaceString|format.replaceString} as convenience for replacing only a single string.
 * 1.36 - replaceStrings to allow for replacement dictionaries and tuplets
 * 1.35 - object.extractObjectProperties / object.extractObjectProperty - to do horizontal transposes on objects
