@@ -27,6 +27,10 @@ require('./_types/global');
  *   * {@link module:array.pickRows|array.pickRows} - picks a row from a 2d array
  *   * {@link module:array.pickColumns|array.pickColumns} - picks a column from a 2d array
  *   * {@link module:array.pick|array.pick} - picks either/or rows and columns
+ *   * {@link module:array.extract|array.extract} - synonym to array.pick to pick either a row or column from an array
+ * * Applying a value
+ *   * {@link module:array.applyArrayValue|array.applyArrayValue} - applies a value deeply into an array safely
+ *   * {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
  * * Understanding Values
  *   * {@link module:array.isMultiDimensional|array.isMultiDimensional} - determines if an array is multi-dimensional
  * 
@@ -150,6 +154,7 @@ module.exports.peekLast = function peekLast(targetArray, defaultVal = null) {
  * @param {Array} array2d - 2d array to pick from [row][column]
  * @param {...Number} rowIndices - Indexes of the row to return, [0...length-1]
  * @returns - Array with only those rows
+ * @see {@link module:array.pick|array.pick} - pick either rows or columns
  * @example
  * data = [
  *  ['john', 23, 'purple'],
@@ -179,6 +184,7 @@ module.exports.pickRows = function pickRows(array2d, ...rowIndices) {
  * @param {Array} array2d - 2d array to pick from [row][column]
  * @param  {...any} columns - Indexes of the columns to pick the values from: [0...row.length-1]
  * @returns - Array with all rows, and only those columns
+ * @see {@link module:array.pick|array.pick} - pick either rows or columns
  * @example
  * data = [
  *  ['john', 23, 'purple'],
@@ -210,8 +216,9 @@ module.exports.pickColumns = function pickColumns(array2d, ...columns) {
  * @param {Number[]} [options.rows = null] - indices of the rows to pick
  * @param {Number[]} [options.columns = null] - indices of the columns to pick.
  * @returns {Array} - 2d array of only the rows and columns chosen.
- * @see {@link module:Array.pickRows} - picking rows
- * @see {@link module:Array.pickColumns} - picking columns
+ * @see {@link module:array.pickRows|array.pickRows} - picking rows
+ * @see {@link module:array.pickColumns|array.pickColumns} - picking columns
+ * @see {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
  * @returns - 2dArray of the columns and rows requested
  * @example
  * data = [
@@ -262,8 +269,8 @@ module.exports.pick = function pick(array2d, options) {
  * @param {Number[]} [options.rows = null] - indices of the rows to pick
  * @param {Number[]} [options.columns = null] - indices of the columns to pick.
  * @returns {Array} - 2d array of only the rows and columns chosen.
- * @see {@link module:Array.pickRows} - picking rows
- * @see {@link module:Array.pickColumns} - picking columns
+ * @see {@link module:array.pickRows} - picking rows
+ * @see {@link module:array.pickColumns} - picking columns
  * @returns - 2dArray of the columns and rows requested
  * @example
  * data = [
@@ -344,7 +351,8 @@ module.exports.extract = module.exports.pick;
  * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
  * @param {any} value - value to set
  * @returns {Array} - the base array
- * @see {@link module:array.applyArrayValues|array.applyArrayValue}
+ * @see {@link module:array.pick|array.pick} - to pick a row or column into an array
+ * @see {@link module:array.applyArrayValues|array.applyArrayValues} - applies an array safely and deeply onto another array of values
  */
 module.exports.applyArrayValue = function applyArrayValue(collection, path, value) {
   // const signature = 'applyArrayValue(collection, path, value)';
@@ -422,8 +430,8 @@ module.exports.applyArrayValue = function applyArrayValue(collection, path, valu
  * @param {string} path - dot notation path to set the value within each index, ex: 'geo', or 'states[0].prop'
  * @param {any} value - the value that should be set at that path.
  * @returns {Object}
- * @see {@link module:object.applyArrayValue} - to apply a single value to a single object
- * @see {@link module:object.extractObjectProperties} - to extract values from a list of objects
+ * @see {@link module:array.applyArrayValue|array.applyArrayValue} - to apply a single value to a single object
+ * @see {@link module:array.pick|array.pick} - to pick a row or column into an array
  */
 module.exports.applyArrayValues = function applyArrayValues(collection, path, valueList) {
   // const signature = 'applyValue(objectList, path, valueList)';

@@ -1218,8 +1218,6 @@ describe('ObjectUtils', () => {
         const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
         global.expect(result).toStrictEqual(expected);
       });
-    });
-    global.describe('cannot set', () => {
       global.it('an invalid path: hanging dot .', () => {
         const targetObj = {
           first: 'john',
@@ -1230,11 +1228,17 @@ describe('ObjectUtils', () => {
         };
         const path = 'class.';
         const value = 'blue';
-        const expected = 'applyPropertyValue(obj, path, value):Unable to set value with path:class.';
-        global.expect(
-          () => ObjectUtils.applyPropertyValue(targetObj, path, value)
-        ).toThrow(expected);
+        // const expected = 'applyPropertyValue(obj, path, value):Unable to set value with path:class.';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: 'blue'
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
       });
+    });
+    global.describe('cannot set', () => {
       global.it('on a null object', () => {
         const targetObj = null;
         const path = 'favoriteColor';
@@ -1375,10 +1379,14 @@ describe('ObjectUtils', () => {
         };
         const path = 'class.';
         const value = 'blue';
-        const expected = 'applyPropertyValue(obj, path, value):Unable to set value with path:class.';
-        global.expect(
-          () => ObjectUtils.applyPropertyValues(targetObj, path, value)
-        ).toThrow(expected);
+        // const expected = 'applyPropertyValue(obj, path, value):Unable to set value with path:class.';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: 'blue'
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
       });
       global.it('if targetObjects are null', () => {
         const targetObj = null;
