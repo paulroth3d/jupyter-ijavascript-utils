@@ -75,7 +75,9 @@ Give it a try here:
 
 ## What's New
 
-* 1.38 - {@link module:array.extract|array.extract} / {@link module:array.apply|array.apply} and {@link module:object.extract|object.extract} / {@link module:object.apply|object.apply}
+* 1.40 - {@link module:array.extract|array.extract} and {@link module:array.applyArrayValues|array.applyArrayValues} to allow for extracting values from arrays, transforming them on a separate process and applying them deeply and safely
+* 1.39 - {@link module:format.extractWords|format.exportWords} - to identify distinct words in strings using unicode character properties
+* 1.38 - {@link module:object.extractObjectProperty|object.extractObjectProperty} / {@link module:object.applyPropertyValue|object.applyPropertyValue} to allow for extracting values from arrays, transforming them on a separate process and applying them back
 * 1.37 - {@link module:format.replaceString|format.replaceString} as convenience for replacing only a single string.
 * 1.36 - {@link module:format.replaceStrings|format.replaceStrings} to allow for replacement dictionaries and tuplets
 * 1.35 - {@link module:object.extractObjectProperties|extractObjectProperties} / {@link module:object.extractObjectProperty|extractObjectProperty} - to do horizontal transposes on objects

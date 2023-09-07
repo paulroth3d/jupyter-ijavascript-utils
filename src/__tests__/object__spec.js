@@ -980,6 +980,58 @@ describe('ObjectUtils', () => {
       const result = ObjectUtils.fetchObjectProperty(targetObj, 'class.id');
       global.expect(result).toStrictEqual(expected);
     });
+    global.it('can fetch a property off a child list .', () => {
+      const targetObj = {
+        first: 'john',
+        age: 24,
+        classes: [{
+          id: 'econ-101',
+          name: 'Economy of Thought'
+        }]
+      };
+      const expected = 'econ-101';
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'classes.0.id');
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('can fetch a property off a child list with prefixed []', () => {
+      const targetObj = [{
+        first: 'john',
+        age: 24,
+        classes: [{
+          id: 'econ-101',
+          name: 'Economy of Thought'
+        }]
+      }];
+      const expected = 'econ-101';
+      const result = ObjectUtils.fetchObjectProperty(targetObj, '[0]classes.0.id');
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('can fetch a property off a child list with prefixed .', () => {
+      const targetObj = [{
+        first: 'john',
+        age: 24,
+        classes: [{
+          id: 'econ-101',
+          name: 'Economy of Thought'
+        }]
+      }];
+      const expected = 'econ-101';
+      const result = ObjectUtils.fetchObjectProperty(targetObj, '.[0]classes.0.id');
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('can fetch a property off a child list []', () => {
+      const targetObj = {
+        first: 'john',
+        age: 24,
+        classes: [{
+          id: 'econ-101',
+          name: 'Economy of Thought'
+        }]
+      };
+      const expected = 'econ-101';
+      const result = ObjectUtils.fetchObjectProperty(targetObj, 'classes[0]id');
+      global.expect(result).toStrictEqual(expected);
+    });
     global.it('will not thrown an error if we target an invalid property', () => {
       const targetObj = {
         first: 'john',
@@ -1063,6 +1115,323 @@ describe('ObjectUtils', () => {
     global.it('does not throw an error if fetching properties on null', () => {
       const result = ObjectUtils.fetchObjectProperty(null, 'clases.className');
       global.expect(result).toBeNull();
+    });
+  });
+  global.describe('applyPropertyValue', () => {
+    global.describe('can set', () => {
+      global.it('on a simple object', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'favoriteColor';
+        const value = 'blue';
+        const expected = {
+          first: 'john',
+          age: 24,
+          favoriteColor: 'blue',
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('on a child object', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = 'Economy of Thought';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101',
+            name: 'Economy of Thought'
+          }
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('on a non-existant child object', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24
+        };
+        const path = 'class.name';
+        const value = 'Economy of Thought';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            name: 'Economy of Thought'
+          }
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('on a non-existant child object multi-level', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24
+        };
+        const path = 'class.instance.name';
+        const value = 'Economy of Thought';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            instance: {
+              name: 'Economy of Thought'
+            }
+          }
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('on a multi-dimensional array', () => {
+        const targetObj = [{
+          first: 'john',
+          age: 24,
+          class: [{
+            id: 'econ-101'
+          }]
+        }];
+        const path = '[0]class[0].name';
+        const value = 'Economy of Thought';
+        const expected = [{
+          first: 'john',
+          age: 24,
+          class: [{
+            id: 'econ-101',
+            name: 'Economy of Thought'
+          }]
+        }];
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('an invalid path: hanging dot .', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.';
+        const value = 'blue';
+        // const expected = 'applyPropertyValue(obj, path, value):Unable to set value with path:class.';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: 'blue'
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('cannot set', () => {
+      global.it('on a null object', () => {
+        const targetObj = null;
+        const path = 'favoriteColor';
+        const value = 'blue';
+        const expected = null;
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.it('on a null path', () => {
+      const targetObj = {
+        first: 'john',
+        age: 24,
+        class: {
+          id: 'econ-101'
+        }
+      };
+      const path = null;
+      const value = 'blue';
+      const expected = {
+        first: 'john',
+        age: 24,
+        class: {
+          id: 'econ-101'
+        }
+      };
+      const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+      global.expect(result).toStrictEqual(expected);
+    });
+  });
+  global.describe('applyPropertyValues', () => {
+    global.describe('can apply', () => {
+      global.it('can apply a single value to multiple objects', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }, { name: 'jane', last: 'doe' }];
+        const path = 'age';
+        const values = 25;
+        const expected = [
+          { name: 'john', last: 'doe', age: 25 },
+          { name: 'jane', last: 'doe', age: 25 }
+        ];
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can apply separate values to multiple objects', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }, { name: 'jane', last: 'doe' }];
+        const path = 'age';
+        const values = [24, 25];
+        const expected = [
+          { name: 'john', last: 'doe', age: 24 },
+          { name: 'jane', last: 'doe', age: 25 }
+        ];
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('will apply the 1 property if only one target provided', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }];
+        const path = 'age';
+        const values = [24, 25];
+        const expected = [
+          { name: 'john', last: 'doe', age: 24 }
+        ];
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('will apply the 1 property if only one value provided', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }, { name: 'jane', last: 'doe' }];
+        const path = 'age';
+        const values = [24];
+        const expected = [
+          { name: 'john', last: 'doe', age: 24 },
+          { name: 'jane', last: 'doe' }
+        ];
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can apply a single null value to multiple objects', () => {
+        const targetObj = [{ name: 'john', last: 'doe', age: 25 }, { name: 'jane', last: 'doe', age: 25 }];
+        const path = 'age';
+        const values = null;
+        const expected = [
+          { name: 'john', last: 'doe', age: null },
+          { name: 'jane', last: 'doe', age: null }
+        ];
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if valueList is null', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = null;
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101',
+            name: null
+          }
+        };
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if valueList is undefined', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = undefined;
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101',
+            name: undefined
+          }
+        };
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('cannot apply', () => {
+      global.it('an invalid path: hanging dot .', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.';
+        const value = 'blue';
+        // const expected = 'applyPropertyValue(obj, path, value):Unable to set value with path:class.';
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: 'blue'
+        };
+        const result = ObjectUtils.applyPropertyValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('if targetObjects are null', () => {
+        const targetObj = null;
+        const path = 'class.name';
+        const value = 'blue';
+        const expected = null;
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if path are null', () => {
+        const targetObj = null;
+        const path = 'class.';
+        const value = 'blue';
+        const expected = null;
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if targetObjects is an empty array', () => {
+        const targetObj = [];
+        const path = 'class.name';
+        const value = 'blue';
+        const expected = [];
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if valueList is an empty array', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = [];
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const results = ObjectUtils.applyPropertyValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
   });
   global.describe('fetchObjectproperties', () => {
@@ -3199,6 +3568,66 @@ describe('ObjectUtils', () => {
           });
         });
       });
+    });
+  });
+  global.describe('extractTransformApply', () => {
+    global.it('on a simple case', () => {
+      const targetObjects = [
+        { account: 'A', user: 'X' },
+        { account: 'A', user: 'Y' },
+        { account: 'A', user: 'Z' },
+      ];
+      const path = 'user';
+      const values = ObjectUtils.extractObjectProperty(targetObjects, path);
+      const expectedTransformations = new Map([['X', 'User-X'], ['Y', 'User-Y'], ['Z', 'User-Z']]);
+
+      global.expect(expectedTransformations.get('X')).toBe('User-X');
+      global.expect(expectedTransformations.get('Y')).toBe('User-Y');
+      global.expect(expectedTransformations.get('Z')).toBe('User-Z');
+
+      const transformedValues = values.map((val) => expectedTransformations.get(val));
+
+      global.expect(transformedValues[0]).toBe('User-X');
+      global.expect(transformedValues[1]).toBe('User-Y');
+      global.expect(transformedValues[2]).toBe('User-Z');
+
+      ObjectUtils.applyPropertyValues(targetObjects, path, transformedValues);
+
+      const expected = [
+        { account: 'A', user: 'User-X' },
+        { account: 'A', user: 'User-Y' },
+        { account: 'A', user: 'User-Z' },
+      ];
+
+      global.expect(targetObjects).toStrictEqual(expected);
+    });
+    global.it('on multiple properties', () => {
+      const targetObjects = [
+        { account: 'A', user: 'X', owner: 'Z' },
+        { account: 'A', user: 'Y', owner: 'X' },
+        { account: 'A', user: 'Z', owner: 'Y' },
+      ];
+      const paths = ['user', 'owner'];
+      const values = ObjectUtils.extractObjectProperties(targetObjects, paths);
+      const expectedTransformations = new Map([['X', 'User-X'], ['Y', 'User-Y'], ['Z', 'User-Z']]);
+
+      global.expect(expectedTransformations.get('X')).toBe('User-X');
+      global.expect(expectedTransformations.get('Y')).toBe('User-Y');
+      global.expect(expectedTransformations.get('Z')).toBe('User-Z');
+
+      const transformedUsers = values.user.map((val) => expectedTransformations.get(val));
+      const transformedOwners = values.owner.map((val) => expectedTransformations.get(val));
+
+      ObjectUtils.applyPropertyValues(targetObjects, 'user', transformedUsers);
+      ObjectUtils.applyPropertyValues(targetObjects, 'owner', transformedOwners);
+
+      const expected = [
+        { account: 'A', user: 'User-X', owner: 'User-Z' },
+        { account: 'A', user: 'User-Y', owner: 'User-X' },
+        { account: 'A', user: 'User-Z', owner: 'User-Y' },
+      ];
+
+      global.expect(targetObjects).toStrictEqual(expected);
     });
   });
 });

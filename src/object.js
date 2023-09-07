@@ -13,29 +13,33 @@ const FormatUtils = require('./format');
  *   * {@link module:object.generateSchema|generateSchema()} - generate a schema / describe properties of a list of objects
  *   * {@link module:object.findWithoutProperties|findWithoutProperties()} - find objects without ALL the properties specified
  *   * {@link module:object.findWithoutProperties|findWithProperties()} - find objects with any of the properties specified
- *   * {@link module:object.setPropertyDefaults|setPropertyDefaults()} - sets values for objects that don't currently have the property
  *   * {@link module:object.propertyValueSample|propertyValueSample(collection)} - finds non-empty values for all properties found in the collection
- * * Manipulating objects
+ * * Fetch child properties from related objects
+ *   * {@link module:object.fetchObjectProperty|fetchObjectProperty(object, string)} - use dot notation to bring a child property onto a parent
+ *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
+ *   * {@link module:object.join|join(array, index, map, fn)} - join a collection against a map by a given index
+ *   * {@link module:object.joinProperties|join(array, index, map, ...fields)} - join a collection, and copy properties over from the mapped object.
+ * * Fetch values safely
+ *   * {@link module:object.propertyFromList|propertyFromList(array, propertyName)} - fetches a specific property from all objects in a list
+ *   * {@link module:object.extractObjectProperty|extractObjectProperty(list, propertyNameOrFn)} - extracts a property or fn across all objects in list.
+ *   * {@link module:object.extractObjectProperties|extractObjectProperties(list, propertyNameOrFnMap)} - extracts multiple propertie or fn across all objects in list.
+ * * Apply deep values safely
  *   * {@link module:object.assign|objAssign(object, property, value)} - Applies properties to an object in functional programming style.
- *   * {@link module:object.assignEntities|objAssignEntities(object, [property, value])} - Applies properties to an object using Array values - [key,value]
  *   * {@link module:object.augment|augment(object, augmentFn)} - Applies properties to an object similar to Map
+ *   * {@link module:object.assignEntities|objAssignEntities(object, [property, value])} - Applies properties to an object using Array values - [key,value]
+ *   * {@link module:object.setPropertyDefaults|setPropertyDefaults()} - sets values for objects that don't currently have the property
+ *   * {@link module:object.applyPropertyValue|object.applyPropertyValue} - safely apply a value deeply and safely
+ *   * {@link module:object.applyPropertyValues|object.applyPropertyValues} - apply an array of values safely and deeply against a list of objects.
+ * * Manipulating objects
  *   * {@link module:object.augmentInherit|augmentInherit(object, augmentFn)} - Applies properties to a collection of objects, 'remembering' the last value - useful for 1d to *D lists.
  *   * {@link module:object.selectObjectProperties|selectObjectProperties()} - keep only specific properties
  *   * {@link module:object.filterObjectProperties|filterObjectProperties()} - remove specific properties
  *   * {@link module:object.mapProperties|mapProperties(collection, fn, ...properties)} - map multiple properties at once (like parseInt, or toString)
  *   * {@link module:object.formatProperties|formatProperties(collection, propertyTranslation)} - map specific properties (ex: toString, toNumber, etc)
  *   * {@link module:object.union|union(objectList1, objectList2)} - Unites the properties of two collections of objects.
- * * Fetch child properties from related objects
- *   * {@link module:object.fetchObjectProperty|fetchObjectProperty(object, string)} - use dot notation to bring a child property onto a parent
- *   * {@link module:object.fetchObjectProperties|fetchObjectProperties(object, string[])} - use dot notation to bring multiple child properties onto a parent
- *   * {@link module:object.join|join(array, index, map, fn)} - join a collection against a map by a given index
- *   * {@link module:object.joinProperties|join(array, index, map, ...fields)} - join a collection, and copy properties over from the mapped object.
- *   * {@link module:object.propertyFromList|propertyFromList(array, propertyName)} - fetches a specific property from all objects in a list
- *   * {@link module:object.extractObjectProperty|extractObjectProperty(list, propertyNameOrFn)} - extracts a property or fn across all objects in list.
- *   * {@link module:object.extractObjectProperties|extractObjectProperties(list, propertyNameOrFnMap)} - extracts multiple propertie or fn across all objects in list.
  * * Rename properties
  *   * {@link module:object.cleanProperties|cleanProperties()} - correct inaccessible property names in a list of objects - in place
- *  *   * {@link module:object.cleanProperties2|cleanProperties2()} - correct inaccessible property names in a list of objects - on a cloned list
+ *   * {@link module:object.cleanProperties2|cleanProperties2()} - correct inaccessible property names in a list of objects - on a cloned list
  *   * {@link module:object.cleanPropertyNames|cleanPropertyNames()} - create a translation of inaccessible names to accessible ones
  *   * {@link module:object.cleanPropertyName|cleanPropertyName()} - create a translation of a specific property name to be accessible.
  *   * {@link module:object.renameProperties|renameProperties()} - Use a translation from old property names to new ones
@@ -518,7 +522,9 @@ module.exports.filterObjectProperties = function filterObjectProperties(list, pr
  * @param {Function | String} propertyOrFn - Name of the property or accessor function
  * @returns {Array} - single array the values stored in propertyOrFn across all objects in objectList.
  * @see {@link module:aggregate.unique|unique()} to see all the unique values stored
- * @see {@link module:object.extractObjectProperties|extractObjectProperties(list, propertyNameOrFnMap)} to see the values extracted into a single object / horizontal transpose.
+ * @see {@link module:object.extractObjectProperties|object.extractObjectProperties} - to extract into array vectors 
+ * @see {@link module:object.fetchObjectProperty|object.fetchObjectProperty} - to extract a deep value and optionally throw if not found
+ * @see {@link module:object.applyPropertyValue|object.applyPropertyValue} - to apply a single value to a single object using dot notation safely
  */
 module.exports.extractObjectProperty = function extractObjectProperty(list, propertyOrFn) {
   let cleanList = !list ? [] : Array.isArray(list) ? list : [list];
@@ -560,6 +566,8 @@ module.exports.extractObjectProperty = function extractObjectProperty(list, prop
  * @param {Map<Function | String>} propertyOrFnMap - Name of the property or accessor function
  * @returns {Object} - Object with the keys in the map as properties - extracting the values across all in list.
  * @see {@link module:object.extractObjectProperty|extractObjectProperty(list, propertyNameOrFn)} to see all the values stored for a single property.
+ * @see {@link module:object.applyPropertyValues|object.applyPropertyValues} - to safely and deeply apply the list of values extracted to a list of objects.
+ * @see {@link module:object.fetchObjectProperties} - to fetch multiple properties at once into objects
  */
 module.exports.extractObjectProperties = function extractObjectProperties(list, propertyOrFnMap) {
   let propertyEntries = [];
@@ -585,8 +593,6 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
   const results = {};
   propertyEntries.forEach(([propertyName, propertyOrFn]) => {
     results[propertyName] = ObjectUtils.extractObjectProperty(list, propertyOrFn || propertyName);
-    // const fn = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
-    // results[propertyName] = cleanList.map(fn);
   });
 
   return results;
@@ -600,13 +606,27 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
 
 /**
  * Fetches multiple properties from an object or list of objects.
+ * 
+ * ```
+ * testObj = {
+ *  name: 'john',
+ *  courses: [{ name: 'econ-101' }]
+ * }
+ * utils.object.fetchObjectProperty(testObj,
+ *  { 'courseName': 'courses[0].?name', personName: 'name' });
+ * // { courseName: 'econ-101', personName: 'john' }
+ * ```
+ * 
  * @param {Object | Object[]} list - collection of objects to reduce
- * @param {Map<String,any>} propertyNames - Object with the keys as the properties
+ * @param {Object<String,any>} propertyNames - Object with the keys as as properties to return,
  *    and the values using dot notation to access related records and properties
  *    (ex: {parentName: 'somePropertyObject.parent.parent.name', childName: 'child.Name'})
  * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions} 
  * @returns {Object[]} - objects with the properties resolved
  *    (ex: {parentname, childName, etc.})
+ * @see {@link module:object.fetchObjectProperty|object.fetchObjectProperty} - to safely fetch  a single value
+ * @see {@link module:object.applyPropertyValues|object.applyPropertyValues} - to safely and deeply apply the list of values extracted to a list of objects.
+ * @see {@link module:object.extractObjectProperties|object.extractObjectProperties} - to extract into array vectors instead of objects
  */
 module.exports.fetchObjectProperties = function fetchObjectProperties(list, propertyNames, options = {}) {
   if (!list) return [];
@@ -630,11 +650,41 @@ module.exports.fetchObjectProperties = function fetchObjectProperties(list, prop
 
 /**
  * Accesses a property using a string
+ * 
+ * ```
+ * testObj = {
+ *  name: 'john',
+ *  courses: [{ name: 'econ-101' }]
+ * }
+ * utils.object.fetchObjectProperty(testObj, 'courses[0].?name');
+ * // 'econ-101'
+ * ```
+ * 
+ * note that the options allow for safe property access
+ * 
+ * ```
+ * testObj = {
+ *  name: 'john',
+ *  courses: [{ name: 'econ-101' }]
+ * }
+ * utils.object.fetchObjectProperty(testObj, 'courses[0].courseId');
+ * // throws an error
+ * 
+ * utils.object.fetchObjectProperty(testObj, 'courses[0].?courseId');
+ * // null - because of optional condition operator
+ * 
+ * utils.object.fetchObjectProperty(testObj, 'courses[0].courseId', { safeAccess: true });
+ * // null - because of the safe access option
+ * ```
+ * 
  * @param {Object} obj - object to access the properties on
  * @param {String} propertyAccess - dot notation for the property to access
  *    (ex: `parent.obj.Name`)
  * @param {FetchObjectOptions} options - {@link module:object~FetchObjectOptions|See FetchObjectOptions}
  * @returns {any} - the value accessed at the end ofthe property chain
+ * @see {@link module:object.fetchObjectProperties} - to fetch multiple properties at once into objects
+ * @see {@link module:object.extractObjectProperty|object.extractObjectProperty} - to safely extract a deep value without options
+ * @see {@link module:object.applyPropertyValue|object.applyPropertyValue} - to apply a single value to a single object using dot notation safely
  */
 module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyAccess, options = {}) {
   if (!obj || !propertyAccess) return null;
@@ -643,8 +693,14 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
     safeAccess = false
   } = options;
 
-  //-- @TODO - should we be safe or support elvis operators?
-  return propertyAccess.split('.')
+  const cleanPropertyAccess = String(propertyAccess)
+    .replace(/\[/g, '.')
+    .replace(/\]/g, '.')
+    .replace(/[.]+/g, '.')
+    .replace(/^[.]+/, '')
+    .replace(/[.]$/, '');
+
+  return cleanPropertyAccess.split('.')
     .reduce((currentVal, prop) => {
       let isElvis = false;
       let cleanProp = prop;
@@ -659,6 +715,142 @@ module.exports.fetchObjectProperty = function fetchObjectProperty(obj, propertyA
       }
       throw Error(`Invalid property ${propertyAccess} [${prop}] does not exist - safeAccess:${safeAccess}`);
     }, obj);
+};
+
+/**
+ * Applies a target value onto a source object in-place safely - using dot-notation paths.
+ * 
+ * This can be as simple as safely applying a value even if targetObj may be null
+ * ```
+ * targetObj = { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 };
+ * utils.object.applyPropertyValue(targetObj, 'state', 'WA');
+ * // { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, state: 'WA };
+ * ```
+ * 
+ * working with deeply nested objects
+ * ```
+ * targetObj = { name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer' }} };
+ * utils.object.applyPropertyValue(targetObj, 'class.professor.first_name', 'René');
+ * // { name: 'john smith', class: { name: 'ECON_101', professor: { last_name: 'Winklemeyer', first_name: 'René' }} };
+ * ```
+ * 
+ * or safely working with arrays of values
+ * ```
+ * targetObj = { name: 'john smith', classes: [{ name: 'ECON_101' }] };
+ * utils.object.applyPropertyValue(targetObj, 'classes[0].grade', 'A');
+ * // { name: 'john smith', classes: [{ name: 'ECON_101', grade: 'A' }] };
+ * ```
+ * 
+ * @param {Object} obj - object to apply the value to
+ * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
+ * @param {any} value - value to set
+ * @returns {Object} - the object the value was applied to
+ * @see {@link module:object.applyPropertyValues|object.applyPropertyValues} - to safely and deeply apply the list of values extracted to a list of objects.
+ * @see {@link module:object.extractObjectProperty|object.extractObjectProperty} - to safely extract a deep value
+ * @see {@link module:object.fetchObjectProperty|object.fetchObjectProperty} - to extract a deep value and optionally throw if not found
+ */
+module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value) {
+  // const signature = 'applyPropertyValue(obj, path, value)';
+
+  if (!obj) return obj;
+  if (!path) return obj;
+
+  const cleanPath = String(path)
+    .replace(/\[/g, '.')
+    .replace(/\]/g, '.')
+    .replace(/[.]+/g, '.')
+    .replace(/^[.]+/, '')
+    .replace(/[.]$/, '');
+
+  const splitPath = cleanPath.split('.');
+  const terminalIndex = splitPath.length - 1;
+
+  return splitPath
+    .reduce((currentVal, prop, currentIndex) => {
+      //-- can no longer occur
+      // if (!prop) throw Error(`${signature}:Unable to set value with path:${path}`);
+
+      const isLeaf = currentIndex === terminalIndex;
+      if (isLeaf) {
+        // eslint-disable-next-line no-param-reassign
+        currentVal[prop] = value;
+        // if (value === undefined) {
+        //   delete currentVal[prop];
+        // } else {
+        //   currentVal[prop] = value;
+        // }
+        return obj;
+      }
+      //-- not a leaf
+      if (!currentVal[prop]) {
+        // eslint-disable-next-line no-param-reassign
+        currentVal[prop] = {};
+      }
+      return currentVal[prop];
+    }, obj);
+};
+
+/**
+ * Opposite of the extractObjectProperty, this takes a value / set of values
+ * and applies them along a given path on each of the target objects.
+ * 
+ * for example:
+ * 
+ * ```
+ * weather = [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }];
+ * 
+ * cities = utils.object.extractObjectProperty('city');
+ * // ['Seattle', 'New York', 'Chicago'];
+ * 
+ * //-- async process to geocode
+ * geocodedCities = geocodeCity(cities);
+ * // [{ city: 'Seattle', state: 'WA', country: 'USA' },
+ * // { city: 'New York', state: 'NY', country: 'USA' },
+ * // { city: 'Chicago', state: 'IL', country: 'USA' }]
+ * 
+ * utils.applyPropertyValues(weather, 'geo', geocodedCities);
+ *  [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
+ *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
+ *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * 
+ * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+ * works best for if you are working with objects completely in memory.
+ * 
+ * But this helps quite a bit if the action of mapping / transforming values
+ * needs to be separate from the extraction / application of values back.
+ * 
+ * @param {Object} obj - object to apply the value to
+ * @param {string} path - dot notation path to set the value, ex: 'geo', or 'states[0].prop'
+ * @param {any} value - the value that should be set at that path.
+ * @returns {Object}
+ * @see {@link module:object.applyPropertyValue} - to apply a single value to a single object
+ * @see {@link module:object.fetchObjectProperties} - to fetch multiple properties at once into objects
+ * @see {@link module:object.extractObjectProperties|object.extractObjectProperties} - to extract properties into array vectors instead of objects
+ */
+module.exports.applyPropertyValues = function applyPropertyValues(objectList, path, valueList) {
+  // const signature = 'applyPropertyValues(objectList, path, valueList)';
+  if (!objectList || !path) {
+    //-- do nothing
+    return objectList;
+  }
+
+  const cleanObjectList = Array.isArray(objectList) ? objectList : [objectList];
+  const cleanValueList = Array.isArray(valueList) ? valueList : Array(cleanObjectList.length).fill(valueList);
+
+  // if (cleanObjectList.length !== cleanValueList) throw Error(
+  //   `${signature}: objectList.length[${cleanObjectList.length}] does not match valueList.length[${cleanValueList.length}]`
+  // );
+  const minLength = Math.min(cleanObjectList.length, cleanValueList.length);
+
+  for (let i = 0; i < minLength; i += 1) {
+    const obj = cleanObjectList[i];
+    const val = cleanValueList[i];
+    ObjectUtils.applyPropertyValue(obj, path, val);
+  }
+
+  return objectList;
 };
 
 /**

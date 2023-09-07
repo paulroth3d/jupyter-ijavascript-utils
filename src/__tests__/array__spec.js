@@ -965,4 +965,464 @@ describe('ArrayUtils', () => {
       });
     });
   });
+
+  global.describe('extract', () => {
+    global.it('extract rows', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const rows = [0, 1];
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red']
+      ];
+
+      const results = ArrayUtils.extract(data, { rows });
+      global.expect(results).toEqual(expected);
+    });
+    global.it('extract columns', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const columns = [0, 1];
+
+      const expected = [
+        ['john', 23],
+        ['jane', 32],
+        ['ringo', 27]
+      ];
+
+      const results = ArrayUtils.extract(data, { columns });
+      global.expect(results).toEqual(expected);
+    });
+    global.it('extract both', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const rows = [0, 1];
+      const columns = [0, 1];
+
+      const expected = [
+        ['john', 23],
+        ['jane', 32]
+      ];
+
+      const results = ArrayUtils.extract(data, { rows, columns });
+      global.expect(results).toEqual(expected);
+    });
+    global.it('extract with null options returns the whole array', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const rows = null;
+      const columns = null;
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const results = ArrayUtils.extract(data, { rows, columns });
+      global.expect(results).toEqual(expected);
+    });
+    global.it('extract with neither option returns the whole array', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const results = ArrayUtils.extract(data, {});
+      global.expect(results).toEqual(expected);
+    });
+    global.it('extract without any option returns the whole array', () => {
+      const data = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const expected = [
+        ['john', 23, 'purple'],
+        ['jane', 32, 'red'],
+        ['ringo', 27, 'green']
+      ];
+
+      const results = ArrayUtils.extract(data);
+      global.expect(results).toEqual(expected);
+    });
+  });
+
+  global.describe('applyArrayValue', () => {
+    global.describe('can set', () => {
+      global.describe('on a simple array', () => {
+        global.it('on item [0]', () => {
+          const targetObj = [0, 0, 0, 0];
+          const path = '[0]';
+          const value = 1;
+          const expected = [1, 0, 0, 0];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('on item 0', () => {
+          const targetObj = [0, 0, 0, 0];
+          const path = '0';
+          const value = 2;
+          const expected = [2, 0, 0, 0];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('on item 2', () => {
+          const targetObj = [0, 0, 0, 0];
+          const path = '2';
+          const value = 3;
+          const expected = [0, 0, 3, 0];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('on item 3', () => {
+          const targetObj = [0, 0, 0, 0];
+          const path = '3';
+          const value = 4;
+          const expected = [0, 0, 0, 4];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('on item 4', () => {
+          const targetObj = [0, 0, 0, 0];
+          const path = '4';
+          const value = 5;
+          const expected = [0, 0, 0, 0, 5];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+      });
+      global.describe('on objects in an array', () => {
+        global.it('update a property', () => {
+          const targetObj = [{
+            first: 'john'
+          }, {
+            first: 'jane'
+          }];
+          const path = '[1].last';
+          const value = 'doe';
+          const expected = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            last: 'doe'
+          }];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('deep property', () => {
+          const targetObj = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            class: {}
+          }];
+          const path = '[1].class.name';
+          const value = 'econ-101';
+          const expected = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            class: {
+              name: 'econ-101'
+            }
+          }];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('deep property', () => {
+          const targetObj = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            classes: [{ name: 'econ-101' }]
+          }];
+          const path = '[1].classes[0].professor';
+          const value = "o'leary";
+          const expected = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            classes: [{
+              name: 'econ-101',
+              professor: "o'leary"
+            }]
+          }];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('deep non-existant child obj', () => {
+          const targetObj = [{
+            first: 'john'
+          }, {
+            first: 'jane'
+          }];
+          const path = '[1].class.name';
+          const value = 'econ-101';
+          const expected = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            class: {
+              name: 'econ-101'
+            }
+          }];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('deep non-existant 2x child obj', () => {
+          const targetObj = [{
+            first: 'john'
+          }, {
+            first: 'jane'
+          }];
+          const path = '[1].class.professor.name';
+          const value = "o'leary";
+          const expected = [{
+            first: 'john'
+          }, {
+            first: 'jane',
+            class: {
+              professor: {
+                name: "o'leary"
+              }
+            }
+          }];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+        global.it('overwrite a property', () => {
+          const targetObj = [{
+            first: 'john'
+          }, {
+            first: 'jane'
+          }];
+          const path = '[1]';
+          const value = { first: 'bobby' };
+          const expected = [{
+            first: 'john'
+          }, {
+            first: 'bobby'
+          }];
+          const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+          global.expect(result).toStrictEqual(expected);
+        });
+      });
+    });
+    global.describe('cannot set', () => {
+      global.it('on a null object', () => {
+        const targetObj = null;
+        const path = 'favoriteColor';
+        const value = 'blue';
+        const expected = null;
+        const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.it('on a null path', () => {
+      const targetObj = {
+        first: 'john',
+        age: 24,
+        class: {
+          id: 'econ-101'
+        }
+      };
+      const path = null;
+      const value = 'blue';
+      const expected = {
+        first: 'john',
+        age: 24,
+        class: {
+          id: 'econ-101'
+        }
+      };
+      const result = ArrayUtils.applyArrayValue(targetObj, path, value);
+      global.expect(result).toStrictEqual(expected);
+    });
+  });
+  global.describe('applyArrayValues', () => {
+    global.describe('can apply', () => {
+      global.it('can apply a single value to multiple objects', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }, { name: 'jane', last: 'doe' }];
+        const path = 'age';
+        const values = 25;
+        const expected = [
+          { name: 'john', last: 'doe', age: 25 },
+          { name: 'jane', last: 'doe', age: 25 }
+        ];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can apply separate values to multiple objects', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }, { name: 'jane', last: 'doe' }];
+        const path = 'age';
+        const values = [24, 25];
+        const expected = [
+          { name: 'john', last: 'doe', age: 24 },
+          { name: 'jane', last: 'doe', age: 25 }
+        ];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('will apply the 1 property if only one target provided', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }];
+        const path = 'age';
+        const values = [24, 25];
+        const expected = [
+          { name: 'john', last: 'doe', age: 24 }
+        ];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('will apply the 1 property if only one value provided', () => {
+        const targetObj = [{ name: 'john', last: 'doe' }, { name: 'jane', last: 'doe' }];
+        const path = 'age';
+        const values = [24];
+        const expected = [
+          { name: 'john', last: 'doe', age: 24 },
+          { name: 'jane', last: 'doe' }
+        ];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can apply a single null value to multiple objects', () => {
+        const targetObj = [{ name: 'john', last: 'doe', age: 25 }, { name: 'jane', last: 'doe', age: 25 }];
+        const path = 'age';
+        const values = null;
+        const expected = [
+          { name: 'john', last: 'doe', age: null },
+          { name: 'jane', last: 'doe', age: null }
+        ];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, values);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if valueList is null', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = null;
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101',
+            name: null
+          }
+        };
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if valueList is undefined', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = undefined;
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101',
+            name: undefined
+          }
+        };
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('hanging dot .', () => {
+        const targetObj = [
+          [0, 0, 0],
+          [0, 0, 0]
+        ];
+        const path = '1';
+        const value = 2;
+        const expected = [
+          [0, 2, 0],
+          [0, 2, 0]
+        ];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('cannot apply', () => {
+      global.it('if targetObjects are null', () => {
+        const targetObj = null;
+        const path = 'class.name';
+        const value = 'blue';
+        const expected = null;
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if path are null', () => {
+        const targetObj = null;
+        const path = 'class.';
+        const value = 'blue';
+        const expected = null;
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if targetObjects is an empty array', () => {
+        const targetObj = [];
+        const path = 'class.name';
+        const value = 'blue';
+        const expected = [];
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if valueList is an empty array', () => {
+        const targetObj = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const path = 'class.name';
+        const value = [];
+        const expected = {
+          first: 'john',
+          age: 24,
+          class: {
+            id: 'econ-101'
+          }
+        };
+        const results = ArrayUtils.applyArrayValues(targetObj, path, value);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
 });
