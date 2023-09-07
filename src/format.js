@@ -41,6 +41,8 @@
  *   * {@link module:format.parseNumber|format.parseNumber(val, locale)} - converts a value to a number
  * * Identifying values
  *   * {@link module:format.isEmptyValue|format.isEmptyValue} - determine if a value is not 'empty'
+ * * Extracting values
+ *   * {@link module:format.extractWords|format.extractWords} - to extract the words from a string
  * 
  * @module format
  * @exports format
@@ -1285,4 +1287,57 @@ module.exports.replaceString = function replaceString(targetStr, stringTupletsOr
     throw Error('replaceString(targetStr, stringTupletsOrMap): targetStr was sent an array - please use replaceStrings instead');
   }
   return FormatUtils.replaceStrings([targetStr], stringTupletsOrMap)[0];
+};
+
+/**
+ * Identify an array of words each from a string.
+ * 
+ * Note that this uses the new [Unicode Properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape)
+ * using `\p{L}` to identify characters based on unicode properties.
+ * 
+ * For example:
+ * 
+ * ```
+ * strs = 'I am Modern "major-general".';
+ * FormatUtils.extractWords(strs);
+ * // ['I', 'am', 'Modern', 'major', 'general'];
+ * ```
+ * 
+ * you can also include additional characters that will no longer be considered word boundaries.
+ * 
+ * ```
+ * strs = 'I am Modern "major-general".';
+ * FormatUtils.extractWords(strs);
+ * // ['I', 'am', 'Modern', 'major-general'];
+ * ```
+ * 
+ * arrays of strings are also supported
+ * 
+ * ```
+ * strs = ['letras mayúsculas de tamaño igual a las minúsculas',
+ *  'الاختراع، ومايكل هارت'];
+ * FormatUtils.extractWords(strs);
+ * // [ 'letras', 'mayúsculas', 'de', 'tamaño', 'igual', 'a', 'las', 'minúsculas', 'الاختراع', 'ومايكل', 'هارت'];
+ * ```
+ * 
+ * @param {String|String[]} strToExtractFrom - collection of strings to extract words from
+ * @param {String} additionalNonBreakingCharacters - each char in this string will not be treated as a word boundry
+ * @returns {string[]} - collection of words
+ */
+module.exports.extractWords = function extractWords(strToExtractFrom, additionalNonBreakingCharacters) {
+  if (!strToExtractFrom) return strToExtractFrom;
+  
+  const cleanNonBreaking = additionalNonBreakingCharacters
+    ? additionalNonBreakingCharacters
+    : '';
+  
+  const regex = cleanNonBreaking
+    ? new RegExp(`[${additionalNonBreakingCharacters}\\p{L}]+`, 'gu')
+    : /\p{L}+/ug;  // -- old attempt/[A-Za-zÀ-ÖØ-öø-ÿ]+/g;
+  
+  const cleanStrings = Array.isArray(strToExtractFrom)
+    ? strToExtractFrom
+    : [strToExtractFrom];
+  
+  return cleanStrings.reduce((result, str) => [...result, ...((str || '').match(regex) || [])], []);
 };

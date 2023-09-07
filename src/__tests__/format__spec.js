@@ -3280,3 +3280,117 @@ global.describe('format', () => {
     });
   });
 });
+
+global.describe('extractWords', () => {
+  global.describe('can extract', () => {
+    global.describe('english', () => {
+      global.it('single sentence', () => {
+        const strs = 'I am Modern "major-general".';
+        const expected = ['I', 'am', 'Modern', 'major', 'general'];
+        const results = FormatUtils.extractWords(strs);
+        global.expect(results).toEqual(expected);
+      });
+      global.it('single sentence with hypen', () => {
+        const strs = 'I am Modern "major-general".';
+        const additionalNonBreakingCharacters = '-';
+        const expected = ['I', 'am', 'Modern', 'major-general'];
+        const results = FormatUtils.extractWords(strs, additionalNonBreakingCharacters);
+        global.expect(results).toEqual(expected);
+      });
+      global.it('multiple sentences', () => {
+        const strs = ['I am Modern "major-general"', 'I have information animal, vegitable and mineral'];
+        const additionalNonBreakingCharacters = '-';
+        const expected = ['I', 'am', 'Modern', 'major-general', 'I', 'have', 'information', 'animal', 'vegitable', 'and', 'mineral'];
+        const results = FormatUtils.extractWords(strs, additionalNonBreakingCharacters);
+        global.expect(results).toEqual(expected);
+      });
+    });
+    global.describe('spanish', () => {
+      global.it('single sentence', () => {
+        const strs = 'Las versalitas (letras mayúsculas de tamaño igual a las minúsculas)';
+        const expected = ['Las', 'versalitas', 'letras', 'mayúsculas', 'de', 'tamaño', 'igual', 'a', 'las', 'minúsculas'];
+        const results = FormatUtils.extractWords(strs);
+        global.expect(results).toEqual(expected);
+      });
+      global.it('single sentence with hypen', () => {
+        const strs = 'Las versalitas (letras mayúsculas de tamaño igual a las min-úsculas).';
+        const additionalNonBreakingCharacters = '-';
+        const expected = ['Las', 'versalitas', 'letras', 'mayúsculas', 'de', 'tamaño', 'igual', 'a', 'las', 'min-úsculas'];
+        const results = FormatUtils.extractWords(strs, additionalNonBreakingCharacters);
+        global.expect(results).toEqual(expected);
+      });
+      global.it('multiple sentences', () => {
+        const strs = ['Las versalitas (letras mayúsculas de tamaño igual a las minúsculas)',
+          'han sido sustituidas por letras mayúsculas de tamaño normal.'];
+        const additionalNonBreakingCharacters = '-';
+        const expected = ['Las', 'versalitas', 'letras', 'mayúsculas', 'de', 'tamaño', 'igual', 'a', 'las', 'minúsculas',
+          'han', 'sido', 'sustituidas', 'por', 'letras', 'mayúsculas', 'de', 'tamaño', 'normal'];
+        const results = FormatUtils.extractWords(strs, additionalNonBreakingCharacters);
+        global.expect(results).toEqual(expected);
+      });
+    });
+    global.describe('arabic', () => {
+      global.it('single sentence', () => {
+        const strs = 'إنه الكتاب الألكتروني ';
+        const expected = ['إنه', 'الكتاب', 'الألكتروني'];
+        const results = FormatUtils.extractWords(strs);
+        global.expect(results).toEqual(expected);
+      });
+      global.it('multiple sentences', () => {
+        const strs = ['إنه الكتاب الألكتروني', 'الاختراع، ومايكل هارت'];
+        const additionalNonBreakingCharacters = '-';
+        const expected = ['إنه', 'الكتاب', 'الألكتروني', 'الاختراع', 'ومايكل', 'هارت'];
+        const results = FormatUtils.extractWords(strs, additionalNonBreakingCharacters);
+        global.expect(results).toEqual(expected);
+      });
+    });
+    global.it('docs example', () => {
+      const strs = ['letras mayúsculas de tamaño igual a las minúsculas',
+        'الاختراع، ومايكل هارت'];
+      const expected = [
+        'letras',
+        'mayúsculas',
+        'de',
+        'tamaño',
+        'igual',
+        'a',
+        'las',
+        'minúsculas',
+        'الاختراع',
+        'ومايكل',
+        'هارت'
+      ];
+      const results = FormatUtils.extractWords(strs);
+      global.expect(results).toEqual(expected);
+    });
+  });
+  //إنه الكتاب الألكتروني "eBook".. الاختراع، ومايكل هارت Michael S Hart"".. المخترع..
+  //Svako ima pravo na školovanje. Školovanje treba da bude besplatno bar u osnovnim i nižim školama. Osnovna nastava je obavezna. Tehnička i stručna nastava treba da bude opšte dostupna, a viša nastava treba da bude svima podjednako pristupačna na osnovu utvrdjenih kriterijuma.
+  global.describe('cannot extract', () => {
+    global.it('if not passed a string', () => {
+      const strs = 23;
+      const additionalNonBreakingCharacters = null;
+      // const expected = 'something';
+      global.expect(() => FormatUtils.extractWords(strs, additionalNonBreakingCharacters))
+        .toThrow();
+    });
+    global.it('cannot extract from undefined', () => {
+      const strs = undefined;
+      const expected = undefined;
+      const results = FormatUtils.extractWords(strs);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('cannot extract from null', () => {
+      const strs = null;
+      const expected = null;
+      const results = FormatUtils.extractWords(strs);
+      global.expect(results).toEqual(expected);
+    });
+    global.it('cannot extract from null in array', () => {
+      const strs = ['four score', 'and seven years ago', undefined, null, 'something something'];
+      const expected = ['four', 'score', 'and', 'seven', 'years', 'ago', 'something', 'something'];
+      const results = FormatUtils.extractWords(strs);
+      global.expect(results).toEqual(expected);
+    });
+  });
+});
