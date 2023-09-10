@@ -9,13 +9,23 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies-old": {
     "cheerio": "^1.0.0-rc.11",
     "d3": "^6.7.0",
     "danfojs-node": "^1.1.1",
-    "dotenv": "^16.0.1",
-    "i18n-iso-countries": "^7.4.0",
-    "jupyter-ijavascript-utils": "^1.8.1",
+    "dotenv": "^16.3.1",
+    "esm-hook": "^0.1.4",
+    "i18n-iso-countries": "^7.6.0",
+    "noisejs": "^2.1.0",
+    "sane-topojson": "^4.0.0",
+    "topojson-client": "^3.1.0"
+  },
+  "dependencies": {
+    "d3": "^7.8.5",
+    "dotenv": "^16.3.1",
+    "esm-hook": "^0.1.4",
+    "i18n-iso-countries": "^7.6.0",
+    "jupyter-ijavascript-utils": "^1.40.0",
     "noisejs": "^2.1.0",
     "sane-topojson": "^4.0.0",
     "topojson-client": "^3.1.0"
