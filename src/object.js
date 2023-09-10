@@ -69,6 +69,9 @@ module.exports.evaluateFunctionOrProperty = function evaluateFunctionOrProperty(
   if (!fnOrProp) {
     return (r) => r;
   } else if (typeof fnOrProp === 'string') {
+    if (fnOrProp.match(/[[.]/)) {
+      return (r) => ObjectUtils.fetchObjectProperty(r, fnOrProp, { safeAccess: true });
+    }
     return (r) => r[fnOrProp];
   } else if (typeof fnOrProp === 'function') {
     return fnOrProp;
@@ -518,6 +521,26 @@ module.exports.filterObjectProperties = function filterObjectProperties(list, pr
  * // [ 'Seattle', 'New York', 'Chicago'];
  * ```
  * 
+ * However, this can be helpful to extract values safely from deeply nested values
+ * 
+ * ```
+ * data = [{
+ *    category_id: 'c884a636628bca341e', menu_item_id: 'mi88dc7bb31bc6104f1',
+ *    item_sizes: [{ id: 'mio882f48820281cf4b6', price: 16.09 }]
+ * },
+ * {
+ *    category_id: 'c884a636628bca341e', menu_item_id: 'mi8802b942e737df40d',
+ *    item_sizes: [{ id: 'mio88b60bcd7dd202481', price: 17.09 }]
+ * },
+ * {
+ *    category_id: 'c884a636628bca341e', menu_item_id: 'mi88ff22662b0c0644a',
+ *    item_sizes: [{ id: 'mio88645e98cd8ffc42e', price: 14.99 }]
+ * }];
+ * 
+ * utils.object.extractObjectProperty(data, 'item_sizes[0].price');
+ * // [ 16.09, 17.09, 14.99 ]
+ * ```
+ * 
  * @param {Object|Object[]} objectList - list of objects to extract the property from
  * @param {Function | String} propertyOrFn - Name of the property or accessor function
  * @returns {Array} - single array the values stored in propertyOrFn across all objects in objectList.
@@ -534,8 +557,11 @@ module.exports.extractObjectProperty = function extractObjectProperty(list, prop
 };
 
 /**
- * Similar to a transpose, this finds all the values of a particular property
- * within a list of objects.
+ * Similar to {@link module:object:extractObjectProperty|object.extractObjectProperty} -
+ * this extracts out multiple property/vectors at a time.
+ * 
+ * Note that unlike numpy, there is a key preserved in the result - to better
+ * keep track of what the values were intended to represent.
  * 
  * ```
  * weather = [
@@ -546,8 +572,50 @@ module.exports.extractObjectProperty = function extractObjectProperty(list, prop
  * ];
  * 
  * utils.object.extractObjectProperties(weather, ['city', 'month']);
- * // { city: [ 'Seattle', 'New York', 'Chicago'], month: ['Aug', 'Apr', 'Apr'] }
+ * // { 
+ * //   city: [ 'Seattle', 'New York', 'Chicago'],
+ * //   month: ['Aug', 'Apr', 'Apr']
+ * // }
+ * ```
  * 
+ * Keys will be the the dot notation of the path used `ex: prop[index].value`
+ * or can be explicitly set through a `[key, accessor]` pair
+ * 
+ * ```
+ * utils.object.extractObjectProperties(weather, ['city', ['Month', 'month'], ['precipitation', r => r.precip]]);
+ * // { 
+ * //   city: [ 'Seattle', 'New York', 'Chicago'],
+ * //   month: ['Aug', 'Apr', 'Apr'],
+ * //   precipitation: [0.87, 3.94, 3.62]
+ * // }
+ * ```
+ * 
+ * However, this can be helpful to extract values safely from deeply nested values
+ * 
+ * ```
+ * data = [{
+ *    category_id: 'c884a636628bca341e', menu_item_id: 'mi88dc7bb31bc6104f1',
+ *    item_sizes: [{ id: 'mio882f48820281cf4b6', price: 16.09 }]
+ * },
+ * {
+ *    category_id: 'c884a636628bca341e', menu_item_id: 'mi8802b942e737df40d',
+ *    item_sizes: [{ id: 'mio88b60bcd7dd202481', price: 17.09 }]
+ * },
+ * {
+ *    category_id: 'c884a636628bca341e', menu_item_id: 'mi88ff22662b0c0644a',
+ *    item_sizes: [{ id: 'mio88645e98cd8ffc42e', price: 14.99 }]
+ * }];
+ * 
+ * utils.object.extractObjectProperty(data, ['menu_item_id', 'item_sizes[0].price']);
+ * // {
+ * //   menu_item_id: ['', '', ''],
+ * //   'item_sizes[0].price': [ 16.09, 17.09, 14.99 ]
+ * // }
+ * ```
+ * 
+ * Note that this can also work with maps of properties / paths or functions
+ * 
+ * ```
  * // note you can also pass maps with property name strings, or functions.
  * extractionMap = new Map();
  * extractionMap.set('city', null); // default the property by the key name
@@ -582,6 +650,8 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
       //-- only string properties are accepted as an array
       if (typeof propertyOrFnKey === 'string') {
         propertyEntries.push([propertyOrFnKey, propertyOrFnKey]);
+      } else if (Array.isArray(propertyOrFnKey)) {
+        propertyEntries.push(propertyOrFnKey);
       }
     }
   } else if (propertyOrFnMap instanceof Map) {

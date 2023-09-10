@@ -3395,6 +3395,74 @@ describe('ObjectUtils', () => {
           global.expect(results).toStrictEqual(expected);
         });
       });
+      global.describe('deeply from an object array', () => {
+        const data = [
+          {
+            category_id: 'c884a636628bca341e',
+            menu_item_id: 'mi88dc7bb31bc6104f1',
+            item_sizes: [
+              {
+                id: 'mio882f48820281cf4b6',
+                price: 16.09
+              }
+            ]
+          },
+          {
+            category_id: 'c884a636628bca341e',
+            menu_item_id: 'mi8802b942e737df40d',
+            item_sizes: [
+              {
+                id: 'mio88b60bcd7dd202481',
+                price: 17.09
+              }
+            ]
+          },
+          {
+            category_id: 'c884a636628bca341e',
+            menu_item_id: 'mi88ff22662b0c0644a',
+            item_sizes: [
+              {
+                id: 'mio88645e98cd8ffc42e',
+                price: 14.99
+              }
+            ]
+          }
+        ];
+        const expected = [16.09, 17.09, 14.99];
+        const results = ObjectUtils.extractObjectProperty(data, 'item_sizes[0].price');
+        global.expect(results).toEqual(expected);
+      });
+      global.describe('deeply from an object', () => {
+        const data = [
+          {
+            category_id: 'c884a636628bca341e',
+            menu_item_id: 'mi88dc7bb31bc6104f1',
+            item_sizes: {
+              id: 'mio882f48820281cf4b6',
+              price: 16.09
+            }
+          },
+          {
+            category_id: 'c884a636628bca341e',
+            menu_item_id: 'mi8802b942e737df40d',
+            item_sizes: {
+              id: 'mio88b60bcd7dd202481',
+              price: 17.09
+            }
+          },
+          {
+            category_id: 'c884a636628bca341e',
+            menu_item_id: 'mi88ff22662b0c0644a',
+            item_sizes: {
+              id: 'mio88645e98cd8ffc42e',
+              price: 14.99
+            }
+          }
+        ];
+        const expected = [16.09, 17.09, 14.99];
+        const results = ObjectUtils.extractObjectProperty(data, 'item_sizes.price');
+        global.expect(results).toEqual(expected);
+      });
     });
     global.describe('cannot extract', () => {
       global.it('if the list is empty', () => {
@@ -3458,6 +3526,60 @@ describe('ObjectUtils', () => {
         const results = ObjectUtils.extractObjectProperties(weather, [1, 'city']);
         global.expect(results).toStrictEqual(expected);
       });
+      global.it('docs example 1', () => {
+        const weather = [
+          { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+          null,
+          { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+          { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+        ];
+        const expected = {
+          city: ['Seattle', 'New York', 'Chicago'],
+          month: ['Aug', 'Apr', 'Apr']
+        };
+        const results = ObjectUtils.extractObjectProperties(weather, ['city', 'month']);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('docs example 2', () => {
+        const weather = [
+          { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+          null,
+          { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+          { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 }
+        ];
+        const expected = {
+          city: ['Seattle', 'New York', 'Chicago'],
+          Month: ['Aug', 'Apr', 'Apr'],
+          precipitation: [0.87, 3.94, 3.62]
+        };
+        const results = ObjectUtils.extractObjectProperties(weather,
+          ['city', ['Month', 'month'], ['precipitation', (r) => r.precip]]);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('docs example 3', () => {
+        const data = [{
+          category_id: 'c884a636628bca341e',
+          menu_item_id: 'mi88dc7bb31bc6104f1',
+          item_sizes: [{ id: 'mio882f48820281cf4b6', price: 16.09 }]
+        },
+        {
+          category_id: 'c884a636628bca341e',
+          menu_item_id: 'mi8802b942e737df40d',
+          item_sizes: [{ id: 'mio88b60bcd7dd202481', price: 17.09 }]
+        },
+        {
+          category_id: 'c884a636628bca341e',
+          menu_item_id: 'mi88ff22662b0c0644a',
+          item_sizes: [{ id: 'mio88645e98cd8ffc42e', price: 14.99 }]
+        }];
+        const expected = {
+          menu_item_id: ['mi88dc7bb31bc6104f1', 'mi8802b942e737df40d', 'mi88ff22662b0c0644a'],
+          'item_sizes[0].price': [16.09, 17.09, 14.99]
+        };
+        const results = ObjectUtils.extractObjectProperties(data,
+          ['menu_item_id', 'item_sizes[0].price']);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
     global.describe('can extract', () => {
       global.describe('from a list', () => {
@@ -3488,6 +3610,80 @@ describe('ObjectUtils', () => {
             };
             const results = ObjectUtils.extractObjectProperties(weather, ['city', 'month']);
             global.expect(results).toStrictEqual(expected);
+          });
+          global.it('deeply from an object array', () => {
+            const data = [
+              {
+                category_id: 'c884a636628bca341e',
+                menu_item_id: 'mi88dc7bb31bc6104f1',
+                item_sizes: [
+                  {
+                    id: 'mio882f48820281cf4b6',
+                    price: 16.09
+                  }
+                ]
+              },
+              {
+                category_id: 'c884a636628bca341e',
+                menu_item_id: 'mi8802b942e737df40d',
+                item_sizes: [
+                  {
+                    id: 'mio88b60bcd7dd202481',
+                    price: 17.09
+                  }
+                ]
+              },
+              {
+                category_id: 'c884a636628bca341e',
+                menu_item_id: 'mi88ff22662b0c0644a',
+                item_sizes: [
+                  {
+                    id: 'mio88645e98cd8ffc42e',
+                    price: 14.99
+                  }
+                ]
+              }
+            ];
+            const expected = {
+              category_id: ['c884a636628bca341e', 'c884a636628bca341e', 'c884a636628bca341e'],
+              'item_sizes[0].id': ['mio882f48820281cf4b6', 'mio88b60bcd7dd202481', 'mio88645e98cd8ffc42e'],
+              'item_sizes[0].price': [16.09, 17.09, 14.99]
+            };
+            const results = ObjectUtils.extractObjectProperties(data, ['category_id', 'item_sizes[0].price', 'item_sizes[0].id']);
+            global.expect(results).toEqual(expected);
+          });
+          global.it('deeply from an object', () => {
+            const data = [
+              {
+                category_id: 'c884a636628bca341e',
+                menu_item_id: 'mi88dc7bb31bc6104f1',
+                item_sizes: {
+                  id: 'mio882f48820281cf4b6',
+                  price: 16.09
+                }
+              },
+              {
+                category_id: 'c884a636628bca341e',
+                menu_item_id: 'mi8802b942e737df40d',
+                item_sizes: {
+                  id: 'mio88b60bcd7dd202481',
+                  price: 17.09
+                }
+              },
+              {
+                category_id: 'c884a636628bca341e',
+                menu_item_id: 'mi88ff22662b0c0644a',
+                item_sizes: {
+                  id: 'mio88645e98cd8ffc42e',
+                  price: 14.99
+                }
+              }
+            ];
+            const expected = {
+              'item_sizes.price': [16.09, 17.09, 14.99]
+            };
+            const results = ObjectUtils.extractObjectProperties(data, ['item_sizes.price']);
+            global.expect(results).toEqual(expected);
           });
         });
         global.describe('with a map', () => {
