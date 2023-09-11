@@ -55,6 +55,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New
 
+* 1.41 - object.propertyInherit - to simplify inheriting values from one record to the next
 * 1.40 - array.extract and array.applyArrayValue to allow for extracting values from arrays, transforming them on a separate process and applying them back
 * 1.39 - format.exportWords - to identify distinct words in strings using unicode character properties
 * 1.38 - object.extract / object.apply

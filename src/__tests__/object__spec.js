@@ -3217,6 +3217,125 @@ describe('ObjectUtils', () => {
       });
     });
   });
+  global.describe('propertyInherit', () => {
+    global.describe('can inherit', () => {
+      global.it('simple example', () => {
+        const source = [
+          {
+            text: 'A',
+            section: 'Overview',
+            subSection: undefined
+          },
+          {
+            text: 'B',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'C',
+            section: 'Section A',
+            subSection: undefined
+          },
+          {
+            text: 'D',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'E',
+            section: undefined,
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'F',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'G',
+            section: 'Section B',
+            subSection: undefined },
+          {
+            text: 'H',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'I',
+            section: undefined,
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'J',
+            section: undefined,
+            subSection: undefined
+          }
+        ];
+        const expected = [
+          {
+            text: 'A',
+            section: 'Overview',
+            subSection: undefined
+          },
+          {
+            text: 'B',
+            section: 'Overview',
+            subSection: undefined
+          },
+          {
+            text: 'C',
+            section: 'Section A',
+            subSection: undefined
+          },
+          {
+            text: 'D',
+            section: 'Section A',
+            subSection: undefined
+          },
+          {
+            text: 'E',
+            section: 'Section A',
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'F',
+            section: 'Section A',
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'G',
+            section: 'Section B',
+            subSection: undefined },
+          {
+            text: 'H',
+            section: 'Section B',
+            subSection: undefined
+          },
+          {
+            text: 'I',
+            section: 'Section B',
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'J',
+            section: 'Section B',
+            subSection: 'SubSection 1'
+          }
+        ];
+        const results = ObjectUtils.propertyInherit(source, 'section', 'subSection');
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('cannot work', () => {
+      global.it('if the source list is null', () => {
+        const source = null;
+        const expected = 'propertyInherit(source, ...properties): source must be an array';
+        global.expect(() => {
+          ObjectUtils.propertyInherit(source, 'property1');
+        }).toThrow(expected);
+      });
+    });
+  });
 
   global.describe('union', () => {
     global.describe('can union', () => {

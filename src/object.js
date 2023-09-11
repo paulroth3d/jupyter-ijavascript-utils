@@ -32,6 +32,7 @@ const FormatUtils = require('./format');
  *   * {@link module:object.applyPropertyValues|object.applyPropertyValues} - apply an array of values safely and deeply against a list of objects.
  * * Manipulating objects
  *   * {@link module:object.augmentInherit|augmentInherit(object, augmentFn)} - Applies properties to a collection of objects, 'remembering' the last value - useful for 1d to *D lists.
+ *   * {@link module:object.propertyInherit|object.propertyInherit(object, ...propertyName)} - Copies values from one record to the next if the current value is undefined.
  *   * {@link module:object.selectObjectProperties|selectObjectProperties()} - keep only specific properties
  *   * {@link module:object.filterObjectProperties|filterObjectProperties()} - remove specific properties
  *   * {@link module:object.mapProperties|mapProperties(collection, fn, ...properties)} - map multiple properties at once (like parseInt, or toString)
@@ -608,7 +609,7 @@ module.exports.extractObjectProperty = function extractObjectProperty(list, prop
  * 
  * utils.object.extractObjectProperty(data, ['menu_item_id', 'item_sizes[0].price']);
  * // {
- * //   menu_item_id: ['', '', ''],
+ * //   menu_item_id: ['mi88dc7bb31bc6104f1', 'mi8802b942e737df40d', 'mi88ff22662b0c0644a'],
  * //   'item_sizes[0].price': [ 16.09, 17.09, 14.99 ]
  * // }
  * ```
@@ -1555,8 +1556,8 @@ module.exports.propertyValueSample = function propertyValueSample(objCollection)
  * @param {Object[]} source - the collection of objects to check and augment.
  * @param {Function} augmentFn - function accepting each entry, and returning the properties to "inherit" <br /> or a property with a value of undefined - if it should not be preserved.
  * @returns {Object[]} - new version of the source objects with the properties applied.
- * 
- *  @see {@link module:object.augment|augment()} - Applies properties to an object similar to Map
+ * @see {@link module:object.propertyInherit|object.propertyInherit} - if you want to use values already on the object
+ * @see {@link module:object.augment|augment()} - Applies properties to an object similar to Map
  */
 module.exports.augmentInherit = function augmentInherit(source, augmentFn) {
   const signature = 'augmentInherit(source, augmentFn)';
@@ -1590,6 +1591,56 @@ module.exports.augmentInherit = function augmentInherit(source, augmentFn) {
     lastValue = newValue;
     return result;
   });
+};
+
+/**
+ * Copies values from one record to the next
+ * or "inherits" the value previously used
+ * if the current value is undefined.
+ * 
+ * For example:
+ * 
+ * ```
+ * source = [
+ *  { header: 'Section 1', text: 'A' },
+ *  { header: undefined, text: 'B' },
+ *  { header: undefined, text: 'C' },
+ *  { header: 'Section 2', text: 'D' },
+ *  { header: undefined, text: 'E' },
+ *  { header: undefined, text: 'F' }
+ * ];
+ * utils.object.propertyInherit(source, 'header');
+ * // [
+ * //  { header: 'Section 1', text: 'A' },
+ * //  { header: 'Section 1', text: 'B' },
+ * //  { header: 'Section 1', text: 'C' },
+ * //  { header: 'Section 2', text: 'D' },
+ * //  { header: 'Section 2', text: 'E' },
+ * //  { header: 'Section 2', text: 'F' }
+ * // ];
+ * ```
+ * 
+ * @param {Object[]} source - Collection of objects to inherit values
+ * @param  {...string} properties - properties that should use the previous value if the current value is undefined
+ * @returns {Object[]} - collection of results
+ * @see {@link module:object.augmentInherit|object.augmentInherit} - to create new properties to inherit
+ */
+module.exports.propertyInherit = function propertyInherit(source, ...properties) {
+  const signature = 'propertyInherit(source, ...properties)';
+  if (!Array.isArray(source)) {
+    throw new Error(`${signature}: source must be an array`);
+  }
+
+  if (properties.length < 1) {
+    return (source);
+  }
+
+  const fn = (obj) => properties.reduce(
+    (result, propertyName) => ObjectUtils.objAssign(result, propertyName, obj[propertyName]),
+    {}
+  );
+
+  return ObjectUtils.augmentInherit(source, fn);
 };
 
 /**
