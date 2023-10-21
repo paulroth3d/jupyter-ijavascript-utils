@@ -25,7 +25,7 @@
     "dotenv": "^16.3.1",
     "esm-hook": "^0.1.4",
     "i18n-iso-countries": "^7.6.0",
-    "jupyter-ijavascript-utils": "^1.40.0",
+    "jupyter-ijavascript-utils": "^1.42.0",
     "noisejs": "^2.1.0",
     "sane-topojson": "^4.0.0",
     "topojson-client": "^3.1.0"
