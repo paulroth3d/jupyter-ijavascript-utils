@@ -3325,6 +3325,113 @@ describe('ObjectUtils', () => {
         const results = ObjectUtils.propertyInherit(source, 'section', 'subSection');
         global.expect(results).toStrictEqual(expected);
       });
+
+      global.it('short circuits if no properties provided', () => {
+        const source = [
+          {
+            text: 'A',
+            section: 'Overview',
+            subSection: undefined
+          },
+          {
+            text: 'B',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'C',
+            section: 'Section A',
+            subSection: undefined
+          },
+          {
+            text: 'D',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'E',
+            section: undefined,
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'F',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'G',
+            section: 'Section B',
+            subSection: undefined },
+          {
+            text: 'H',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'I',
+            section: undefined,
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'J',
+            section: undefined,
+            subSection: undefined
+          }
+        ];
+        const expected = [
+          {
+            text: 'A',
+            section: 'Overview',
+            subSection: undefined
+          },
+          {
+            text: 'B',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'C',
+            section: 'Section A',
+            subSection: undefined
+          },
+          {
+            text: 'D',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'E',
+            section: undefined,
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'F',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'G',
+            section: 'Section B',
+            subSection: undefined },
+          {
+            text: 'H',
+            section: undefined,
+            subSection: undefined
+          },
+          {
+            text: 'I',
+            section: undefined,
+            subSection: 'SubSection 1'
+          },
+          {
+            text: 'J',
+            section: undefined,
+            subSection: undefined
+          }
+        ];
+        const results = ObjectUtils.propertyInherit(source);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
     global.describe('cannot work', () => {
       global.it('if the source list is null', () => {
