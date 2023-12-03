@@ -27,11 +27,13 @@ const SetUtils = module.exports;
 /**
  * Mutably adds a value to a set, and then returns the set. (Allowing Chaining)
  * 
- * (If you wish to immutably, use ES6: `{...setA, value1, value2, ...setB, etc...}`)
+ * (If you wish to immutably, use ES6: `{...setA, value1, value2, ...setB, etc...}`<br />
+ * or use the {@link module:set.union|union(set, list|set|iterable)} command below)
  * 
  * @param {set} setTarget - set to add values to
  * @param {any} val - value to add to the set
  * @returns {set} setTarget
+ * @see {@link module:set.union|union(set, list|set|iterable)}
  * @example
  * setA = new Set([1, 2, 3]);
  * utils.array.add(setA, 4, 5, 6); // Set([1, 2, 3, 4, 5, 6])
@@ -50,7 +52,8 @@ module.exports.add = function add(setTarget, ...rest) {
  *
  * @param {set} setTarget - set to add values to
  * @param {iteratable} iteratable - iteratable that can be unioned into the set.
- * @returns {set} setTarget
+ * @param {...iteratable} rest - additional iteratables to add to the union
+ * @returns {set} new set that contains values from all sources
  * @example
  * 
  * setA = new Set([1, 2, 3]);
@@ -61,8 +64,12 @@ module.exports.add = function add(setTarget, ...rest) {
  * listB = [4, 5, 6];
  * array.union(setA, listB) // Set([1, 2, 3, 4, 5, 6])
  * 
+ * setC = new Set([7, 8, 9]);
+ * array.union(setA, listB, setC);
+ * // Set(1, 2, 3, 4, 5, 6, 7, 8, 9);
+ * 
  */
-module.exports.union = function union(setTarget, iteratable) {
+module.exports.union = function union(setTarget, iteratable, ...rest) {
   const target = setTarget instanceof Set ? setTarget : new Set(setTarget);
   if (iteratable) {
     // eslint-disable-next-line
@@ -70,6 +77,7 @@ module.exports.union = function union(setTarget, iteratable) {
       target.add(v);
     }
   }
+  if (rest.length > 0) return SetUtils.union.apply(this, [target, ...rest]);
   return target;
 };
 
@@ -80,7 +88,8 @@ module.exports.union = function union(setTarget, iteratable) {
  * 
  * @param {Set} sourceA - the set to check for common items
  * @param {Set} sourceB - another set to check for common items
- * @returns {Set} - set of items that are in both sourceA and sourceB
+ * @param {...iteratable} rest - additional iteratables to verify
+ * @returns {Set} - set of items that are in all sources
  * @example
  * setA = new Set([1, 2, 3, 4]);
  * setB = new Set([3, 4, 5, 6]);
@@ -88,10 +97,14 @@ module.exports.union = function union(setTarget, iteratable) {
  * 
  * // Note that you can use other iteratable things too
  * utils.set.intersection([1, 2, 3, 4], [3, 4, 5, 6]); // Set([3, 4])
+ * 
+ * setC = new Set([3, 4, 9, 10]);
+ * utils.set.intersection(setA, setB, setC); // Set([3, 4]);
  */
-module.exports.intersection = function intersection(sourceA, sourceB) {
+module.exports.intersection = function intersection(sourceA, sourceB, ...rest) {
   const targetA = sourceA instanceof Set ? sourceA : new Set(sourceA);
   const results = new Set([...sourceB].filter((val) => targetA.has(val)));
+  if (rest.length > 0) return SetUtils.intersection.apply(this, [results, ...rest]);
   return results;
 };
 
