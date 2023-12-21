@@ -45,8 +45,8 @@ const FormatUtils = require('./format');
  *   * {@link module:object.cleanPropertyName|cleanPropertyName()} - create a translation of a specific property name to be accessible.
  *   * {@link module:object.renameProperties|renameProperties()} - Use a translation from old property names to new ones
  * * Flatten object properties
- *   * {@link module:object.collapseSpecificObject|collapseSpecificObject()} - flatten object properties
- *   * {@link module:object.collapse|collapse()} - flatten specific object
+ *   * {@link module:object.collapse|collapse()} - coalesce properties from all nested objects to the base object.
+ *   * {@link module:object.flatten|flatten()} - creates dot notation properties (similar to arrow notation) of all child objects.
  * * Create Map of objects by key
  *   * {@link module:object.mapByProperty|mapByProperty()} -
  *   * {@link module:group.by|group(collection, accessor)}
@@ -463,10 +463,47 @@ const collapseSpecificObject = function collapseSpecificObject(sourceObj, target
  * // 'Hi John, how do you like your F150?
  * @param {Object} objectTree
  * @returns {Object} - object with all the properties added
- * @see #MAX_COLLAPSE_DEPTH - 
+ * @see #MAX_COLLAPSE_DEPTH - library property that defines how far to collapse
  */
 module.exports.collapse = function collapse(targetObj) {
   return collapseSpecificObject({}, targetObj, 0);
+};
+
+/**
+ * Determines whether a value is an Object and not an Array or a Date
+ * @param {any} testValue - value to be tested
+ * @returns {Boolean} - whether the testValue is an Object and not an Array or a Date.
+ * @see https://www.npmjs.com/package/isobject
+ */
+module.exports.isObject = (o) => o != null
+  && typeof o === 'object'
+  && !Array.isArray(o)
+  && !(o instanceof Date);
+
+function flattenSpecificObject(sourceObj, targetObj, prefix) {
+  const cleanTarget = targetObj || {};
+  const cleanPrefix = prefix || '';
+
+  if (!ObjectUtils.isObject(sourceObj)) {
+    return sourceObj;
+  }
+  
+  const sourceKeys = ObjectUtils.keys(sourceObj);
+  
+  sourceKeys.forEach((key) => {
+    const prefixedKey = `${cleanPrefix}${key}`;
+    const keyValue = sourceObj[key];
+    if (ObjectUtils.isObject(keyValue)) {
+      flattenSpecificObject(keyValue, cleanTarget, `${prefixedKey}.`);
+    } else {
+      cleanTarget[prefixedKey] = keyValue;
+    }
+  });
+  return cleanTarget;
+}
+
+module.exports.flatten = function flatten(targetObj) {
+  return flattenSpecificObject(targetObj);
 };
 
 /**
@@ -1429,9 +1466,11 @@ module.exports.mapProperties = function mapProperties(objCollection, formattingF
     ? [objCollection]
     : objCollection;
 
-  const cleanProperties = propertiesToFormat.length > 0 && Array.isArray(propertiesToFormat[0])
-    ? propertiesToFormat[0]
-    : propertiesToFormat;
+  const cleanProperties = propertiesToFormat.length === 0
+    ? ObjectUtils.keys(objCollection)
+    : propertiesToFormat.length > 0 && Array.isArray(propertiesToFormat[0])
+      ? propertiesToFormat[0]
+      : propertiesToFormat;
   
   if (typeof formattingFn !== 'function') {
     throw Error('object.mapProperties(collection, formattingFn, ...propertiesToFormat): formattingFn must be provided');
