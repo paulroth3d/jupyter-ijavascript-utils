@@ -75,6 +75,7 @@ Give it a try here:
 
 ## What's New
 
+* 1.45 - more ways to understand the data - {@link module:aggregate.coalesce|aggregate.coalesce()}, convert properties to arrow/dot notation / reverse it {@link module:object.flatten|object.flatten()} / {@link module:object.expand|object.expand()} and {@link module:object.isObject|object.isObject()}
 * 1.43 - esm module fix since still not supported yet in ijavascript
 * 1.41 - {@link module:object.propertyInherit|object.propertyInherit} - to simplify inheriting values from one record to the next
 * 1.40 - {@link module:array.extract|array.extract} and {@link module:array.applyArrayValues|array.applyArrayValues} to allow for extracting values from arrays, transforming them on a separate process and applying them deeply and safely

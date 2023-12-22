@@ -763,6 +763,79 @@ describe('ObjectUtils', () => {
       });
     });
   });
+
+  global.describe('expand', () => {
+    global.describe('Can expand', () => {
+      global.it('a simple pojo', () => {
+        const value = { first: 'john', last: 'doe' };
+        const expected = { first: 'john', last: 'doe' };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a simple pojo with string properties', () => {
+        const value = {};
+        //-- yes this is against linting, but thats the point
+        value['first'] = 'john'; // eslint-disable-line
+        value['last'] = 'doe'; // eslint-disable-line
+        const expected = { first: 'john', last: 'doe' };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a simple pojo with a child', () => {
+        const value = { first: 'john', last: 'doe', 'friend.first': 'jane', 'friend.last': 'doe' };
+        const expected = { first: 'john', last: 'doe', friend: { first: 'jane', last: 'doe' } };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a complex pojo with a child', () => {
+        const value = {
+          first: 'john',
+          last: 'doe',
+          'friend.first': 'jane',
+          'friend.last': 'doe',
+          'course.id': 'econ-101',
+          'course.professor.id': 10101,
+          'course.professor.first': 'jim',
+          'course.professor.last': 'gifford'
+        };
+        const expected = {
+          first: 'john',
+          last: 'doe',
+          friend: { first: 'jane', last: 'doe' },
+          course: { id: 'econ-101', professor: { id: 10101, first: 'jim', last: 'gifford' } }
+        };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('Cannot Expand', () => {
+      global.it('a null', () => {
+        const value = null;
+        const expected = null;
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a number', () => {
+        const value = 2.2;
+        const expected = 2.2;
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('an array', () => {
+        const value = [0, 1, 2];
+        const expected = [0, 1, 2];
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a date', () => {
+        const value = new Date(2023, 12, 1);
+        const expected = new Date(2023, 12, 1);
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+  });
+
   global.describe('generate schema', () => {
     it('creates a schema for a set of objects', () => {
       const createRecord = (a, b) => ({ a, b });

@@ -96,6 +96,327 @@ global.describe('AggregateUtils', () => {
     });
   });
 
+  global.describe('coalesce', () => {
+    global.describe('examples', () => {
+      global.it('separate props', () => {
+        const collection = [
+          { first: 'john' },
+          { last: 'doe' },
+          { age: 23 }
+        ];
+        const results = AggregateUtils.coalesce(collection);
+        const expected = { first: 'john', last: 'doe', age: 23 };
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('different keys on different objects', () => {
+        const collection = [
+          { first: 'john', last: 'doe', age: 23, failedClass: null },
+          { first: 'jane', last: 'doe', favouriteColor: 'blue', failedClass: null },
+          null,
+          { first: 'bill', favouriteColor: 'red', failedClass: 'asbx-dx2' }
+        ];
+        const results = AggregateUtils.coalesce(collection);
+        //-- now we can understand the types of values we got for each property type
+        const expected = { first: 'john', last: 'doe', age: 23, favouriteColor: 'blue', failedClass: 'asbx-dx2' };
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('custom evaluation fn', () => {
+        const collection = [{ num: null, numB: 1 }, { num: 23, numB: 20 }, { num: 2, numB: 4 }, { num: 100, numB: 6 }];
+        const maxCoalesce = (propertyValue, current) => propertyValue && (!current || propertyValue > current);
+        const results = AggregateUtils.coalesce(collection, maxCoalesce);
+        const expected = { num: 100, numB: 20 };
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('defaultEvalFn', () => {
+      global.describe('should be true', () => {
+        global.it('if only passed a value', () => {
+          const entryValue = 1;
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is 0.000001', () => {
+          const entryValue = 0.000001;
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is 1', () => {
+          const entryValue = 1;
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is -1', () => {
+          const entryValue = -1;
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is an array [0]', () => {
+          const entryValue = [0];
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is an array ["str"]', () => {
+          const entryValue = ['str'];
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is an array ["a", "b"]', () => {
+          const entryValue = ['a', 'b'];
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value a date just after epoch', () => {
+          const entryValue = new Date(10);
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is today', () => {
+          const entryValue = new Date();
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is a map', () => {
+          const entryValue = new Map([['first', 'john']]);
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is a set', () => {
+          const entryValue = new Set([0]);
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is a set', () => {
+          const entryValue = new Set(['str']);
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = true;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+      });
+      global.describe('should be false', () => {
+        global.it('if the value is null', () => {
+          const entryValue = null;
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = false;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is undefined', () => {
+          const entryValue = undefined;
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = false;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is 0', () => {
+          const entryValue = 0;
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = false;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is an empty array', () => {
+          const entryValue = [];
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = false;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+        global.it('if the value is an empty date', () => {
+          const entryValue = new Date(0);
+          const currentValue = undefined;
+          const propName = 'cuca';
+          const entry = {};
+          const expected = false;
+          const results = AggregateUtils.coalesceDefaultEvaluationFn(entryValue, currentValue, propName, entry);
+          global.expect(results).toBe(expected);
+        });
+      });
+    });
+    global.describe('can coalesce', () => {
+      global.describe('with default evalFn', () => {
+        global.it('with a simple object', () => {
+          const collection = [{ val: 1 }];
+          const expected = { val: 1 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with a list of simple objects - value first', () => {
+          const collection = [{ val: 1 }, { val: null }, { val: 2 }];
+          const expected = { val: 1 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with a list of simple objects - value second', () => {
+          const collection = [{ val: null }, { val: 1 }, { val: 2 }];
+          const expected = { val: 1 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with a list of simple objects - value last', () => {
+          const collection = [{ val: undefined }, { val: null }, { val: 1 }];
+          const expected = { val: 1 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with a list of simple objects - and a null', () => {
+          const collection = [{ val: undefined }, null, { val: 1 }];
+          const expected = { val: 1 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('does not allow for updating the coalesced value', () => {
+          const collection = [{ val: undefined }, { val: 1 }, { val: 2 }];
+          const expected = { val: 1 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('with multiple properties', () => {
+          const collection = [{ valA: 1 }, { valB: 2 }, { valA: 'a', valB: 'b' }];
+          const expected = { valA: 1, valB: 2 };
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+      });
+      global.describe('with problematic standard objects', () => {
+        global.it('arrays', () => {
+          const collection = [[1]];
+          const expected = {};
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('maps', () => {
+          const collection = [new Map([['first', 'john']])];
+          const expected = {};
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+        global.it('sets', () => {
+          const collection = [new Set([1])];
+          const expected = {};
+          const results = AggregateUtils.coalesce(collection);
+          global.expect(results).toStrictEqual(expected);
+        });
+      });
+    });
+    global.describe('if passed a custom evalFn', () => {
+      const simpleEval = (val, currentVal) => currentVal ? false : val ? true : false;
+      global.it('with a simple object', () => {
+        const collection = [{ val: 1 }];
+        const expected = { val: 1 };
+        const results = AggregateUtils.coalesce(collection, simpleEval);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with a list of simple objects - value first', () => {
+        const collection = [{ val: 1 }, { val: null }, { val: 2 }];
+        const expected = { val: 1 };
+        const results = AggregateUtils.coalesce(collection, simpleEval);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with a list of simple objects - value second', () => {
+        const collection = [{ val: null }, { val: 1 }, { val: 2 }];
+        const expected = { val: 1 };
+        const results = AggregateUtils.coalesce(collection, simpleEval);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with a list of simple objects - value last', () => {
+        const collection = [{ val: undefined }, { val: null }, { val: 1 }];
+        const expected = { val: 1 };
+        const results = AggregateUtils.coalesce(collection, simpleEval);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can allow for updating the coalesced value', () => {
+        const collection = [{ val: undefined }, { val: 1 }, { val: 2 }];
+        const expected = { val: 2 };
+        const results = AggregateUtils.coalesce(collection, (val) => val ? true : false);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with multiple properties', () => {
+        const collection = [{ valA: 1 }, { valB: 2 }, { valA: 'a', valB: 'b' }];
+        const expected = { valA: 1, valB: 2 };
+        const results = AggregateUtils.coalesce(collection, simpleEval);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('cannot coalesce', () => {
+      global.it('if passed a null', () => {
+        const collection = null;
+        const expected = null;
+        const results = AggregateUtils.coalesce(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if passed undefined', () => {
+        const collection = undefined;
+        const expected = undefined;
+        const results = AggregateUtils.coalesce(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if passed a literal number', () => {
+        const collection = 10;
+        const expected = 10;
+        const results = AggregateUtils.coalesce(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if passed a literal string', () => {
+        const collection = 'cuca';
+        const expected = 'cuca';
+        const results = AggregateUtils.coalesce(collection);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
   global.describe('sum', () => {
     global.it('finds the sum value, with a property', () => {
       const source = initializeWeather();

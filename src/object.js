@@ -8,6 +8,7 @@ const FormatUtils = require('./format');
  * Utility for working with and massaging javascript objects.
  * 
  * * Describe objects
+ *   * {@link module:object.isObject|isObject()} - Determine if a given value is an Object and not a Number, String, Array or Date
  *   * {@link module:object.keys|keys()} - Safely get the keys of an object or list of objects
  *   * {@link module:object.getObjectPropertyTypes|getObjectPropertyTypes()} - describe the properties of a list of objects
  *   * {@link module:object.generateSchema|generateSchema()} - generate a schema / describe properties of a list of objects
@@ -47,6 +48,7 @@ const FormatUtils = require('./format');
  * * Flatten object properties
  *   * {@link module:object.collapse|collapse()} - coalesce properties from all nested objects to the base object.
  *   * {@link module:object.flatten|flatten()} - creates dot notation properties (similar to arrow notation) of all child objects.
+ *   * {@link module:object.expand|expand()}  - expands dot notation properties onto sub children (inverse of flatten)
  * * Create Map of objects by key
  *   * {@link module:object.mapByProperty|mapByProperty()} -
  *   * {@link module:group.by|group(collection, accessor)}
@@ -473,14 +475,40 @@ module.exports.collapse = function collapse(targetObj) {
  * Determines whether a value is an Object and not an Array or a Date
  * @param {any} testValue - value to be tested
  * @returns {Boolean} - whether the testValue is an Object and not an Array or a Date.
- * @see https://www.npmjs.com/package/isobject
  */
 module.exports.isObject = (o) => o != null
   && typeof o === 'object'
   && !Array.isArray(o)
   && !(o instanceof Date);
 
-function flattenSpecificObject(sourceObj, targetObj, prefix) {
+/**
+ * While originally intended as a sub-implementation for Flatten,
+ * this was exposed in case additional cases ever arose.
+ * 
+ * Example:
+ * 
+ * ```
+ * student = { first: 'john', last: 'doe' };
+ * friend = { first: 'jane', last: 'doe' };
+ * course = { id: 'econ-101', professor: { id: 10101, first: 'jim', last: 'gifford' }};
+ * flattenedObj = {};
+ * flattenedObj = utils.object.flattenObjectOntoAnother(student, flattenedObj);
+ * // { first: 'john', last: 'doe' }
+ * flattenedObj = utils.object.flattenObjectOntoAnother(friend, flattenedObj, 'friend.');
+ * // { first: 'john', last: 'doe', 'friend.first': 'jane', 'friend.last': 'doe' };
+ * flattenedObj = utils.object.flattenObjectOntoAnother(course, flattenedObj, 'course.');
+ * // { first: 'john', last: 'doe', 'friend.first': 'jane', 'friend.last': 'doe', 'course.id': 'econ-101',
+ * //   'course.professor.id': 10101, 'course.professor.first': 'jim', 'course.professor.last': 'gifford' };
+ * ```
+ * 
+ * See flatten for a an alternative to achieve the same result.
+ * 
+ * @param {Object} sourceObj - The object to review for source values / properties
+ * @param {Object} [targetObj={}] - The object to apply the dot notation properties onto
+ * @param {String} [prefix=''] - the string prefix of any properties found on source, to apply onto target
+ * @returns {Object} - the targetObj with the properties applied (in place)
+ */
+module.exports.flattenObjectOntoAnother = function flattenObjectOntoAnother(sourceObj, targetObj, prefix) {
   const cleanTarget = targetObj || {};
   const cleanPrefix = prefix || '';
 
@@ -494,16 +522,79 @@ function flattenSpecificObject(sourceObj, targetObj, prefix) {
     const prefixedKey = `${cleanPrefix}${key}`;
     const keyValue = sourceObj[key];
     if (ObjectUtils.isObject(keyValue)) {
-      flattenSpecificObject(keyValue, cleanTarget, `${prefixedKey}.`);
+      ObjectUtils.flattenObjectOntoAnother(keyValue, cleanTarget, `${prefixedKey}.`);
     } else {
       cleanTarget[prefixedKey] = keyValue;
     }
   });
   return cleanTarget;
-}
+};
 
+/**
+ * Flattens an object and sub-objects into dot notation - to have easier time understanding schemas and explainations.
+ * 
+ * example:
+ * 
+ * ```
+ * student = {
+ *  first: 'john', last: 'doe',
+ *  friend: { first: 'jane', last: 'doe' },
+ *  course: { id: 'econ-101', professor: { id: 10101, first: 'jim', last: 'gifford' }}
+ * };
+ * 
+ * flattenedObj = utils.object.flatten(student);
+ * // {
+ * //   first: 'john', last: 'doe',
+ * //   'friend.first': 'jane', 'friend.last': 'doe',
+ * //   'course.id': 'econ-101',
+ * //     'course.professor.id': 10101, 'course.professor.first': 'jim', 'course.professor.last': 'gifford'
+ * // };
+ * ```
+ * @param {Object} targetObj - Object with all properties and sub-objects to flatten.
+ * @returns {Object} - New object with dot notation properties
+ * @see {@link module:object.expand|expand()} - as the inverse
+ * @see {@link module:describe.describeObjects|describeObjects(collection, options)} - as a way to describe the values provided
+ */
 module.exports.flatten = function flatten(targetObj) {
-  return flattenSpecificObject(targetObj);
+  return ObjectUtils.flattenObjectOntoAnother(targetObj);
+};
+
+/**
+ * The inverse of Flatten - this takes an object with dot notation properties,
+ * and creates the sub-objects as necessary to contain the properties defined.
+ * 
+ * Example:
+ * 
+ * ```
+ * flattenedObj = {
+ *   first: 'john', last: 'doe',
+ *   'friend.first': 'jane', 'friend.last': 'doe',
+ *   'course.id': 'econ-101',
+ *     'course.professor.id': 10101, 'course.professor.first': 'jim', 'course.professor.last': 'gifford'
+ * };
+ * 
+ * expandedObj = utils.object.expand(flattenedObj);
+ * // {
+ * //  first: 'john', last: 'doe',
+ * //  friend: { first: 'jane', last: 'doe' },
+ * //  course: { id: 'econ-101', professor: { id: 10101, first: 'jim', last: 'gifford' }}
+ * // };
+ * ```
+ * 
+ * @param {Object} targetObj - a flattened object (with dot notation properties) to be expanded
+ * @returns {Object} - a new object with sub-objects for each of the dot-notation entries
+ * @see {@link module:object.flatten|flatten()} - as the inverse
+ */
+module.exports.expand = function expand(targetObj) {
+  if (!ObjectUtils.isObject(targetObj)) return targetObj;
+
+  const result = {};
+  const keys = ObjectUtils.keys(targetObj);
+  keys.forEach((key) => {
+    ObjectUtils.applyPropertyValue(result, key, targetObj[key]);
+  });
+
+  return result;
 };
 
 /**
