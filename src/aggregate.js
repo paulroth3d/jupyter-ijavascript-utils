@@ -38,6 +38,7 @@ const FormatUtils = require('./format');
  *   * {@link module:aggregate.length|length()} - Number of records found in the collection
  *   * {@link module:aggregate.first|first()} - returns first non-null/undefined in list
  *   * {@link module:aggregate.sum|sum()} - sum of a collection
+ *   * {@link module:aggregate.coalesce|coalesce()} - given a list of objects, creates a single object with first non-null value of all properties
  * * Functional
  *   * {@link module:aggregate.deferCollection|deferCollection(function, bindArg, bindArg, ...)} - bind a function with arguments
  * * Percentile
@@ -387,6 +388,87 @@ module.exports.max = function max(collection, accessor) {
 module.exports.sum = function sum(collection, accessor) {
   const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
   return collection.reduce((current, val) => current + cleanedFunc(val), 0);
+};
+
+module.exports.coalesceDefaultEvaluationFn = function coalesceDefaultEvaluationFn(
+  entryValue,
+  currentCoalescedValue,
+  entryPropName,
+  entry
+) {
+  if (currentCoalescedValue) return false;
+  if (entryValue == null) return false;
+  if (entryValue === 0) return false;
+  if (Array.isArray(entryValue) && entryValue.length === 0) return false;
+  if (entryValue instanceof Date && entryValue.getTime() === 0) return false;
+  return true;
+};
+
+/**
+ * Coalesces a collection of objects to return a single object that has the first non-null value
+ * of all unique properties found in the collection.
+ * 
+ * example:
+ * 
+ * ```
+ * collection = [
+ *  { first: 'john' },
+ *  { last: 'doe' },
+ *  { age: 23 }
+ * ];
+ * utils.agg.coalesce(collection);
+ * // { first: 'john', last: 'doe', age: 23 };
+ * ```
+ * 
+ * this also works to show example values for a large number of objects
+ * 
+ * ```
+ * collection = [
+ *   { first: 'john', last: 'doe', age: 23, failedClass: null },
+ *   { first: 'jane', last: 'doe', favouriteColor: 'blue', failedClass: null },
+ *   null,
+ *   { first: 'bill', favouriteColor: 'red', failedClass: 'asbx-dx2' }
+ * ];
+ * utils.agg.coalesce(collection);
+ * //-- now we can understand the types of values we got for each property type
+ * // { first: 'john', last: 'doe', age: 23, favouriteColor: 'blue', failedClass: 'asbx-dx2' }
+ * ```
+ * 
+ * Note - an optional evaluationFn can be provided, that can be used to determine
+ * if a value is collected.
+ * 
+ * ```
+ * collection = [{ val: null }, { val: 23 }, { val: 2 }, { val: 100 }];
+ * maxCoalesce = (val, current) => val && (!current || val > current);
+ * utils.agg.coalesce(collection, maxCoalesce);
+ * // { val: 100 }
+ * ```
+ * 
+ * @param {Array} collection - 
+ * @param {Function} [evaluationFn] - optional function that defines the value collected
+ *  - function(entryValue:any, currentCoalescedValue:any, entryPropName:string, entry:Object):Boolean
+ * @returns {Object} - Object with all properties found, and the first 
+ * @see {@link module:describe.describeObjects|describe.describeObjects(collection, options)} - to better understand values found
+ */
+module.exports.coalesce = function coalesce(collection, evaluationFn) {
+  if (!Array.isArray(collection)) return collection;
+  const cleanEvalFn = evaluationFn || AggregateUtils.coalesceDefaultEvaluationFn;
+
+  const result = {};
+
+  collection.forEach((entry) => {
+    if (ObjectUtils.isObject(entry)) {
+      Object.keys(entry).forEach((key) => {
+        const entryValue = entry[key];
+        const currentCoalescedValue = result[key];
+        if (cleanEvalFn(entryValue, currentCoalescedValue, key, entry)) {
+          result[key] = entryValue;
+        }
+      });
+    }
+  });
+
+  return result;
 };
 
 /**

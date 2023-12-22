@@ -615,7 +615,228 @@ describe('ObjectUtils', () => {
       global.expect(result).not.toHaveProperty('targetValue', 'test');
     });
   });
-  describe('generate schema', () => {
+  describe('isObject', () => {
+    global.describe('valid objects', () => {
+      global.it('Map', () => {
+        const val = new Map([['firstname', 'john']]);
+        const expected = true;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('pojo', () => {
+        const val = { firstName: 'john' };
+        const expected = true;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('class', () => {
+        class Person {
+          constructor(firstName, lastName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+          }
+        }
+        const val = new Person('john', 'doe');
+        const expected = true;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+    global.describe('invalid objects', () => {
+      global.it('null', () => {
+        const val = null;
+        const expected = false;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('undefined', () => {
+        const val = undefined;
+        const expected = false;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('string', () => {
+        const val = 'string';
+        const expected = false;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('number', () => {
+        const val = 2;
+        const expected = false;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('array', () => {
+        const val = [0, 1, 2];
+        const expected = false;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+      global.it('date', () => {
+        const val = new Date(2023, 12, 1);
+        const expected = false;
+        const result = ObjectUtils.isObject(val);
+        global.expect(result).toBe(expected);
+      });
+    });
+  });
+  global.describe('flatten', () => {
+    global.describe('can flatten', () => {
+      global.it('a simple pojo', () => {
+        const val = {
+          firstName: 'john',
+          lastName: 'doe'
+        };
+        const expected = {
+          firstName: 'john',
+          lastName: 'doe'
+        };
+        const results = ObjectUtils.flatten(val);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('a simple 2 deep pojo', () => {
+        const val = {
+          firstName: 'john',
+          lastName: 'doe',
+          class: {
+            name: 'econ-101'
+          }
+        };
+        const expected = {
+          firstName: 'john',
+          lastName: 'doe',
+          'class.name': 'econ-101'
+        };
+        const results = ObjectUtils.flatten(val);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('multiple nested objects', () => {
+        const val = {
+          firstName: 'john',
+          lastName: 'doe',
+          class: {
+            name: 'econ-101',
+            professor: {
+              firstName: 'amy',
+              lastName: 'gillespie',
+              id: 10101
+            }
+          },
+          subObject: {
+            first: 'first',
+            last: 'last'
+          },
+          array: [0, 1, 2, 3]
+        };
+        const expected = {
+          firstName: 'john',
+          lastName: 'doe',
+          'class.name': 'econ-101',
+          'class.professor.firstName': 'amy',
+          'class.professor.lastName': 'gillespie',
+          'class.professor.id': 10101,
+          'subObject.first': 'first',
+          'subObject.last': 'last',
+          array: [0, 1, 2, 3]
+        };
+        const results = ObjectUtils.flatten(val);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('does not flatten a null', () => {
+        const val = null;
+        const expected = null;
+        const results = ObjectUtils.flatten(val);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('does not flatten an array', () => {
+        const val = [0, 1, 2];
+        const expected = [0, 1, 2];
+        const results = ObjectUtils.flatten(val);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('does not flatten a date', () => {
+        const val = new Date(2023, 12, 1);
+        const expected = new Date(2023, 12, 1);
+        const results = ObjectUtils.flatten(val);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('expand', () => {
+    global.describe('Can expand', () => {
+      global.it('a simple pojo', () => {
+        const value = { first: 'john', last: 'doe' };
+        const expected = { first: 'john', last: 'doe' };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a simple pojo with string properties', () => {
+        const value = {};
+        //-- yes this is against linting, but thats the point
+        value['first'] = 'john'; // eslint-disable-line
+        value['last'] = 'doe'; // eslint-disable-line
+        const expected = { first: 'john', last: 'doe' };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a simple pojo with a child', () => {
+        const value = { first: 'john', last: 'doe', 'friend.first': 'jane', 'friend.last': 'doe' };
+        const expected = { first: 'john', last: 'doe', friend: { first: 'jane', last: 'doe' } };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a complex pojo with a child', () => {
+        const value = {
+          first: 'john',
+          last: 'doe',
+          'friend.first': 'jane',
+          'friend.last': 'doe',
+          'course.id': 'econ-101',
+          'course.professor.id': 10101,
+          'course.professor.first': 'jim',
+          'course.professor.last': 'gifford'
+        };
+        const expected = {
+          first: 'john',
+          last: 'doe',
+          friend: { first: 'jane', last: 'doe' },
+          course: { id: 'econ-101', professor: { id: 10101, first: 'jim', last: 'gifford' } }
+        };
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('Cannot Expand', () => {
+      global.it('a null', () => {
+        const value = null;
+        const expected = null;
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a number', () => {
+        const value = 2.2;
+        const expected = 2.2;
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('an array', () => {
+        const value = [0, 1, 2];
+        const expected = [0, 1, 2];
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('a date', () => {
+        const value = new Date(2023, 12, 1);
+        const expected = new Date(2023, 12, 1);
+        const result = ObjectUtils.expand(value);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('generate schema', () => {
     it('creates a schema for a set of objects', () => {
       const createRecord = (a, b) => ({ a, b });
       const targetObj = [
@@ -2367,11 +2588,11 @@ describe('ObjectUtils', () => {
           { id: '500', age: '25', name: 'p5' }
         ];
         const expected = [
-          { id: '100', age: '21', name: 'p1' },
-          { id: '200', age: '22', name: 'p2' },
-          { id: '300', age: '23', name: 'p3' },
-          { id: '400', age: '24', name: 'p4' },
-          { id: '500', age: '25', name: 'p5' }
+          { id: 100, age: 21, name: Number.NaN },
+          { id: 200, age: 22, name: Number.NaN },
+          { id: 300, age: 23, name: Number.NaN },
+          { id: 400, age: 24, name: Number.NaN },
+          { id: 500, age: 25, name: Number.NaN }
         ];
         const parseNum = (str) => parseInt(str, 10);
         const results = ObjectUtils.mapProperties(list, parseNum);

@@ -14,6 +14,12 @@ const ObjectUtils = require('./object');
  *  * {@link module:describe.describeNumbers|describeNumbers(collection, options)} - describes a series of numbers
  *  * {@link module:describe.describeDates|describeDates(collection, options)} - describes a series of dates
  * 
+ * Most commonly, {@link module:describe.describeObjects|object.describeObjects(collection, options)} is used -
+ * as it describes with the appropriate type for each property.
+ * 
+ * Note, if there are multiple child objects within the collection, {@link module:object.flatten|object.flatten()}
+ * will bring those values down through dot notation (similar to arrow format) - so they can be better described.
+ * 
  * @module describe
  * @exports describe
  */
@@ -500,6 +506,9 @@ class DateDescription extends SeriesDescription {
  *  age     |number|3    |25                      |23                      |24                      |    |            |      
  *  enrolled|Date  |3    |2022-01-05T00:00:00.000Z|2022-01-01T00:00:00.000Z|2022-01-03T00:00:00.000Z|    |            |         
  *  
+ * Note, if there are multiple child objects within the collection, {@link module:object.flatten|object.flatten()}
+ * will bring those values down through dot notation (similar to arrow format) - so they can be better described.
+ * 
  * @param {Object[]} collection - Collection of objects to be described
  * @param {Object} options - options to be used
  * @param {String[]} options.include - string list of fields to include in the description
@@ -508,6 +517,7 @@ class DateDescription extends SeriesDescription {
  *      - that will override how that property is parsed.
  * @param {Number} maxRows - max rows to consider before halting
  * @returns {SeriesDescription[]} - collection of descriptions - one for each property
+ * @see {@link module:object.flatten|object.flatten()} - if the collection of objects have a large number of child objects.
  */
 module.exports.describeObjects = function describeObjects(collection, options) {
   const cleanCollection = Array.isArray(collection) ? collection : [collection];
