@@ -24,9 +24,9 @@
     "prep:docdash": "cp docResources/docdash/layout.tmpl node_modules/docdash/tmpl/layout.tmpl && rm -rf docResources/notebooks/node_modules",
     "open:coverage": "open ./coverage/lcov-report/index.html",
     "open:docs": "open ./docs/index.html",
-    "webpack:clean": "rm dist/bundle.js",
-    "webpack:build-dev": "webpack --mode development",
-    "webpack:build": "webpack --mode production"
+    "webpack:clean": "echo 'TODO'",
+    "webpack:build-dev": "webpack --mode development --config webpack.config.dev.js",
+    "webpack:build": "webpack --mode production --config webpack.config.prod.js"
   },
   "repository": {
     "type": "git",

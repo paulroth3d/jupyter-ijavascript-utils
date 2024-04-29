@@ -5,7 +5,7 @@ const config = {
   entry: './src/webpack.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: 'jupyter-ijavascript-utils.debug.js'
   },
   resolve: {
     fallback: {
