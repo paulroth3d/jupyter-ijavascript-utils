@@ -5,7 +5,7 @@ const config = {
   entry: './src/webpack.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'jupyter-ijavascript-utils.js'
+    filename: 'bundle.js'
   },
   resolve: {
     fallback: {
@@ -25,7 +25,7 @@ const config = {
         test: /\.js$/,
         use: 'babel-loader',
         exclude: /node_modules/
-      }
+      } 
     ]
   }
 };
