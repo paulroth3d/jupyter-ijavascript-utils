@@ -27,7 +27,14 @@ require('./_types/global');
  *   * {@link module:array.pickRows|array.pickRows} - picks a row from a 2d array
  *   * {@link module:array.pickColumns|array.pickColumns} - picks a column from a 2d array
  *   * {@link module:array.pick|array.pick} - picks either/or rows and columns
+ * * Extracting Array Values
  *   * {@link module:array.extract|array.extract} - synonym to array.pick to pick either a row or column from an array
+ *   * {@link module:array.multiLineSubstr|array.multiLineSubstr} - Extract
+ *        {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr|Substr}
+ *        from a multi-line string or array of strings
+ *   * {@link module:array.multiLineSubstring|array.multiLineSubstring} - Extract 
+ *        {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring|Substring}
+ *        from a multi-line string or array of strings
  * * Applying a value
  *   * {@link module:array.applyArrayValue|array.applyArrayValue} - applies a value deeply into an array safely
  *   * {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
@@ -912,11 +919,19 @@ module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions
  * 5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
  * ```
  * 
- * This can be a bit hard to parse, because the space delimiter is a valid character in city.
+ * This can be a bit hard to parse, because the space delimiter is a valid character in the `city` column, ex: `New York`.
+ * 
+ * Instead, we can use the starting index and number of characters, to extract the data out
  * 
  * ```
- * const myArray = utils.array.parseHardSpacedArray(hardSpacedString);
+ * const carModelYears = ArrayUtils.multiLineSubstr(hardSpacedString, 102);
+ * // ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989'];
+ * const ipAddresses = ArrayUtils.multiLineSubstr(hardSpacedString, 73, 14);
+ * // ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
  * ```
+ * @see {@link module:array.multiLineSubstring|multiLineSubstring} - to use start and end character positions
+ * 
+ * {@link module:array.size|array.size(size, default)} - generate array of a specific size and CONSISTENT default value
  * 
  * @param {String|String[]} str - multi-line string or array of strings
  * @param {Number} start - the starting index to substr
@@ -936,15 +951,51 @@ module.exports.multiLineSubstr = function multiLineSubstr(target, start, length)
   return lines.map((line) => line.substr(start, length));
 };
 
-module.exports.multiLineSubstring = function multiLineSubstring(target, start, end) {
+/**
+ * Parse a fixed length table of strings (often in markdown format)
+ * 
+ * For example, say you got a string formatted like this:
+ * 
+ * ```
+ * hardSpacedString = `
+ * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+ * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+ * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+ * 3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+ * 4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+ * 5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+ * ```
+ * 
+ * This can be a bit hard to parse, because the space delimiter is a valid character in the `city` column, ex: `New York`.
+ * 
+ * Instead, we can use the starting index and number of characters, to extract the data out.
+ * 
+ * Note, this function uses the starting and ending character positions, to extract,
+ * where {@link module:array.multiLineSubstr|multiLineSubstr} - uses the start and character length instead.
+ * 
+ * ```
+ * const carModelYears = ArrayUtils.multiLineSubstring(hardSpacedString, 102);
+ * // ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989'];
+ * const ipAddresses = ArrayUtils.multiLineSubstring(hardSpacedString, 73, 87);
+ * // ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+ * ```
+ * @see {@link module:array.multiLineSubstr|multiLineSubstr} - to use character start and length
+ * 
+ * @param {String|String[]} str - multi-line string or array of strings
+ * @param {Number} startPosition - the starting index to extract out - using the standard `substring` method
+ * @param {Number} [endPosition] - the ending endex to extract out
+ * @returns {String[]} - substr values from each line
+ */
+module.exports.multiLineSubstring = function multiLineSubstring(target, startPosition, endPosition) {
   const lines = (() => {
     if (Array.isArray(target)) {
       return target;
     } else if (typeof target === 'string') {
       return target.trim().split(/\n/);
     }
-    throw Error('multiLineSubstring(target, start, length): target is assumed a multi-line string or array of strings');
+    throw Error('multiLineSubstring(target, startPosition, endPosition): target is assumed a multi-line string or array of strings');
   })();
   
-  return lines.map((line) => line.substring(start, end));
+  return lines.map((line) => line.substring(startPosition, endPosition));
 };

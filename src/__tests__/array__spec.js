@@ -1623,7 +1623,7 @@ line3`;
     global.describe('cant', () => {
       global.it('extract from an object', () => {
         const target = {};
-        const expected = 'multiLineSubstring(target, start, length): target is assumed a multi-line string or array of strings';
+        const expected = 'multiLineSubstring(target, startPosition, endPosition): target is assumed a multi-line string or array of strings';
         global.expect(() => ArrayUtils.multiLineSubstring(target, 0)).toThrow(expected);
       });
     });
