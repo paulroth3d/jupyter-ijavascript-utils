@@ -1265,6 +1265,7 @@ describe('ArrayUtils', () => {
       global.expect(result).toStrictEqual(expected);
     });
   });
+
   global.describe('applyArrayValues', () => {
     global.describe('can apply', () => {
       global.it('can apply a single value to multiple objects', () => {
@@ -1422,6 +1423,208 @@ describe('ArrayUtils', () => {
         };
         const results = ArrayUtils.applyArrayValues(targetObj, path, value);
         global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('multiLineSubstr', () => {
+    const docsStr = `
+id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+-- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+    const docsArray = [
+      'id first_name last_name  city        email                        gender ip_address      airport_code car_model_year',
+      '-- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------',
+      '1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          ',
+      '2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          ',
+      '3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          ',
+      '4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          ',
+      '5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          '
+    ];
+
+    global.describe('with the docs example', () => {
+      global.it('with an explicit start', () => {
+        const expected = ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989'];
+        const results = ArrayUtils.multiLineSubstr(docsStr, 102);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an explicit start and end', () => {
+        const expected = ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+        const results = ArrayUtils.multiLineSubstr(docsStr, 73, 14);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can extract from a string', () => {
+      global.it('with an explicit start', () => {
+        const expected = ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989'];
+        const results = ArrayUtils.multiLineSubstr(docsStr, 102);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an explicit start and end', () => {
+        const expected = ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+        const results = ArrayUtils.multiLineSubstr(docsStr, 73, 14);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with a single string', () => {
+        const lineString = 'id first_name last_name  city        email                        gender ip_address      airport_code car_model_year';
+        const expected = ['ip_address    '];
+        const results = ArrayUtils.multiLineSubstr(lineString, 73, 14);
+        // console.log(expected);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can extract from an array of strings', () => {
+      global.it('with an explicit start', () => {
+        const expected = ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989          '];
+        const results = ArrayUtils.multiLineSubstr(docsArray, 102);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an explicit start and end', () => {
+        const expected = ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+        const results = ArrayUtils.multiLineSubstr(docsArray, 73, 14);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('from the beginning', () => {
+        const str = `
+line1
+line2
+line3`;
+        const expected = ['line1', 'line2', 'line3'];
+        const results = ArrayUtils.multiLineSubstr(str, 0);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('past the end', () => {
+        const str = `
+line1
+line2
+line3`;
+        const expected = ['', '', ''];
+        const results = ArrayUtils.multiLineSubstr(str, 100);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an array of a single string', () => {
+        const lineString = ['id first_name last_name  city        email                        gender ip_address      airport_code car_model_year'];
+        const expected = ['ip_address    '];
+        const results = ArrayUtils.multiLineSubstr(lineString, 73, 14);
+        // console.log(expected);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('cant', () => {
+      global.it('extract from an object', () => {
+        const target = {};
+        const expected = 'multiLineSubstr(target, start, length): target is assumed a multi-line string or array of strings';
+        global.expect(() => ArrayUtils.multiLineSubstr(target, 0)).toThrow(expected);
+      });
+    });
+  });
+  
+  global.describe('multiLineSubstring', () => {
+    const docsStr = `
+id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+-- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+    const docsArray = [
+      'id first_name last_name  city        email                        gender ip_address      airport_code car_model_year',
+      '-- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------',
+      '1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          ',
+      '2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          ',
+      '3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          ',
+      '4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          ',
+      '5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          '
+    ];
+
+    global.describe('with the docs example', () => {
+      global.it('with an explicit start', () => {
+        const expected = ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989'];
+        const results = ArrayUtils.multiLineSubstring(docsStr, 102);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an explicit start and end', () => {
+        const expected = ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+        const results = ArrayUtils.multiLineSubstring(docsStr, 73, 87);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can extract from a string', () => {
+      global.it('with an explicit start', () => {
+        const expected = ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989'];
+        const results = ArrayUtils.multiLineSubstring(docsStr, 102);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an explicit start and end', () => {
+        const expected = ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+        const results = ArrayUtils.multiLineSubstring(docsStr, 73, 87);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('from the beginning', () => {
+        const str = `
+line1
+line2
+line3`;
+        const expected = ['line1', 'line2', 'line3'];
+        const results = ArrayUtils.multiLineSubstring(str, 0);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('past the end', () => {
+        const str = `
+line1
+line2
+line3`;
+        const expected = ['', '', ''];
+        const results = ArrayUtils.multiLineSubstring(str, 100);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with a single string', () => {
+        const lineString = 'id first_name last_name  city        email                        gender ip_address      airport_code car_model_year';
+        const expected = ['ip_address    '];
+        const results = ArrayUtils.multiLineSubstring(lineString, 73, 87);
+        // console.log(expected);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can extract from an array of strings', () => {
+      global.it('with an explicit start', () => {
+        const expected = ['car_model_year', '--------------', '2003          ', '2005          ', '2004          ', '1993          ', '1989          '];
+        const results = ArrayUtils.multiLineSubstring(docsArray, 102);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an explicit start and end', () => {
+        const expected = ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
+        const results = ArrayUtils.multiLineSubstring(docsArray, 73, 87);
+        // console.log(JSON.stringify(results).replace(/"/g, "'"));
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('with an array of a single string', () => {
+        const lineString = ['id first_name last_name  city        email                        gender ip_address      airport_code car_model_year'];
+        const expected = ['ip_address    '];
+        const results = ArrayUtils.multiLineSubstring(lineString, 73, 87);
+        // console.log(expected);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('cant', () => {
+      global.it('extract from an object', () => {
+        const target = {};
+        const expected = 'multiLineSubstring(target, start, length): target is assumed a multi-line string or array of strings';
+        global.expect(() => ArrayUtils.multiLineSubstring(target, 0)).toThrow(expected);
       });
     });
   });

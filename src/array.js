@@ -895,3 +895,56 @@ module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions
 
   return results;
 };
+
+/**
+ * Parse a fixed length table of strings (often in markdown format)
+ * 
+ * For example, say you got a string formatted like this:
+ * 
+ * ```
+ * hardSpacedString = `
+ * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+ * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+ * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+ * 3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+ * 4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+ * 5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+ * ```
+ * 
+ * This can be a bit hard to parse, because the space delimiter is a valid character in city.
+ * 
+ * ```
+ * const myArray = utils.array.parseHardSpacedArray(hardSpacedString);
+ * ```
+ * 
+ * @param {String|String[]} str - multi-line string or array of strings
+ * @param {Number} start - the starting index to substr
+ * @param {Number} [len=0] - optional length of string to substr
+ * @returns {String[]} - substr values from each line
+ */
+module.exports.multiLineSubstr = function multiLineSubstr(target, start, length) {
+  const lines = (() => {
+    if (Array.isArray(target)) {
+      return target;
+    } else if (typeof target === 'string') {
+      return target.trim().split(/\n/);
+    }
+    throw Error('multiLineSubstr(target, start, length): target is assumed a multi-line string or array of strings');
+  })();
+  
+  return lines.map((line) => line.substr(start, length));
+};
+
+module.exports.multiLineSubstring = function multiLineSubstring(target, start, end) {
+  const lines = (() => {
+    if (Array.isArray(target)) {
+      return target;
+    } else if (typeof target === 'string') {
+      return target.trim().split(/\n/);
+    }
+    throw Error('multiLineSubstring(target, start, length): target is assumed a multi-line string or array of strings');
+  })();
+  
+  return lines.map((line) => line.substring(start, end));
+};
