@@ -1341,3 +1341,22 @@ module.exports.extractWords = function extractWords(strToExtractFrom, additional
   
   return cleanStrings.reduce((result, str) => [...result, ...((str || '').match(regex) || [])], []);
 };
+
+/**
+ * Returns the reduce at each step along the way.
+ * 
+ * 
+ * 
+ * This can also be helpful with coming up with complex
+ *  {@link module:array.arrange|array.arrange(size, start, step)}
+ * collections.
+ */
+module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue = null) {
+  const results = [initialValue];
+  let currentResult = initialValue;
+  list.forEach((val, index) => {
+    currentResult = fn(currentResult, val, index, list);
+    results.push(currentResult);
+  });
+  return results;
+};
