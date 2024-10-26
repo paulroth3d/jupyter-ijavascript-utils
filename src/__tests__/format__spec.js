@@ -3279,28 +3279,6 @@ global.describe('format', () => {
       });
     });
   });
-
-  global.describe('multiStepReduce', () => {
-    const simpleList = [1, 2, 3, 4, 5];
-    const simpleAdd = (a, b) => a + b;
-    const simpleSubtract = (a, b) => a - b;
-    global.it('can add across multiple values', () => {
-      const expected = [0, 1, 3, 6, 10, 15];
-      const results = FormatUtils.multiStepReduce(simpleList, simpleAdd, 0);
-      global.expect(results).toStrictEqual(expected);
-    });
-    global.it('can subtract across multiple values', () => {
-      const expected = [15, 14, 12, 9, 5, 0];
-      const results = FormatUtils.multiStepReduce(simpleList, simpleSubtract, 15);
-      global.expect(results).toStrictEqual(expected);
-    });
-    global.it('can add strings', () => {
-      const list = ['hello', ' how', ' are', ' you', '?'];
-      const expected = ['', 'hello', 'hello how', 'hello how are', 'hello how are you', 'hello how are you?'];
-      const results = FormatUtils.multiStepReduce(list, simpleAdd, '');
-      global.expect(results).toStrictEqual(expected);
-    });
-  });
 });
 
 global.describe('extractWords', () => {

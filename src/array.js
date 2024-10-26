@@ -35,6 +35,7 @@ require('./_types/global');
  *   * {@link module:array.multiLineSubstring|array.multiLineSubstring} - Extract 
  *        {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring|Substring}
  *        from a multi-line string or array of strings
+ *   * {@link module:array.multiStepReduce|array.multiStepReduce} - Performs reduce, and returns the value of reduce at each step
  * * Applying a value
  *   * {@link module:array.applyArrayValue|array.applyArrayValue} - applies a value deeply into an array safely
  *   * {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
@@ -930,6 +931,7 @@ module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions
  * // ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
  * ```
  * @see {@link module:array.multiLineSubstring|multiLineSubstring} - to use start and end character positions
+ * @see {@link module:array.multiStepReduce|multiStepReduce} - for example on how to extract data from hard spaced arrays
  * 
  * {@link module:array.size|array.size(size, default)} - generate array of a specific size and CONSISTENT default value
  * 
@@ -943,7 +945,7 @@ module.exports.multiLineSubstr = function multiLineSubstr(target, start, length)
     if (Array.isArray(target)) {
       return target;
     } else if (typeof target === 'string') {
-      return target.trim().split(/\n/);
+      return target.split(/\n/); //.trim()
     }
     throw Error('multiLineSubstr(target, start, length): target is assumed a multi-line string or array of strings');
   })();
@@ -981,6 +983,7 @@ module.exports.multiLineSubstr = function multiLineSubstr(target, start, length)
  * // ['ip_address    ', '--------------', '81.118.170.238', '255.140.25.31 ', '149.240.166.18', '132.67.225.203', '247.123.242.49'];
  * ```
  * @see {@link module:array.multiLineSubstr|multiLineSubstr} - to use character start and length
+ * @see {@link module:array.multiStepReduce|multiStepReduce} - for example on how to extract data from hard spaced arrays
  * 
  * @param {String|String[]} str - multi-line string or array of strings
  * @param {Number} startPosition - the starting index to extract out - using the standard `substring` method
@@ -998,4 +1001,99 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
   })();
   
   return lines.map((line) => line.substring(startPosition, endPosition));
+};
+
+/**
+ * Returns the reduce at each step along the way.
+ * 
+ * For example, if you have a set of column widths
+ * and would like to know how wide the table is after each column.
+ * 
+ * For example:
+ * 
+ * ```
+ * hardSpacedString = `
+ * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+ * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+ * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+ * 3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+ * 4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+ * 5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+ * 
+ * columnWidths = [3, 11, 11, 12, 29, 7, 16, 13, 15];
+ * sumFn = (a, b) => a + b;
+ * 
+ * //-- get the starting position for each column,
+ * //-- ex: column 3 is sum of columnWidths[0..3] or 0 + 3 + 11 + 11 or 25
+ * columnStops = utils.format.multiStepReduce( columnWidths, (a,b) => a + b, 0);
+ * // [0, 3, 14, 25, 37, 66, 73, 89, 102, 117];
+ * ```
+ * 
+ * We can then pair with the column widths - to get exactly the starting position and width of each column.
+ * 
+ * ```
+ * substrPairs = columnWidths.map((value, index) => [columnStops[index], value]);
+ * // [[0, 3], [3, 11], [14, 11], [25, 12], [37, 29], [66, 7], [73, 16], [89, 13], [102, 15]];
+ * ```
+ * 
+ * Now that we know how the starting positions for each of the columns, we can try picking one column out:
+ * 
+ * ```
+ * //-- we can get a single column like this:
+ * cityStartingCharacter = substrPairs[3][0]; // 25
+ * cityColumnLength = substrPairs[3][0]; // 12
+ * 
+ * cityData = ArrayUtils.multiLineSubstr(hardSpacedString, cityStartingCharacter, cityColumnLength);
+ * // ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', 'Lainqu      ', 'Los Angeles ']
+ * ```
+ * 
+ * Or we can get all columns with something like this:
+ * 
+ * ```
+ * results = substrPairs.map(
+ *  ([startingPos, length]) => ArrayUtils.multiLineSubstr(hardSpacedString, startingPos, length)
+ * );
+ * 
+ * [['id ', '-- ', '1  ', '2  ', '3  ', '4  ', '5  '],
+ * ['first_name ', '---------- ', 'Thekla     ', 'Lexi       ', 'Shawna     ', 'Gin...', ...],
+ * ['last_name  ', '---------- ', 'Brokenshaw ', 'Dugall     ', 'Burghill   ', 'Twe...', ...],
+ * ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', ...],
+ * ['email                        ', '---------------------------- ', 'tbrokenshaw0...', ...],
+ * ['gender ', '------ ', 'Female ', 'Female ', 'Female ', 'Female ', 'Female '],
+ * ['ip_address      ', '--------------- ', '81.118.170.238  ', '255.140.25.31   ', ...],
+ * ['airport_code ', '------------ ', 'CXI          ', 'LBH          ', 'GBA       ...', ...],
+ * ['car_model_year', '--------------', '2003          ', '2005          ', '2004  ...', ...]]
+ * ```
+ * 
+ * We can then transpose the array to give us the format we might expect (non DataFrame centric)
+ * 
+ * ```
+ * resultsData = utils.array.transpose(results);
+ * 
+ * utils.table(resultsData).render();
+ * ```
+ * 
+ * 0  |1          |2          |3           |4                            |5      |6               |7            |8             
+-- |--         |--         |--          |--                           |--     |--              |--           |--            
+id |first_name |last_name  |city        |email                        |gender |ip_address      |airport_code |car_model_year
+-- |---------- |---------- |----------- |---------------------------- |------ |--------------- |------------ |--------------
+1  |Thekla     |Brokenshaw |Chicago     |tbrokenshaw0@kickstarter.com |Female |81.118.170.238  |CXI          |2003          
+2  |Lexi       |Dugall     |New York    |ldugall1@fc2.com             |Female |255.140.25.31   |LBH          |2005          
+3  |Shawna     |Burghill   |London      |sburghill2@scribd.com        |Female |149.240.166.189 |GBA          |2004          
+4  |Ginger     |Tween      |Lainqu      |gtween3@wordpress.com        |Female |132.67.225.203  |EMS          |1993          
+5  |Elbertina  |Setford    |Los Angeles |esetford4@ted.com            |Female |247.123.242.49  |MEK          |1989          
+ * 
+ * This can also be helpful with coming up with complex
+ *  {@link module:array.arrange|array.arrange(size, start, step)}
+ * collections.
+ */
+module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue = undefined) {
+  const results = [initialValue];
+  let currentResult = initialValue;
+  list.forEach((val, index) => {
+    currentResult = fn(currentResult, val, index, list);
+    results.push(currentResult);
+  });
+  return results;
 };
