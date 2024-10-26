@@ -13,7 +13,6 @@
  * * {@link ChainContainer#close|.close()} - gets the value of the current chain
  * * {@link ChainContainer#chain|.chain(function)} - where it is passed the value, and returns a new Chain with that value.
  * * {@link ChainContainer#errorHandler|.errorHandler(fn)} - custom function called if an error is ever thrown
- * * {@link ChainContainer#debug|.debug()} - console.logs the current value, and continues the chain with that value
  * 
  * Along with methods that can iterate on each element, assuming the value in the chain is an Array.
  * 
@@ -32,10 +31,12 @@
  * 
  * There may be times you want to run side effects, or replace the value entirely. (This isn't common, but may be useful on occasion)
  * 
+ * * {@link ChainContainer#debug|.debug()} - continues with the current value, but executes a console.log first
  * * {@link ChainContainer#execute|.execute(function)} - where it calls a function, but doesn't pass on the result.
  *        <br /> (This is useful for side-effects, like writing to files)
  * * {@link ChainContainer#replace|.replace(value)} - replaces the value in the chain with a literal value,
  *        regardless of the previous value.
+ * * {@link ChainContainer#toArray|.toArray()} - assuming the current value is an interatable, converts it to an array.
  * 
  * For example:
  * 
@@ -524,6 +525,25 @@ class ChainContainer {
    */
   close() {
     return this.value;
+  }
+
+  /**
+   * Converts the current value to an array to be further chained.
+   * (Assumes it is iteratable);
+   * 
+   * Example: 
+   * 
+   * ```
+   * new Chain(document.querySelectorAll('div'))
+   *  .toArray()
+   *  .execute((passedValue) => Array.isArray(passedValue))
+   *  .close(); // [... list of div elements on the page]
+   * ```
+   * 
+   * @returns {ChainContainer}
+   */
+  toArray() {
+    return new ChainContainer(Array.from(this.value));
   }
 
   //-- private methods
