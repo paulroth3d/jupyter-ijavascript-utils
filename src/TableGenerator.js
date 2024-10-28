@@ -337,8 +337,6 @@ class TableGenerator {
     this.#isTransposed = false;
   }
 
-  //--    GETTER SETTERS
-
   /**
    * Assigns the data to be used in generating the table.
    * @param {Array} collection -
@@ -362,6 +360,101 @@ class TableGenerator {
    */
   data(col) {
     this.#data = col || [];
+    return this;
+  }
+
+  /**
+   * Assigns the data by importing in a collections of objects.
+   * 
+   * Note: this is the default functionality / syntatic sugar - as data is expected as a collection of objects.
+   * @param {Object[]} collection -
+   * @returns {TableGenerator} 
+   * @example
+   * 
+   * dataSet = [{temp: 37, type: 'C'}, {temp: 310, type: 'K'}, {temp: 98, type: 'F'}];
+   * 
+   * //-- simple example where the temp property is converted, and type property overwritten
+   * new TableGenerator()
+   *  .data(dataSet)
+   *  .generateMarkdown()
+   * 
+   * //-- gives
+   * temp | type
+   * ---- | ----
+   * 37   | C   
+   * 310  | K   
+   * 98   | F   
+   */
+  fromObjectCollection(data) {
+    this.data(data);
+    return this;
+  }
+
+  /**
+   * Assigns the data by importing a 2 dimensional array.
+   * 
+   * If headers are not provided, then the first row of the collection is assumed.
+   * 
+   * If there is no header provided (by default) - then the first row is assumed.
+   * 
+   * ```
+   * dataSet = [ [ 'temp', 'type' ], [ 37, 'C' ], [ 310, 'K' ], [ 98, 'F' ] ];
+   * 
+   * new TableGenerator()
+   *  .fromArray(dataSet)
+   *  .generateMarkdown();
+   * ```
+   * 
+   * temp | type
+   * ---- | ----
+   * 37   | C   
+   * 310  | K   
+   * 98   | F   
+   * 
+   * However, if there is a header provided, it assumes there is none in teh first row.
+   * 
+   * ```
+   * headers = [ 'temp', 'type' ];
+   * dataSet = [[ 37, 'C' ], [ 310, 'K' ], [ 98, 'F' ] ];
+   * 
+   * new TableGenerator()
+   *  .fromArray(dataSet)
+   *  .generateMarkdown();
+   * ```
+   * 
+   * temp | type
+   * ---- | ----
+   * 37   | C   
+   * 310  | K   
+   * 98   | F   
+   * 
+   * @param {Array<Array>} collection -
+   * @returns {TableGenerator}
+   * @see {TableGenerator.data}
+   * @see {TableGenerator.fromList}
+   */
+  fromArray(arrayCollection, headers = null) {
+    this.data(ObjectUtils.objectCollectionFromArray(arrayCollection, headers));
+
+    return this;
+  }
+
+  /**
+   * Assigns the data from a single 1 dimensional array.
+   * 
+   * Is syntatic sugar to simply wrap the 1 dimensional array into a 2 dimensional array.
+   * 
+   * @param {Array} array1d 
+   * @returns {TableGenerator}
+   * @see {TableGenerator.fromArray}
+  */
+  fromList(array1d) {
+    this.data(array1d.map((v) => ({ _: v })));
+    return this;
+  }
+
+  fromDataFrameObject(dataFrameObject) {
+    this.data(ObjectUtils.objectCollectionFromDataFrameObject(dataFrameObject));
     return this;
   }
 
@@ -1507,7 +1600,11 @@ class TableGenerator {
    */
   generateArray2() {
     const results = this.prepare();
-    return [[...results.headers], ...results.data];
+    return [results.headers, ...results.data];
+  }
+
+  generateObjectCollection() {
+    return ObjectUtils.objectCollectionFromArray(this.generateArray2);
   }
 
   static hasRenderedCSS = false;
