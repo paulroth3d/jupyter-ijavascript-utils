@@ -1068,6 +1068,12 @@ module.exports.limitLines = function limitLines(str, toLine, fromLine, lineSepar
     : JSON.stringify(str || '', FormatUtils.mapReplacer, 2);
   const cleanLine = lineSeparator || '\n';
 
+  if (!toLine) {
+    return cleanStr.split(cleanLine)
+      .slice(fromLine || 0)
+      .join(cleanLine);
+  }
+
   return cleanStr.split(cleanLine)
     .slice(fromLine || 0, toLine)
     .join(cleanLine);
