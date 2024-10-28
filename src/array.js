@@ -1097,3 +1097,82 @@ module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue
   });
   return results;
 };
+
+// https://www.npmjs.com/package/peekable-array-iterator
+class PeekableArrayIterator {
+  constructor(array, start = 0) {
+    this.array = array;
+    this.i = start;
+  }
+
+  [Symbol.iterator]() { return this; }
+
+  /* eslint-disable wrap-iife */
+  next() {
+    const self = this;
+    if (this.i < this.array.length) {
+      this.peek = (function* peek() {
+        for (let peekI = self.i; peekI < self.array.length; peekI += 1) {
+          yield self.array[peekI];
+        }
+      })();
+
+      this.i += 1;
+      return { done: false, value: this.array[this.i] };
+    }
+    return { done: true, value: undefined };
+  }
+  /* eslint-enable wrap-iife */
+}
+module.exports.PeekableArrayIterator = PeekableArrayIterator;
+
+const delayedFn = (fn, ...rest) => () => {
+  const cleanRest = rest.length === 1 && Array.isArray(rest[0]) ? rest[0] : rest;
+  return fn.apply(this, cleanRest);
+};
+module.exports.delayedFn = delayedFn;
+
+module.exports.chainFunctions = (fn, rows) => {
+  const delayedFunctions = rows.map((val) => delayedFn(fn, val));
+  const delayedIterator = delayedFunctions.values();
+  const rootPromise = Promise.resolve();
+  const answers = [];
+  const callNext = (result) => {
+    answers.push(result);
+    const nextVal = delayedIterator.next();
+    const { value: delayedFunction, done } = nextVal;
+    if (!done) {
+      return Promise.resolve(delayedFunction()).then(callNext);
+    }
+    console.log({ answers });
+    return Promise.resolve(answers);
+  };
+  rootPromise.then(callNext);
+  return rootPromise;
+};
+
+// eslint-disable-next-line no-unused-vars
+const asyncWaitAndChain = (seconds, fn, rows) => {
+  const delayedFunctions = rows.map((val) => delayedFn(fn, val));
+  const delayedIterator = delayedFunctions.values();
+  const answers = [];
+  
+  return new Promise((resolve, reject) => {
+    const callNext = (result) => {
+      answers.push(result);
+      try {
+        const nextVal = delayedIterator.next();
+        const { value: delayedFunction, done } = nextVal;
+        if (!done) {
+          return asyncWaitAndChain(seconds, delayedFunction).then(callNext);
+        }
+        console.log({ answers });
+        resolve(answers);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    return callNext();
+  });
+};
+module.exports.asyncWaitAndChain = this.asyncWaitAndChain;
