@@ -478,6 +478,7 @@ module.exports.applyArrayValues = function applyArrayValues(collection, path, va
  * @param {Number} length - the length of the new array
  * @param {any} defaultValue - the new value to put in each cell
  * @see {@link module:array.arrange} for values based on the index
+ * @see https://stackoverflow.com/questions/35578478/array-prototype-fill-with-object-passes-reference-and-not-new-instance
  * @returns {Array} - an array of length size with default values
  */
 module.exports.size = function size(length, defaultValue) {
@@ -1098,10 +1099,39 @@ module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue
   return results;
 };
 
-// https://www.npmjs.com/package/peekable-array-iterator
+/**
+ * Create an iterator for an array that allows for peeking next values.
+ * 
+ * @see https://www.npmjs.com/package/peekable-array-iterator
+ * @example
+ * 
+ * source = [0, 1, 2, 3, 4, 5];
+ * 
+ * // also quite helpful for document.querySelector(...)
+ * itr = new utils.array.PeekableArrayIterator(source);
+ * 
+ * console.log(itr.next()); // { done: false, value: 0 }
+ * 
+ * //-- peek without moving the iterator
+ * const peekItr = itr.peek();
+ * console.log(peekItr.next()); // { done: false, value: 1 }
+ * console.log(peekItr.next()); // { done: false, value: 2 }
+ * console.log(peekItr.next()); // { done: false, value: 3 }
+ * console.log(peekItr.next()); // { done: false, value: 4 }
+ * console.log(peekItr.next()); // { done: true, value: 5 }
+ * 
+ * //-- move the main iterator
+ * console.log(itr.next()); // { done: false, value: 1 }
+ */
 class PeekableArrayIterator {
-  constructor(array, start = 0) {
-    this.array = array;
+  /**
+   * Constructor
+   * 
+   * @param {Iterable} array - something we can iterate over
+   * @param {Number} start - the starting index
+   */
+  constructor(source, start = 0) {
+    this.array = Array.isArray(source) ? source : [...source];
     this.i = start;
   }
 
@@ -1126,6 +1156,27 @@ class PeekableArrayIterator {
 }
 module.exports.PeekableArrayIterator = PeekableArrayIterator;
 
+/**
+ * Defines a function to be called with arguments, without using `bind()`
+ * 
+ * Example, these are equivalent, but the delayedFn does not mess with `this`
+ * 
+ * sayFn = (...rest) => console.log(...rest);
+ * arguments = [0, 1, 2, 3, 4, 5];
+ * 
+ * delayedFnA = sayFn.bind(globalThis, arguments);
+ * ...
+ * delayedFnA(); // consoles: [0, 1, 2, 3, 4, 5];
+ * 
+ * delayedFnB = utils.array.delayedFn(sayFn, arguments);
+ * ...
+ * delayedFnB(); // consoles: [0, 1, 2, 3, 4, 5];
+ * 
+ * @param {Function} fn - Function to be executed at a later time
+ * @param  {...any} rest - arguments to be passed to fn
+ * @returns {Function} - function that can be called to execute fn with the arguments
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+ */
 const delayedFn = (fn, ...rest) => () => {
   const cleanRest = rest.length === 1 && Array.isArray(rest[0]) ? rest[0] : rest;
   return fn.apply(this, cleanRest);
