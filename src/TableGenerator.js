@@ -1369,7 +1369,12 @@ class TableGenerator {
 
     const printBody = (collection) => collection
       .map((dataRow, rowIndex) => {
-        const record = this.#data[rowIndex];
+        let record;
+        if (this.#limit > 0) {
+          record = results.headers.reduce((result, header, headerIndex) => ObjectUtils.assign(result, header, dataRow[headerIndex]), {});
+        } else {
+          record = this.#data[rowIndex];
+        }
         const rowStyle = !styleRowFn ? null : styleRowFn({ rowIndex, row: dataRow, record }) || '';
 
         return `<tr ${printInlineCSS(rowStyle)}>\n\t`
