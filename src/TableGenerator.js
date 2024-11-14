@@ -1370,7 +1370,7 @@ class TableGenerator {
     const printBody = (collection) => collection
       .map((dataRow, rowIndex) => {
         let record;
-        if (this.#limit > 0) {
+        if (this.#filterFn) {
           record = results.headers.reduce((result, header, headerIndex) => ObjectUtils.assign(result, header, dataRow[headerIndex]), {});
         } else {
           record = this.#data[rowIndex];
