@@ -41,6 +41,12 @@ require('./_types/global');
  *   * {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
  * * Understanding Values
  *   * {@link module:array.isMultiDimensional|array.isMultiDimensional} - determines if an array is multi-dimensional
+ * * Custom Iterators
+ *   * {@link module:array.PeekableArrayIterator|PeekableArrayIterator} - Iterator that lets you peek ahead while not moving the iterator.
+ * * Iterating over values
+ *   * {@link module:array.delayedFn|delayedFn} - Similar to Function.bind() - you specify a function and arguments only to be called when you ask
+ *   * {@link module:array.chainFunctions|chainFunctions} - Chain a set of functions to be called one after another.
+ *   * {@link module:array.asyncWaitAndChain|asyncWaitAndChain} - Chains a set of functions to run one after another, but with a delay between.
  * 
  * @module array
  * @exports array
@@ -1162,18 +1168,25 @@ class PeekableArrayIterator {
 module.exports.PeekableArrayIterator = PeekableArrayIterator;
 
 /**
- * Defines a function to be called with arguments, without using `bind()`
+ * Defines a function and arguments that will only be called,
+ * only when the delayedFunction is called.
+ * 
+ * (Similar to Function.bind - but supports Function.call(1,2,3) or Function.apply([1,2,3]) syntax)
  * 
  * Example, these are equivalent, but the delayedFn does not mess with `this`
  * 
  * sayFn = (...rest) => console.log(...rest);
  * arguments = [0, 1, 2, 3, 4, 5];
  * 
+ * Spy(sayFn);
+ * 
  * delayedFnA = sayFn.bind(globalThis, arguments);
  * ...
+ * sayFn.calledCount; // 0
  * delayedFnA(); // consoles: [0, 1, 2, 3, 4, 5];
+ * sayFn.calledCount; // 1
  * 
- * delayedFnB = utils.array.delayedFn(sayFn, arguments);
+ * delayedFnB = utils.array.delayedFn(sayFn, 0, 1, 2, 3, 4, 5);
  * ...
  * delayedFnB(); // consoles: [0, 1, 2, 3, 4, 5];
  * 
@@ -1252,11 +1265,20 @@ const chainFunctions = (fn, rows) => {
 };
 module.exports.chainFunctions = chainFunctions;
 
-const asyncWaitThenRun = (seconds, fn) => new Promise(
+/**
+ * Executes a function with arguments after a few second delay.
+ * 
+ * @param {Number} seconds - number of seconds to wait before calling
+ * @param {Function} fn - Function to call
+ * @param {...any} rest - arguments to send to the function when it is executed. 
+ * @returns {@Promise<any>} - that then executes when the timer is up
+ * @private
+ */
+const asyncWaitThenRun = (seconds, fn, ...rest) => new Promise(
   (resolve, reject) => {
     setTimeout(() => {
       try {
-        const results = fn();
+        const results = fn(...rest);
         if (results instanceof Promise) {
           results.then((promiseResults) => {
             resolve(promiseResults);
@@ -1297,6 +1319,8 @@ const asyncWaitThenRun = (seconds, fn) => new Promise(
  * @param {Function} fn - function to be called for each row of rows
  * @param {Array<any[]>} rows - Array where each row are arguments to be applied to fn
  * @returns {Promise<any>} - promise that will resolve when the last delayed function finishes
+ * @see {@link module:array.chainFunctions|chainFunctions} - to execute methods right after each other.
+* @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to execute more than one at a time.
  */
 // eslint-disable-next-line no-unused-vars
 const asyncWaitAndChain = (seconds, fn, rows) => {
