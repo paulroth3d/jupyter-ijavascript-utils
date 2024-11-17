@@ -1137,7 +1137,7 @@ class PeekableArrayIterator {
    * @param {Iterable} array - something we can iterate over
    * @param {Number} start - the starting index
    */
-  constructor(source, start = 0) {
+  constructor(source, start = -1) {
     this.array = Array.isArray(source) ? source : [...source];
     this.i = start;
   }
@@ -1148,13 +1148,14 @@ class PeekableArrayIterator {
   next() {
     const self = this;
     this.peek = (function* peek() {
-      for (let peekI = self.i; peekI < self.array.length; peekI += 1) {
+      for (let peekI = self.i + 1; peekI < self.array.length; peekI += 1) {
         yield self.array[peekI];
       }
+      return undefined;
     })();
 
     this.i += 1;
-    return { done: this.i >= this.array.length, value: this.array[this.i] };
+    return { done: this.i >= this.array.length - 1, value: this.array[this.i] };
   }
   /* eslint-enable wrap-iife */
 }
@@ -1216,24 +1217,49 @@ module.exports.delayedFn = delayedFn;
  * @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to have more than one active at a time.
  * @see {@link module:array.asyncWaitAndChain|asyncWaitAndChain} - if you would like a delay between executions
  */
-module.exports.chainFunctions = (fn, rows) => {
+const chainFunctions = (fn, rows) => {
   const delayedFunctions = rows.map((val) => delayedFn(fn, val));
   const delayedIterator = delayedFunctions.values();
-  const rootPromise = Promise.resolve();
   const answers = [];
-  const callNext = (result) => {
-    answers.push(result);
-    const nextVal = delayedIterator.next();
-    const { value: delayedFunction, done } = nextVal;
-    if (!done) {
-      return Promise.resolve(delayedFunction()).then(callNext);
-    }
-    console.log({ answers });
-    return Promise.resolve(answers);
-  };
-  rootPromise.then(callNext);
-  return rootPromise;
+  let isFirstCall = true;
+
+  return new Promise((resolve, reject) => {
+    const callNext = (result) => {
+      if (isFirstCall) {
+        isFirstCall = false;
+      } else {
+        answers.push(result);
+      }
+      try {
+        const nextVal = delayedIterator.next();
+        const { value: delayedFunction, done } = nextVal;
+        if (!done) {
+          const fnResult = delayedFunction();
+          if (fnResult instanceof Promise) {
+            fnResult.then(callNext);
+          } else {
+            callNext(fnResult);
+          }
+        } else {
+          resolve(answers);
+        }
+      } catch (err) {
+        reject(err);
+      }
+    };
+    return callNext();
+  });
 };
+module.exports.chainFunctions = chainFunctions;
+
+const asyncWaitThenRun = (seconds, fn) => new Promise(
+  (resolve, reject) => {
+    setTimeout(() => {
+      const results = fn();
+      resolve(results);
+    }, seconds * 1000);
+  }
+);
 
 /**
  * Similar to chainFunctions - in that only one delayed function will occur at a time,
@@ -1267,17 +1293,21 @@ const asyncWaitAndChain = (seconds, fn, rows) => {
   const delayedFunctions = rows.map((val) => delayedFn(fn, val));
   const delayedIterator = delayedFunctions.values();
   const answers = [];
+  let isFirstCall = true;
   
   return new Promise((resolve, reject) => {
     const callNext = (result) => {
-      answers.push(result);
+      if (isFirstCall) {
+        isFirstCall = false;
+      } else {
+        answers.push(result);
+      }
       try {
         const nextVal = delayedIterator.next();
         const { value: delayedFunction, done } = nextVal;
         if (!done) {
-          return asyncWaitAndChain(seconds, delayedFunction).then(callNext);
+          return asyncWaitThenRun(seconds, delayedFunction).then(callNext);
         }
-        console.log({ answers });
         resolve(answers);
       } catch (err) {
         reject(err);
@@ -1286,4 +1316,4 @@ const asyncWaitAndChain = (seconds, fn, rows) => {
     return callNext();
   });
 };
-module.exports.asyncWaitAndChain = this.asyncWaitAndChain;
+module.exports.asyncWaitAndChain = asyncWaitAndChain;
