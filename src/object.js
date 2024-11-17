@@ -1550,7 +1550,7 @@ module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, 
  * @param {Object[]} objCollection - object or multiple objects that should have properties formatted
  * @param {Function} formattingFn - function to apply to all the properties specified
  * @param  {...any} propertiesToFormat - list of properties to apply the formatting function
- * @returns {Object[] - clone of objCollection with properties mapped
+ * @returns {Object[]} - clone of objCollection with properties mapped
  */
 module.exports.mapProperties = function mapProperties(objCollection, formattingFn, ...propertiesToFormat) {
   const cleanCollection = !Array.isArray(objCollection)
@@ -1860,3 +1860,333 @@ module.exports.union = function union(source1, source2) {
 
   return results;
 };
+
+/**
+ * Converts a 2d array to a collection of objects.
+ * 
+ * For Example:
+ * ```
+ * weather = [
+ *   [ 'id', 'city', 'month', 'precip' ],
+ *   [ 1, 'Seattle', 'Aug', 0.87 ],
+ *   [ 0, 'Seattle', 'Apr', 2.68 ],
+ *   [ 2, 'Seattle', 'Dec', 5.31 ]
+ * ]
+ * 
+ * utils.object.objectCollectionFromArray(weather);
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ * //   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * // ];
+ * ```
+ * 
+ * Note that the headers can be optionally provided separately.
+ * 
+ * ```
+ * weather = [
+ *   [ 1, 'Seattle', 'Aug', 0.87 ],
+ *   [ 0, 'Seattle', 'Apr', 2.68 ],
+ *   [ 2, 'Seattle', 'Dec', 5.31 ]
+ * ];
+ * headers = [ 'id', 'city', 'month', 'precip' ];
+ * 
+ * utils.object.objectCollectionFromArray(weather, headers);
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ * //   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * // ];
+ * ```
+ * 
+ * @param {Array<Array>} arrayCollection - 2d collection of values
+ * @param {String[]} [headers] - Optional set of headers to use if not present in first row 0
+ * @returns {Object[]} - list of objects
+ * @see {@link module:object.objectCollectionFromArray|objectCollectionFromArray}
+ * @see {@link module:object.objectCollectionToArray|objectCollectionToArray}
+ * @see {@link module:object.objectCollectionFromDataFrameObject|objectCollectionFromDataFrameObject}
+ * @see {@link module:object.objectCollectionToDataFrameObject|objectCollectionToDataFrameObject}
+ */
+module.exports.objectCollectionFromArray = function objectCollectionFromArray(arrayCollection, headers = null) {
+  let cleanHeaders;
+  let cleanValues;
+  
+  if (!Array.isArray(arrayCollection)) throw Error('objectCollectionFromArray: expected collection to be a 2 dimensional array');
+  
+  if (!headers) {
+    const [arrayCollectionHeaders, ...arrayCollectionValues] = arrayCollection;
+    cleanHeaders = arrayCollectionHeaders;
+    cleanValues = arrayCollectionValues;
+  } else {
+    cleanHeaders = headers;
+    cleanValues = arrayCollection;
+  }
+
+  /* eslint-disable arrow-body-style */
+  const newData = cleanValues.map((row) => {
+    return cleanHeaders.reduce((result, header, index) => {
+      return ObjectUtils.assign(result, header, row[index]);
+    }, {});
+  });
+  /* eslint-enable arrow-body-style */
+
+  return newData;
+};
+
+/**
+ * Converts a 2d array to a collection of objects.
+ * 
+ * For Example:
+ * ```
+ * weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * ];
+ * 
+ * utils.object.objectCollectionToArray(weather);
+ * // [
+ * //   [ 'id', 'city', 'month', 'precip' ],
+ * //   [ 1, 'Seattle', 'Aug', 0.87 ],
+ * //   [ 0, 'Seattle', 'Apr', 2.68 ],
+ * //   [ 2, 'Seattle', 'Dec', 5.31 ]
+ * // ]
+ * ```
+ * 
+ * @param {Array<Array>} arrayCollection - 2d collection of values
+ * @param {String[]?} headers - Optional set of headers to use if not present in first row 0
+ * @returns {Object[]} - list of objects
+ * @see {@link module:object.objectCollectionFromArray|objectCollectionFromArray}
+ * @see {@link module:object.objectCollectionToArray|objectCollectionToArray}
+ * @see {@link module:object.objectCollectionFromDataFrameObject|objectCollectionFromDataFrameObject}
+ * @see {@link module:object.objectCollectionToDataFrameObject|objectCollectionToDataFrameObject}
+ */
+module.exports.objectCollectionToArray = function objectCollectionToArray(objectCollection) {
+  if (!Array.isArray(objectCollection)) throw Error('objectCollectionToArray: expected collection to be a collection of objects');
+
+  //-- create the result array in advance for performance 
+  // https://stackoverflow.com/questions/35578478/array-prototype-fill-with-object-passes-reference-and-not-new-instance
+
+  const keys = ObjectUtils.keys(objectCollection);
+
+  const finalResult = new Array(objectCollection.length + 1);
+  finalResult[0] = keys;
+
+  for (let i = 1; i <= objectCollection.length; i += 1) {
+    finalResult[i] = new Array(keys.length);
+  }
+
+  objectCollection.forEach((obj, objIndex) => {
+    const rowResult = finalResult[objIndex + 1];
+    keys.forEach((key, keyIndex) => {
+      rowResult[keyIndex] = obj[key];
+    });
+  });
+  return finalResult;
+};
+
+/**
+ * Convert a DataFrame Object into a collection of objects.
+ * 
+ * This uses properties with 1d tensor lists
+ * and converts them to a list of objects.
+ * 
+ * ```
+ * const weather = {
+ *   id: [1, 0, 2],
+ *   city: ['Seattle',  'Seattle', 'Seattle'],
+ *   month: ['Aug', 'Apr', 'Dec'],
+ *   precip: [0.87, 2.68, 5.31]
+ * };
+ * 
+ * ObjectUtils.objectCollectionFromDataFrameObject(weather);
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ * //   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * // ];
+ * ```
+ * 
+ * @param {Object} dataFrameObject - Object with properties holding 1d tensor arrays
+ * @returns {Object[]} - collection of objects
+ * @see {@link module:object.objectCollectionFromArray|objectCollectionFromArray}
+ * @see {@link module:object.objectCollectionToArray|objectCollectionToArray}
+ * @see {@link module:object.objectCollectionFromDataFrameObject|objectCollectionFromDataFrameObject}
+ * @see {@link module:object.objectCollectionToDataFrameObject|objectCollectionToDataFrameObject}
+ * @see {@link https://danfo.jsdata.org/api-reference/dataframe/creating-a-dataframe#creating-a-dataframe-from-an-object|Danfo DataFrame Objects}
+ */
+module.exports.objectCollectionFromDataFrameObject = function objectCollectionFromDataFrameObject(dataFrameObject) {
+  if (!dataFrameObject) return [];
+  if ((typeof dataFrameObject) !== 'object') throw Error('objectCollectionFromDataFrameObject must be passed an object with properties holding 1d tensors');
+
+  const fields = ObjectUtils.keys(dataFrameObject);
+
+  if (fields.length < 1) return [];
+
+  const len = fields.reduce((maxLen, field) => {
+    const list = dataFrameObject[field];
+    if (!Array.isArray(list)) return maxLen;
+
+    const listLength = list?.length || 0;
+    return listLength > maxLen ? listLength : maxLen;
+  }, -1);
+
+  // console.log(`fieldLength:${len}`);
+  const results = new Array(len).fill(0).map((_) => ({}));
+
+  fields.forEach((field) => {
+    const fieldArray = dataFrameObject[field];
+    if (Array.isArray(fieldArray)) {
+      fieldArray.forEach((fieldValue, rowIndex) => {
+        results[rowIndex][field] = fieldValue;
+      });
+    }
+  });
+
+  return results;
+};
+
+/**
+ * Convert a DataFrame Object into a collection of objects.
+ * 
+ * This uses properties with 1d tensor lists
+ * and converts them to a list of objects.
+ * 
+ * ```
+ * const weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * ];
+ * 
+ * ObjectUtils.objectCollectionToDataFrameObject(weather);
+ * // {
+ * //   id: [1, 0, 2],
+ * //   city: ['Seattle',  'Seattle', 'Seattle'],
+ * //   month: ['Aug', 'Apr', 'Dec'],
+ * //   precip: [0.87, 2.68, 5.31]
+ * // };
+ * ```
+ * 
+ * @param {Object} dataFrameObject - Object with properties holding 1d tensor arrays
+ * @returns {Object[]} - collection of objects
+ * @see {@link module:object.objectCollectionFromArray|objectCollectionFromArray}
+ * @see {@link module:object.objectCollectionToArray|objectCollectionToArray}
+ * @see {@link module:object.objectCollectionFromDataFrameObject|objectCollectionFromDataFrameObject}
+ * @see {@link module:object.objectCollectionToDataFrameObject|objectCollectionToDataFrameObject}
+ * @see {@link https://danfo.jsdata.org/api-reference/dataframe/creating-a-dataframe#creating-a-dataframe-from-an-object|Danfo DataFrame Objects}
+ */
+module.exports.objectCollectionToDataFrameObject = function objectCollectionToDataFrameObject(objectCollection, fields = null) {
+  const dataFrameObject = {};
+
+  const cleanFields = fields || ObjectUtils.keys(objectCollection);
+  const length = objectCollection?.length || 0;
+
+  cleanFields.forEach((field) => {
+    const fieldData = new Array(length).fill(undefined);
+    dataFrameObject[field] = fieldData;
+
+    objectCollection.forEach((obj, index) => {
+      fieldData[index] = obj[field];
+    });
+  });
+  return dataFrameObject;
+};
+
+/*
+module.exports.arrayFromDataFrameObject = function arrayFromDataFrameObject(dataFrameObject) {
+  const cleanFields = Object.keys(dataFrameObject);
+
+  const maxLength = cleanFields.reduce((maxLen, field) => {
+    const fieldLength = dataFrameObject[field]?.length;
+    return fieldLength > maxLen ? fieldLength : maxLen;
+  });
+
+  const results = new Array(maxLength).fill(undefined).map((_) => new Array(cleanFields.length).fill(undefined));
+
+  cleanFields.forEach((field, fieldIndex) => {
+    const dataFrameList = dataFrameObject[field] || [];
+    dataFrameList.forEach((value, rowIndex) => {
+      results[rowIndex][fieldIndex] = value;
+    });
+  });
+
+  return results;
+};
+
+module.exports.dataFrameObjectFromArray = function dataFrameObjectFromArray(arrayCollection, headers = null) {
+  let cleanHeaders;
+  let cleanValues;
+  
+  if (!Array.isArray(arrayCollection)) throw Error('objectCollectionFromArray: expected collection to be a 2 dimensional array');
+  
+  if (!headers) {
+    const [arrayCollectionHeaders, ...arrayCollectionValues] = arrayCollection;
+    cleanHeaders = arrayCollectionHeaders;
+    cleanValues = arrayCollectionValues;
+  } else {
+    cleanHeaders = headers;
+    cleanValues = arrayCollection;
+  }
+
+  // /# eslint-disable arrow-body-style #/
+  const newData = {};
+  headers.forEach((header) => {
+    newData[header] = new Array(cleanValues.length).fill(undefined);
+  });
+
+  cleanValues.forEach((row, rowIndex) => {
+    cleanHeaders.forEach((header, headerIndex) => {
+      newData[header][rowIndex] = row[headerIndex];
+    });
+  });
+
+  return newData;
+};
+
+module.exports.objectCollectionFrom2dTensor = function objectCollectionFrom2dTensor(tensor, columnNames) {
+  if (!Array.isArray(tensor)) throw Error('objectCollectionFrom2dTensor: tensor is expected to be an array');
+  if (tensor.length < 1) return [];
+  if (!Array.isArray(tensor[0])) throw Error('objectCollectionFrom2dTensor: assume tensor is a 2d matrix');
+  if (!columnNames || !Array.isArray(columnNames)) throw Error('objectCollectionFrom2dTensor: list of column names are required');
+  if (columnNames.length !== tensor.length) throw Error('objectCollectionFrom2dTensor: headers expected for each column of the tensor');
+
+  const maxLength = tensor.reduce((maxLen, list) => {
+    if (!Array.isArray(list)) return maxLen;
+    return list.length > maxLen ? list.length : maxLen;
+  }, -1);
+
+  const results = new Array(maxLength);
+  for (let i = 0; i < maxLength; i += 1) {
+    results[i] = {};
+  }
+
+  tensor.forEach((fieldValueList, fieldIndex) => {
+    const columnName = columnNames[fieldIndex];
+    if (Array.isArray(fieldValueList)) {
+      fieldValueList.forEach((fieldValue, rowIndex) => {
+        results[rowIndex][columnName] = fieldValue;
+      });
+    }
+  });
+
+  return results;
+};
+
+module.exports.objectCollectionTo2dTensor = function objectCollectionTo2dTensor(objectCollection) {
+  const columnNames = ObjectUtils.keys(objectCollection);
+
+  const results = new Array(columnNames.length);
+  for (let i = 0; i < results.length; i += 1) {
+    results[i] = new Array(objectCollection.length);
+  }
+
+  objectCollection.forEach((obj, rowIndex) => {
+    columnNames.forEach((columnName, columnIndex) => {
+      results[columnIndex][rowIndex] = obj[columnName];
+    });
+  });
+
+  return ({ dataSet: results, columns: columnNames });
+};
+*/
