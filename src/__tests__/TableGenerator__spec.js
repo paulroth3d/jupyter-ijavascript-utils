@@ -111,6 +111,27 @@ global.describe('tableGenerator', () => {
         global.expect(results.headers).toStrictEqual(expected.headers);
         global.expect(results.data).toStrictEqual(expected.data);
       });
+      global.it('uses fromObjectCollection to override the constructor', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(null)
+          .fromObjectCollection(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
       global.it('treats a null dataset as empty', () => {
         const weather = initializeWeather();
         const expected = ({
@@ -1090,6 +1111,49 @@ state|IL   |IL    `;
         const results = new TableGenerator(weather)
           .styleRow(styleRowFn)
           .styleRow(null)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('styles correctly if filter is used', () => {
+        /*
+        with filter included, we will no longer be able to use the same
+        order of the records in the dataset, so we must recreate the objects
+        to be passed to the generateStyle function.
+        */
+        const weather = initializeWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr style="dynamic-style: green;">
+\t<td >6</td>
+\t<td >Chicago</td>
+\t<td >Apr</td>
+\t<td >3.62</td>
+</tr>
+<tr >
+\t<td >8</td>
+\t<td >Chicago</td>
+\t<td >Dec</td>
+\t<td >2.56</td>
+</tr>
+<tr style="dynamic-style: green;">
+\t<td >7</td>
+\t<td >Chicago</td>
+\t<td >Aug</td>
+\t<td >3.98</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ rowIndex, record }) => record.precip > 3
+          ? 'dynamic-style: green'
+          : '';
+        const results = new TableGenerator(weather)
+          .styleRow(styleRowFn)
+          .filter((obj) => obj.city === 'Chicago')
           .generateHTML();
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
