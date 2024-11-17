@@ -1859,6 +1859,42 @@ line3`;
 
       global.expect(isCalled).toStrictEqual('abc');
     });
+    global.it('can support an array as the first argument', () => {
+      let isCalled = false;
+      const shouldBeDelayed = (arg1, arg2, arg3) => {
+        isCalled = arg1 + arg2 + arg3;
+        return isCalled;
+      };
+      const expected = 6;
+      
+      global.expect(isCalled).toBe(false);
+
+      const delayed = ArrayUtils.delayedFn(shouldBeDelayed, [1, 2, 3]);
+
+      global.expect(isCalled).toBe(false);
+
+      delayed();
+
+      global.expect(isCalled).toStrictEqual(expected);
+    });
+    global.it('can support multiple arguments instead', () => {
+      let isCalled = false;
+      const shouldBeDelayed = (arg1, arg2, arg3) => {
+        isCalled = arg1 + arg2 + arg3;
+        return isCalled;
+      };
+      const expected = 6;
+      
+      global.expect(isCalled).toBe(false);
+
+      const delayed = ArrayUtils.delayedFn(shouldBeDelayed, 1, 2, 3);
+
+      global.expect(isCalled).toBe(false);
+
+      delayed();
+
+      global.expect(isCalled).toStrictEqual(expected);
+    });
   });
   
   global.describe('chainFunctions', () => {
@@ -1879,6 +1915,26 @@ line3`;
           done();
         })
         .catch((err) => done(err));
+    });
+    global.it('can handle the error in the chain with the top promise', () => {
+      const sumValues = (...rest) => {
+        if (rest.length < 2) return rest.reduce((result, val) => result + val, 0);
+        throw Error('Some Error thrown in the middle of the loop');
+      };
+      
+      const fnArgs = [
+        [1],
+        [1, 1],
+        [1, 1, 2],
+        [1, 1, 2, 3]
+      ];
+
+      const expected = 'Some Error';
+      global.expect(
+        () => ArrayUtils.chainFunctions(sumValues, fnArgs)
+      )
+        .rejects
+        .toThrow(expected);
     });
     global.it('can chain promises', (done) => {
       const sumValues = (...rest) => {
@@ -1931,6 +1987,10 @@ line3`;
       const sumValues = (...rest) => {
         throw Error('CUSTOM ERROR');
       };
+
+      //-- each additional execution will add in a new timer
+      //-- jest doesn't seem to support calling runAllTimers multiple times.
+      //-- so have only one row for now
       
       const fnArgs = [
         [1]
@@ -1943,6 +2003,35 @@ line3`;
         .toThrow(expected);
       
       jest.runAllTimers();
+    });
+    global.it('can async wait with promises', (done) => {
+      jest.useFakeTimers();
+      const sumValues = (...rest) => {
+        const sumValuesResult = rest.reduce((result, value) => result + value, 0);
+        return Promise.resolve(sumValuesResult);
+        // if (rest.length < 2) return rest.reduce((result, value) => result + value, 0);
+        // throw Error('Some Error in the middle of the execution');
+      };
+
+      //-- each additional execution will add in a new timer
+      //-- jest doesn't seem to support calling runAllTimers multiple times.
+      //-- so have only one row for now
+      const fnArgs = [
+        [1]
+      ];
+
+      const expected = [ 1 ];
+
+      ArrayUtils.asyncWaitAndChain(2, sumValues, fnArgs)
+        .then((finalResults) => {
+          global.expect(finalResults).toStrictEqual(expected);
+          done();
+        });
+      
+      //-- each call adds in a new timer
+      jest.runAllTimers();
+      Promise.resolve()
+        .then(() => jest.runAllTimers());
     });
   });
 });

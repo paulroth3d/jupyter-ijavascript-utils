@@ -1312,20 +1312,16 @@ const asyncWaitAndChain = (seconds, fn, rows) => {
       } else {
         answers.push(result);
       }
-      try {
-        const nextVal = delayedIterator.next();
-        const { value: delayedFunction, done } = nextVal;
-        if (!done) {
-          return asyncWaitThenRun(seconds, delayedFunction)
-            .then(callNext)
-            .catch((err) => {
-              reject(err);
-            });
-        }
-        resolve(answers);
-      } catch (err) {
-        reject(err);
+      const nextVal = delayedIterator.next();
+      const { value: delayedFunction, done } = nextVal;
+      if (!done) {
+        return asyncWaitThenRun(seconds, delayedFunction)
+          .then(callNext)
+          .catch((err) => {
+            reject(err);
+          });
       }
+      resolve(answers);
     };
     return callNext();
   });
