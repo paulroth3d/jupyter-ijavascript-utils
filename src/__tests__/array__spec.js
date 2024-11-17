@@ -1906,5 +1906,25 @@ line3`;
       
       jest.runAllTimers();
     });
+    global.it('can handle errors in parent promise', async () => {
+      jest.useFakeTimers();
+      jest.spyOn(global, 'setTimeout');
+
+      const sumValues = (...rest) => {
+        throw Error('CUSTOM ERROR');
+      };
+      
+      const fnArgs = [
+        [1]
+      ];
+
+      const expected = 'CUSTOM ERROR';
+
+      global.expect(() => ArrayUtils.asyncWaitAndChain(2, sumValues, fnArgs))
+        .rejects
+        .toThrow(expected);
+      
+      jest.runAllTimers();
+    });
   });
 });

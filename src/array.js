@@ -1255,8 +1255,18 @@ module.exports.chainFunctions = chainFunctions;
 const asyncWaitThenRun = (seconds, fn) => new Promise(
   (resolve, reject) => {
     setTimeout(() => {
-      const results = fn();
-      resolve(results);
+      try {
+        const results = fn();
+        if (results instanceof Promise) {
+          results.then((promiseResults) => {
+            resolve(promiseResults);
+          });
+        } else {
+          resolve(results);
+        }
+      } catch (err) {
+        reject(err);
+      }
     }, seconds * 1000);
   }
 );
@@ -1306,7 +1316,11 @@ const asyncWaitAndChain = (seconds, fn, rows) => {
         const nextVal = delayedIterator.next();
         const { value: delayedFunction, done } = nextVal;
         if (!done) {
-          return asyncWaitThenRun(seconds, delayedFunction).then(callNext);
+          return asyncWaitThenRun(seconds, delayedFunction)
+            .then(callNext)
+            .catch((err) => {
+              reject(err);
+            });
         }
         resolve(answers);
       } catch (err) {
