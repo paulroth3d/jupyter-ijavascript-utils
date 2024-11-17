@@ -1682,6 +1682,12 @@ global.describe('format', () => {
           const results = FormatUtils.limitLines(target, undefined, 2, '\n');
           global.expect(results).toBe(expected);
         });
+        global.it('4 lines, sliced to from 2', () => {
+          const target = '1\n2\n3\n\n4';
+          const expected = '1\n2\n3\n\n4';
+          const results = FormatUtils.limitLines(target);
+          global.expect(results).toBe(expected);
+        });
       });
       global.describe('object', () => {
         global.it('simple object', () => {

@@ -31,6 +31,28 @@ global.describe('Chain', () => {
       global.expect(result).toBe(expected);
     });
   });
+  global.describe('to array', () => {
+    global.it('can convert an array', () => {
+
+    });
+    global.it('can convert a set', () => {
+      const expected = ['a', 'b', 'c'];
+      const value = new Set(expected);
+      const result = chain(value).toArray().close();
+
+      global.expect(result.length).toBe(value.size);
+      global.expect(Array.isArray(result)).toBe(true);
+    
+      //-- no duplicates
+      const resultSet = new Set(result);
+      global.expect(resultSet.size).toBe(expected.length);
+
+      for (let i = 0; i < expected.length; i += 1) {
+        const expectedValue = expected[i];
+        global.expect(resultSet.has(expectedValue)).toBe(true);
+      }
+    });
+  });
   global.describe('can chain a value', () => {
     global.it('a simple add', () => {
       const addTwo = (value) => value + 2;

@@ -4273,4 +4273,220 @@ describe('ObjectUtils', () => {
       global.expect(targetObjects).toStrictEqual(expected);
     });
   });
+
+  global.describe('objectCollectionFromArray', () => {
+    global.it('can convert from a valid array', () => {
+      const weather = [
+        ['id', 'city', 'month', 'precip'],
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if no headers provided', () => {
+      const weather = [
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const expected = 'Property must be a string:1';
+      global.expect(() => ObjectUtils.objectCollectionFromArray(weather))
+        .toThrow(expected);
+    });
+    global.it('can convert from an array with built in headers', () => {
+      const weather = [
+        ['id', 'city', 'month', 'precip'],
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an array with separate headers', () => {
+      const weather = [
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const headers = ['id', 'city', 'month', 'precip'];
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather, headers);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an array with headers only', () => {
+      const weather = [
+        ['id', 'city', 'month', 'precip']
+      ];
+      const expected = [
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an empty array with only headers separate', () => {
+      const weather = [
+      ];
+      const headers = ['id', 'city', 'month', 'precip'];
+      const expected = [
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather, headers);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if converting from null', () => {
+      const weather = null;
+      const expected = 'objectCollectionFromArray: expected collection to be a 2 dimensional array';
+      global.expect(() => ObjectUtils.objectCollectionFromArray(weather))
+        .toThrow(expected);
+    });
+  });
+
+  global.describe('objectCollectionToArray', () => {
+    global.it('can convert from a valid set', () => {
+      const weather = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const expected = [
+        ['id', 'city', 'month', 'precip'],
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const results = ObjectUtils.objectCollectionToArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if converting from null', () => {
+      const weather = null;
+      const expected = 'objectCollectionToArray: expected collection to be a collection of objects';
+      global.expect(() => ObjectUtils.objectCollectionToArray(weather))
+        .toThrow(expected);
+    });
+  });
+
+  global.describe('objectCollectionFromDataFrameObject', () => {
+    global.it('can convert from a valid dataframe object', () => {
+      const weather = {
+        id: [1, 0, 2],
+        city: ['Seattle',  'Seattle', 'Seattle'],
+        month: ['Aug', 'Apr', 'Dec'],
+        precip: [0.87, 2.68, 5.31]
+      };
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if not an object', () => {
+      const weather = 23;
+      const expected = 'objectCollectionFromDataFrameObject must be passed an object with properties holding 1d tensors';
+      global.expect(() => ObjectUtils.objectCollectionFromDataFrameObject(weather))
+        .toThrow(expected);
+    });
+    global.it('can convert from a dataframe object that may have fields that are not tensors', () => {
+      const weather = {
+        id: [1, 0, 2],
+        city: ['Seattle',  'Seattle', 'Seattle'],
+        month: ['Aug', 'Apr', 'Dec'],
+        precip: [0.87, 2.68, 5.31],
+        valid: true
+      };
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from a dataframe even if the tensor lists are uneven', () => {
+      const weather = {
+        id: [1, 0, 2],
+        city: ['Seattle',  'Seattle', 'Seattle'],
+        month: ['Aug', 'Apr'],
+        precip: [0.87],
+        valid: true
+      };
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr' },
+        { id: 2, city: 'Seattle' }
+      ];
+      const results = ObjectUtils.objectCollectionFromDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from a dataframe object with headers only', () => {
+      const weather = {
+        id: [],
+        city: [],
+        month: [],
+        precip: []
+      };
+      const expected = [
+      ];
+      const results = ObjectUtils.objectCollectionFromDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an empty dataframe', () => {
+      const weather = {};
+      const expected = [];
+      const results = ObjectUtils.objectCollectionFromDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if converting from null', () => {
+      const weather = null;
+      const expected = [];
+      const results = ObjectUtils.objectCollectionFromDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('objectCollectionToDataFrameObject', () => {
+    global.it('can convert from a valid set', () => {
+      const weather = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const expected = {
+        id: [1, 0, 2],
+        city: ['Seattle',  'Seattle', 'Seattle'],
+        month: ['Aug', 'Apr', 'Dec'],
+        precip: [0.87, 2.68, 5.31]
+      };
+      const results = ObjectUtils.objectCollectionToDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if converting from null', () => {
+      const weather = null;
+      const expected = {};
+      const results = ObjectUtils.objectCollectionToDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if converting from null', () => {
+      const weather = null;
+      const expected = {};
+      const results = ObjectUtils.objectCollectionToDataFrameObject(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
 });

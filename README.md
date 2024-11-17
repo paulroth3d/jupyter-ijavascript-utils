@@ -54,7 +54,11 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New
-* 1.46 - Make it easier to extract data from "hard-spaced arrays" - {@link module:array.multiLineSubstr}, {@link module:array.multiStepReduce}
+* 1.47 - Correct table rendering html if filter was used (#46)
+  * allow conversion from a Collection of Objects to Arrays and back with object. (objectCollectionFromArray, objectCollectionToArray)
+  * Easier iterating over values and peeking with array with PeekableArrayIterator
+  * Support for delayed and asynchronous chaining of functions (array.delayedFn, chainFunction, etc)
+* 1.46 - Make it easier to extract data from "hard-spaced arrays" - (array.multiLineSubstr, array.multiStepReduce)
 * 1.45 - more ways to understand the data - aggregate.coalesce(), convert properties to arrow/dot notation / reverse it : object.flatten() / object.expand() and Object.isObject()
 * 1.43 - esm module fix since still not supported yet in ijavascript
 * 1.41 - object.propertyInherit - to simplify inheriting values from one record to the next

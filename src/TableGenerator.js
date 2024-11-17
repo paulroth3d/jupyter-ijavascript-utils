@@ -337,8 +337,6 @@ class TableGenerator {
     this.#isTransposed = false;
   }
 
-  //--    GETTER SETTERS
-
   /**
    * Assigns the data to be used in generating the table.
    * @param {Array} collection -
@@ -362,6 +360,182 @@ class TableGenerator {
    */
   data(col) {
     this.#data = col || [];
+    return this;
+  }
+
+  /**
+   * Assigns the data by importing in a collections of objects.
+   * 
+   * Note: this is the default functionality / syntatic sugar - as data is expected as a collection of objects.
+   * @param {Object[]} collection -
+   * @returns {TableGenerator} 
+   * @example
+   * 
+   * dataSet = [{temp: 37, type: 'C'}, {temp: 310, type: 'K'}, {temp: 98, type: 'F'}];
+   * 
+   * //-- simple example where the temp property is converted, and type property overwritten
+   * new TableGenerator()
+   *  .data(dataSet)
+   *  .generateMarkdown()
+   * 
+   * //-- gives
+   * temp | type
+   * ---- | ----
+   * 37   | C   
+   * 310  | K   
+   * 98   | F   
+   */
+  fromObjectCollection(data) {
+    this.data(data);
+    return this;
+  }
+
+  /**
+   * Assigns the data by importing a 2 dimensional array.
+   * 
+   * If headers are not provided, then the first row of the collection is assumed.
+   * 
+   * If there is no header provided (by default) - then the first row is assumed.
+   * 
+   * ```
+   * dataSet = [ [ 'temp', 'type' ], [ 37, 'C' ], [ 310, 'K' ], [ 98, 'F' ] ];
+   * 
+   * new TableGenerator()
+   *  .fromArray(dataSet)
+   *  .generateMarkdown();
+   * ```
+   * 
+   * temp | type
+   * ---- | ----
+   * 37   | C   
+   * 310  | K   
+   * 98   | F   
+   * 
+   * However, if there is a header provided, it assumes there is none in teh first row.
+   * 
+   * ```
+   * headers = [ 'temp', 'type' ];
+   * dataSet = [[ 37, 'C' ], [ 310, 'K' ], [ 98, 'F' ] ];
+   * 
+   * new TableGenerator()
+   *  .fromArray(dataSet)
+   *  .generateMarkdown();
+   * ```
+   * 
+   * temp | type
+   * ---- | ----
+   * 37   | C   
+   * 310  | K   
+   * 98   | F   
+   * 
+   * @param {Array<Array>} collection -
+   * @returns {TableGenerator}
+   * @see {TableGenerator.data}
+   * @see {TableGenerator.fromList}
+   */
+  fromArray(arrayCollection, headers = null) {
+    if (!arrayCollection) {
+      this.data(null);
+      return this;
+    }
+    this.data(ObjectUtils.objectCollectionFromArray(arrayCollection, headers));
+
+    return this;
+  }
+
+  /**
+   * Assigns the data from a single 1 dimensional array.
+   * 
+   * Is syntatic sugar to simply wrap the 1 dimensional array into a 2 dimensional array.
+   * 
+   * ```
+   * let precip = [
+   *   1, 0, 2, 3, 4
+   * ];
+   * 
+   * utils.table().fromList(precip).render()
+   * ```
+   * 
+   * _   
+   * --  
+   * 1
+   * 0
+   * 2
+   * 3
+   * 4
+   * 
+   * @param {Array} array1d 
+   * @returns {TableGenerator}
+   * @see {TableGenerator.fromArray}
+  */
+  fromList(array1d) {
+    if (!array1d) {
+      this.data(null);
+      return this;
+    }
+    this.data(array1d.map((v) => ({ _: v })));
+    return this;
+  }
+
+  /**
+   * Initializes the data in the tableGenerator with an object holding
+   * 1d tensor properties.
+   * 
+   * ```
+   * dfObject = {
+   *   id: [
+   *     1, 0, 2, 3, 4,
+   *     5, 6, 8, 7
+   *   ],
+   *   city: [
+   *     'Seattle',  'Seattle',
+   *     'Seattle',  'New York',
+   *     'New York', 'New York',
+   *     'Chicago',  'Chicago',
+   *     'Chicago'
+   *   ],
+   *   month: [
+   *     'Aug', 'Apr',
+   *     'Dec', 'Apr',
+   *     'Aug', 'Dec',
+   *     'Apr', 'Dec',
+   *     'Aug'
+   *   ],
+   *   precip: [
+   *     0.87, 2.68, 5.31,
+   *     3.94, 4.13, 3.58,
+   *     3.62, 2.56, 3.98
+   *   ]
+   * }
+   * 
+   * utils.table().fromDataFrameObject(dfObject).render()
+   * ```
+   * 
+   * id|city    |month|precip
+   * --|--      |--   |--    
+   * 1 |Seattle |Aug  |0.87  
+   * 0 |Seattle |Apr  |2.68  
+   * 2 |Seattle |Dec  |5.31  
+   * 3 |New York|Apr  |3.94  
+   * 4 |New York|Aug  |4.13  
+   * 5 |New York|Dec  |3.58  
+   * 6 |Chicago |Apr  |3.62  
+   * 8 |Chicago |Dec  |2.56  
+   * 7 |Chicago |Aug  |3.98 
+   * 
+   * @param {Object} dataFrameObject - DataFrame with 1d tensor properties
+   * @returns {TableGenerator}
+   * @see https://danfo.jsdata.org/api-reference/dataframe/creating-a-dataframe#creating-a-dataframe-from-an-object
+   * @see {TableGenerator.fromList}
+   * @see {TableGenerator.fromObjectCollection}
+   * @see {TableGenerator.data}
+   */
+  fromDataFrameObject(dataFrameObject) {
+    if (!dataFrameObject) {
+      this.data(null);
+      return this;
+    }
+    this.data(ObjectUtils.objectCollectionFromDataFrameObject(dataFrameObject));
     return this;
   }
 
@@ -1276,7 +1450,12 @@ class TableGenerator {
 
     const printBody = (collection) => collection
       .map((dataRow, rowIndex) => {
-        const record = this.#data[rowIndex];
+        let record;
+        if (this.#filterFn) {
+          record = results.headers.reduce((result, header, headerIndex) => ObjectUtils.assign(result, header, dataRow[headerIndex]), {});
+        } else {
+          record = this.#data[rowIndex];
+        }
         const rowStyle = !styleRowFn ? null : styleRowFn({ rowIndex, row: dataRow, record }) || '';
 
         return `<tr ${printInlineCSS(rowStyle)}>\n\t`
@@ -1507,7 +1686,26 @@ class TableGenerator {
    */
   generateArray2() {
     const results = this.prepare();
-    return [[...results.headers], ...results.data];
+    return [results.headers, ...results.data];
+  }
+
+  generateObjectCollection() {
+    return ObjectUtils.objectCollectionFromArray(this.generateArray2());
+  }
+
+  generateDataFrameObject() {
+    const prepResults = this.prepare();
+    const results = {};
+    const createFrameList = () => new Array(prepResults.data.length).fill(undefined);
+    prepResults.headers.forEach((header) => ObjectUtils.assign(results, header, createFrameList()));
+
+    prepResults.data.forEach((row, rowIndex) => {
+      row.forEach((value, valIndex) => {
+        results[prepResults.headers[valIndex]][rowIndex] = value;
+      });
+    });
+
+    return results;
   }
 
   static hasRenderedCSS = false;

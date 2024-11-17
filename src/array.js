@@ -41,6 +41,12 @@ require('./_types/global');
  *   * {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
  * * Understanding Values
  *   * {@link module:array.isMultiDimensional|array.isMultiDimensional} - determines if an array is multi-dimensional
+ * * Custom Iterators
+ *   * {@link module:array~PeekableArrayIterator|PeekableArrayIterator} - Iterator that lets you peek ahead while not moving the iterator.
+ * * Iterating over values
+ *   * {@link module:array.delayedFn|delayedFn} - Similar to Function.bind() - you specify a function and arguments only to be called when you ask
+ *   * {@link module:array.chainFunctions|chainFunctions} - Chain a set of functions to be called one after another.
+ *   * {@link module:array.asyncWaitAndChain|asyncWaitAndChain} - Chains a set of functions to run one after another, but with a delay between.
  * 
  * @module array
  * @exports array
@@ -478,6 +484,7 @@ module.exports.applyArrayValues = function applyArrayValues(collection, path, va
  * @param {Number} length - the length of the new array
  * @param {any} defaultValue - the new value to put in each cell
  * @see {@link module:array.arrange} for values based on the index
+ * @see https://stackoverflow.com/questions/35578478/array-prototype-fill-with-object-passes-reference-and-not-new-instance
  * @returns {Array} - an array of length size with default values
  */
 module.exports.size = function size(length, defaultValue) {
@@ -1096,4 +1103,248 @@ module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue
     results.push(currentResult);
   });
   return results;
+};
+
+/**
+ * Create an iterator for an array that allows for peeking next values.
+ * 
+ * @see https://www.npmjs.com/package/peekable-array-iterator
+ * @example
+ * 
+ * source = [0, 1, 2, 3, 4, 5];
+ * 
+ * // also quite helpful for document.querySelector(...)
+ * itr = new utils.array.PeekableArrayIterator(source);
+ * 
+ * console.log(itr.next()); // { done: false, value: 0 }
+ * 
+ * //-- peek without moving the iterator
+ * const peekItr = itr.peek();
+ * console.log(peekItr.next()); // { done: false, value: 1 }
+ * console.log(peekItr.next()); // { done: false, value: 2 }
+ * console.log(peekItr.next()); // { done: false, value: 3 }
+ * console.log(peekItr.next()); // { done: false, value: 4 }
+ * console.log(peekItr.next()); // { done: true, value: 5 }
+ * 
+ * //-- move the main iterator
+ * console.log(itr.next()); // { done: false, value: 1 }
+ * 
+ * Of course, for each will always work
+ * or
+ * for (let i of new utils.array.PeekableArrayIterator(list)) {
+ *   console.log(i);
+ * }
+ * // 1\n2\n3\n4\n5
+ */
+class PeekableArrayIterator {
+  /**
+   * Constructor
+   * 
+   * @param {Iterable} array - something we can iterate over
+   * @param {Number} start - the starting index
+   */
+  constructor(source, start = -1) {
+    this.array = Array.isArray(source) ? source : [...source];
+    this.i = start;
+  }
+
+  [Symbol.iterator]() { return this; }
+
+  /* eslint-disable wrap-iife */
+  next() {
+    const self = this;
+    this.peek = (function* peek() {
+      for (let peekI = self.i + 1; peekI < self.array.length; peekI += 1) {
+        yield self.array[peekI];
+      }
+      return undefined;
+    })();
+
+    this.i += 1;
+    return { done: this.i >= this.array.length - 1, value: this.array[this.i] };
+  }
+  /* eslint-enable wrap-iife */
+}
+module.exports.PeekableArrayIterator = PeekableArrayIterator;
+
+/**
+ * Defines a function and arguments that will only be called,
+ * only when the delayedFunction is called.
+ * 
+ * (Similar to Function.bind - but supports Function.call(1,2,3) or Function.apply([1,2,3]) syntax)
+ * 
+ * Example, these are equivalent, but the delayedFn does not mess with `this`
+ * 
+ * sayFn = (...rest) => console.log(...rest);
+ * arguments = [0, 1, 2, 3, 4, 5];
+ * 
+ * Spy(sayFn);
+ * 
+ * delayedFnA = sayFn.bind(globalThis, arguments);
+ * ...
+ * sayFn.calledCount; // 0
+ * delayedFnA(); // consoles: [0, 1, 2, 3, 4, 5];
+ * sayFn.calledCount; // 1
+ * 
+ * delayedFnB = utils.array.delayedFn(sayFn, 0, 1, 2, 3, 4, 5);
+ * ...
+ * delayedFnB(); // consoles: [0, 1, 2, 3, 4, 5];
+ * 
+ * @param {Function} fn - Function to be executed at a later time
+ * @param  {...any} rest - arguments to be passed to fn
+ * @returns {Function} - function that can be called to execute fn with the arguments
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+ */
+module.exports.delayedFn = (fn, ...rest) => () => {
+  const cleanRest = rest.length === 1 && Array.isArray(rest[0]) ? rest[0] : rest;
+  return fn.apply(this, cleanRest);
+};
+
+/**
+ * Chain a set of functions to be called one after another
+ * (supports functions returning promises)
+ * 
+ * This is especially helpful if calls need to be rate limited to only having 1 occur at a time.
+ * 
+ * The resulting promise will return a list, with each entry corresponding with the row of arguments sent.
+ * 
+ * ```
+ * const sumValues = (...rest) => rest.reduce((result, val) => result + val, 0);
+ * 
+ * const arguments = [
+ *  [1],
+ *  [1, 1],
+ *  [1, 1, 2],
+ *  [1, 1, 2, 3]
+ * ];
+ * 
+ * utils.array.chainFunctions(sumValues, arguments)
+ *  .then((results) => console.log(`fibonnacci numbers: ${results}`));
+ * // fibonacci numbers: [1, 2, 4, 7]
+ * ```
+ * 
+ * @param {Function} fn - the function to be called
+ * @param {Array<any[]>} rows - Array where each row are arguments to be applied to fn
+ * @returns {Promise<any>} - promise that will resolve when the last delayed function finishes
+ * @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to have more than one active at a time.
+ * @see {@link module:array.asyncWaitAndChain|asyncWaitAndChain} - if you would like a delay between executions
+ */
+module.exports.chainFunctions = (fn, rows) => {
+  const delayedFunctions = rows.map((val) => ArrayUtils.delayedFn(fn, val));
+  const delayedIterator = delayedFunctions.values();
+  const answers = [];
+  let isFirstCall = true;
+
+  return new Promise((resolve, reject) => {
+    const callNext = (result) => {
+      if (isFirstCall) {
+        isFirstCall = false;
+      } else {
+        answers.push(result);
+      }
+      try {
+        const nextVal = delayedIterator.next();
+        const { value: delayedFunction, done } = nextVal;
+        if (!done) {
+          const fnResult = delayedFunction();
+          if (fnResult instanceof Promise) {
+            fnResult.then(callNext);
+          } else {
+            callNext(fnResult);
+          }
+        } else {
+          resolve(answers);
+        }
+      } catch (err) {
+        reject(err);
+      }
+    };
+    return callNext();
+  });
+};
+
+/**
+ * Executes a function with arguments after a few second delay.
+ * 
+ * @param {Number} seconds - number of seconds to wait before calling
+ * @param {Function} fn - Function to call
+ * @param {...any} rest - arguments to send to the function when it is executed. 
+ * @returns {@Promise<any>} - that then executes when the timer is up
+ * @private
+ */
+const asyncWaitThenRun = (seconds, fn, ...rest) => new Promise(
+  (resolve, reject) => {
+    setTimeout(() => {
+      try {
+        const results = fn(...rest);
+        if (results instanceof Promise) {
+          results.then((promiseResults) => {
+            resolve(promiseResults);
+          });
+        } else {
+          resolve(results);
+        }
+      } catch (err) {
+        reject(err);
+      }
+    }, seconds * 1000);
+  }
+);
+
+/**
+ * Similar to chainFunctions - in that only one delayed function will occur at a time,
+ * but adds a delay between calls.
+ * 
+ * This also supports functions returning promises.
+ * 
+ * 
+ * ```
+ * const sumValues = (...rest) => rest.reduce((result, val) => result + val, 0);
+ * 
+ * const arguments = [
+ *  [1],
+ *  [1, 1],
+ *  [1, 1, 2],
+ *  [1, 1, 2, 3]
+ * ];
+ * 
+ * utils.array.asyncWaitAndChain(3, sumValues, arguments)
+ *  .then((results) => console.log(`fibonnacci numbers: ${results}`));
+ * // fibonacci numbers: [1, 2, 4, 7], but took 9 seconds to accomplish
+ * ```
+ * 
+ * @param {Number} seconds - number of seconds to delay between each execution
+ * @param {Function} fn - function to be called for each row of rows
+ * @param {Array<any[]>} rows - Array where each row are arguments to be applied to fn
+ * @returns {Promise<any>} - promise that will resolve when the last delayed function finishes
+ * @see {@link module:array.chainFunctions|chainFunctions} - to execute methods right after each other.
+* @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to execute more than one at a time.
+ */
+// eslint-disable-next-line no-unused-vars
+module.exports.asyncWaitAndChain = (seconds, fn, rows) => {
+  const delayedFunctions = rows.map((val) => ArrayUtils.delayedFn(fn, val));
+  const delayedIterator = delayedFunctions.values();
+  const answers = [];
+  let isFirstCall = true;
+  
+  return new Promise((resolve, reject) => {
+    const callNext = (result) => {
+      if (isFirstCall) {
+        isFirstCall = false;
+      } else {
+        answers.push(result);
+      }
+      const nextVal = delayedIterator.next();
+      const { value: delayedFunction, done } = nextVal;
+      if (!done) {
+        return asyncWaitThenRun(seconds, delayedFunction)
+          .then(callNext)
+          .catch((err) => {
+            reject(err);
+          });
+      }
+      resolve(answers);
+    };
+    return callNext();
+  });
 };

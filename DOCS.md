@@ -75,6 +75,10 @@ Give it a try here:
 
 ## What's New
 
+* 1.47 - Correct table rendering html if filter was used ({@link https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/64|#64})
+  * allow conversion from a Collection of Objects to Arrays and back with object. ({@link module:object.objectCollectionFromArray|object.objectCollectionFromArray}, {@link module:object.objectCollectionToArray|object.objectCollectionToArray})
+  * Easier iterating over values and peeking with array with {@link module:array~PeekableArrayIterator|PeekableArrayIterator}
+  * Support for delayed and asynchronous chaining of functions ({@link module:array.delayedFn|delayedFn}, {@link module:array.chainFunctions|chainFunctions}, etc)
 * 1.46 - Make it easier to extract data from "hard-spaced arrays" - {@link module:array.multiLineSubstr}, {@link module:array.multiStepReduce}
 * 1.45 - more ways to understand the data - {@link module:aggregate.coalesce|aggregate.coalesce()}, convert properties to arrow/dot notation / reverse it {@link module:object.flatten|object.flatten()} / {@link module:object.expand|object.expand()} and {@link module:object.isObject|object.isObject()}
 * 1.43 - esm module fix since still not supported yet in ijavascript
