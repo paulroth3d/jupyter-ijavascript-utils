@@ -1714,4 +1714,324 @@ line3`;
       });
     });
   });
+
+  global.describe('PeekableArrayIterator', () => {
+    global.it('can iterate over a set of numbers', () => {
+      const values = [0, 1, 2, 3, 4, 5];
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      let result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(0);
+
+      result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(1);
+
+      result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(2);
+
+      result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(3);
+
+      result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(4);
+
+      result = itr.next();
+      global.expect(result.value).toBe(5);
+      global.expect(result.done).toBe(true);
+    });
+    global.it('get duplicate the iterator', () => {
+      const values = [0, 1, 2];
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      let result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(0);
+
+      let itr2 = itr[Symbol.iterator]();
+
+      result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(1);
+
+      result = itr2.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(2);
+    });
+    global.it('can iterate over an empty list', () => {
+      const values = [];
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+      const result = itr.next();
+      global.expect(result.value).toBe(undefined);
+      global.expect(result.done).toBe(true);
+    });
+    global.it('can iterate over other iterable things', () => {
+      const values = new Set([0, 1]);
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      let result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(0);
+
+      result = itr.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(1);
+    });
+    global.it('can go past the end of the array', () => {
+      const values = new Set([0, 1]);
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      let result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(0);
+
+      result = itr.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(1);
+
+      result = itr.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(undefined);
+    });
+    global.describe('can peek at values', () => {
+      global.it('without messing up the main iterator', () => {
+        const values = [0, 1, 2, 3, 4, 5];
+        const itr = new ArrayUtils.PeekableArrayIterator(values);
+  
+        let result = itr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(0);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(1);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(2);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(3);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(4);
+  
+        result = itr.peek.next();
+        global.expect(result.value).toBe(5);
+        global.expect(result.done).toBe(false);
+  
+        result = itr.peek.next();
+        global.expect(result.value).toBe(undefined);
+        global.expect(result.done).toBe(true);
+  
+        result = itr.peek.next();
+        global.expect(result.value).toBe(undefined);
+        global.expect(result.done).toBe(true);
+  
+        result = itr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(1);
+      });
+    });
+  });
+  
+  global.describe('delayedFunction', () => {
+    global.it('can delay a function but ensure that it isnt called', () => {
+      let isCalled = false;
+      const shouldBeDelayed = (arg1) => {
+        isCalled = arg1;
+        return isCalled;
+      };
+      
+      global.expect(isCalled).toBe(false);
+
+      const delayed = ArrayUtils.delayedFn(shouldBeDelayed, ['abc']);
+
+      global.expect(isCalled).toBe(false);
+
+      delayed();
+
+      global.expect(isCalled).toStrictEqual('abc');
+    });
+    global.it('can support an array as the first argument', () => {
+      let isCalled = false;
+      const shouldBeDelayed = (arg1, arg2, arg3) => {
+        isCalled = arg1 + arg2 + arg3;
+        return isCalled;
+      };
+      const expected = 6;
+      
+      global.expect(isCalled).toBe(false);
+
+      const delayed = ArrayUtils.delayedFn(shouldBeDelayed, [1, 2, 3]);
+
+      global.expect(isCalled).toBe(false);
+
+      delayed();
+
+      global.expect(isCalled).toStrictEqual(expected);
+    });
+    global.it('can support multiple arguments instead', () => {
+      let isCalled = false;
+      const shouldBeDelayed = (arg1, arg2, arg3) => {
+        isCalled = arg1 + arg2 + arg3;
+        return isCalled;
+      };
+      const expected = 6;
+      
+      global.expect(isCalled).toBe(false);
+
+      const delayed = ArrayUtils.delayedFn(shouldBeDelayed, 1, 2, 3);
+
+      global.expect(isCalled).toBe(false);
+
+      delayed();
+
+      global.expect(isCalled).toStrictEqual(expected);
+    });
+  });
+  
+  global.describe('chainFunctions', () => {
+    global.it('can chain a function', (done) => {
+      const sumValues = (...rest) => rest.reduce((result, val) => result + val, 0);
+      
+      const fnArgs = [
+        [1],
+        [1, 1],
+        [1, 1, 2],
+        [1, 1, 2, 3]
+      ];
+
+      const expected = [1, 2, 4, 7];
+      ArrayUtils.chainFunctions(sumValues, fnArgs)
+        .then((results) => {
+          global.expect(results).toStrictEqual(expected);
+          done();
+        })
+        .catch((err) => done(err));
+    });
+    global.it('can handle the error in the chain with the top promise', () => {
+      const sumValues = (...rest) => {
+        if (rest.length < 2) return rest.reduce((result, val) => result + val, 0);
+        throw Error('Some Error thrown in the middle of the loop');
+      };
+      
+      const fnArgs = [
+        [1],
+        [1, 1],
+        [1, 1, 2],
+        [1, 1, 2, 3]
+      ];
+
+      const expected = 'Some Error';
+      global.expect(
+        () => ArrayUtils.chainFunctions(sumValues, fnArgs)
+      )
+        .rejects
+        .toThrow(expected);
+    });
+    global.it('can chain promises', (done) => {
+      const sumValues = (...rest) => {
+        const finalResult = rest.reduce((result, val) => result + val, 0);
+        return Promise.resolve(finalResult);
+      };
+      
+      const fnArgs = [
+        [1],
+        [1, 1],
+        [1, 1, 2],
+        [1, 1, 2, 3]
+      ];
+
+      const expected = [1, 2, 4, 7];
+      ArrayUtils.chainFunctions(sumValues, fnArgs)
+        .then((results) => {
+          global.expect(results).toStrictEqual(expected);
+          done();
+        })
+        .catch((err) => done(err));
+    });
+  });
+  
+  global.describe('asyncWaitAndChain', () => {
+    global.it('can chain a function', (done) => {
+      jest.useFakeTimers();
+      jest.spyOn(global, 'setTimeout');
+
+      const sumValues = (...rest) => rest.reduce((result, val) => result + val, 0);
+      
+      const fnArgs = [
+        [1]
+      ];
+
+      const expected = [1];
+      ArrayUtils.asyncWaitAndChain(2, sumValues, fnArgs)
+        .then((results) => {
+          global.expect(results).toStrictEqual(expected);
+          done();
+        })
+        .catch((err) => done(err));
+      
+      jest.runAllTimers();
+    });
+    global.it('can handle errors in parent promise', async () => {
+      jest.useFakeTimers();
+      jest.spyOn(global, 'setTimeout');
+
+      const sumValues = (...rest) => {
+        throw Error('CUSTOM ERROR');
+      };
+
+      //-- each additional execution will add in a new timer
+      //-- jest doesn't seem to support calling runAllTimers multiple times.
+      //-- so have only one row for now
+      
+      const fnArgs = [
+        [1]
+      ];
+
+      const expected = 'CUSTOM ERROR';
+
+      global.expect(() => ArrayUtils.asyncWaitAndChain(2, sumValues, fnArgs))
+        .rejects
+        .toThrow(expected);
+      
+      jest.runAllTimers();
+    });
+    global.it('can async wait with promises', (done) => {
+      jest.useFakeTimers();
+      const sumValues = (...rest) => {
+        const sumValuesResult = rest.reduce((result, value) => result + value, 0);
+        return Promise.resolve(sumValuesResult);
+        // if (rest.length < 2) return rest.reduce((result, value) => result + value, 0);
+        // throw Error('Some Error in the middle of the execution');
+      };
+
+      //-- each additional execution will add in a new timer
+      //-- jest doesn't seem to support calling runAllTimers multiple times.
+      //-- so have only one row for now
+      const fnArgs = [
+        [1]
+      ];
+
+      const expected = [ 1 ];
+
+      ArrayUtils.asyncWaitAndChain(2, sumValues, fnArgs)
+        .then((finalResults) => {
+          global.expect(finalResults).toStrictEqual(expected);
+          done();
+        });
+      
+      //-- each call adds in a new timer
+      jest.runAllTimers();
+      Promise.resolve()
+        .then(() => jest.runAllTimers());
+    });
+  });
 });
