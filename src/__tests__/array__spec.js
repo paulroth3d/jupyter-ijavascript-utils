@@ -1752,7 +1752,7 @@ line3`;
       global.expect(result.done).toBe(false);
       global.expect(result.value).toBe(0);
 
-      let itr2 = itr[Symbol.iterator]();
+      const itr2 = itr[Symbol.iterator]();
 
       result = itr.next();
       global.expect(result.done).toBe(false);

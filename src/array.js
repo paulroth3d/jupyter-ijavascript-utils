@@ -42,7 +42,7 @@ require('./_types/global');
  * * Understanding Values
  *   * {@link module:array.isMultiDimensional|array.isMultiDimensional} - determines if an array is multi-dimensional
  * * Custom Iterators
- *   * {@link module:array.PeekableArrayIterator|PeekableArrayIterator} - Iterator that lets you peek ahead while not moving the iterator.
+ *   * {@link module:array~PeekableArrayIterator|PeekableArrayIterator} - Iterator that lets you peek ahead while not moving the iterator.
  * * Iterating over values
  *   * {@link module:array.delayedFn|delayedFn} - Similar to Function.bind() - you specify a function and arguments only to be called when you ask
  *   * {@link module:array.chainFunctions|chainFunctions} - Chain a set of functions to be called one after another.
@@ -1195,11 +1195,10 @@ module.exports.PeekableArrayIterator = PeekableArrayIterator;
  * @returns {Function} - function that can be called to execute fn with the arguments
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
  */
-const delayedFn = (fn, ...rest) => () => {
+module.exports.delayedFn = (fn, ...rest) => () => {
   const cleanRest = rest.length === 1 && Array.isArray(rest[0]) ? rest[0] : rest;
   return fn.apply(this, cleanRest);
 };
-module.exports.delayedFn = delayedFn;
 
 /**
  * Chain a set of functions to be called one after another
@@ -1230,8 +1229,8 @@ module.exports.delayedFn = delayedFn;
  * @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to have more than one active at a time.
  * @see {@link module:array.asyncWaitAndChain|asyncWaitAndChain} - if you would like a delay between executions
  */
-const chainFunctions = (fn, rows) => {
-  const delayedFunctions = rows.map((val) => delayedFn(fn, val));
+module.exports.chainFunctions = (fn, rows) => {
+  const delayedFunctions = rows.map((val) => ArrayUtils.delayedFn(fn, val));
   const delayedIterator = delayedFunctions.values();
   const answers = [];
   let isFirstCall = true;
@@ -1263,7 +1262,6 @@ const chainFunctions = (fn, rows) => {
     return callNext();
   });
 };
-module.exports.chainFunctions = chainFunctions;
 
 /**
  * Executes a function with arguments after a few second delay.
@@ -1323,8 +1321,8 @@ const asyncWaitThenRun = (seconds, fn, ...rest) => new Promise(
 * @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to execute more than one at a time.
  */
 // eslint-disable-next-line no-unused-vars
-const asyncWaitAndChain = (seconds, fn, rows) => {
-  const delayedFunctions = rows.map((val) => delayedFn(fn, val));
+module.exports.asyncWaitAndChain = (seconds, fn, rows) => {
+  const delayedFunctions = rows.map((val) => ArrayUtils.delayedFn(fn, val));
   const delayedIterator = delayedFunctions.values();
   const answers = [];
   let isFirstCall = true;
@@ -1350,4 +1348,3 @@ const asyncWaitAndChain = (seconds, fn, rows) => {
     return callNext();
   });
 };
-module.exports.asyncWaitAndChain = asyncWaitAndChain;

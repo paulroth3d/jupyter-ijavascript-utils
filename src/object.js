@@ -52,6 +52,11 @@ const FormatUtils = require('./format');
  * * Create Map of objects by key
  *   * {@link module:object.mapByProperty|mapByProperty()} -
  *   * {@link module:group.by|group(collection, accessor)}
+ * * Convert collections of objects
+ *   * {@link module:object.objectCollectionFromArray|objectCollectionFromArray} - convert rows/columns 2d array to objects
+ *   * {@link module:object.objectCollectionToArray} - convert objects to a rows/columns 2d array
+ *   * {@link module:object.objectCollectionFromDataFrameObject} - convert tensor object with each field as 1d array of values
+ *   * {@link module:object.objectCollectionToDataFrameObject} - convert objects from a tensor object
  * 
  * @module object
  * @exports object
