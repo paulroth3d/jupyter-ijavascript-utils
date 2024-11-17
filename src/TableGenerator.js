@@ -434,6 +434,10 @@ class TableGenerator {
    * @see {TableGenerator.fromList}
    */
   fromArray(arrayCollection, headers = null) {
+    if (!arrayCollection) {
+      this.data(null);
+      return this;
+    }
     this.data(ObjectUtils.objectCollectionFromArray(arrayCollection, headers));
 
     return this;
@@ -444,16 +448,93 @@ class TableGenerator {
    * 
    * Is syntatic sugar to simply wrap the 1 dimensional array into a 2 dimensional array.
    * 
+   * ```
+   * let precip = [
+   *   1, 0, 2, 3, 4
+   * ];
+   * 
+   * utils.table().fromList(precip).render()
+   * ```
+   * 
+   * _   
+   * --  
+   * 1
+   * 0
+   * 2
+   * 3
+   * 4
+   * 
    * @param {Array} array1d 
    * @returns {TableGenerator}
    * @see {TableGenerator.fromArray}
   */
   fromList(array1d) {
+    if (!array1d) {
+      this.data(null);
+      return this;
+    }
     this.data(array1d.map((v) => ({ _: v })));
     return this;
   }
 
+  /**
+   * Initializes the data in the tableGenerator with an object holding
+   * 1d tensor properties.
+   * 
+   * ```
+   * dfObject = {
+   *   id: [
+   *     1, 0, 2, 3, 4,
+   *     5, 6, 8, 7
+   *   ],
+   *   city: [
+   *     'Seattle',  'Seattle',
+   *     'Seattle',  'New York',
+   *     'New York', 'New York',
+   *     'Chicago',  'Chicago',
+   *     'Chicago'
+   *   ],
+   *   month: [
+   *     'Aug', 'Apr',
+   *     'Dec', 'Apr',
+   *     'Aug', 'Dec',
+   *     'Apr', 'Dec',
+   *     'Aug'
+   *   ],
+   *   precip: [
+   *     0.87, 2.68, 5.31,
+   *     3.94, 4.13, 3.58,
+   *     3.62, 2.56, 3.98
+   *   ]
+   * }
+   * 
+   * utils.table().fromDataFrameObject(dfObject).render()
+   * ```
+   * 
+   * id|city    |month|precip
+   * --|--      |--   |--    
+   * 1 |Seattle |Aug  |0.87  
+   * 0 |Seattle |Apr  |2.68  
+   * 2 |Seattle |Dec  |5.31  
+   * 3 |New York|Apr  |3.94  
+   * 4 |New York|Aug  |4.13  
+   * 5 |New York|Dec  |3.58  
+   * 6 |Chicago |Apr  |3.62  
+   * 8 |Chicago |Dec  |2.56  
+   * 7 |Chicago |Aug  |3.98 
+   * 
+   * @param {Object} dataFrameObject - DataFrame with 1d tensor properties
+   * @returns {TableGenerator}
+   * @see https://danfo.jsdata.org/api-reference/dataframe/creating-a-dataframe#creating-a-dataframe-from-an-object
+   * @see {TableGenerator.fromList}
+   * @see {TableGenerator.fromObjectCollection}
+   * @see {TableGenerator.data}
+   */
   fromDataFrameObject(dataFrameObject) {
+    if (!dataFrameObject) {
+      this.data(null);
+      return this;
+    }
     this.data(ObjectUtils.objectCollectionFromDataFrameObject(dataFrameObject));
     return this;
   }
@@ -1610,6 +1691,21 @@ class TableGenerator {
 
   generateObjectCollection() {
     return ObjectUtils.objectCollectionFromArray(this.generateArray2);
+  }
+
+  generateDataFrame() {
+    const prepResults = this.prepare();
+    const results = {};
+    const createFrameList = () => new Array(prepResults.data.length).fill(undefined);
+    prepResults.headers.forEach((header) => ObjectUtils.assign(results, header, createFrameList()));
+
+    prepResults.data.forEach((row, rowIndex) => {
+      row.forEach((value, valIndex) => {
+        results[prepResults.headers[valIndex]][rowIndex] = value;
+      });
+    });
+
+    return results;
   }
 
   static hasRenderedCSS = false;

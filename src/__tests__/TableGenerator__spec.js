@@ -19,6 +19,49 @@ const initializeWeather = () => [
   { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98 }
 ];
 
+const initializeWeatherArray = () => [
+  ['id', 'city', 'month', 'precip'],
+  [ 1, 'Seattle', 'Aug', 0.87 ],
+  [ 0, 'Seattle', 'Apr', 2.68 ],
+  [ 2, 'Seattle', 'Dec', 5.31 ],
+  [ 3, 'New York', 'Apr', 3.94 ],
+  [ 4, 'New York', 'Aug', 4.13 ],
+  [ 5, 'New York', 'Dec', 3.58 ],
+  [ 6, 'Chicago', 'Apr', 3.62 ],
+  [ 8, 'Chicago', 'Dec', 2.56 ],
+  [ 7, 'Chicago', 'Aug', 3.98 ]
+];
+
+const initializeWeatherList = () => [
+  0.87, 2.68, 5.31, 3.94, 4.13, 3.58, 3.62, 2.56, 3.98
+];
+
+const initializeWeatherDataFrameObject = () => ({
+  id: [
+    1, 0, 2, 3, 4,
+    5, 6, 8, 7
+  ],
+  city: [
+    'Seattle',  'Seattle',
+    'Seattle',  'New York',
+    'New York', 'New York',
+    'Chicago',  'Chicago',
+    'Chicago'
+  ],
+  month: [
+    'Aug', 'Apr',
+    'Dec', 'Apr',
+    'Aug', 'Dec',
+    'Apr', 'Dec',
+    'Aug'
+  ],
+  precip: [
+    0.87, 2.68, 5.31,
+    3.94, 4.13, 3.58,
+    3.62, 2.56, 3.98
+  ]
+});
+
 const initializeSmallWeather = () => [
   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 }
@@ -171,6 +214,221 @@ global.describe('tableGenerator', () => {
           ]
         });
         const results = new TableGenerator(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+    });
+    global.describe('fromArray', () => {
+      global.it('uses fromArray to override the constructor', () => {
+        const weather = initializeWeatherArray();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(null)
+          .fromArray(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('can use a separate header list if provided', () => {
+        const weather = [
+          ['A', 'B', 'C', 'D'],
+          ...initializeWeatherArray().slice(1)
+        ];
+        const expected = ({
+          headers: ['A', 'B', 'C', 'D'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(null)
+          .fromArray(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats a null dataset as empty', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator(weather)
+          .fromArray(null)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats an empty data() call as empty', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator(weather)
+          .fromArray()
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('shows columns for all rows provided', () => {
+        const weather = initializeWeatherArray().slice(0, 4);
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle', 'Aug', 0.87],
+            [0, 'Seattle', 'Apr', 2.68],
+            [2, 'Seattle', 'Dec', 5.31]
+          ]
+        });
+        const results = new TableGenerator()
+          .fromArray(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+    });
+    global.describe('fromList', () => {
+      global.it('uses fromList to override the constructor', () => {
+        const weather = initializeWeatherList();
+        const expected = ({
+          headers: ['_'],
+          data: [
+            [0.87],
+            [2.68],
+            [5.31],
+            [3.94],
+            [4.13],
+            [3.58],
+            [3.62],
+            [2.56],
+            [3.98]
+          ] });
+        const results = new TableGenerator(null)
+          .fromList(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats a null dataset as empty', () => {
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator()
+          .fromList(null)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats an empty data() call as empty', () => {
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator()
+          .fromList()
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('shows columns for all rows provided', () => {
+        const weather = initializeWeatherList().slice(0, 4);
+        const expected = ({
+          headers: ['_'],
+          data: [
+            [0.87],
+            [2.68],
+            [5.31],
+            [3.94]
+          ]
+        });
+        const results = new TableGenerator()
+          .fromList(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+    });
+    global.describe('fromDataFrameObject', () => {
+      global.it('uses fromObjectCollection to override the constructor', () => {
+        const weather = initializeWeatherDataFrameObject();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(null)
+          .fromDataFrameObject(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats a null dataset as empty', () => {
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator()
+          .fromDataFrameObject(null)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats an empty data() call as empty', () => {
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator()
+          .fromDataFrameObject()
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('shows columns for all rows provided', () => {
+        const weather = initializeWeatherDataFrameObject();
+        weather.city = weather.city.slice(0, 3);
+        weather.id = weather.id.slice(0, 3);
+        weather.precip = weather.precip.slice(0, 3);
+        weather.month = weather.month.slice(0, 3);
+
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle', 'Aug', 0.87],
+            [0, 'Seattle', 'Apr', 2.68],
+            [2, 'Seattle', 'Dec', 5.31]
+          ]
+        });
+        const results = new TableGenerator(weather)
+          .fromDataFrameObject(weather)
           .prepare();
         global.expect(results.headers).toStrictEqual(expected.headers);
         global.expect(results.data).toStrictEqual(expected.data);
