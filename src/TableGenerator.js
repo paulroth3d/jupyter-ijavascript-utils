@@ -1690,10 +1690,10 @@ class TableGenerator {
   }
 
   generateObjectCollection() {
-    return ObjectUtils.objectCollectionFromArray(this.generateArray2);
+    return ObjectUtils.objectCollectionFromArray(this.generateArray2());
   }
 
-  generateDataFrame() {
+  generateDataFrameObject() {
     const prepResults = this.prepare();
     const results = {};
     const createFrameList = () => new Array(prepResults.data.length).fill(undefined);

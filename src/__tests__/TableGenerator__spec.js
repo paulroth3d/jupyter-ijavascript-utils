@@ -2225,6 +2225,76 @@ state|IL   |IL    `;
     });
   });
 
+  global.describe('generateObjectCollection', () => {
+    global.it('can generate a list of objects if given proper data', () => {
+      const weather = initializeWeather();
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 },
+        { id: 3, city: 'New York', month: 'Apr', precip: 3.94 },
+        { id: 4, city: 'New York', month: 'Aug', precip: 4.13 },
+        { id: 5, city: 'New York', month: 'Dec', precip: 3.58 },
+        { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62 },
+        { id: 8, city: 'Chicago',  month: 'Dec', precip: 2.56 },
+        { id: 7, city: 'Chicago',  month: 'Aug', precip: 3.98 }
+      ];
+      const results = new TableGenerator(weather)
+        .generateObjectCollection();
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('doesnt throw an error on an empty set', () => {
+      const weather = null;
+      const expected = [
+      ];
+      const results = new TableGenerator(weather)
+        .generateObjectCollection();
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('generateDataFrame', () => {
+    global.it('can generate a dataFrame Object if given proper data', () => {
+      const weather = initializeWeather();
+      const expected = {
+        id: [
+          1, 0, 2, 3, 4,
+          5, 6, 8, 7
+        ],
+        city: [
+          'Seattle',  'Seattle',
+          'Seattle',  'New York',
+          'New York', 'New York',
+          'Chicago',  'Chicago',
+          'Chicago'
+        ],
+        month: [
+          'Aug', 'Apr',
+          'Dec', 'Apr',
+          'Aug', 'Dec',
+          'Apr', 'Dec',
+          'Aug'
+        ],
+        precip: [
+          0.87, 2.68, 5.31,
+          3.94, 4.13, 3.58,
+          3.62, 2.56, 3.98
+        ]
+      };
+      const results = new TableGenerator(weather)
+        .generateDataFrameObject();
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('doesnt throw an error on an empty set', () => {
+      const weather = null;
+      const expected = {
+      };
+      const results = new TableGenerator(weather)
+        .generateDataFrameObject();
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
   global.describe('ijs aware', () => {
     const OLD_CONSOLE = global.console;
     beforeEach(() => {
