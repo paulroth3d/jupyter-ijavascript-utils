@@ -1187,6 +1187,35 @@ const delayedFn = (fn, ...rest) => () => {
 };
 module.exports.delayedFn = delayedFn;
 
+/**
+ * Chain a set of functions to be called one after another
+ * (supports functions returning promises)
+ * 
+ * This is especially helpful if calls need to be rate limited to only having 1 occur at a time.
+ * 
+ * The resulting promise will return a list, with each entry corresponding with the row of arguments sent.
+ * 
+ * ```
+ * const sumValues = (...rest) => rest.reduce((result, val) => result + val, 0);
+ * 
+ * const arguments = [
+ *  [1],
+ *  [1, 1],
+ *  [1, 1, 2],
+ *  [1, 1, 2, 3]
+ * ];
+ * 
+ * utils.array.chainFunctions(sumValues, arguments)
+ *  .then((results) => console.log(`fibonnacci numbers: ${results}`));
+ * // fibonacci numbers: [1, 2, 4, 7]
+ * ```
+ * 
+ * @param {Function} fn - the function to be called
+ * @param {Array<any[]>} rows - Array where each row are arguments to be applied to fn
+ * @returns {Promise<any>} - promise that will resolve when the last delayed function finishes
+ * @see {@link https://rxjs.dev/guide/overview|rxjs} if you would like to have more than one active at a time.
+ * @see {@link module:array.asyncWaitAndChain|asyncWaitAndChain} - if you would like a delay between executions
+ */
 module.exports.chainFunctions = (fn, rows) => {
   const delayedFunctions = rows.map((val) => delayedFn(fn, val));
   const delayedIterator = delayedFunctions.values();
@@ -1206,6 +1235,33 @@ module.exports.chainFunctions = (fn, rows) => {
   return rootPromise;
 };
 
+/**
+ * Similar to chainFunctions - in that only one delayed function will occur at a time,
+ * but adds a delay between calls.
+ * 
+ * This also supports functions returning promises.
+ * 
+ * 
+ * ```
+ * const sumValues = (...rest) => rest.reduce((result, val) => result + val, 0);
+ * 
+ * const arguments = [
+ *  [1],
+ *  [1, 1],
+ *  [1, 1, 2],
+ *  [1, 1, 2, 3]
+ * ];
+ * 
+ * utils.array.asyncWaitAndChain(3, sumValues, arguments)
+ *  .then((results) => console.log(`fibonnacci numbers: ${results}`));
+ * // fibonacci numbers: [1, 2, 4, 7], but took 9 seconds to accomplish
+ * ```
+ * 
+ * @param {Number} seconds - number of seconds to delay between each execution
+ * @param {Function} fn - function to be called for each row of rows
+ * @param {Array<any[]>} rows - Array where each row are arguments to be applied to fn
+ * @returns {Promise<any>} - promise that will resolve when the last delayed function finishes
+ */
 // eslint-disable-next-line no-unused-vars
 const asyncWaitAndChain = (seconds, fn, rows) => {
   const delayedFunctions = rows.map((val) => delayedFn(fn, val));
