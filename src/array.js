@@ -1122,6 +1122,13 @@ module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue
  * 
  * //-- move the main iterator
  * console.log(itr.next()); // { done: false, value: 1 }
+ * 
+ * Of course, for each will always work
+ * or
+ * for (let i of new utils.array.PeekableArrayIterator(list)) {
+ *   console.log(i);
+ * }
+ * // 1\n2\n3\n4\n5
  */
 class PeekableArrayIterator {
   /**
@@ -1140,17 +1147,14 @@ class PeekableArrayIterator {
   /* eslint-disable wrap-iife */
   next() {
     const self = this;
-    if (this.i < this.array.length) {
-      this.peek = (function* peek() {
-        for (let peekI = self.i; peekI < self.array.length; peekI += 1) {
-          yield self.array[peekI];
-        }
-      })();
+    this.peek = (function* peek() {
+      for (let peekI = self.i; peekI < self.array.length; peekI += 1) {
+        yield self.array[peekI];
+      }
+    })();
 
-      this.i += 1;
-      return { done: false, value: this.array[this.i] };
-    }
-    return { done: true, value: undefined };
+    this.i += 1;
+    return { done: this.i >= this.array.length, value: this.array[this.i] };
   }
   /* eslint-enable wrap-iife */
 }
