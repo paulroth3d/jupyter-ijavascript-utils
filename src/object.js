@@ -1861,6 +1861,49 @@ module.exports.union = function union(source1, source2) {
   return results;
 };
 
+/**
+ * Converts a 2d array to a collection of objects.
+ * 
+ * For Example:
+ * ```
+ * weather = [
+ *   [ 'id', 'city', 'month', 'precip' ],
+ *   [ 1, 'Seattle', 'Aug', 0.87 ],
+ *   [ 0, 'Seattle', 'Apr', 2.68 ],
+ *   [ 2, 'Seattle', 'Dec', 5.31 ]
+ * ]
+ * 
+ * utils.object.objectCollectionFromArray(weather);
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ * //   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * // ];
+ * ```
+ * 
+ * Note that the headers can be optionally provided separately.
+ * 
+ * ```
+ * weather = [
+ *   [ 1, 'Seattle', 'Aug', 0.87 ],
+ *   [ 0, 'Seattle', 'Apr', 2.68 ],
+ *   [ 2, 'Seattle', 'Dec', 5.31 ]
+ * ];
+ * headers = [ 'id', 'city', 'month', 'precip' ];
+ * 
+ * utils.object.objectCollectionFromArray(weather, headers);
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ * //   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * // ];
+ * ```
+ * 
+ * @param {Array<Array>} arrayCollection - 2d collection of values
+ * @param {String[]?} headers - Optional set of headers to use if not present in first row 0
+ * @returns {Object[]} - list of objects
+ * @see {module:object.objectCollectionFromArray}
+ */
 module.exports.objectCollectionFromArray = function objectCollectionFromArray(arrayCollection, headers = null) {
   let cleanHeaders;
   let cleanValues;
@@ -1887,6 +1930,31 @@ module.exports.objectCollectionFromArray = function objectCollectionFromArray(ar
   return newData;
 };
 
+/**
+ * Converts a 2d array to a collection of objects.
+ * 
+ * For Example:
+ * ```
+ * weather = [
+ *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+ *   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+ *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+ * ];
+ * 
+ * utils.object.objectCollectionToArray(weather);
+ * // [
+ * //   [ 'id', 'city', 'month', 'precip' ],
+ * //   [ 1, 'Seattle', 'Aug', 0.87 ],
+ * //   [ 0, 'Seattle', 'Apr', 2.68 ],
+ * //   [ 2, 'Seattle', 'Dec', 5.31 ]
+ * // ]
+ * ```
+ * 
+ * @param {Array<Array>} arrayCollection - 2d collection of values
+ * @param {String[]?} headers - Optional set of headers to use if not present in first row 0
+ * @returns {Object[]} - list of objects
+ * @see {module:object.objectCollectionFromArray}
+ */
 module.exports.objectCollectionToArray = function objectCollectionToArray(objectCollection) {
   if (!Array.isArray(objectCollection)) throw Error('objectCollectionToArray: expected collection to be a collection of objects');
 

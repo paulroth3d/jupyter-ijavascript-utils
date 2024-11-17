@@ -4273,4 +4273,86 @@ describe('ObjectUtils', () => {
       global.expect(targetObjects).toStrictEqual(expected);
     });
   });
+
+  global.describe('objectCollectionFromArray', () => {
+    global.it('can convert from a valid array', () => {
+      const weather = [
+        ['id', 'city', 'month', 'precip'],
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if no headers provided', () => {
+      const weather = [
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const expected = 'Property must be a string:1';
+      global.expect(() => ObjectUtils.objectCollectionFromArray(weather))
+        .toThrow(expected);
+    });
+    global.it('can convert from an array with built in headers', () => {
+      const weather = [
+        ['id', 'city', 'month', 'precip'],
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an array with separate headers', () => {
+      const weather = [
+        [1, 'Seattle', 'Aug', 0.87],
+        [0, 'Seattle', 'Apr', 2.68],
+        [2, 'Seattle', 'Dec', 5.31]
+      ];
+      const headers = ['id', 'city', 'month', 'precip'];
+      const expected = [
+        { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
+        { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
+        { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather, headers);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an array with headers only', () => {
+      const weather = [
+        ['id', 'city', 'month', 'precip']
+      ];
+      const expected = [
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert from an empty array with only headers separate', () => {
+      const weather = [
+      ];
+      const headers = ['id', 'city', 'month', 'precip'];
+      const expected = [
+      ];
+      const results = ObjectUtils.objectCollectionFromArray(weather, headers);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('throws an error if converting from null', () => {
+      const weather = null;
+      const expected = 'objectCollectionFromArray: expected collection to be a 2 dimensional array';
+      global.expect(() => ObjectUtils.objectCollectionFromArray(weather))
+        .toThrow(expected);
+    });
+  });
 });
