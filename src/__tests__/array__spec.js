@@ -1744,6 +1744,24 @@ line3`;
       global.expect(result.value).toBe(5);
       global.expect(result.done).toBe(true);
     });
+    global.it('get duplicate the iterator', () => {
+      const values = [0, 1, 2];
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      let result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(0);
+
+      let itr2 = itr[Symbol.iterator]();
+
+      result = itr.next();
+      global.expect(result.done).toBe(false);
+      global.expect(result.value).toBe(1);
+
+      result = itr2.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(2);
+    });
     global.it('can iterate over an empty list', () => {
       const values = [];
       const itr = new ArrayUtils.PeekableArrayIterator(values);
