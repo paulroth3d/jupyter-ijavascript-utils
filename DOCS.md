@@ -74,7 +74,8 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
-* 1.47 - Correct table rendering html if filter was used ({@link https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/64|#64})
+* 1.48 - Correct table rendering html if filter was used ({@link https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/64|#64})
+* 1.47
   * allow conversion from a Collection of Objects to Arrays and back with object. ({@link module:object.objectCollectionFromArray|object.objectCollectionFromArray}, {@link module:object.objectCollectionToArray|object.objectCollectionToArray})
   * Easier iterating over values and peeking with array with {@link module:array~PeekableArrayIterator|PeekableArrayIterator}
   * Support for delayed and asynchronous chaining of functions ({@link module:array.delayedFn|delayedFn}, {@link module:array.chainFunctions|chainFunctions}, etc)

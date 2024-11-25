@@ -1416,6 +1416,175 @@ state|IL   |IL    `;
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
       });
+      global.it('styles the rows well if there is a limit', () => {
+        const weather = initializeWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+<tr >
+\t<td >2</td>
+\t<td >Seattle</td>
+\t<td >Dec</td>
+\t<td >5.31</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >3</td>
+\t<td >New York</td>
+\t<td >Apr</td>
+\t<td >3.94</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >4</td>
+\t<td >New York</td>
+\t<td >Aug</td>
+\t<td >4.13</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >5</td>
+\t<td >New York</td>
+\t<td >Dec</td>
+\t<td >3.58</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ columnIndex, record }) => record.city === 'New York'
+          ? 'dynamic-style: found'
+          : '';
+        const results = new TableGenerator(weather)
+          .styleRow(styleRowFn)
+          .limit(6)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('styles the rows well if there is a limit and offset', () => {
+        const weather = initializeWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >3</td>
+\t<td >New York</td>
+\t<td >Apr</td>
+\t<td >3.94</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >4</td>
+\t<td >New York</td>
+\t<td >Aug</td>
+\t<td >4.13</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >5</td>
+\t<td >New York</td>
+\t<td >Dec</td>
+\t<td >3.58</td>
+</tr>
+<tr >
+\t<td >6</td>
+\t<td >Chicago</td>
+\t<td >Apr</td>
+\t<td >3.62</td>
+</tr>
+<tr >
+\t<td >8</td>
+\t<td >Chicago</td>
+\t<td >Dec</td>
+\t<td >2.56</td>
+</tr>
+<tr >
+\t<td >7</td>
+\t<td >Chicago</td>
+\t<td >Aug</td>
+\t<td >3.98</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ columnIndex, record }) => record.city === 'New York'
+          ? 'dynamic-style: found'
+          : '';
+        const results = new TableGenerator(weather)
+          .styleRow(styleRowFn)
+          .limit(6)
+          .offset(3)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('styles the rows well if there is only an offset', () => {
+        const weather = initializeWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >3</td>
+\t<td >New York</td>
+\t<td >Apr</td>
+\t<td >3.94</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >4</td>
+\t<td >New York</td>
+\t<td >Aug</td>
+\t<td >4.13</td>
+</tr>
+<tr style="dynamic-style: found;">
+\t<td >5</td>
+\t<td >New York</td>
+\t<td >Dec</td>
+\t<td >3.58</td>
+</tr>
+<tr >
+\t<td >6</td>
+\t<td >Chicago</td>
+\t<td >Apr</td>
+\t<td >3.62</td>
+</tr>
+<tr >
+\t<td >8</td>
+\t<td >Chicago</td>
+\t<td >Dec</td>
+\t<td >2.56</td>
+</tr>
+<tr >
+\t<td >7</td>
+\t<td >Chicago</td>
+\t<td >Aug</td>
+\t<td >3.98</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ columnIndex, record }) => record.city === 'New York'
+          ? 'dynamic-style: found'
+          : '';
+        const results = new TableGenerator(weather)
+          .styleRow(styleRowFn)
+          .offset(3)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
     });
     global.describe('styleColumn', () => {
       global.it('can style a column based on the value of the cell', () => {
