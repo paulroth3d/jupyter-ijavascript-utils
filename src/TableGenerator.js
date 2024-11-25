@@ -1453,6 +1453,8 @@ class TableGenerator {
         let record;
         if (this.#filterFn) {
           record = results.headers.reduce((result, header, headerIndex) => ObjectUtils.assign(result, header, dataRow[headerIndex]), {});
+        } else if (this.#offset) {
+          record = this.#data[rowIndex + this.#offset];
         } else {
           record = this.#data[rowIndex];
         }
