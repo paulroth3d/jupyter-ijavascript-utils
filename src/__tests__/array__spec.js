@@ -2034,4 +2034,328 @@ line3`;
         .then(() => jest.runAllTimers());
     });
   });
+  global.describe('extractFromHardSpacedTable', () => {
+    const columns = [
+      'id ',
+      'first_name ',
+      'last_name  ',
+      'city        ',
+      'email                        ',
+      'gender ',
+      'ip_address      ',
+      'airport_code ',
+      'car_model_year '
+    ];
+    // eslint-disable-next-line operator-linebreak
+    const hardSpacedString = '' +
+`id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+-- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+    global.it('can extract by string headers', () => {
+      const columnWidths = columns;
+      const expected = [
+        [
+          'id ',
+          '-- ',
+          '1  ',
+          '2  ',
+          '3  ',
+          '4  ',
+          '5  ',
+        ],
+        [
+          'first_name ',
+          '---------- ',
+          'Thekla     ',
+          'Lexi       ',
+          'Shawna     ',
+          'Ginger     ',
+          'Elbertina  ',
+        ],
+        [
+          'last_name  ',
+          '---------- ',
+          'Brokenshaw ',
+          'Dugall     ',
+          'Burghill   ',
+          'Tween      ',
+          'Setford    ',
+        ],
+        [
+          'city        ',
+          '----------- ',
+          'Chicago     ',
+          'New York    ',
+          'London      ',
+          'Lainqu      ',
+          'Los Angeles ',
+        ],
+        [
+          'email                        ',
+          '---------------------------- ',
+          'tbrokenshaw0@kickstarter.com ',
+          'ldugall1@fc2.com             ',
+          'sburghill2@scribd.com        ',
+          'gtween3@wordpress.com        ',
+          'esetford4@ted.com            ',
+        ],
+        [
+          'gender ',
+          '------ ',
+          'Female ',
+          'Female ',
+          'Female ',
+          'Female ',
+          'Female ',
+        ],
+        [
+          'ip_address      ',
+          '--------------- ',
+          '81.118.170.238  ',
+          '255.140.25.31   ',
+          '149.240.166.189 ',
+          '132.67.225.203  ',
+          '247.123.242.49  ',
+        ],
+        [
+          'airport_code ',
+          '------------ ',
+          'CXI          ',
+          'LBH          ',
+          'GBA          ',
+          'EMS          ',
+          'MEK          ',
+        ],
+        [
+          'car_model_year',
+          '--------------',
+          '2003          ',
+          '2005          ',
+          '2004          ',
+          '1993          ',
+          '1989          ',
+        ]
+      ];
+      const results = ArrayUtils.extractFromHardSpacedTable(hardSpacedString, columnWidths);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('test numeric headers', () => {
+      const columnWidths = columns.map((str) => str.length);
+      const expected = [3, 11, 11, 12, 29, 7, 16, 13, 15];
+      global.expect(columnWidths).toStrictEqual(expected);
+    });
+    global.it('can extract by numeric headers', () => {
+      const columnWidths = columns.map((str) => str.length);
+
+      const expectedColumnWidths = [3, 11, 11, 12, 29, 7, 16, 13, 15];
+      global.expect(columnWidths).toStrictEqual(expectedColumnWidths);
+
+      const expected = [
+        [
+          'id ',
+          '-- ',
+          '1  ',
+          '2  ',
+          '3  ',
+          '4  ',
+          '5  ',
+        ],
+        [
+          'first_name ',
+          '---------- ',
+          'Thekla     ',
+          'Lexi       ',
+          'Shawna     ',
+          'Ginger     ',
+          'Elbertina  ',
+        ],
+        [
+          'last_name  ',
+          '---------- ',
+          'Brokenshaw ',
+          'Dugall     ',
+          'Burghill   ',
+          'Tween      ',
+          'Setford    ',
+        ],
+        [
+          'city        ',
+          '----------- ',
+          'Chicago     ',
+          'New York    ',
+          'London      ',
+          'Lainqu      ',
+          'Los Angeles ',
+        ],
+        [
+          'email                        ',
+          '---------------------------- ',
+          'tbrokenshaw0@kickstarter.com ',
+          'ldugall1@fc2.com             ',
+          'sburghill2@scribd.com        ',
+          'gtween3@wordpress.com        ',
+          'esetford4@ted.com            ',
+        ],
+        [
+          'gender ',
+          '------ ',
+          'Female ',
+          'Female ',
+          'Female ',
+          'Female ',
+          'Female ',
+        ],
+        [
+          'ip_address      ',
+          '--------------- ',
+          '81.118.170.238  ',
+          '255.140.25.31   ',
+          '149.240.166.189 ',
+          '132.67.225.203  ',
+          '247.123.242.49  ',
+        ],
+        [
+          'airport_code ',
+          '------------ ',
+          'CXI          ',
+          'LBH          ',
+          'GBA          ',
+          'EMS          ',
+          'MEK          ',
+        ],
+        [
+          'car_model_year',
+          '--------------',
+          '2003          ',
+          '2005          ',
+          '2004          ',
+          '1993          ',
+          '1989          ',
+        ]
+      ];
+      const results = ArrayUtils.extractFromHardSpacedTable(hardSpacedString, columnWidths);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can extract a mixture', () => {
+      const columnWidthLengths = columns.map((str) => str.length);
+
+      const columnWidths = [
+        ...columns.slice(0, 2),
+        ...columnWidthLengths.slice(2)
+      ];
+
+      const expectedColumnWidths = ['id ', 'first_name ', 11, 12, 29, 7, 16, 13, 15];
+      global.expect(columnWidths).toStrictEqual(expectedColumnWidths);
+
+      const expected = [
+        [
+          'id ',
+          '-- ',
+          '1  ',
+          '2  ',
+          '3  ',
+          '4  ',
+          '5  ',
+        ],
+        [
+          'first_name ',
+          '---------- ',
+          'Thekla     ',
+          'Lexi       ',
+          'Shawna     ',
+          'Ginger     ',
+          'Elbertina  ',
+        ],
+        [
+          'last_name  ',
+          '---------- ',
+          'Brokenshaw ',
+          'Dugall     ',
+          'Burghill   ',
+          'Tween      ',
+          'Setford    ',
+        ],
+        [
+          'city        ',
+          '----------- ',
+          'Chicago     ',
+          'New York    ',
+          'London      ',
+          'Lainqu      ',
+          'Los Angeles ',
+        ],
+        [
+          'email                        ',
+          '---------------------------- ',
+          'tbrokenshaw0@kickstarter.com ',
+          'ldugall1@fc2.com             ',
+          'sburghill2@scribd.com        ',
+          'gtween3@wordpress.com        ',
+          'esetford4@ted.com            ',
+        ],
+        [
+          'gender ',
+          '------ ',
+          'Female ',
+          'Female ',
+          'Female ',
+          'Female ',
+          'Female ',
+        ],
+        [
+          'ip_address      ',
+          '--------------- ',
+          '81.118.170.238  ',
+          '255.140.25.31   ',
+          '149.240.166.189 ',
+          '132.67.225.203  ',
+          '247.123.242.49  ',
+        ],
+        [
+          'airport_code ',
+          '------------ ',
+          'CXI          ',
+          'LBH          ',
+          'GBA          ',
+          'EMS          ',
+          'MEK          ',
+        ],
+        [
+          'car_model_year',
+          '--------------',
+          '2003          ',
+          '2005          ',
+          '2004          ',
+          '1993          ',
+          '1989          ',
+        ]
+      ];
+      const results = ArrayUtils.extractFromHardSpacedTable(hardSpacedString, columnWidths);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('does not support an object for lengths', () => {
+      const columnWidths = { first: 10, last: 20 };
+      const expected = 'columnWidths passed must be an array of column widths to extract';
+      global.expect(() => {
+        ArrayUtils.extractFromHardSpacedTable(hardSpacedString, columnWidths);
+      }).toThrow(expected);
+    });
+    global.it('does not support other values', () => {
+      const columnWidthLengths = columns.map((str) => str.length);
+
+      const columnWidths = [
+        ...columns.slice(0, 2),
+        {},
+        ...columnWidthLengths.slice(2)
+      ];
+      const expected = 'Only strings and numbers are accepted as columnWidths';
+      global.expect(() => {
+        ArrayUtils.extractFromHardSpacedTable(hardSpacedString, columnWidths);
+      }).toThrow(expected);
+    });
+  });
 });

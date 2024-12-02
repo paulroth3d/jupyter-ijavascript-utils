@@ -54,6 +54,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New
+* 1.49 - Additional documentation for issues #18, #63, #62, #61 (like table.generateObjectCollection)
 * 1.48 - Correct table rendering html if filter was used (#46)
 * 1.47 - 
   * allow conversion from a Collection of Objects to Arrays and back with object. (objectCollectionFromArray, objectCollectionToArray)

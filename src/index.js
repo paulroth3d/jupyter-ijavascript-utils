@@ -8,6 +8,7 @@ const group = require('./group');
 const hashMap = require('./hashMap');
 const ijsUtils = require('./ijs');
 const file = require('./file');
+const help = require('./help');
 const vega = require('./vega');
 const format = require('./format');
 const set = require('./set');
@@ -72,6 +73,9 @@ module.exports = {
   svg,
   /** @see {@link module:vega} */
   vega,
+
+  /** @see {@link module:help} */
+  help,
 
   /** @see SourceMap */
   SourceMap,

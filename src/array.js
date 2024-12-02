@@ -914,6 +914,9 @@ module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions
 /**
  * Parse a fixed length table of strings (often in markdown format)
  * 
+ * This is different from multiLineSubString
+ * in this uses a start position and string length (not start and end position per line)
+ * 
  * For example, say you got a string formatted like this:
  * 
  * ```
@@ -962,6 +965,9 @@ module.exports.multiLineSubstr = function multiLineSubstr(target, start, length)
 
 /**
  * Parse a fixed length table of strings (often in markdown format)
+ * 
+ * This is different from multiLineSubStr
+ * in this uses a start and end position (not start and length)
  * 
  * For example, say you got a string formatted like this:
  * 
@@ -1028,12 +1034,23 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
  * 4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
  * 5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
  * 
- * columnWidths = [3, 11, 11, 12, 29, 7, 16, 13, 15];
- * sumFn = (a, b) => a + b;
+ * columns = [
+ *   'id ',
+ *   'first_name ',
+ *   'last_name  ',
+ *   'city        ',
+ *   'email                        ',
+ *   'gender ',
+ *   'ip_address      ',
+ *   'airport_code ',
+ *   'car_model_year '
+ * ];
+ * columnWidths = columns.map((str) => str.length);
+ * // [ 3, 11, 11, 12, 29, 7, 16, 13, 15 ];
  * 
  * //-- get the starting position for each column,
  * //-- ex: column 3 is sum of columnWidths[0..3] or 0 + 3 + 11 + 11 or 25
- * columnStops = utils.format.multiStepReduce( columnWidths, (a,b) => a + b, 0);
+ * columnStops = utils.array.multiStepReduce( columnWidths, (a,b) => a + b, 0);
  * // [0, 3, 14, 25, 37, 66, 73, 89, 102, 117];
  * ```
  * 
@@ -1049,7 +1066,7 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
  * ```
  * //-- we can get a single column like this:
  * cityStartingCharacter = substrPairs[3][0]; // 25
- * cityColumnLength = substrPairs[3][0]; // 12
+ * cityColumnLength = substrPairs[3][1]; // 12
  * 
  * cityData = ArrayUtils.multiLineSubstr(hardSpacedString, cityStartingCharacter, cityColumnLength);
  * // ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', 'Lainqu      ', 'Los Angeles ']
@@ -1082,14 +1099,14 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
  * ```
  * 
  * 0  |1          |2          |3           |4                            |5      |6               |7            |8             
--- |--         |--         |--          |--                           |--     |--              |--           |--            
-id |first_name |last_name  |city        |email                        |gender |ip_address      |airport_code |car_model_year
--- |---------- |---------- |----------- |---------------------------- |------ |--------------- |------------ |--------------
-1  |Thekla     |Brokenshaw |Chicago     |tbrokenshaw0@kickstarter.com |Female |81.118.170.238  |CXI          |2003          
-2  |Lexi       |Dugall     |New York    |ldugall1@fc2.com             |Female |255.140.25.31   |LBH          |2005          
-3  |Shawna     |Burghill   |London      |sburghill2@scribd.com        |Female |149.240.166.189 |GBA          |2004          
-4  |Ginger     |Tween      |Lainqu      |gtween3@wordpress.com        |Female |132.67.225.203  |EMS          |1993          
-5  |Elbertina  |Setford    |Los Angeles |esetford4@ted.com            |Female |247.123.242.49  |MEK          |1989          
+ * -- |--         |--         |--          |--                           |--     |--              |--           |--            
+ * id |first_name |last_name  |city        |email                        |gender |ip_address      |airport_code |car_model_year
+ * -- |---------- |---------- |----------- |---------------------------- |------ |--------------- |------------ |--------------
+ * 1  |Thekla     |Brokenshaw |Chicago     |tbrokenshaw0@kickstarter.com |Female |81.118.170.238  |CXI          |2003          
+ * 2  |Lexi       |Dugall     |New York    |ldugall1@fc2.com             |Female |255.140.25.31   |LBH          |2005          
+ * 3  |Shawna     |Burghill   |London      |sburghill2@scribd.com        |Female |149.240.166.189 |GBA          |2004          
+ * 4  |Ginger     |Tween      |Lainqu      |gtween3@wordpress.com        |Female |132.67.225.203  |EMS          |1993          
+ * 5  |Elbertina  |Setford    |Los Angeles |esetford4@ted.com            |Female |247.123.242.49  |MEK          |1989          
  * 
  * This can also be helpful with coming up with complex
  *  {@link module:array.arrange|array.arrange(size, start, step)}
@@ -1103,6 +1120,88 @@ module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue
     results.push(currentResult);
   });
   return results;
+};
+
+/**
+ * Useful for extracting out hard spaced string arrays separated by newlines
+ * 
+* ```
+ * hardSpacedString = `
+ * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
+ * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
+ * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
+ * 3  Shawna     Burghill   London      sburghill2@scribd.com        Female 149.240.166.189 GBA          2004          
+ * 4  Ginger     Tween      Lainqu      gtween3@wordpress.com        Female 132.67.225.203  EMS          1993          
+ * 5  Elbertina  Setford    Los Angeles esetford4@ted.com            Female 247.123.242.49  MEK          1989          `;
+ * 
+ * columns = [
+ *   'id ',
+ *   'first_name ',
+ *   'last_name  ',
+ *   'city        ',
+ *   'email                        ',
+ *   'gender ',
+ *   'ip_address      ',
+ *   'airport_code ',
+ *   'car_model_year '
+ * ];
+ * columnWidths = columns.map((str) => str.length);
+ * // [ 3, 11, 11, 12, 29, 7, 16, 13, 15 ];
+ * 
+ * 
+ * results = utils.array.extractFromHardSpacedTable(str, columnWidths);
+ * 
+ * [['id ', '-- ', '1  ', '2  ', '3  ', '4  ', '5  '],
+ * ['first_name ', '---------- ', 'Thekla     ', 'Lexi       ', 'Shawna     ', 'Gin...', ...],
+ * ['last_name  ', '---------- ', 'Brokenshaw ', 'Dugall     ', 'Burghill   ', 'Twe...', ...],
+ * ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', ...],
+ * ['email                        ', '---------------------------- ', 'tbrokenshaw0...', ...],
+ * ['gender ', '------ ', 'Female ', 'Female ', 'Female ', 'Female ', 'Female '],
+ * ['ip_address      ', '--------------- ', '81.118.170.238  ', '255.140.25.31   ', ...],
+ * ['airport_code ', '------------ ', 'CXI          ', 'LBH          ', 'GBA       ...', ...],
+ * ['car_model_year', '--------------', '2003          ', '2005          ', '2004  ...', ...]]
+ * ```
+ * 
+ * We can then transpose the array to give us the format we might expect (non DataFrame centric)
+ * 
+ * ```
+ * resultsData = utils.array.transpose(results);
+ * 
+ * utils.table(resultsData).render();
+ * ```
+ * 
+ * 0  |1          |2          |3           |4                            |5      |6               |7            |8             
+ * -- |--         |--         |--          |--                           |--     |--              |--           |--            
+ * id |first_name |last_name  |city        |email                        |gender |ip_address      |airport_code |car_model_year
+ * -- |---------- |---------- |----------- |---------------------------- |------ |--------------- |------------ |--------------
+ * 1  |Thekla     |Brokenshaw |Chicago     |tbrokenshaw0@kickstarter.com |Female |81.118.170.238  |CXI          |2003          
+ * 2  |Lexi       |Dugall     |New York    |ldugall1@fc2.com             |Female |255.140.25.31   |LBH          |2005          
+ * 3  |Shawna     |Burghill   |London      |sburghill2@scribd.com        |Female |149.240.166.189 |GBA          |2004          
+ * 4  |Ginger     |Tween      |Lainqu      |gtween3@wordpress.com        |Female |132.67.225.203  |EMS          |1993          
+ * 5  |Elbertina  |Setford    |Los Angeles |esetford4@ted.com            |Female |247.123.242.49  |MEK          |1989          
+ * 
+ * @param {String} str - Markdown / Hard Spaced Strings
+ * @param {Number[]} columnWidths - Array of of the column widths to extract
+ * @returns {String[][]} - Array of Arrays, where each row is an extracted column
+ */
+module.exports.extractFromHardSpacedTable = function extractFromHardSpacedTable(str, columnWidths) {
+  if (!Array.isArray(columnWidths)) throw Error('columnWidths passed must be an array of column widths to extract');
+  const cleanColumnWidths = columnWidths.map((v) => {
+    const vType = typeof v;
+    if (vType === 'string') return v.length;
+    if (vType === 'number') return v;
+    throw Error('Only strings and numbers are accepted as columnWidths');
+  });
+
+  const columnStarts = ArrayUtils.multiStepReduce(cleanColumnWidths, (a, b) => a + b, 0);
+
+  const columns = cleanColumnWidths.map((value, index) => [
+    columnStarts[index],
+    value
+  ]);
+
+  return columns.map(([startPos, columnWidth]) => ArrayUtils.multiLineSubstr(str, startPos, columnWidth));
 };
 
 /**

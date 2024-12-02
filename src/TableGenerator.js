@@ -138,6 +138,8 @@ const { createSort } = require('./array');
  *   * {@link TableGenerator#generateCSV|generateCSV()} - generates a TSV with the results
  *   * {@link TableGenerator#generateArray|generateArray()} - generates an array of headers and data for further process
  *   * {@link TableGenerator#generateArray2|generateArray2()} - generates a single array for further process
+ *   * {@link TableGenerator#generateObjectCollection|generateObjectCollection()} - generate an object collection from the results
+ *   * {@link TableGenerator#generateDataFrameObject|generateDataFrameObject()} - generate a Danfo.js compatable dataframe object
  * * render in jupyter
  *   * {@link TableGenerator#render|render()} - renders the results in a table within jupyter
  *   * {@link TableGenerator#renderCSV|renderCSV()} - renders the generateCSV results in a table within jupyter
@@ -1691,10 +1693,60 @@ class TableGenerator {
     return [results.headers, ...results.data];
   }
 
+  /**
+   * Generates a collection of objects as a result set.
+   * 
+   * Example:
+   * 
+   * ```
+   * dataSet = [{reg:'z', source: 'A', temp: 99},
+   *    {reg: 'z', source: 'B', temp: 98},
+   *    {reg: 'z', source:'A', temp: 100}
+   * ];
+   * 
+   * new TableGenerator(dataSet)
+   *  .filter((obj) => ob.source === 'A')
+   *  .sort('-temp')
+   *  .limit(2)
+   *  .generateObjectCollection();
+   * 
+   * // [
+   * //   { reg: 'z', source: 'A', temp: 100 },
+   * //   { reg: 'z', source: 'A', temp: 99 }
+   * // ]
+   * ```
+   * 
+   * @see {@link TableGenerator#generateArray2|generateArray2()}
+   * @returns {Object[]} - collection of objects
+   */
   generateObjectCollection() {
     return ObjectUtils.objectCollectionFromArray(this.generateArray2());
   }
 
+  /**
+   * Generates a Danfo compatible DataFrame Object.
+   * 
+   * (Where each property has a 1d collection of values)
+   * 
+   *  ```
+   * dataSet = [{reg:'z', source: 'A', temp: 99},
+   *    {reg: 'z', source: 'B', temp: 98},
+   *    {reg: 'z', source:'A', temp: 100}
+   * ];
+   * 
+   * new TableGenerator(dataSet)
+   *  .generateDataFrameObject();
+   * 
+   * // {
+   * //   reg: [ 'z', 'z', 'z' ],
+   * //   source: [ 'A', 'A', 'B' ],
+   * //   temp: [ 100, 99, 98 ]
+   * // }
+   * ```
+   * 
+   * @returns {Object} - with each property as a column.
+   * @see {@link TableGenerator#generateObjectCollection|generateObjectCollection()}
+   */
   generateDataFrameObject() {
     const prepResults = this.prepare();
     const results = {};
