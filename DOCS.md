@@ -74,6 +74,7 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
+* 1.50 - added in {@link module:color|color/colour} - and addressed issue #65
 * 1.49 - Additional documentation for issues #18, #63, #62, #61 (like table.generateObjectCollection)
 * 1.48 - Correct table rendering html if filter was used ({@link https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/64|#64})
 * 1.47

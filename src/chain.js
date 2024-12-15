@@ -543,7 +543,7 @@ class ChainContainer {
    * @returns {ChainContainer}
    */
   toArray() {
-    return new ChainContainer(Array.from(this.value));
+    return this.update(Array.from(this.value));
   }
 
   //-- private methods
