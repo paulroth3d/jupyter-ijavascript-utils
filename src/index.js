@@ -2,6 +2,7 @@ const aggregate = require('./aggregate');
 const array = require('./array');
 const base64 = require('./base64');
 const chain = require('./chain');
+const color = require('./color');
 const datasets = require('./datasets');
 const describe = require('./describe');
 const group = require('./group');
@@ -42,6 +43,10 @@ module.exports = {
   base64,
   /** @see {@link module:chain} */
   chain,
+  /** @see {@link module:color} */
+  color,
+  /** @see {@link module:color} */
+  colour: color,
   /** @see {@link module:datasets} */
   datasets,
   dataset: datasets,
