@@ -1,22 +1,22 @@
-const webpack = require('webpack');
+// const webpack = require('webpack');
 const path = require('path');
 
 const config = {
-  entry: './src/webpack.js',
+  entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'jupyter-ijavascript-utils.js'
   },
   resolve: {
     fallback: {
-      "fs": false,
-      "path": false,
-      "stream": false,
-      "buffer": false,
-      "constants": false,
-      "util": false,
-      "events": false,
-      "assert": false
+      fs: false,
+      path: false,
+      stream: false,
+      buffer: false,
+      constants: false,
+      util: false,
+      events: false,
+      assert: false
     }
   },
   module: {
@@ -25,7 +25,7 @@ const config = {
         test: /\.js$/,
         use: 'babel-loader',
         exclude: /node_modules/
-      } 
+      }
     ]
   }
 };

@@ -7,18 +7,18 @@ const datasets = require('./datasets');
 const describe = require('./describe');
 const group = require('./group');
 const hashMap = require('./hashMap');
-const ijsUtils = require('./ijs');
-const file = require('./file');
+// const ijsUtils = require('./ijs');
+// const file = require('./file');
 const help = require('./help');
-const vega = require('./vega');
+// const vega = require('./vega');
 const format = require('./format');
 const set = require('./set');
 const object = require('./object');
-const plantuml = require('./plantuml');
-const leaflet = require('./leaflet');
-const latex = require('./latex');
+// const plantuml = require('./plantuml');
+// const leaflet = require('./leaflet');
+// const latex = require('./latex');
 const random = require('./random');
-const svg = require('./svg');
+// const svg = require('./svg');
 
 const SourceMap = require('./SourceMap');
 const TableGenerator = require('./TableGenerator');
@@ -27,13 +27,15 @@ const table = function table(...rest) {
   return new TableGenerator(...rest);
 };
 
+const pkg = require('../package.json');
+
 /**
  * Default module
  * @module index
  * @exports index
  * @private
  */
-module.exports = {
+const mainResults = {
   /** @see {@link module:aggregate} */
   aggregate,
   agg: aggregate,
@@ -52,32 +54,18 @@ module.exports = {
   dataset: datasets,
   /** @see {@link module:describe} */
   describe,
-  /** @see {@link module:file} */
-  file,
   /** @see {@link module:group} */
   group,
   /** @see {@link module:hashMap} */
   hashMap,
   /** @see {@link module:format} */
   format,
-  /** @see {@link IJSUtils} */
-  ijs: ijsUtils,
-  /** @see {@link module:latex} */
-  latex,
-  /** @see {@link module:leaflet} */
-  leaflet,
   /** @see {@link module:object} */
   object,
-  /** @see {@link module:plantuml} */
-  plantuml,
   /** @see {@link module:random} */
   random,
   /** @see {@link module:set} */
   set,
-  /** @see {@link module:svg} */
-  svg,
-  /** @see {@link module:vega} */
-  vega,
 
   /** @see {@link module:help} */
   help,
@@ -87,5 +75,9 @@ module.exports = {
   /** @see TableGenerator */
   TableGenerator,
   /** @see TableGenerator */
-  table
+  table,
+
+  version: pkg.version
 };
+
+globalThis.ijsUtils = mainResults;
