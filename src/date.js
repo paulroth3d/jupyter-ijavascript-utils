@@ -311,9 +311,10 @@ module.exports.epochShift = function epochShift(date, timeZoneStr) {
  * Consider this as an alternative to epochShifting.
  * 
  * ```
- * d = new Date(Date.toISO(2024, 12, 26, 12, 30, 0));
+ * d = Date.parse('2024-12-27 13:30:00');
  * 
- * utils.date.toLocalISO(d, 'america/Chicago'); // '2024-12-16T06:30:00.000+05:30Z'
+ * utils.date.toLocalISO(d, 'america/Chicago'); // '2024-12-27T07:30:00.000-06:00'
+ * utils.date.toLocalISO(d, 'europe/paris'); //    '2024-12-27T14:30:00.000+01:00'
  * ```
  * 
  * @param {Date} date - date to print
@@ -461,10 +462,10 @@ class DateRange {
    * @param {DateRange} targetDateRange - dateRange to compare
    * @returns {Boolean}
    * @example
-   * overlapA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * overlapB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
-   * overlapC = new Date(Date.UTC(2024, 12, 26, 14, 0, 0));
-   * overlapD = new Date(Date.UTC(2024, 12, 26, 15, 0, 0));
+   * overlapA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * overlapB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
+   * overlapC = new Date(Date.UTC(2024, 11, 26, 14, 0, 0));
+   * overlapD = new Date(Date.UTC(2024, 11, 26, 15, 0, 0));
    * 
    * rangeBefore = new utils.DateRange(overlapA, overlapB);
    * rangeAfter = new utils.DateRange(overlapC, overlapD);
@@ -490,10 +491,10 @@ class DateRange {
    * @returns {Boolean} - if the value is within the range (true) or not (false)
    * 
    * @example
-   * withinA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * withinB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
-   * withinC = new Date(Date.UTC(2024, 12, 26, 14, 0, 0));
-   * withinD = new Date(Date.UTC(2024, 12, 26, 15, 0, 0));
+   * withinA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * withinB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
+   * withinC = new Date(Date.UTC(2024, 11, 26, 14, 0, 0));
+   * withinD = new Date(Date.UTC(2024, 11, 26, 15, 0, 0));
    * 
    * range = new utils.DateRange(withinB, withinD);
    * range.contains(withinA); // false - it was before the range
@@ -512,8 +513,8 @@ class DateRange {
    * Determines the millisecond duration between the end and start time.
    * 
    * ```
-   * durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
    * range.durationString(); // 1 hour in milliseconds; 1000 * 60 * 60;
@@ -529,8 +530,8 @@ class DateRange {
    * Determines the duration in a clear and understandable string;
    * 
    * ```
-   * durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
    * range.durationString(); // '0 days, 1 hours, 0 minutes, 0.0 seconds';
@@ -547,8 +548,8 @@ class DateRange {
    * Determines the duration in days:hours:minutes:seconds.milliseconds
    * 
    * ```
-   * durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
    * range.durationString(); // '0:01:00:00.0000';
@@ -574,8 +575,8 @@ class DateRange {
    * Converts the daterange to a string value
    * 
    * ```
-   * durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
    * range.toString(); // '2025-01-26T12:00:00.000Z to 2025-01-26T13:00:00.000Z';
@@ -591,8 +592,8 @@ class DateRange {
    * Converts the daterange to a local string value
    * 
    * ```
-   * durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-   * durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
    * range.toLocaleString(); // '1/26/2025, 12:00:00 PM to 1/26/2025, 1:00:00 PM'
