@@ -212,4 +212,105 @@ global.describe('Date', () => {
       global.expect(results).toStrictEqual(expected);
     });
   });
+
+  global.describe('durationString', () => {
+    global.it('simple example', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '0 days, 1 hours, 0 minutes, 0.0 seconds';
+      const results = DateUtils.durationLong(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('day', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 27, 12, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '1 days, 0 hours, 0 minutes, 0.0 seconds';
+      const results = DateUtils.durationLong(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('hours', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 14, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '0 days, 2 hours, 0 minutes, 0.0 seconds';
+      const results = DateUtils.durationLong(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('minutes', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 30, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '0 days, 0 hours, 30 minutes, 0.0 seconds';
+      const results = DateUtils.durationLong(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('negative example', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 27, 13, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '-1 days, 1 hours, 0 minutes, 0.0 seconds';
+      const results = DateUtils.durationLong(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('durationISO', () => {
+    global.it('simple example', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '0:01:00:00.000';
+      const results = DateUtils.durationISO(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('day', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 27, 12, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '1:00:00:00.000';
+      const results = DateUtils.durationISO(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('hours', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 14, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '0:02:00:00.000';
+      const results = DateUtils.durationISO(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('minutes', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 30, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '0:00:30:00.000';
+      const results = DateUtils.durationISO(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('negative example', () => {
+      const durationA = new Date(Date.UTC(2024, 12, 27, 13, 30, 0));
+      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const range = durationB.getTime() - durationA.getTime();
+      const expected = '-1:01:30:00.000';
+      const results = DateUtils.durationISO(range);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('toLocalISO', () => {
+    global.it('can convert a date to america/Chicago', () => {
+      const dateA = Date.parse('2024-12-27 13:30:00');
+      const expected = '2024-12-27T07:30:00.000-06:00';
+      const results = DateUtils.toLocalISO(dateA, 'america/Chicago');
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can convert a date to europe/paris', () => {
+      const dateA = Date.parse('2024-12-27 13:30:00');
+      const expected = '2024-12-27T14:30:00.000+01:00';
+      const results = DateUtils.toLocalISO(dateA, 'europe/paris');
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
 });

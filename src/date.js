@@ -7,6 +7,7 @@
  * * Parse
  *   * {@link module:date.parse|date.parse(String)} - parse a date and throw an exception if it is not a valid date
  * * TimeZones
+ *   * {@link module:date.toLocalISO|date.toLocalISO} - prints in 8601 format with timezone offset based on a tz entry - like america/chicago
  *   * {@link module:date.getTimezoneOffset|date.getTimezoneOffset(String)} - gets the number of milliseconds offset for a given timezone
  *   * {@link module:date.correctForTimezone|date.correctForTimezone(Date, String)} - meant to correct a date already off from UTC to the correct time
  *   * {@link module:date.epochShift|date.epochShift(Date, String)} - offsets a date from UTC to a given time amount
@@ -15,6 +16,10 @@
  *   * {@link module:date.add|date.add(Date, {days, hours, minutes, seconds)} - shift a date by a given amount
  *   * {@link module:date.endOfDay|date.endOfDay(Date)} - finds the end of day UTC for a given date
  *   * {@link module:date.startOfDay|date.startOfDay(Date)} - finds the end of day UTC for a given date
+ * * Print
+ *   * {@link module:date.durationLong|date.durationLong(epoch)} - displays duration in legible form:
+ *      `D days, H hours, M minutes, S.MMM seconds`
+ *   * {@link module:date.durationISO|date.durationISO(epoch)} - displays duration in condensed forme:
  * 
  * --------
  * 
@@ -34,6 +39,8 @@
  */
 module.exports = {};
 const DateUtils = module.exports;
+
+module.exports.divideRemainder = (val, denominator) => ({ value: Math.floor(val / denominator), remainder: val % denominator });
 
 /**
  * Collection of time durations in milliseconds
@@ -99,7 +106,136 @@ module.exports.parse = (dateStr) => {
   return result;
 };
 
-module.exports.timeZoneOffsets = new Map();
+/**
+ * Prints the duration in ISO format: `D:HH:MM:SS.MMM`
+ * 
+ * ```
+ * start = new Date(Date.ISO(2024, 12, 26, 12, 0, 0));
+ * end = new Date(Date.ISO(2024, 12, 26, 13, 0, 0));
+ * 
+ * duration = end.getTime() - start.getTime();
+ * 
+ * utils.date.durationLong(duration); // '0 days, 1 hours, 0 minutes, 0.00 seconds'
+ * 
+ * @param {Number} epochDifference - difference in milliseconds between two dates
+ * @returns {String} `D days, H hours, M minutes,S.MMMM seconds`
+ * @see {@link module:date.DateRange.duration|DateRange.duration}
+ */
+module.exports.durationISO = function durationISO(epochDifference) {
+  const signStr = epochDifference < 0 ? '-' : '';
+  let result = DateUtils.divideRemainder(Math.abs(epochDifference), DateUtils.TIME.DAY);
+  const days = String(result.value);
+  result = DateUtils.divideRemainder(result.remainder, DateUtils.TIME.HOUR);
+  const hours = String(result.value).padStart(2, '0');
+  result = DateUtils.divideRemainder(result.remainder, DateUtils.TIME.MINUTE);
+  const minutes = String(result.value).padStart(2, '0');
+  result = DateUtils.divideRemainder(result.remainder, DateUtils.TIME.SECOND);
+  const seconds = String(result.value).padStart(2, '0');
+  const milli = String(result.remainder).padStart(3, '0');
+  return `${signStr}${days}:${hours}:${minutes}:${seconds}.${milli}`;
+};
+
+/**
+ * Prints the duration in long format: `D days, H hours, M minutes, S.MMM seconds`
+ * 
+ * ```
+ * start = new Date(Date.ISO(2024, 12, 26, 12, 0, 0));
+ * end = new Date(Date.ISO(2024, 12, 27, 13, 0, 0));
+ * 
+ * duration = end.getTime() - start.getTime();
+ * 
+ * utils.date.durationLong(duration); // '1 days, 1 hours, 0 minutes, 0.00 seconds'
+ * 
+ * @param {Number} epochDifference - difference in milliseconds between two dates
+ * @returns {String} `D days, H hours, M minutes,S.MMMM seconds`
+ * @see {@link module:date.DateRange.duration|DateRange.duration}
+ */
+module.exports.durationLong = function durationLong(epochDifference) {
+  const signStr = epochDifference < 0 ? '-' : '';
+  let result = DateUtils.divideRemainder(Math.abs(epochDifference), DateUtils.TIME.DAY);
+  const days = result.value;
+  result = DateUtils.divideRemainder(result.remainder, DateUtils.TIME.HOUR);
+  const hours = result.value;
+  result = DateUtils.divideRemainder(result.remainder, DateUtils.TIME.MINUTE);
+  const minutes = result.value;
+  result = DateUtils.divideRemainder(result.remainder, DateUtils.TIME.SECOND);
+  const seconds = result.value;
+  const milli = result.remainder;
+  return `${signStr}${days} days, ${hours} hours, ${minutes} minutes, ${seconds}.${milli} seconds`;
+};
+
+/**
+ * @typedef {Object} TimeZoneEntry
+ * @property {String} tz - the name of the timezone
+ * @property {Function} formatter - formats a date to that local timezone
+ * @property {Number} epoch - the difference in milliseconds from that tz to UTC
+ * @property {String} offset - ISO format for how many hours and minutes offset to UTC '+|-' HH:MMM 
+ */
+
+/**
+ * Collection of TimeZoneEntries by the tz string
+ * @private
+ * @type {Map<String,TimeZoneEntry>}
+ */
+module.exports.timeZoneOffsetMap = new Map();
+
+/**
+ * Fetches or creates a TimeZoneEntry
+ * @private
+ * @param {String} timeZoneStr - tz database entry for the timezone
+ * @returns {TimeZoneEntry}
+ */
+module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
+  const cleanTz = String(timeZoneStr).toLowerCase();
+  if (DateUtils.timeZoneOffsetMap.has(cleanTz)) {
+    return DateUtils.timeZoneOffsetMap.get(cleanTz);
+  }
+  const d = new Date();
+
+  const formatter = (dateValue) => {
+    const dtFormat = new Intl.DateTimeFormat('en-us', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false,
+      fractionalSecondDigits: 3,
+      timeZone: cleanTz
+    });
+    const dm = dtFormat.formatToParts(dateValue)
+      .filter(({ type }) => type !== 'literal')
+      .reduce((result, { type, value }) => {
+        // eslint-disable-next-line no-param-reassign
+        result[type] = value;
+        return result;
+      }, {});
+    //   const impactedDate = new Date(d.toLocaleString('en-US', { timeZone: timeZoneStr }));
+    const dateStr = `${dm.year}-${DateUtils.padTime(dm.month)}-${DateUtils.padTime(dm.day)}T${
+      DateUtils.padTime(dm.hour)}:${DateUtils.padTime(dm.minute)}:${DateUtils.padTime(dm.second)}.${
+      DateUtils.padTime(dm.fractionalSecond, 3)}`;
+    return dateStr;
+  };
+  
+  const impactedDateStr = formatter(d);
+  const impactedDate = new Date(impactedDateStr);
+
+  const diff = d.getTime() - impactedDate.getTime();
+
+  const diffSign = diff > 0 ? '-' : '+';
+  let remainder = DateUtils.divideRemainder(Math.abs(diff), DateUtils.TIME.HOUR);
+  const diffHours = remainder.value;
+  remainder = DateUtils.divideRemainder(remainder.remainder, DateUtils.TIME.MINUTE);
+  const diffMinutes = remainder.value;
+  const offset = `${diffSign}${DateUtils.padTime(diffHours)}:${DateUtils.padTime(diffMinutes)}`;
+
+  const result = ({ tz: cleanTz, formatter, epoch: diff, offset });
+
+  DateUtils.timeZoneOffsetMap.set(cleanTz, result);
+
+  return result;
+};
 
 /**
  * Determines the number of milliseconds difference between
@@ -111,43 +247,10 @@ module.exports.timeZoneOffsets = new Map();
  * for the full list of options.
  * 
  * @param {String} timeZoneStr - a timezone string like "America/Toronto"
- * @returns {Number} - the number of milliseconds between UTC and that timezone
+ * @returns {TimeZoneEntry} - the number of milliseconds between UTC and that timezone
  */
 module.exports.getTimezoneOffset = function getTimezoneOffset(timeZoneStr) {
-  if (DateUtils.timeZoneOffsets.has(timeZoneStr)) {
-    return DateUtils.timeZoneOffsets.get(timeZoneStr);
-  }
-  const d = new Date();
-
-  const format = new Intl.DateTimeFormat('en-us', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: false,
-    fractionalSecondDigits: 3,
-    timeZone: timeZoneStr
-  });
-  const dm = format.formatToParts(d)
-    .filter(({ type }) => type !== 'literal')
-    .reduce((result, { type, value }) => {
-      // eslint-disable-next-line no-param-reassign
-      result[type] = value;
-      return result;
-    }, {});
-  //   const impactedDate = new Date(d.toLocaleString('en-US', { timeZone: timeZoneStr }));
-  const dateStr = `${dm.year}-${DateUtils.padTime(dm.month)}-${DateUtils.padTime(dm.day)}T${
-    DateUtils.padTime(dm.hour)}:${DateUtils.padTime(dm.minute)}:${DateUtils.padTime(dm.second)}.${
-    DateUtils.padTime(dm.fractionalSecond, 3)}`;
-  const impactedDate = new Date(dateStr);
-
-  const diff = d.getTime() - impactedDate.getTime();
-
-  DateUtils.timeZoneOffsets.set(timeZoneStr, diff);
-
-  return diff;
+  return DateUtils.getTimezoneEntry(timeZoneStr).epoch;
 };
 
 /**
@@ -181,8 +284,8 @@ module.exports.getTimezoneOffset = function getTimezoneOffset(timeZoneStr) {
  * @returns {Date} - copy of the date corrected 
  */
 module.exports.correctForTimezone = function correctForTimezone(date, timeZoneStr) {
-  const offsetMilli = DateUtils.getTimezoneOffset(timeZoneStr);
-  return new Date(date.getTime() + offsetMilli);
+  const { epoch } = DateUtils.getTimezoneEntry(timeZoneStr);
+  return new Date(date.getTime() + epoch);
 };
 
 /**
@@ -194,10 +297,32 @@ module.exports.correctForTimezone = function correctForTimezone(date, timeZoneSt
  * @param {Date} date - date to shift
  * @param {String} timeZoneStr - the tz database name of the timezone
  * @returns {Date}
+ * @see {@link module:date.toLocalISO|date.toLocalISO} - consider as an alternative.
+ *    This prints the correct time, without updating the date object.
  */
 module.exports.epochShift = function epochShift(date, timeZoneStr) {
-  const offsetMilli = DateUtils.getTimezoneOffset(timeZoneStr);
-  return new Date(date.getTime() - offsetMilli);
+  const { epoch } = DateUtils.getTimezoneEntry(timeZoneStr);
+  return new Date(date.getTime() - epoch);
+};
+
+/**
+ * Prints a date in 8601 format to a timezone (with +H:MM offset)
+ * 
+ * Consider this as an alternative to epochShifting.
+ * 
+ * ```
+ * d = new Date(Date.toISO(2024, 12, 26, 12, 30, 0));
+ * 
+ * utils.date.toLocalISO(d, 'america/Chicago'); // '2024-12-16T06:30:00.000+05:30Z'
+ * ```
+ * 
+ * @param {Date} date - date to print
+ * @param {String} timeZoneStr - the tz database name of the timezone
+ * @returns {String} - ISO format with timezone offset
+ */
+module.exports.toLocalISO = function toLocalISO(date, timeZoneStr) {
+  const { formatter, offset } = DateUtils.getTimezoneEntry(timeZoneStr);
+  return `${formatter(date)}${offset}`;
 };
 
 /**
@@ -415,17 +540,7 @@ class DateRange {
    */
   durationString() {
     const dur = this.duration();
-    const divideRemainder = (val, denominator) => ({ value: Math.floor(val / denominator), remainder: val % denominator });
-    let result = divideRemainder(dur, DateUtils.TIME.DAY);
-    const days = result.value;
-    result = divideRemainder(result.remainder, DateUtils.TIME.HOUR);
-    const hours = result.value;
-    result = divideRemainder(result.remainder, DateUtils.TIME.MINUTE);
-    const minutes = result.value;
-    result = divideRemainder(result.remainder, DateUtils.TIME.SECOND);
-    const seconds = result.value;
-    const milli = result.remainder;
-    return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds}.${milli} seconds`;
+    return DateUtils.durationLong(dur);
   }
 
   /**
@@ -443,17 +558,7 @@ class DateRange {
    */
   durationISO() {
     const dur = this.duration();
-    const divideRemainder = (val, denominator) => ({ value: Math.floor(val / denominator), remainder: val % denominator });
-    let result = divideRemainder(dur, DateUtils.TIME.DAY);
-    const days = String(result.value);
-    result = divideRemainder(result.remainder, DateUtils.TIME.HOUR);
-    const hours = String(result.value).padStart(2, '0');
-    result = divideRemainder(result.remainder, DateUtils.TIME.MINUTE);
-    const minutes = String(result.value).padStart(2, '0');
-    result = divideRemainder(result.remainder, DateUtils.TIME.SECOND);
-    const seconds = String(result.value).padStart(2, '0');
-    const milli = String(result.remainder).padStart(4, '0');
-    return `${days}:${hours}:${minutes}:${seconds}.${milli}`;
+    return DateUtils.durationISO(dur);
   }
 
   /**
