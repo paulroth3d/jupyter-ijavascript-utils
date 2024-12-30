@@ -216,3 +216,27 @@ module.exports.fromObject = function fromObject(target) {
   return [...Object.keys(target)]
     .reduce((result, key) => HashMapUtil.add(result, key, target[key]), new Map());
 };
+
+/**
+ * Simple and safe Map accessing function.
+ * 
+ * ```
+ * styleMap = new Map(['1', 'background-color: #FF0000'], ['2', 'background-color: #00FF00']]);
+ * styleFn = utils.map.mappingFn(styleMap, 'background-color: #aaaaaa');
+ * 
+ * styleFn('1'); // 'background-color: #FF0000';
+ * styleFn('2'); // 'background-color: #00FF00';
+ * styleFn('somethingElse'); // 'background-color: #aaaaaa' - because it was not found
+ * 
+ * @param {Map} map - map to use when checking the subsequent function
+ * @param {any} [defaultValue=''] - default value to return if key is not found
+ * @returns {Function} - (key) => map.get(key) || defaultValue
+ */
+module.exports.mappingFn = function mappingFn(map, defaultValue = '') {
+  return function mappingFnImpl(key) {
+    if (map.has(key)) {
+      return map.get(key);
+    }
+    return defaultValue;
+  };
+};

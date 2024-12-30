@@ -13,6 +13,7 @@ require('./_types/global');
  *   * {@link module:array.arrange|array.arrange(size, start, step)} - generate array of a size, and INCREASING default value
  *   * {@link module:array.arrangeMulti|array.arrangeMulti(n, m, ...)} - generate a multi-dimensional array
  *   * {@link module:array.clone|array.clone(array)} - deep clones arrays
+ *   * {@link module:array.zip|array.zip(arrayleft, arrayRight)} - zips two arrays to join values at the same index together.
  * * Sorting
  *   * {@link module:array.createSort|array.createSort(sortIndex, sortIndex, ...)} - generates a sorting function
  *   * {@link module:array.SORT_ASCENDING|array.SORT_ASCENDING} - common ascending sorting function for array.sort()
@@ -21,6 +22,7 @@ require('./_types/global');
  * * Rearrange Array
  *   * {@link module:array.reshape|array.reshape} - reshapes an array to a size of rows and columns
  *   * {@link module:array.transpose|array.transpose} - transposes (flips - the array along the diagonal)
+ *   * {@link module:array.resize|array.resize} - repeats or truncates to change the size of an array.
  * * Picking Values
  *   * {@link module:array.peekFirst|array.peekFirst} - peeks at the first value in the list
  *   * {@link module:array.peekLast|array.peekLast} - peeks at the last value in the list
@@ -36,6 +38,8 @@ require('./_types/global');
  *        {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substring|Substring}
  *        from a multi-line string or array of strings
  *   * {@link module:array.multiStepReduce|array.multiStepReduce} - Performs reduce, and returns the value of reduce at each step
+ *   * {@link module:array.extractFromHardSpacedTable|array.extractFromHardSpacedTable} - Extract values where each line has no delimiter,
+ *      but instead a column index (ex: column 13)
  * * Applying a value
  *   * {@link module:array.applyArrayValue|array.applyArrayValue} - applies a value deeply into an array safely
  *   * {@link module:array.applyArrayValues|array.applyArrayValues} - applies a value / multiple values deeply into an array safely
@@ -607,8 +611,8 @@ module.exports.transpose = function transpose(matrix) {
 };
 
 /**
- * Resizes an NxM dimensional array by number of columns
- * @param {any[]} sourceArray - an array to resize
+ * Re-shapes an NxM dimensional array by number of columns
+ * @param {any[]} sourceArray - an array to reshape
  * @param {Number} numColumns - number of columns
  * @returns {any[][]} - 2 dimensinal array
  * @example
@@ -618,14 +622,14 @@ module.exports.transpose = function transpose(matrix) {
  *    0,  1, 2, 3, 4, 5,  6, 7, 8, 9, 10, 11
  * ]
  * 
- * //-- resize the 1d array based on 3 columns
+ * //-- reshape the 1d array based on 3 columns
  * newArray = utils.array.reshape(baseArray, 3)
  * [ [ 0, 1, 2 ],
  *   [ 3, 4, 5 ],
  *   [ 6, 7, 8 ],
  *   [ 9, 10, 11 ] ];
  * 
- * //-- now resize the 4x3 array to 3x4
+ * //-- now reshape the 4x3 array to 3x4
  * utils.array.reshape(newArray, 4);
  * [ [ 0, 1, 2, 3 ],
  *   [ 4, 5, 6, 7 ],
@@ -1446,4 +1450,119 @@ module.exports.asyncWaitAndChain = (seconds, fn, rows) => {
     };
     return callNext();
   });
+};
+
+/**
+ * Resizes an array - if shorter (truncates), if longer cycles values.
+ * 
+ * ```
+ * categoryValues = ['rock', 'paper', 'scissors'];
+ * 
+ * utils.array.resize(categoryValues, 2); // ['rock', 'paper']
+ * utils.array.resize(categoryValues, 7); // ['rock', 'paper', 'scissors',
+ * 'rock', 'paper', 'scissors', 'rock];
+ * ```
+ * 
+ * @param {Array} sourceList - array of values
+ * @param {Number} length - new number of items in the list
+ */
+module.exports.resize = function resize(sourceList, length) {
+  if (!sourceList || !Array.isArray(sourceList)) return [];
+  if (length < 1 || sourceList.length < 1) return [];
+  return new Array(length)
+    .fill(0)
+    .map((_, index) => sourceList[index % sourceList.length]);
+};
+
+/**
+ * Combines arrays together by joining the values at the same index.
+ * 
+ * Similar to Panda's zip
+ * 
+ * This can be very helpful for joining multiple value lists.
+ * 
+ * ```
+ * first = ['john', 'paul', 'george', 'ringo'];
+ * last = ['lennon', 'mccartney', 'harrison', 'starr'];
+ * phrase = ['imagine', 'yesterday', 'taxman', 'walrus'];
+ * 
+ * names = utils.array.zip(first, last);
+ * // [['john', 'lennon'], ['paul', 'mccartney'],
+ * //  ['george', 'harrison'], ['ringo', 'starr']];
+ * ```
+ * 
+ * You can also zip together existing arrays
+ * 
+ * ```
+ * utils.array.zip(names, phrase);
+ * // [['john', 'lennon', 'imagine'],
+ * //   ['paul', 'mccartney', 'yesterday'],
+ * //   ['george', 'harrison', 'taxman'],
+ * //   ['ringo', 'starr', 'walrus']]
+ * ```
+ * 
+ * or you can zip them together all at once
+ * 
+ * ```
+ * utils.array.zip(first, last, phrase);
+ * // [['john', 'lennon', 'imagine'],
+ * //   ['paul', 'mccartney', 'yesterday'],
+ * //   ['george', 'harrison', 'taxman'],
+ * //   ['ringo', 'starr', 'walrus']]
+ * ```
+ * 
+ * @param {Array} arrayLeft - one array to combine with the array on the right
+ * @param {Array} arrayRight - another array to combine at the same indices on the left
+ * @param  {...any} rest - additional arrays to combine
+ * @returns {Array<Array>}
+ */
+module.exports.zip = function zip(arrayLeft, arrayRight, ...rest) {
+  if (!arrayLeft || !arrayLeft[Symbol.iterator]) {
+    throw new Error('zip: left must be iterable');
+  }
+  if (!arrayRight || !arrayRight[Symbol.iterator]) {
+    throw new Error('zip: right must be iterable');
+  }
+
+  const cleanLeft = Array.isArray(arrayLeft) ? arrayLeft : [...arrayLeft];
+  const cleanRight = Array.isArray(arrayRight) ? arrayRight : [...arrayRight];
+
+  let result;
+
+  if (cleanLeft.length === 0 && cleanRight.length === 0) {
+    result = [[]];
+  } else if (cleanLeft.length === 0) {
+    result = cleanRight.map((val) => Array.isArray(val) ? val : [val]);
+  } else if (cleanRight.length === 0) {
+    result = cleanLeft.map((val) => Array.isArray(val) ? val : [val]);
+  } else {
+    const cleanLeftLen = cleanLeft.length;
+    const cleanRightLen = cleanRight.length;
+    const zipLen = Math.min(cleanLeftLen, cleanRightLen);
+
+    result = new Array(zipLen).fill(0);
+
+    for (let i = 0; i < zipLen; i += 1) {
+      const leftVal = cleanLeft[i];
+      const rightVal = cleanRight[i];
+      const leftValArray = Array.isArray(leftVal);
+      const rightValArray = Array.isArray(rightVal);
+      if (leftValArray && rightValArray) {
+        result[i] = [...leftVal, ...rightVal];
+      } else if (leftValArray) {
+        result[i] = [...leftVal, rightVal];
+      } else if (rightValArray) {
+        result[i] = [leftVal, ...rightVal];
+      } else {
+        result[i] = [leftVal, rightVal];
+      }
+    }
+  }
+
+  if (rest && rest.length > 0) {
+    const [newRight, ...newRest] = rest;
+    result = ArrayUtils.zip(result, newRight, ...newRest);
+  }
+
+  return result;
 };

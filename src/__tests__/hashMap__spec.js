@@ -276,4 +276,40 @@ global.describe('hashmap', () => {
       });
     });
   });
+
+  global.describe('mappingFn', () => {
+    const bgRed = 'background-color: #FF0000';
+    const bgGreen = 'background-color: #00FF00';
+    const bgGrey = 'background-color: #AAAAAA';
+    const styleMap = new Map([['1', bgRed], ['2', bgGreen]]);
+
+    global.it('styles if the value is found', () => {
+      const mappingFn = HashMapUtil.mappingFn(styleMap, bgGrey);
+      const expected = bgRed;
+      const value = '1';
+      const results = mappingFn(value);
+      global.expect(results).toBe(expected);
+    });
+    global.it('styles if the value is found 2', () => {
+      const mappingFn = HashMapUtil.mappingFn(styleMap, bgGrey);
+      const expected = bgGreen;
+      const value = '2';
+      const results = mappingFn(value);
+      global.expect(results).toBe(expected);
+    });
+    global.it('styles with default if not found', () => {
+      const mappingFn = HashMapUtil.mappingFn(styleMap, bgGrey);
+      const expected = bgGrey;
+      const value = 'somethingElse';
+      const results = mappingFn(value);
+      global.expect(results).toBe(expected);
+    });
+    global.it('styles with default if not found', () => {
+      const mappingFn = HashMapUtil.mappingFn(styleMap);
+      const expected = '';
+      const value = 'somethingElse';
+      const results = mappingFn(value);
+      global.expect(results).toBe(expected);
+    });
+  });
 });

@@ -21,6 +21,8 @@
  * 
  * See other common libraries for working with color on NPM:
  * like [d3/color](https://d3js.org/d3-color)
+ * or [d3-scale-chromatic scales](https://d3js.org/d3-scale-chromatic)
+ * or [d3-color-interpolation](https://d3js.org/d3-interpolate/color)
  * 
  * * Parsing color formats
  *   * {@link module:color.parse|color.parse(string|array|object, optionalAlpha 0-1)} - intelligently parse any of the types to an array format
@@ -41,6 +43,8 @@
  *      with properties: {r:Number[0-255], g: Number[0-255], b: Number[0-255], a: Number[0-1]}
  * * interpolate
  *   * {@link module:color.interpolate|color.interpolate(fromColor, toColor, percent, formatType)} - gradually converts one color to another
+ *   * {@link module:color.interpolator|color.interpolator} - create a function you can then call with a percentage over and over again.
+ *   * {@link module:color.generateSequence|color.generateSequence} - generate a sequence of colors from one to another, in X number of steps
  *   * {@link module:color.interpolationStrategy|color.interpolationStrategy} - the function to use for interpolation,
  *      a function of signature (fromColor:Number[0-255], toColor:Number[0-255], percentage:Number[0-1]):Number[0-255]
  *   * {@link module:color.INTERPOLATION_STRATEGIES|color.INTERPOLATION_STRATEGIES} - a list of strategies for interpolation you can choose from
@@ -568,6 +572,7 @@ module.exports.convert = function convert(target, formatType = ColorUtils.defaul
  * @see {@link module:color.interpolationStrategy|color.interpolationStrategy} - the default interpolation
  *    used to calculate how the percentages come up with the color
  * @see {@link module:color.defaultFormat|color.defaultFormat} - the default format to use if not specified
+ * @see {@link module:format.mapArrayDomain|format.mapArrayDomain}
  */
 module.exports.interpolate = function interpolate(
   fromColor,
@@ -588,3 +593,97 @@ module.exports.interpolate = function interpolate(
   newColor[2] = Math.round(newColor[2]);
   return ColorUtils.convert(newColor, formatType);
 };
+
+/**
+ * Curried function for color interpolation, so only the percent between [0-1] inclusive is needed.
+ * 
+ * Meaning that you can do something like this:
+ * 
+ * ```
+ * black = `#000000`;
+ * white = `#FFFFFF`;
+ * 
+ * colorFn = utils.color.interpolator(black, white);
+ * 
+ * colorFn(0);   // '#000000';
+ * colorFn(0.5); // '#808080';
+ * colorFn(1);   // '#FFFFFF;
+ * 
+ * ```
+ * 
+ * Instead of something like this with the interpolate function
+ * 
+ * ```
+ * utils.color.interpolate(black, white, 0); // `#000000`
+ * utils.color.interpolate(black, white, 0.5); // `#808080`
+ * utils.color.interpolate(black, white, 1); // `#FFFFFF`
+ * ```
+ * 
+ * @param {string|array|object} fromColor -the color to interpolate from
+ * @param {string|array|object} toColor - the color to interpolate to
+ * @param {Number} percent - value from 0-1 on where we should be on the sliding scale
+ * @param {Function} [interpolationFn = ColorUtils.interpolationStrategy] - function of
+ *  signature (fromVal:Number[0-255], toVal:Number[0-255], pct:Number[0-1]):Number[0-255]
+ * @param {String} [formatType = ColorUtils.defaultFormat] - the format to convert the result to 
+ * @returns {Function} - of signature: (Number) => {string|array|object}
+ * @see {@link module:color.interpolate|color.interpolate} - as this is a curried version of that function.
+ * @see {@link module:format.mapArrayDomain|format.mapArrayDomain}
+ */
+module.exports.interpolator = function interpolator(
+  fromColor,
+  toColor,
+  interpolationFn = ColorUtils.interpolationStrategy,
+  formatType = ColorUtils.defaultFormat
+) {
+  return function interpolatorImpl(pct) {
+    return ColorUtils.interpolate(fromColor, toColor, pct, interpolationFn, formatType);
+  };
+};
+
+/**
+ * Generates a sequential array of colors interpolating fromColor to toColor, 
+ * 
+ * ```
+ * black = `#000000`;
+ * white = `#FFFFFF`;
+ * 
+ * categoricalColors = utils.color.generateSequence(black, white, 5);
+ * // [' #000000' ,' #404040' ,' #808080' ,' #bfbfbf' ,' #ffffff' ]
+ * ```
+ * 
+ * @param {string|array|object} fromColor -the color to interpolate from
+ * @param {string|array|object} toColor - the color to interpolate to
+ * @param {Number} lengthOfSequence - how many steps in the sequence to generate
+ * @param {Function} [interpolationFn = ColorUtils.interpolationStrategy] - function of
+ *  signature (fromVal:Number[0-255], toVal:Number[0-255], pct:Number[0-1]):Number[0-255]
+ * @param {String} [formatType = ColorUtils.defaultFormat] - the format to convert the result to 
+ * @returns {Function} - of signature: (Number) => {string|array|object}
+ * @see {@link module:color.interpolate|color.interpolate} - as this is a curried version of that function.
+ */
+module.exports.generateSequence = function generateSequence(
+  fromColor,
+  toColor,
+  lengthOfSequence,
+  interpolationFn = ColorUtils.interpolationStrategy,
+  formatType = ColorUtils.defaultFormat
+) {
+  if (lengthOfSequence <= 0) return [];
+  const cleanLengthOSequence = Math.floor(lengthOfSequence);
+  const maxIndex = cleanLengthOSequence - 1;
+  const result = new Array(lengthOfSequence).fill(0)
+    .map((_, index) => index / maxIndex)
+    .map((pct) => ColorUtils.interpolate(fromColor, toColor, pct, interpolationFn, formatType));
+  return result;
+};
+
+/**
+ * Simple sequence of colors to use when plotting categorical values.
+ * 
+ * Used based on the Tableau color scheme.
+ * 
+ * For example:
+ *
+ * ```
+ * utils.color.SEQUENCE[0]
+ */
+ColorUtils.SEQUENCE = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#59a14f', '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab'];

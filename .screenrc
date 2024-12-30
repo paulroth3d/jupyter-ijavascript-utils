@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# sets a screen session for the current project
-
 # sets the current window's name
 # screen -X sessionname "ijsutils"
 screen -X title "notebooks"
@@ -9,65 +7,88 @@ screen -X stuff "cd ../^M"
 screen -X number 0
 # screen -X sessionname "ijsutils"
 
-# uncomment below to make the tabs only run those commands
-# but note that restarting will lose that tab
-
-screen -X dynamictitle off
-screen -X defdynamictitle off
-
 screen -t "ijsUtils"
-screen -p ijsUtils -X stuff "cd ../jupyter-ijavascript-utils^M"
+
 screen -t "docker"
+sleep 1
 screen -p docker -X stuff "cd ../docker_jupyter-ijavascript-utils^M"
+# sleep 1
 screen -t "scratchpad"
+sleep 1
 screen -p scratchpad -X stuff "cd ../jupyterScratchpad^M"
 
 screen -t lint
+sleep 1
 screen -p lint -X stuff "npm run lint:watch^M"
+#sleep 1
 screen -t test
+sleep 1
 screen -p test -X stuff "npm run test:watch^M"
+#sleep 1
 screen -t debug
+sleep 1
 
 screen -t "server" 10
+sleep 1
+screen -p server -X number 10
+#sleep 1
 screen -p server -X stuff "cd ../^Mjupyter lab"
-screen -t plantuml 11
+sleep 1
+screen -t plantuml
+sleep 1
+screen -p plantuml -X number 11
+#sleep 1
 screen -p plantuml -X stuff "plantuml -picoweb"
-screen -t codeserver 12
+#sleep 1
+screen -t codeserver
+sleep 1
+screen -p codeserver -X number 12
+#sleep 1
 screen -p codeserver -X stuff "code-server .."
-screen -t httpServer 13
+#sleep 1
+screen -t httpServer
+sleep 1
+screen -p httpServer -X number 13
+#sleep 1
 screen -p httpServer -X stuff "npm run doc^Mcd ./docs^Mhttp-server ."
+#sleep 1
 
 screen -X select 0
+#sleep 1
 
 # create layouts
 
 screen -X layout new default
+#sleep 1
 screen -X select ijsUtils
-
-screen -X layout new dev
-#screen -X select micro
-#screen -X split -h
-#screen -X resize 70%
-#screen -X focus
-screen -X select lint
-screen -X split -v
-screen -X focus
-screen -X select test
+#sleep 1
 
 screen -X layout new test
+sleep 1
 screen -X select test
+#sleep 1
 screen -X split -h
+#sleep 1
 screen -X resize 60%
+#sleep 1
 screen -X focus
+#sleep 1
 screen -X select lint
+#sleep 1
 
 screen -X layout new server
+sleep 1
 screen -X select server
+#sleep 1
 screen -X split -v
+#sleep 1
 screen -X focus right
+#sleep 1
 screen -X select plantuml
+#sleep 1
 
 screen -X layout select default
+sleep 1
 
 # key bindings
 
@@ -75,3 +96,5 @@ screen -X layout select default
 # screen -X bindkey -k k2 layout select 1
 # screen -X bindkey -k k3 layout select 2
 
+# sets a screen session for the current project
+screen -X sessionname ijsutils

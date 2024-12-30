@@ -2358,4 +2358,203 @@ line3`;
       }).toThrow(expected);
     });
   });
+
+  global.describe('zip', () => {
+    const first = ['john', 'paul', 'george', 'ringo'];
+    const last = ['lennon', 'mccartney', 'harrison', 'starr'];
+    const phrase = ['imagine', 'yesterday', 'taxman', 'walrus'];
+    const color = ['red', 'green', 'blue', 'white'];
+
+    global.it('can combine a single array', () => {
+      const expected = [['john', 'lennon'], ['paul', 'mccartney'],
+        ['george', 'harrison'], ['ringo', 'starr']];
+      const results = ArrayUtils.zip(first, last);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine two empty lists', () => {
+      const expected = [[]];
+      const results = ArrayUtils.zip([], []);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine three empty lists', () => {
+      const expected = [[]];
+      const results = ArrayUtils.zip([], [], []);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine three empty lists and a value', () => {
+      const expected = [['john']];
+      const results = ArrayUtils.zip([], [], [], first);
+      global.expect(results).toStrictEqual(expected);
+    });
+
+    global.it('can combine afterwards left', () => {
+      const expected = [['john', 'lennon', 'imagine'],
+        ['paul', 'mccartney', 'yesterday'],
+        ['george', 'harrison', 'taxman'],
+        ['ringo', 'starr', 'walrus']];
+      const starter = [['john', 'lennon'], ['paul', 'mccartney'],
+        ['george', 'harrison'], ['ringo', 'starr']];
+      const results = ArrayUtils.zip(starter, phrase);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine afterwards right', () => {
+      const expected = [['imagine', 'john', 'lennon'],
+        ['yesterday', 'paul', 'mccartney'],
+        ['taxman', 'george', 'harrison'],
+        ['walrus', 'ringo', 'starr']];
+      const starter = [['john', 'lennon'], ['paul', 'mccartney'],
+        ['george', 'harrison'], ['ringo', 'starr']];
+      const results = ArrayUtils.zip(phrase, starter);
+      global.expect(results).toStrictEqual(expected);
+    });
+
+    global.it('can combine all at once', () => {
+      const expected = [['john', 'lennon', 'imagine'],
+        ['paul', 'mccartney', 'yesterday'],
+        ['george', 'harrison', 'taxman'],
+        ['ringo', 'starr', 'walrus']];
+      const results = ArrayUtils.zip(first, last, phrase);
+      global.expect(results).toStrictEqual(expected);
+    });
+
+    global.describe('works if the left is empty', () => {
+      global.it('and the right is a single value', () => {
+        const expected = [['john'], ['paul'], ['george'], ['ringo']];
+        const left = [];
+        const right = first;
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('if the right is an array', () => {
+        const expected = [['john'], ['paul'], ['george'], ['ringo']];
+        const left = [];
+        const right = expected;
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('works if the right is empty', () => {
+      global.it('and the right is a single value', () => {
+        const expected = [['john'], ['paul'], ['george'], ['ringo']];
+        const left = first;
+        const right = [];
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('an the right is an array', () => {
+        const expected = [['john'], ['paul'], ['george'], ['ringo']];
+        const left = expected;
+        const right = [];
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+
+    global.it('can combine 4 lists', () => {
+      const expected = [['john', 'lennon', 'imagine', 'red'],
+        ['paul', 'mccartney', 'yesterday', 'green'],
+        ['george', 'harrison', 'taxman', 'blue'],
+        ['ringo', 'starr', 'walrus', 'white']];
+      const results = ArrayUtils.zip(first, last, phrase, color);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine separately A', () => {
+      const expected = [['john', 'lennon'], ['paul', 'mccartney'],
+        ['george', 'harrison'], ['ringo', 'starr']];
+      const results = ArrayUtils.zip(first, last);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine separately B', () => {
+      const expected = [['imagine', 'red'], ['yesterday', 'green'],
+        ['taxman', 'blue'], ['walrus', 'white']];
+      const results = ArrayUtils.zip(phrase, color);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can combine separately B', () => {
+      const expected = [['john', 'lennon', 'imagine', 'red'],
+        ['paul', 'mccartney', 'yesterday', 'green'],
+        ['george', 'harrison', 'taxman', 'blue'],
+        ['ringo', 'starr', 'walrus', 'white']];
+      const left = [['john', 'lennon'], ['paul', 'mccartney'],
+        ['george', 'harrison'], ['ringo', 'starr']];
+      const right = [['imagine', 'red'], ['yesterday', 'green'],
+        ['taxman', 'blue'], ['walrus', 'white']];
+      const results = ArrayUtils.zip(left, right);
+      global.expect(results).toStrictEqual(expected);
+    });
+
+    global.describe('must be given something iteratable', () => {
+      global.it('cannot combine if not given something iteratable', () => {
+        const expected = 'zip: left must be iterable';
+        const left = {};
+        const right = left;
+        global.expect(() => {
+          ArrayUtils.zip(left, right);
+        }).toThrow(expected);
+      });
+      global.it('cannot combine if not given something iteratable', () => {
+        const expected = 'zip: right must be iterable';
+        const left = first;
+        const right = {};
+        global.expect(() => {
+          ArrayUtils.zip(left, right);
+        }).toThrow(expected);
+      });
+    });
+
+    global.describe('can combine things not an array', () => {
+      global.it('can a set to the left', () => {
+        const expected = [['john', 'lennon'], ['paul', 'mccartney'],
+          ['george', 'harrison'], ['ringo', 'starr']];
+        const left = new Set(first);
+        const right = last;
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can a set to the right', () => {
+        const expected = [['john', 'lennon'], ['paul', 'mccartney'],
+          ['george', 'harrison'], ['ringo', 'starr']];
+        const left = first;
+        const right = new Set(last);
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('resize', () => {
+    const baseList = ['heart', 'club', 'spade', 'diamond'];
+    global.it('can make a list smaller', () => {
+      const expected = ['heart', 'club'];
+      const result = ArrayUtils.resize(baseList, 2);
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('can make a list larger', () => {
+      const expected = ['heart', 'club', 'spade', 'diamond', 'heart', 'club'];
+      const result = ArrayUtils.resize(baseList, 6);
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('can make a list larger', () => {
+      const expected = ['heart', 'club', 'spade', 'diamond'];
+      const result = ArrayUtils.resize(baseList, 4);
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.describe('returns an empty array', () => {
+      global.it('if the source array is not an array', () => {
+        const expected = [];
+        const result = ArrayUtils.resize({}, 4);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('if the source array null', () => {
+        const expected = [];
+        const result = ArrayUtils.resize(null, 4);
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('if the source array is an empty array', () => {
+        const expected = [];
+        const result = ArrayUtils.resize([], 4);
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+  });
 });

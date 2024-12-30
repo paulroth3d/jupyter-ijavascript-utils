@@ -217,6 +217,7 @@ module.exports.augment = function augment(objCollection, mappingFn, inPlace = fa
  * @param {Function | String} propertyOrFn - Name of the property or Function to return a value
  * @returns {Map<String, Object>} - map using the propertyName as the key
  * @see {@link module:group.by|group(collection, propertyOrFn)} - if there is a possibility the records are not unique
+ * @see {@link module:object.join|object.join()} - join two objects by a shared index
  * @example
  * const data = [{ id: '123', name: 'jim' },
  *    { id: '456', name: 'mary' },
@@ -1248,6 +1249,7 @@ module.exports.generateSchema = function generateSchema(targetObj) {
  * @param {Function} joinFn - function to call each time an objectArray object, has an indexField found in targetMap <br />
  *      Signature: `(sourceObj:Object, mappedObject:Object) => {Object}`
  * @returns {Array<Object>} - Array of results returned from `joinFn`
+ * @see {@link module:object.mapByProperty|object.mapByProperty}
  */
 module.exports.join = function join(objectArray, indexField, targetMap, joinFn) {
   const cleanArray = !objectArray

@@ -3399,4 +3399,13 @@ global.describe('extractWords', () => {
       global.expect(results).toEqual(expected);
     });
   });
+
+  global.describe('constant function', () => {
+    global.it('always returns the same value', () => {
+      const expected = 'Los Angeles';
+      const fn = FormatUtils.constantFn(expected);
+      const result = fn();
+      global.expect(result).toBe(expected);
+    });
+  });
 });
