@@ -4,6 +4,7 @@ const base64 = require('./base64');
 const chain = require('./chain');
 const color = require('./color');
 const datasets = require('./datasets');
+const date = require('./date');
 const describe = require('./describe');
 const group = require('./group');
 const hashMap = require('./hashMap');
@@ -52,6 +53,9 @@ const mainResults = {
   /** @see {@link module:datasets} */
   datasets,
   dataset: datasets,
+  /** @see {@link module:date} */
+  date,
+  DateRange: date.DateRange,
   /** @see {@link module:describe} */
   describe,
   /** @see {@link module:group} */

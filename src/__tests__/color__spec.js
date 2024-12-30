@@ -47,6 +47,17 @@ global.describe('ColorUtil', () => {
     [255, 255, 255, 1],
     { r: 255, g: 255, b: 255, a: 1 }
   );
+  const OPAQUE_BLACK = new ColorInfo(
+    'opaqueBlack',
+    '#000000',
+    '#000000FF',
+    '#000',
+    '#000F',
+    'rgb( 0, 0, 0)',
+    'rgb(0, 0, 0, 1)',
+    [0, 0, 0, 1],
+    { r: 0, g: 0, b: 0, a: 1 }
+  );
 
   /*
   const TRANS_WHITE = new ColorInfo(
@@ -1147,6 +1158,106 @@ global.describe('ColorUtil', () => {
         const results = ColorUtils.INTERPOLATION_STRATEGIES.easeOut(fromColor, toColor, percent);
         global.expect(results).toBeCloseTo(expected);
       });
+    });
+  });
+
+  global.describe('interpolator', () => {
+    global.it('can interpolate from one color to another', () => {
+      const fromColor = OPAQUE_BLACK.arr;
+      const toColor = OPAQUE_WHITE.arr;
+      const interpolationFn = ColorUtils.INTERPOLATION_STRATEGIES.linear;
+      const formatType = ColorUtils.FORMATS.ARRAY;
+
+      const targetFn = ColorUtils.interpolator(fromColor, toColor, interpolationFn, formatType);
+
+      global.expect(typeof targetFn).toBe('function');
+
+      const expected = [128, 128, 128, 1];
+      const results = targetFn(0.5);
+
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can interpolate from one color to another', () => {
+      const fromColor = OPAQUE_BLACK.arr;
+      const toColor = OPAQUE_WHITE.arr;
+      // const interpolationFn = ColorUtils.INTERPOLATION_STRATEGIES.linear;
+      // const formatType = ColorUtils.FORMATS.ARRAY;
+
+      const targetFn = ColorUtils.interpolator(fromColor, toColor);
+
+      global.expect(typeof targetFn).toBe('function');
+
+      const expected = '#808080ff';
+      const results = targetFn(0.5);
+
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('generateSequence', () => {
+    global.it('can generate a sequence', () => {
+      const fromColor = OPAQUE_BLACK.arr;
+      const toColor = OPAQUE_WHITE.arr;
+      const interpolationFn = ColorUtils.INTERPOLATION_STRATEGIES.linear;
+      const formatType = ColorUtils.FORMATS.ARRAY;
+
+      global.expect(typeof interpolationFn).toBe('function');
+
+      const expected = [
+        [0, 0, 0, 1],
+        [85, 85, 85, 1],
+        [170, 170, 170, 1],
+        [255, 255, 255, 1],
+      ];
+      const results = ColorUtils.generateSequence(
+        fromColor,
+        toColor,
+        4,
+        interpolationFn,
+        formatType
+      );
+
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can generate a sequence', () => {
+      const fromColor = OPAQUE_BLACK.arr;
+      const toColor = OPAQUE_WHITE.arr;
+      // const interpolationFn = ColorUtils.INTERPOLATION_STRATEGIES.linear;
+      // const formatType = ColorUtils.FORMATS.ARRAY;
+
+      const expected = [
+        '#000000ff',
+        '#555555ff',
+        '#aaaaaaff',
+        '#ffffffff'
+      ];
+      const results = ColorUtils.generateSequence(
+        fromColor,
+        toColor,
+        4
+      );
+
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can generate a sequence', () => {
+      const fromColor = OPAQUE_BLACK.arr;
+      const toColor = OPAQUE_WHITE.arr;
+      const interpolationFn = ColorUtils.INTERPOLATION_STRATEGIES.linear;
+      const formatType = ColorUtils.FORMATS.ARRAY;
+
+      global.expect(typeof interpolationFn).toBe('function');
+
+      const expected = [
+      ];
+      const results = ColorUtils.generateSequence(
+        fromColor,
+        toColor,
+        0,
+        interpolationFn,
+        formatType
+      );
+
+      global.expect(results).toStrictEqual(expected);
     });
   });
 });

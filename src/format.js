@@ -1347,3 +1347,19 @@ module.exports.extractWords = function extractWords(strToExtractFrom, additional
   
   return cleanStrings.reduce((result, str) => [...result, ...((str || '').match(regex) || [])], []);
 };
+
+/**
+ * A function that returns the value provided
+ * 
+ * ```
+ * alwaysBlack = utils.format.constantFn('#000000');
+ * alwaysBlack(); // '#000000'
+ * alwaysBlack(); // '#000000'
+ * ```
+ * 
+ * @param {any} val - Any value
+ * @returns {Function} - a function that accepts no parameters, and always returns value provided
+ */
+module.exports.constantFn = function constantFn(val) {
+  return () => val;
+};
