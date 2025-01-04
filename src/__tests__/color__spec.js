@@ -1259,5 +1259,28 @@ global.describe('ColorUtil', () => {
 
       global.expect(results).toStrictEqual(expected);
     });
+    global.it('can generate a sequence from docs', () => {
+      const fromColor = OPAQUE_BLACK.arr;
+      const toColor = OPAQUE_WHITE.arr;
+      const interpolationFn = ColorUtils.INTERPOLATION_STRATEGIES.linear;
+      const formatType = ColorUtils.FORMATS.HEX;
+
+      global.expect(typeof interpolationFn).toBe('function');
+
+      const expected = [
+        '#000000',
+        '#808080',
+        '#ffffff'
+      ];
+      const results = ColorUtils.generateSequence(
+        fromColor,
+        toColor,
+        3,
+        interpolationFn,
+        formatType
+      );
+
+      global.expect(results).toStrictEqual(expected);
+    });
   });
 });

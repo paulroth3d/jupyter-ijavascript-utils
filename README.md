@@ -54,6 +54,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.53 - additional docs and examples for color/colour package.
 * 1.52 - print a date to ISO in local time with date.toLocalISO
 * 1.51 - added in date - and addressed issues #69, #68, #67, #66
 * 1.50 - added in color/colour - and addressed issue #65
