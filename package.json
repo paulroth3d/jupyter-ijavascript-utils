@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.52.1",
+  "version": "1.53.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "sinon": "^11.1.1"
   },
   "dependencies": {
-    "@svgdotjs/svg.js": "^3.1.2",
+    "@svgdotjs/svg.js": "^3.2.4",
     "fs-extra": "^10.0.1",
     "generate-schema": "^2.6.0",
     "node-fetch": "^2.6.5",

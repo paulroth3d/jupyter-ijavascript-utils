@@ -49,6 +49,33 @@
  *      a function of signature (fromColor:Number[0-255], toColor:Number[0-255], percentage:Number[0-1]):Number[0-255]
  *   * {@link module:color.INTERPOLATION_STRATEGIES|color.INTERPOLATION_STRATEGIES} - a list of strategies for interpolation you can choose from
  * 
+ * ```
+ * utils.svg.render({ width: 800, height: 100,
+ *     onReady: ({el, width, height, SVG }) => {
+ *         const fromColor = '#ff0000';
+ *         const toColor = 'rgb(0, 255, 0)';
+ * 
+ *         const numBoxes = 5;
+ *         const boxWidth = width / numBoxes;
+ *         const boxHeight = 100;
+ * 
+ *         // utils.color.interpolationStrategy = utils.color.INTERPOLATION_STRATEGIES.linear;
+ *         // utils.color.defaultFormat = utils.color.FORMATS.hex;
+ * 
+ *         const colorSequence = utils.color.generateSequence(fromColor, toColor, numBoxes);
+ *         // [ '#ff0000', '#9d6200', '#4bb400', '#13ec00', '#00ff00' ]
+ * 
+ *         colorSequence.forEach((boxColor, boxIndex) => {
+ *             el.rect(boxWidth, boxHeight)
+ *                 .fill(boxColor)
+ *                 .translate(boxIndex * boxWidth);
+ *         });
+ *     }
+ * });
+ * ```
+ * 
+ * ![Example SVG](img/interpolationExample.svg)
+ * 
  * @module color
  * @exports color
  */
@@ -68,12 +95,27 @@ module.exports.COLOR_VALIDATION = {
  * Enum strings of types expected
  * 
  * There are 6 types of formats supported:
- * * Hex - 6-8 character hexadecimal colors as RRGGBB or RRGGBBAA, like red for #ff0000 or #ff000080 for semi-transparency
- * * Hex3 - 3-4 character hexadecimal colors: RGB or RGBA, like red for #F00 or #F008 for semi-transparency
+ * * HEX - 6 character hexadecimal colors as RRGGBB, like red for #ff0000
+ *   * alternatively - 3 character hexadecimal colors #RGB are supported: like red for #F00
+ * * HEXA - 8 character hexadecimal colors as RRGGBBAA, like red for #ff000080 with semi-transparency
+ *   * alternatively - 4 character hexadecimal colors #RGBA are supported: #F008
  * * RGB - color with format `rgb(RR,GG,BB)` - like red for `rgb(255,0,0)`
  * * RGBA - RGB format with alpha: `rgba(RR,GG,BB,AA)` - like red for `rgba(255,0,0,0.5)` for semi-transparency
  * * ARRAY - 3 to 4 length array, with format: `[r,g,b]` or `[r,g,b,a]` - like red for [255,0,0] or [255,0,0,0.5] for semi-transparency
  * * OBJECT - objects with properties: r, g, b and optionally: a (the object is not modified and only those properties are checked)
+ * 
+ * For example:
+ * 
+ * ```
+ * baseColor = '#b1d1f3';
+ * 
+ * utils.color.convert(baseColor, utils.color.FORMATS.HEX); // '#b1d1f3'
+ * utils.color.convert(baseColor, utils.color.FORMATS.HEXA); // #b1d1f3ff
+ * utils.color.convert(baseColor, utils.color.FORMATS.RGB); // rgb( 177, 209, 243)
+ * utils.color.convert(baseColor, utils.color.FORMATS.RGBA); // rgba(177, 209, 243, 1)
+ * utils.color.convert(baseColor, utils.color.FORMATS.ARRAY); // [ 177, 209, 243, 1 ]
+ * utils.color.convert(baseColor, utils.color.FORMATS.OBJECT); // { r: 177, g: 209, b: 243, a: 1 }
+ * ```
  * 
  * @see {@link module:color.defaultFormat|color.defaultFormat}
  */
@@ -90,6 +132,13 @@ module.exports.FORMATS = {
  * Default format used when converting to types
  * (allowing the conversion type to be optional)
  * 
+ * ```
+ * baseColor = '#b1d1f3';
+ * utils.color.defaultFormat = utils.color.FORMATS.RGBA;
+ * 
+ * utils.color.convert(baseColor); // rgba(177, 209, 243, 1)
+ * ```
+ * 
  * @see {@link module:color.FORMATS|color.FORMATS}
  */
 module.exports.defaultFormat = ColorUtils.FORMATS.HEX;
@@ -98,6 +147,8 @@ const PI2 = Math.PI * 0.5;
 
 /**
  * Different types of interpolation strategies:
+ * 
+ * ![example](img/interpolationStrategies.svg)
  * 
  * * linear - linear interpolation between one value to another (straight line)
  * * easeInOut - slows in to the change and slows out near the end
@@ -114,9 +165,33 @@ module.exports.INTERPOLATION_STRATEGIES = {
 };
 
 /**
- * Which interpolation strategy to use when interpolating between colors
+ * Default interpolation strategy used when interpolating
+ * from one color to another.
  * 
  * (Defaults to linear)
+ * 
+ * ![example](img/interpolationStrategies.svg)
+ * 
+ * For example, you can specify how you would like to interpolate
+ * and even which format you'd like to receive the results in.
+ * 
+ * ```
+ * //-- same as utils.color.INTERPOLATION_STRATEGIES.linear;
+ * linear = (a, b, pct) => a + (b - a) * pct;
+ * format = utils.color.FORMATS.ARRAY;
+ * utils.color.interpolate(red, green, 0, linear, format); // [255, 0, 0, 1]
+ * ```
+ * 
+ * or instead, you can set this property and set the default
+ * 
+ * ```
+ * // or set the default
+ * utils.color.interpolationStrategy = linear;
+ * utils.color.defaultFormat = utils.color.FORMATS.ARRAY;
+ * 
+ * //-- note that the interpolation strategy or format isn't passed
+ * utils.color.interpolate(red, green, 0.5); // [127.5, 127.5, 0, 1]
+ * ```
  * 
  * @see {@link module:color.INTERPOLATION_STRATEGIES}
  */
@@ -211,7 +286,8 @@ module.exports.parseHex = function parseHex(hexStr, optionalAlpha = 1) {
  */
 module.exports.toHex = function toHex(target) {
   const [r, g, b] = ColorUtils.parse(target);
-  return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+  const hexOut = (num) => num.toString(16).padStart(2, '0');
+  return `#${hexOut(r)}${hexOut(g)}${hexOut(b)}`;
 };
 
 /**
@@ -511,6 +587,7 @@ module.exports.parse = function parse(target, optionalAlpha = 1) {
  * ```
  * 
  * @param {string|array|object} target - any of the Formats provided
+ * @param {string} [formatType = color.defaultFormat] - optional format to convert to, if not using the default
  * @returns {string|array|object} - any of the format types provided
  * 
  * @see {@link module:color.defaultFormat|color.defaultFormat} - to set the default format
@@ -621,7 +698,6 @@ module.exports.interpolate = function interpolate(
  * 
  * @param {string|array|object} fromColor -the color to interpolate from
  * @param {string|array|object} toColor - the color to interpolate to
- * @param {Number} percent - value from 0-1 on where we should be on the sliding scale
  * @param {Function} [interpolationFn = ColorUtils.interpolationStrategy] - function of
  *  signature (fromVal:Number[0-255], toVal:Number[0-255], pct:Number[0-1]):Number[0-255]
  * @param {String} [formatType = ColorUtils.defaultFormat] - the format to convert the result to 
