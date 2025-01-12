@@ -12,6 +12,7 @@ const FormatUtils = require('./format');
  *   * {@link module:hashMap.stringify|hashMap.stringify(map, indent)} - converts a Map to a string representation
  *   * {@link module:hashMap.toObject|hashMap.toObject(map)} - converts a hashMap to an Object
  *   * {@link module:hashMap.fromObject|hashMap.fromObject(object)} - converts an object's properties to hashMap keys
+ *   * {@link module:hashMap.reverse|hashMap.reverse(map)} - swaps the key and value in the resulting map.
  * 
  * Note: JavaScript Maps can sometimes be faster than using Objects,
  * and sometimes slower.
@@ -239,4 +240,25 @@ module.exports.mappingFn = function mappingFn(map, defaultValue = '') {
     }
     return defaultValue;
   };
+};
+
+/**
+ * Flip the key and value of the map
+ * 
+ * ```
+ * encodingMap = new Map([[' ', '%20'],['\\n', '%0A'],['\\t', '%09']]);
+ * encodingMap.get(' '); // '%20'
+ * 
+ * decodingMap = utils.map.reverse(encodingMap);
+ * decodingMap.get('%20'); // ' '
+ * ```
+ * 
+ * 
+ * @param {Map<any,any>} map - map to reverse
+ * @returns {Map<any,any>} - new map with the keys and values reversed
+ */
+module.exports.reverse = function flipKeyValues(map) {
+  return new Map(
+    [...map.entries()].map(([key, value]) => [value, key])
+  );
 };

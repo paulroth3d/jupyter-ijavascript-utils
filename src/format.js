@@ -1251,6 +1251,7 @@ module.exports.lineCount = function lineCount(str, newlineCharacter = '\n') {
  * @param {string|string[]} targetStr - the string to search for with the tuplets
  * @param {Array|Map<string|RegExp,string>} stringTupletsOrMap - [[search, replace]] or Map<String|RegExp,String>
  * @returns {string[]} - the resulting list of strings
+ * @see {@link module:format.replaceStringsGlobal} - to replace all instances
  */
 module.exports.replaceStrings = function replaceStrings(targetStr, stringTupletsOrMap) {
   const cleanStrings = !targetStr ? [] : Array.isArray(targetStr) ? targetStr : [targetStr];
@@ -1277,7 +1278,9 @@ module.exports.replaceStrings = function replaceStrings(targetStr, stringTuplets
     ? stringToClean
     : replacementEntries.reduce((result, [replaceSearch, replaceWith]) => !result
       ? result
-      : result.replace(replaceSearch, replaceWith), stringToClean));
+      : replaceSearch instanceof RegExp
+        ? result.replace(replaceSearch, replaceWith)
+        : result.replaceAll(replaceSearch, replaceWith), stringToClean));
 };
 
 /**

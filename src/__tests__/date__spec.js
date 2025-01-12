@@ -90,6 +90,12 @@ global.describe('Date', () => {
         const results = DateUtils.getTimezoneOffset(testValue);
         global.expect(results).toBe(expected);
       });
+      global.it('for america/los_angeles', () => {
+        const testValue = 'america/los_angeles';
+        const expected = 28800000;
+        const results = DateUtils.getTimezoneOffset(testValue);
+        global.expect(results).toBe(expected);
+      });
     });
     global.describe('cannot get timezone', () => {
       global.it('for invalid datetimes', () => {
@@ -104,15 +110,27 @@ global.describe('Date', () => {
   });
 
   global.describe('correct for timezone', () => {
-    global.it('can correct for time', () => {
-      //-- when pulling the time from the database - it corrected it to local time for me
-      //-- so what I have pulled down is actually in Central time
-      //-- but I want instead to have the correct UTC time
-      const originalDate = new Date(Date.UTC(2024, 12, 26, 11, 0, 0));
-      const timeZone = 'america/chicago';
-      const expected = new Date(Date.UTC(2024, 12, 26, 17, 0, 0));
-      const results = DateUtils.correctForTimezone(originalDate, timeZone);
-      global.expect(results).toStrictEqual(expected);
+    global.describe('can correct for timezone', () => {
+      global.it('america/chicago', () => {
+        //-- when pulling the time from the database - it corrected it to local time for me
+        //-- so what I have pulled down is actually in Central time
+        //-- but I want instead to have the correct UTC time
+        const originalDate = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
+        const timeZone = 'america/chicago';
+        const expected = new Date(Date.UTC(2024, 11, 26, 17, 0, 0));
+        const results = DateUtils.correctForTimezone(originalDate, timeZone);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('us/pacific', () => {
+        //-- when pulling the time from the database - it corrected it to local time for me
+        //-- so what I have pulled down is actually in Central time
+        //-- but I want instead to have the correct UTC time
+        const originalDate = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
+        const timeZone = 'us/pacific';
+        const expected = new Date(Date.UTC(2024, 11, 26, 19, 0, 0));
+        const results = DateUtils.correctForTimezone(originalDate, timeZone);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
   });
 
@@ -124,9 +142,9 @@ global.describe('Date', () => {
       //-- when pulling the time from the database - it corrected it to local time for me
       //-- so what I have pulled down is actually in Central time
       //-- but I want instead to have the correct UTC time
-      const originalDate = new Date(Date.UTC(2024, 12, 26, 17, 0, 0));
+      const originalDate = new Date(Date.UTC(2024, 11, 26, 17, 0, 0));
       const timeZone = 'america/chicago';
-      const expected = new Date(Date.UTC(2024, 12, 26, 11, 0, 0));
+      const expected = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
       const results = DateUtils.epochShift(originalDate, timeZone);
       global.expect(results).toStrictEqual(expected);
     });
@@ -134,60 +152,74 @@ global.describe('Date', () => {
 
   global.describe('add', () => {
     global.describe('can add', () => {
-      global.describe('an empty object', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      global.it('an empty object', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
         const options = {};
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
-      global.describe('null gives the same time', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      global.it('null gives the same time', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
         // const options = {};
         const results = DateUtils.add(originalTime);
         global.expect(results).toStrictEqual(expected);
       });
-      global.describe('1 day', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 27, 12, 0, 0));
+      global.it('1 day', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 27, 12, 0, 0));
         const options = { days: 1 };
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
-      global.describe('3 day', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 28, 12, 0, 0));
+      global.it('3 day', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 28, 12, 0, 0));
         const options = { days: 2 };
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
-      global.describe('1 hour', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+      global.it('1 hour', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
         const options = { hours: 1 };
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
-      global.describe('1 minute', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 26, 12, 1, 0));
+      global.it('1 minute', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 12, 1, 0));
         const options = { minutes: 1 };
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
-      global.describe('1 second', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 26, 12, 0, 1));
+      global.it('1 second', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 12, 0, 1));
         const options = { seconds: 1 };
+        const results = DateUtils.add(originalTime, options);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('1 year', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2025, 11, 26, 12, 0, 0));
+        const options = { years: 1 };
+        const results = DateUtils.add(originalTime, options);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('1 month', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2025, 0, 26, 12, 0, 0));
+        const options = { months: 1 };
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
     });
     global.describe('cannot add', () => {
       global.it('a null', () => {
-        const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-        const expected     = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
         const options = null;
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
@@ -197,8 +229,8 @@ global.describe('Date', () => {
   
   global.describe('endOfDay', () => {
     global.it('can find the end of day', () => {
-      const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const expected     = new Date(Date.UTC(2024, 12, 26, 23, 59, 59, 999));
+      const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const expected     = new Date(Date.UTC(2024, 11, 26, 23, 59, 59, 999));
       const results = DateUtils.endOfDay(originalTime);
       global.expect(results).toStrictEqual(expected);
     });
@@ -206,8 +238,8 @@ global.describe('Date', () => {
   
   global.describe('startOfDay', () => {
     global.it('can find the start of day', () => {
-      const originalTime = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const expected     = new Date(Date.UTC(2024, 12, 26, 0, 0, 0));
+      const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const expected     = new Date(Date.UTC(2024, 11, 26, 0, 0, 0));
       const results = DateUtils.startOfDay(originalTime);
       global.expect(results).toStrictEqual(expected);
     });
@@ -215,40 +247,40 @@ global.describe('Date', () => {
 
   global.describe('durationString', () => {
     global.it('simple example', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '0 days, 1 hours, 0 minutes, 0.0 seconds';
       const results = DateUtils.durationLong(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('day', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 27, 12, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 27, 12, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '1 days, 0 hours, 0 minutes, 0.0 seconds';
       const results = DateUtils.durationLong(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('hours', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 14, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 14, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '0 days, 2 hours, 0 minutes, 0.0 seconds';
       const results = DateUtils.durationLong(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('minutes', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 30, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 12, 30, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '0 days, 0 hours, 30 minutes, 0.0 seconds';
       const results = DateUtils.durationLong(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('negative example', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 27, 13, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 27, 13, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '-1 days, 1 hours, 0 minutes, 0.0 seconds';
       const results = DateUtils.durationLong(range);
@@ -258,40 +290,40 @@ global.describe('Date', () => {
 
   global.describe('durationISO', () => {
     global.it('simple example', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '0:01:00:00.000';
       const results = DateUtils.durationISO(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('day', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 27, 12, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 27, 12, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '1:00:00:00.000';
       const results = DateUtils.durationISO(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('hours', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 14, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 14, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '0:02:00:00.000';
       const results = DateUtils.durationISO(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('minutes', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 30, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 12, 30, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '0:00:30:00.000';
       const results = DateUtils.durationISO(range);
       global.expect(results).toStrictEqual(expected);
     });
     global.it('negative example', () => {
-      const durationA = new Date(Date.UTC(2024, 12, 27, 13, 30, 0));
-      const durationB = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+      const durationA = new Date(Date.UTC(2024, 11, 27, 13, 30, 0));
+      const durationB = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
       const range = durationB.getTime() - durationA.getTime();
       const expected = '-1:01:30:00.000';
       const results = DateUtils.durationISO(range);
@@ -306,11 +338,298 @@ global.describe('Date', () => {
       const results = DateUtils.toLocalISO(dateA, 'america/Chicago');
       global.expect(results).toStrictEqual(expected);
     });
+    global.it('can convert a date to america/los_angeles', () => {
+      const dateA = Date.parse('2024-12-27 13:30:00');
+      const expected = '2024-12-27T05:30:00.000-08:00';
+      const results = DateUtils.toLocalISO(dateA, 'america/Los_Angeles');
+      global.expect(results).toStrictEqual(expected);
+    });
     global.it('can convert a date to europe/paris', () => {
       const dateA = Date.parse('2024-12-27 13:30:00');
       const expected = '2024-12-27T14:30:00.000+01:00';
       const results = DateUtils.toLocalISO(dateA, 'europe/paris');
       global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('shiftStart', () => {
+    const createDateRange = () => new DateUtils.DateRange(
+      new Date(Date.UTC(2025, 0, 1, 12, 0, 0)),
+      new Date(Date.UTC(2025, 0, 2, 12, 0, 0))
+    );
+
+    global.describe('can shift', () => {
+      global.it('simple example', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftStart({ days: 1 });
+        const expected = new Date(Date.UTC(2025, 0, 2, 12, 0, 0));
+        const resultStart = result.startDate;
+        global.expect(resultStart).toStrictEqual(expected);
+      });
+      global.it('is not the same object', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftStart({ days: 1 });
+        const myRangeStart = myRange.startDate;
+        const resultStart = result.startDate;
+        global.expect(resultStart).not.toStrictEqual(myRangeStart);
+      });
+    });
+    global.describe('can shift in place', () => {
+      global.it('simple example', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftStart({ days: 1 }, true);
+        const expected = new Date(Date.UTC(2025, 0, 2, 12, 0, 0));
+        const resultStart = result.startDate;
+        global.expect(resultStart).toStrictEqual(expected);
+      });
+      global.it('is the same object', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftStart({ days: 1 }, true);
+        const myRangeStart = myRange.startDate;
+        const resultStart = result.startDate;
+        global.expect(resultStart).toStrictEqual(myRangeStart);
+      });
+    });
+  });
+
+  global.describe('shiftEnd', () => {
+    const createDateRange = () => new DateUtils.DateRange(
+      new Date(Date.UTC(2025, 0, 1, 12, 0, 0)),
+      new Date(Date.UTC(2025, 0, 2, 12, 0, 0))
+    );
+
+    global.describe('can shift', () => {
+      global.it('simple example', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftEnd({ days: 1 });
+        const expected = new Date(Date.UTC(2025, 0, 3, 12, 0, 0));
+        const resultEnd = result.endDate;
+        global.expect(resultEnd).toStrictEqual(expected);
+      });
+      global.it('is not the same object', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftEnd({ days: 1 });
+        const myRangeEnd = myRange.endDate;
+        const resultEnd = result.endDate;
+        global.expect(resultEnd).not.toStrictEqual(myRangeEnd);
+      });
+    });
+    global.describe('can shift in place', () => {
+      global.it('simple example', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftEnd({ days: 1 }, true);
+        const expected = new Date(Date.UTC(2025, 0, 3, 12, 0, 0));
+        const resultEnd = result.endDate;
+        global.expect(resultEnd).toStrictEqual(expected);
+      });
+      global.it('is the same object', () => {
+        const myRange = createDateRange();
+        const result = myRange.shiftEnd({ days: 1 }, true);
+        const myRangeEnd = myRange.endDate;
+        const resultEnd = result.endDate;
+        global.expect(resultEnd).toStrictEqual(myRangeEnd);
+      });
+    });
+  });
+
+  global.describe('fromList', () => {
+    global.it('can make a list', () => {
+      const dates = [new Date('2025-01-01'),
+        new Date('2025-02-01'),
+        new Date('2025-03-01'),
+        new Date('2025-04-01')];
+      const results = DateUtils.DateRange.fromList(dates);
+      const expected = [
+        new DateUtils.DateRange(dates[0], dates[1]),
+        new DateUtils.DateRange(dates[1], dates[2]),
+        new DateUtils.DateRange(dates[2], dates[3])
+      ];
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('cannot create a list from an empty list', () => {
+      const dates = [];
+      const results = DateUtils.DateRange.fromList(dates);
+      const expected = [];
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('cannot create a list from a list with one date', () => {
+      const dates = [
+        new Date('2025-02-01')
+      ];
+      const results = DateUtils.DateRange.fromList(dates);
+      const expected = [];
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('generateDateSequence', () => {
+    global.it('example for one hour', () => {
+      const start = new Date('2025-01-01 01:00:00');
+      const end = new Date('2025-01-01 02:00:00');
+      const results = DateUtils.generateDateSequence(
+        start,
+        end,
+        { minutes: 30 }
+      );
+      const expected = [
+        start,
+        new Date('2025-01-01 01:30:00'),
+        end
+      ];
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('if not a valid start date', () => {
+      const start = 'string';
+      const end = new Date('2025-01-01 02:00:00');
+      const expected = 'Invalid start date:string';
+      global.expect(() => {
+        DateUtils.generateDateSequence(
+          start,
+          end,
+          { minutes: 30 }
+        );
+      }).toThrow(expected);
+    });
+    global.it('if not a valid end date', () => {
+      const start = new Date('2025-01-01 02:00:00');
+      const end = 'string';
+      const expected = 'Invalid end date:string';
+      global.expect(() => {
+        DateUtils.generateDateSequence(
+          start,
+          end,
+          { minutes: 30 }
+        );
+      }).toThrow(expected);
+    });
+  });
+
+  global.describe('arrange', () => {
+    global.it('example for one hour', () => {
+      const start = new Date('2025-01-01 01:00:00');
+      const count = 1;
+      const options = { hours: 1 };
+      const results = DateUtils.arrange(start, count, options);
+      const expected = [
+        new Date('2025-01-01 01:00:00'),
+        new Date('2025-01-01 02:00:00')
+      ];
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('example for four weeks', () => {
+      const start = new Date('2025-01-01 01:00:00');
+      const count = 4;
+      const options = { days: 7 };
+      const results = DateUtils.arrange(start, count, options);
+      const expected = [
+        new Date('2025-01-01 01:00:00'),
+        new Date('2025-01-08 01:00:00'),
+        new Date('2025-01-15 01:00:00'),
+        new Date('2025-01-22 01:00:00'),
+        new Date('2025-01-29 01:00:00')
+      ];
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('example for four weeks + 1 hour', () => {
+      const start = new Date('2025-01-01 01:00:00');
+      const count = 4;
+      const options = { days: 7, hours: 1 };
+      const results = DateUtils.arrange(start, count, options);
+      const expected = [
+        new Date('2025-01-01 01:00:00'),
+        new Date('2025-01-08 02:00:00'),
+        new Date('2025-01-15 03:00:00'),
+        new Date('2025-01-22 04:00:00'),
+        new Date('2025-01-29 05:00:00')
+      ];
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('if not a valid start date', () => {
+      const start = 'string';
+      const count = 1;
+      const options = { hours: 1 };
+      const expected = 'Invalid start date:string';
+      global.expect(() => {
+        DateUtils.arrange(start, count, options);
+      }).toThrow(expected);
+    });
+  });
+
+  global.describe('overwrite', () => {
+    global.describe('can', () => {
+      global.it('overwrite a date with a date', () => {
+        const dateToUpdate = new Date(Date.UTC(2024, 0, 1, 12, 0, 0));
+        const newDate = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+        const expected = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+        const result = DateUtils.overwrite(dateToUpdate, newDate);
+
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('overwrite a date with a string', () => {
+        const dateToUpdate = new Date(Date.UTC(2024, 0, 1, 12, 0, 0));
+        const newDate = '2025-01-01 13:30:00';
+        const expected = new Date(Date.UTC(2025, 0, 1, 13, 30, 0));
+        const result = DateUtils.overwrite(dateToUpdate, newDate);
+
+        global.expect(result).toStrictEqual(expected);
+      });
+      global.it('overwrite a date with an epoch', () => {
+        const dateToUpdate = new Date(Date.UTC(2024, 0, 1, 12, 0, 0));
+        const newDate = new Date(Date.UTC(2025, 0, 1, 13, 30, 0)).getTime();
+        const expected = new Date(Date.UTC(2025, 0, 1, 13, 30, 0));
+        const result = DateUtils.overwrite(dateToUpdate, newDate);
+
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('cannot', () => {
+      global.it('update if dateToUpdate is not a date', () => {
+        const dateToUpdate = null;
+        const newDate = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+        const expected = 'date.overwrite: dateToUpdate is not a date:null';
+        global.expect(() => {
+          DateUtils.overwrite(dateToUpdate, newDate);
+        }).toThrow(expected);
+      });
+      global.it('update if dateToUpdate is something weird', () => {
+        const dateToUpdate = {};
+        const newDate = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+        const expected = 'date.overwrite: dateToUpdate is not a date:[object Object]';
+        global.expect(() => {
+          DateUtils.overwrite(dateToUpdate, newDate);
+        }).toThrow(expected);
+      });
+      global.it('update if newDate is not a date', () => {
+        const dateToUpdate = new Date(Date.UTC(2024, 0, 1, 6, 0, 0));
+        const newDate = null;
+        const expected = 'date.overwrite: cannot set to an invalid date:null';
+        global.expect(() => {
+          DateUtils.overwrite(dateToUpdate, newDate);
+        }).toThrow(expected);
+      });
+      global.it('update if dateToUpdate is something weird', () => {
+        const dateToUpdate = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+        const newDate = {};
+        const expected = 'cannot overwrite date:2025-01-01T12:00:00.000Z, unknown newDateEpoch: [object Object]';
+        global.expect(() => {
+          DateUtils.overwrite(dateToUpdate, newDate);
+        }).toThrow(expected);
+      });
+    });
+  });
+
+  global.describe('clone', () => {
+    global.it('can clone a value with the same time', () => {
+      const originalDate = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+      const result = DateUtils.clone(originalDate);
+      global.expect(result).toStrictEqual(originalDate);
+    });
+    global.it('does not modify the original date', () => {
+      const originalDate = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+      const result = DateUtils.clone(originalDate);
+      const expected = new Date(Date.UTC(2025, 0, 1, 12, 0, 0));
+      originalDate.setFullYear(1900);
+      global.expect(result).toStrictEqual(expected);
     });
   });
 });

@@ -2926,6 +2926,23 @@ global.describe('format', () => {
             const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
             global.expect(results).toStrictEqual(expected);
           });
+          global.it('removes all', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = [['jack', 'john'], ['jill', 'ringo'], ' down'];
+            const expected = [
+              'john and ringo went up the hill',
+              'to fetch the pail of water',
+              'john fell and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
           global.it('mixed', () => {
             const targetStrings = [
               'jack and jill went up the hill',
@@ -2946,6 +2963,23 @@ global.describe('format', () => {
         });
         global.describe('with a map', () => {
           global.it('of strings', () => {
+            const targetStrings = [
+              'jack and jill went up the hill',
+              'to fetch the pail of water',
+              'jack fell down and broke his crown',
+              'and jill came tumbling after'
+            ];
+            const replaceValues = new Map([['jack', 'john'], ['jill', 'ringo']]);
+            const expected = [
+              'john and ringo went up the hill',
+              'to fetch the pail of water',
+              'john fell down and broke his crown',
+              'and ringo came tumbling after'
+            ];
+            const results = FormatUtils.replaceStrings(targetStrings, replaceValues);
+            global.expect(results).toStrictEqual(expected);
+          });
+          global.it('of strings and removes all', () => {
             const targetStrings = [
               'jack and jill went up the hill',
               'to fetch the pail of water',
@@ -3281,6 +3315,22 @@ global.describe('format', () => {
         const replaceValues = [[/.+/], ['jack', 'john']];
         const expected = '';
         const results = FormatUtils.replaceString(targetStrings, replaceValues);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('for translation', () => {
+      const toTranslate = `this is my text
+\tit is made for me
+there are many like it
+\tbut this one is mine`;
+      const urlEncodeMap = new Map([
+        ['\n', encodeURIComponent('\n')],
+        ['\t', encodeURIComponent('\t')]
+      ]);
+      global.it('can translate using a map', () => {
+        const expected = 'this is my text%0A%09it is made for me'
+          + '%0Athere are many like it%0A%09but this one is mine';
+        const results = FormatUtils.replaceString(toTranslate, urlEncodeMap);
         global.expect(results).toStrictEqual(expected);
       });
     });

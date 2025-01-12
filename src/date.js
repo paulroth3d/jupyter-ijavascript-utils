@@ -16,10 +16,18 @@
  *   * {@link module:date.add|date.add(Date, {days, hours, minutes, seconds)} - shift a date by a given amount
  *   * {@link module:date.endOfDay|date.endOfDay(Date)} - finds the end of day UTC for a given date
  *   * {@link module:date.startOfDay|date.startOfDay(Date)} - finds the end of day UTC for a given date
+ * * Overwrite
+ *   * {@link module:date.overwrite|date.overwrite(targetDate, newValue)} - overwrite the value inside a Date
+ *   * {@link module:date.clone|date.clone(targetDate)} - clone the value of a Date, so it is not modified
  * * Print
  *   * {@link module:date.durationLong|date.durationLong(epoch)} - displays duration in legible form:
  *      `D days, H hours, M minutes, S.MMM seconds`
  *   * {@link module:date.durationISO|date.durationISO(epoch)} - displays duration in condensed forme:
+ * * Generate Date Sequence
+ *   * {@link module:date.arrange|date.arrange(startDate, count, incOptions)} - create a sequence of dates by continually adding to them
+ *   * {@link module:date.generateDateSequence|date.generateDateSequence(startDate, endDate, incOptions)} - create a sequence of dates
+ *      by continually adding between dates
+ *   * {@link module:date~DateRange.fromList|DateRange.fromList()} - pass a sequence of dates to create a list of DateRanges
  * 
  * --------
  * 
@@ -30,6 +38,14 @@
  * 
  * also watch the [TC39 Temporal Proposal](https://github.com/tc39/proposal-temporal)
  * - also found under caniuse: https://caniuse.com/temporal
+ * 
+ * --------
+ * 
+ * List of timezone supported is based on the version of javascript used.
+ * 
+ * Please see:
+ * * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat|Intl.DateTimeFormat from MDN}
+ * * {@link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones|wikipedia list of tz database names}
  * 
  * @module date
  * @exports date
@@ -190,20 +206,32 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
   if (DateUtils.timeZoneOffsetMap.has(cleanTz)) {
     return DateUtils.timeZoneOffsetMap.get(cleanTz);
   }
-  const d = new Date();
+  const d = new Date(Date.UTC(2025, 0, 1, 0, 0, 0));
+
+  const dtFormat = new Intl.DateTimeFormat('en-us', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: false,
+    fractionalSecondDigits: 3,
+    timeZone: cleanTz
+  });
+
+  const getOffset = (dateValue) => {
+    const dm = dtFormat.formatToParts(dateValue)
+      .filter(({ type }) => type !== 'literal')
+      .reduce((result, { type, value }) => {
+        // eslint-disable-next-line no-param-reassign
+        result[type] = value;
+        return result;
+      }, {});
+    return new Date(Date.UTC(dm.year, dm.month - 1, dm.day, dm.hour, dm.minute, dm.second, dm.fractionalSecond));
+  };
 
   const formatter = (dateValue) => {
-    const dtFormat = new Intl.DateTimeFormat('en-us', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false,
-      fractionalSecondDigits: 3,
-      timeZone: cleanTz
-    });
     const dm = dtFormat.formatToParts(dateValue)
       .filter(({ type }) => type !== 'literal')
       .reduce((result, { type, value }) => {
@@ -215,11 +243,11 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
     const dateStr = `${dm.year}-${DateUtils.padTime(dm.month)}-${DateUtils.padTime(dm.day)}T${
       DateUtils.padTime(dm.hour)}:${DateUtils.padTime(dm.minute)}:${DateUtils.padTime(dm.second)}.${
       DateUtils.padTime(dm.fractionalSecond, 3)}`;
+    
     return dateStr;
   };
   
-  const impactedDateStr = formatter(d);
-  const impactedDate = new Date(impactedDateStr);
+  const impactedDate = getOffset(d);
 
   const diff = d.getTime() - impactedDate.getTime();
 
@@ -336,11 +364,46 @@ module.exports.toLocalISO = function toLocalISO(date, timeZoneStr) {
  * @param {Date} targetDate - the date to be cloned
  * @returns {Date}
  */
-/*
 module.exports.clone = function clone(targetDate) {
   return new Date(targetDate.getTime());
 };
-*/
+
+/**
+ * Overwrite the internal time for a date object.
+ * 
+ * ```
+ * const targetDate = new Date('2025-01-01');
+ * utils.date.overwrite(targetDate, new Date('2025-02-01'));
+ * 
+ * targetDate.toISOString(); // 2025-02-01T00:00:00.000Z
+ * ```
+ * 
+ * @param {Date} dateToUpdate - date object to modify the time in-place
+ * @param {Number|Date} newDateEpoch - the new time in epoch or Date
+ * @returns - dateToUpdate but with the internal date aligned to newDateEpoch
+ */
+module.exports.overwrite = function overwrite(dateToUpdate, newDateEpoch) {
+  if (!(dateToUpdate instanceof Date)) {
+    throw Error(`date.overwrite: dateToUpdate is not a date:${dateToUpdate}`);
+  }
+
+  let cleanEpoch;
+  if (!newDateEpoch) {
+    throw Error(`date.overwrite: cannot set to an invalid date:${newDateEpoch}`);
+  } else if ((typeof newDateEpoch) === 'number') {
+    cleanEpoch = newDateEpoch;
+  } else if (newDateEpoch instanceof Date) {
+    cleanEpoch = newDateEpoch.getTime();
+  } else if ((typeof newDateEpoch) === 'string') {
+    cleanEpoch = Date.parse(newDateEpoch);
+  } else {
+    throw Error(`cannot overwrite date:${dateToUpdate.toISOString()}, unknown newDateEpoch: ${newDateEpoch}`);
+  }
+
+  dateToUpdate.setTime(cleanEpoch);
+
+  return dateToUpdate;
+};
 
 /**
  * Adds an amount to a date: days, hours, minutes, seconds
@@ -352,21 +415,32 @@ module.exports.clone = function clone(targetDate) {
  * 
  * @param {Date} dateValue - date to add to
  * @param {Object} options - options of what to add
+ * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
+ * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
  * @param {Number} [options.days=0] - number of days to add
  * @param {Number} [options.minutes=0] - number of minutes to add
  * @param {Number} [options.hours=0] - number of minutes to add 
  * @param {Number} [options.seconds=0] - number of seconds to add 
- * @returns {Date} - 
+ * @returns {Date} -
  */
 module.exports.add = function add(dateValue, options = null) {
   if (!options) return dateValue;
 
   const { days = 0, minutes = 0, hours = 0, seconds = 0 } = options;
-  return new Date(dateValue.getTime()
+  const result = new Date(dateValue.getTime()
     + DateUtils.TIME.DAY * days
     + DateUtils.TIME.HOUR * hours
     + DateUtils.TIME.MINUTE * minutes
     + DateUtils.TIME.SECOND * seconds);
+  
+  if (Object.hasOwn(options, 'years')) {
+    result.setFullYear(result.getFullYear() + options.years);
+  }
+  if (Object.hasOwn(options, 'months')) {
+    result.setMonth(result.getMonth() + options.months);
+  }
+
+  return result;
 };
 
 /**
@@ -402,6 +476,111 @@ module.exports.startOfDay = function endOfDay(dateValue) {
 };
 
 /**
+ * Creates an array of dates, starting with the startDate,
+ * and adding in the options count number of times.
+ * 
+ * ```
+ * const startDate = new Date('2025-02-02');
+ * utils.date.arrange(startDate, 6, { days: 1 });
+ * //   ['2025-02-02 00:00:00')
+ * //   ['2025-02-03 00:00:00')
+ * //   ['2025-02-04 00:00:00')
+ * //   ['2025-02-05 00:00:00')
+ * //   ['2025-02-06 00:00:00')
+ * //   ['2025-02-07 00:00:00')
+ * //   ['2025-02-08 00:00:00')
+ * //   ['2025-02-09 00:00:00')
+ * // ]
+ * ```
+ * 
+ * @param {Date} startDate - startingDate to compare to
+ * @param {Number} count - Number of times to add the options
+ * @param {Object} options - options similar to {@link module:DateUtils.add|DateUtils.add}
+ * @param {Number} [options.days = 0]: how many days to add each check
+ * @param {Number} [options.hours = 0]: how many days to add each check
+ * @param {Number} [options.minutes = 0]: how many days to add each check
+ * @param {Number} [options.seconds = 0]: how many days to add each check
+ * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
+ * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
+ * @returns {Date[]} - collection of dates (count long)
+ * @see {@link module:Date.add|utils.date.add}
+ * @see {@link module:date.generateDateSequence} - finish at an endingDate instead of # of iterations
+ */
+module.exports.arrange = function arrange(startDate, count, options) {
+  if (!DateUtils.isValid(startDate)) {
+    throw Error(`Invalid start date:${startDate}`);
+  }
+
+  const results = new Array(count + 1).fill();
+  results[0] = startDate;
+  let currentDate = startDate;
+  for (let i = 0; i < count; i += 1) {
+    currentDate = DateUtils.add(currentDate, options);
+    results[i + 1] = currentDate;
+  }
+  return results;
+};
+
+/**
+ * Creates an array of dates, beginning at startDate,
+ * and adding time until EndDate is reached.
+ * 
+ * ```
+ * const startDate = new Date('2025-02-02');
+ * const endDate = new Date('2025-02-09 23:59:59.000');
+ * // alternative
+ * // endDate = utils.date.endOfDay(utils.date.add(startDate, { days; 7 }));
+ * 
+ * utils.date.arrange(startDate, endDate, { days: 1 });
+ * //   ['2025-02-02 00:00:00.000'],
+ * //   ['2025-02-03 00:00:00.000'],
+ * //   ['2025-02-04 00:00:00.000'],
+ * //   ['2025-02-05 00:00:00.000'],
+ * //   ['2025-02-06 00:00:00.000'],
+ * //   ['2025-02-07 00:00:00.000'],
+ * //   ['2025-02-08 00:00:00.000'],
+ * //   ['2025-02-09 00:00:00.000'],
+ * //   ['2025-02-09 23:59:59.9999']
+ * // ]
+ * ```
+ * @param {Date} startDate - starting date
+ * @param {Date} endDate - ending date
+ * @param {Object} options - options similar to {@link module:DateUtils.add|DateUtils.add}
+ * @param {Number} [options.days = 0]: how many days to add each check
+ * @param {Number} [options.hours = 0]: how many days to add each check
+ * @param {Number} [options.minutes = 0]: how many days to add each check
+ * @param {Number} [options.seconds = 0]: how many days to add each check
+ * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
+ * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
+ * @returns {Date[]} - sequence of dates from startDate to endDate
+ * @see {@link module:Date.add|utils.date.add}
+ * @see {@link module:date.arrange} - run a set of iterations instead of stopping at endDate
+ */
+module.exports.generateDateSequence = function generateDateSequencde(startDate, endDate, options) {
+  const results = [];
+
+  if (!DateUtils.isValid(startDate)) {
+    throw Error(`Invalid start date:${startDate}`);
+  }
+  if (!DateUtils.isValid(endDate)) {
+    throw Error(`Invalid end date:${endDate}`);
+  }
+
+  const endTime = endDate.getTime();
+
+  for (let currentDate = startDate;
+    DateUtils.isValid(currentDate) && currentDate.getTime() < endTime;
+    currentDate = DateUtils.add(currentDate, options)
+  ) {
+    results.push(currentDate);
+  }
+
+  results.push(endDate);
+
+  return results;
+};
+
+/**
  * Represents a Range between two times
  */
 class DateRange {
@@ -418,11 +597,43 @@ class DateRange {
   endDate;
 
   /**
-   * @param {Date} startDate - the starting datetime of the range
-   * @param {Date} endDate - the ending datetime of the range
+   * @param {Date|String} startDate - the starting date
+   * @param {Date|String} endDate - the ending date
    */
   constructor(startDate, endDate) {
     this.reinitialize(startDate, endDate);
+  }
+
+  /**
+  * Create a list of DateRanges, from a list of dates.
+  * 
+  * ```
+  * dates = [new Date('2025-01-01'),
+  *   new Date('2025-02-01'),
+  *   new Date('2025-03-01'),
+  *   new Date('2025-04-01')];
+  * 
+  * utils.DateRange.fromList(dates);
+  * // [{start: 2025-01-01T00:00:00, end: 2025-02-01TT00:00:00, },
+  * //  {start: 2025-02-01TT00:00:00, end: 2025-03-01TT00:00:00},
+  * //  {start: 2025-03-01TT00:00:00, end: 2025-04-01TT00:00:00}]
+  * ```
+  * 
+  * (If gaps are desired - ex: April to May and next one June to July,
+  * the simplest is to remove the dates from the resulting list.)
+  * 
+  * @param {Date[]} dateList - list of dates
+  * @returns {DateRange[]} - list of dateList.length-1 dateRanges,
+  *   where the end of the firstRange is the start of the next.
+  */
+  static fromList(dateSequence) {
+    if (dateSequence.length < 2) return [];
+
+    const results = new Array(dateSequence.length - 2);
+    for (let i = 0; i < dateSequence.length - 1; i += 1) {
+      results[i] = new DateRange(dateSequence[i], dateSequence[i + 1]);
+    }
+    return results;
   }
 
   /**
@@ -430,16 +641,23 @@ class DateRange {
    * 
    * (Sometimes useful for shifting times after the fact)
    * 
-   * @param {Date} startDate - the starting date
-   * @param {Date} endDate - the ending date
+   * @param {Date|String} startDate - the starting date
+   * @param {Date|String} endDate - the ending date
    */
   reinitialize(startDate, endDate) {
-    if (startDate > endDate) {
-      this.startDate = endDate;
-      this.endDate = startDate;
+    const cleanStart = startDate instanceof Date
+      ? startDate
+      : new Date(Date.parse(startDate));
+    const cleanEnd = endDate instanceof Date
+      ? endDate
+      : new Date(Date.parse(endDate));
+
+    if (cleanStart > cleanEnd) {
+      this.startDate = cleanEnd;
+      this.endDate = cleanStart;
     } else {
-      this.startDate = startDate;
-      this.endDate = endDate;
+      this.startDate = cleanStart;
+      this.endDate = cleanEnd;
     }
   }
 
@@ -507,6 +725,90 @@ class DateRange {
   contains(dateToCheck) {
     const testTime = dateToCheck.getTime();
     return testTime >= this.startDate.getTime() && testTime <= this.endDate.getTime();
+  }
+
+  /**
+   * Shifts the start time of the DateRange.
+   * 
+   * ```
+   * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
+   * myRange.shiftStart({ days: 1 });
+   * // { startDate: 2025-01-02, endDate: 2025-02-01 }
+   * 
+   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-01 }
+   * ```
+   * 
+   * (Note that this defaults to immutable DateRanges,
+   * but passing `inPlace=true` will update this instance)
+   * 
+   * ```
+   * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
+   * myRange.shiftStart({ days: 1 });
+   * 
+   * myRange.toString(); // { startDate: 2025-01-02, endDate: 2025-02-01 }
+   * ```
+   * 
+   * @param {Object} options - options to shift the dateRange by, similar to {@link module:DateUtils.add|DateUtils.add}
+   * @param {Number} [options.days = 0]: how many days to add each check
+   * @param {Number} [options.hours = 0]: how many days to add each check
+   * @param {Number} [options.minutes = 0]: how many days to add each check
+   * @param {Number} [options.seconds = 0]: how many days to add each check
+   * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
+   * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
+   * @param {*} inPlace 
+   * @returns 
+   */
+  shiftStart(options, inPlace = false) {
+    if (inPlace) {
+      DateUtils.overwrite(this.startDate, DateUtils.add(this.startDate, options));
+      return this;
+    }
+
+    const newStart = DateUtils.add(this.startDate, options);
+    const newEnd = this.endDate;
+    return new DateRange(newStart, newEnd);
+  }
+
+  /**
+   * Shifts the ending time of the DateRange.
+   * 
+   * ```
+   * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
+   * myRange.shiftEnd({ days: 1 });
+   * // { startDate: 2025-01-01, endDate: 2025-02-02 }
+   * 
+   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-01 }
+   * ```
+   * 
+   * (Note that this defaults to immutable DateRanges,
+   * but passing `inPlace=true` will update this instance)
+   * 
+   * ```
+   * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
+   * myRange.shiftEnd({ days: 1 });
+   * 
+   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-02 }
+   * ```
+   * 
+   * @param {Object} options - options to shift the dateRange by, similar to {@link module:DateUtils.add|DateUtils.add}
+   * @param {Number} [options.days = 0]: how many days to add each check
+   * @param {Number} [options.hours = 0]: how many days to add each check
+   * @param {Number} [options.minutes = 0]: how many days to add each check
+   * @param {Number} [options.seconds = 0]: how many days to add each check
+   * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
+   * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
+   * @param {*} inPlace 
+   * @returns 
+   */
+  shiftEnd(options, inPlace = false) {
+    if (inPlace) {
+      DateUtils.overwrite(this.endDate, DateUtils.add(this.endDate, options));
+      return this;
+    }
+
+    const newStart = this.startDate;
+    const newEnd = DateUtils.add(this.endDate, options);
+    return new DateRange(newStart, newEnd);
   }
 
   /**
