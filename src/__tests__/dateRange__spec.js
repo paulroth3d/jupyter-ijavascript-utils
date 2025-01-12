@@ -41,6 +41,22 @@ global.describe('DateRange', () => {
       global.expect(results.startDate).toStrictEqual(newStart);
       global.expect(results.endDate).toStrictEqual(newEnd);
     });
+    global.it('can re-initialize from a stringy', () => {
+      const startTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const endTime = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
+      const results = new DateRange(startTime, endTime);
+
+      const newStartStr = '2024-12-28 12:00:00';
+      const newEndStr = '2024-12-28 12:00:00';
+
+      const newStart = new Date(Date.UTC(2024, 11, 28, 12, 0, 0));
+      const newEnd   = new Date(Date.UTC(2024, 11, 28, 12, 0, 0));
+
+      results.reinitialize(newStartStr, newEndStr);
+
+      global.expect(results.startDate).toStrictEqual(newStart);
+      global.expect(results.endDate).toStrictEqual(newEnd);
+    });
     global.it('always has the starting time first', () => {
       const startTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
       const endTime = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));

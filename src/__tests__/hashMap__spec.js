@@ -312,4 +312,25 @@ global.describe('hashmap', () => {
       global.expect(results).toBe(expected);
     });
   });
+
+  global.describe('reverse', () => {
+    global.it('can map', () => {
+      const encodingMap = new Map([[' ', '%20'], ['\\n', '%0A'], ['\\t', '%09']]);
+      const result = encodingMap.get(' '); // '%20'
+      const expected = '%20';
+      global.expect(result).toBe(expected);
+    });
+    global.it('can reverse a map', () => {
+      const encodingMap = new Map([[' ', '%20'], ['\\n', '%0A'], ['\\t', '%09']]);
+      const decodingMap = HashMapUtil.reverse(encodingMap);
+      const result = decodingMap.get('%20');
+      const expected = ' ';
+      global.expect(result).toBe(expected);
+    });
+    global.it('doesnt modify the existing map', () => {
+      const encodingMap = new Map([[' ', '%20'], ['\\n', '%0A'], ['\\t', '%09']]);
+      const decodingMap = HashMapUtil.reverse(encodingMap);
+      global.expect(decodingMap).not.toBe(encodingMap);
+    });
+  });
 });
