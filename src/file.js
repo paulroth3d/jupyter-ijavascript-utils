@@ -249,7 +249,7 @@ module.exports.writeFile = function writeFile(filePath, contents, fsOptions = {}
  */
 module.exports.writeFileStd = function writeFileStd(filePath, contents) {
   //-- allow tests to use, but should be cleared prior to commit
-  // eslint-disable-next-line no-console
+  /* istanbul ignore next */
   if (process.env.JEST_WORKER_ID !== undefined) console.warn('Warning: Test using writeFileStd');
   
   const resolvedPath = path.resolve(filePath);

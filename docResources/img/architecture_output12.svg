@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="228px" preserveAspectRatio="none" style="width:747px;height:228px;background:#FFFFFF;" version="1.1" viewBox="0 0 747 228" width="747px" zoomAndPan="magnify"><defs/><g><!--MD5=[b1435b213846e3ddcd1e6c1cd6b83b9a]
+entity Server--><g id="elem_Server"><path d="M17.093,78.4537 C21.3739,72.39 25.9234,72.9022 29.7257,78.9528 C33.7028,73.0034 39.0348,71.7669 43.7862,78.0638 C46.5833,72.4268 52.8058,71.7491 56.6377,76.8221 C61.1339,71.0268 65.7258,71.0303 69.3045,77.7506 C71.8895,71.0246 76.3797,71.8473 80.6255,76.0266 C85.4773,68.6152 91.0449,68.8984 95.1732,76.7177 C98.1758,71.1557 103.9326,70.743 106.7572,76.8937 C110.9613,71.5522 116.5999,71.8383 120.0257,77.8068 C124.7449,72.4639 129.138,73.0093 131.8334,79.7795 C135.471,74.5469 140.5763,73.6578 144.5226,79.4232 C153.3043,81.7189 156.3095,88.6729 149.2419,95.5941 C154.2696,102.3272 152.3886,106.7663 145.1469,110.0157 C141.0186,116.0612 136.8734,116.6448 132.262,110.5274 C129.4416,115.782 123.2936,116.2882 119.7499,111.4216 C116.5578,117.7511 111.5111,118.9176 106.4425,113.5579 C104.0018,119.1256 99.9624,121.2799 95.1701,116.002 C91.286,121.7767 85.1918,121.5843 81.4395,115.8447 C77.7669,123.4416 71.4214,121.6591 67.6039,115.9959 C63.2007,120.6519 59.696,120.9226 56.6852,114.6099 C51.047,120.623 46.4313,121.5738 42.2691,113.1373 C37.111,119.6509 32.0476,118.7868 29.203,111.0204 C24.5326,116.6093 21.2166,114.5377 18.0344,109.4618 C8.8565,108.6475 6.3799,101.8487 12.0572,94.9259 C6,88.3264 8.3169,80.5185 17.093,78.4537 " fill="#DFF2D1" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="114" x="23.2017" y="98.8752">Notebook Server</text></g><!--MD5=[cb798c5dd5bb639090b009f755d03b00]
+entity Kernel--><g id="elem_Kernel"><rect fill="#DFF2D1" height="46.4883" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="84" x="657.2017" y="70.34"/><rect fill="#DFF2D1" height="10" style="stroke:#181818;stroke-width:1.0;" width="15" x="721.2017" y="75.34"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="719.2017" y="77.34"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="719.2017" y="81.34"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="44" x="672.2017" y="103.8752">Kernel</text></g><!--MD5=[980db8b78ba88f0baa9d1274404985fb]
+entity Notebook1Kernel--><g id="elem_Notebook1Kernel"><rect fill="#DFF2D1" height="62.9766" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="159" x="438.2017" y="61.84"/><rect fill="#DFF2D1" height="10" style="stroke:#181818;stroke-width:1.0;" width="15" x="577.2017" y="66.84"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="575.2017" y="68.84"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="575.2017" y="72.84"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="119" x="453.2017" y="95.3752">«Kernel Instance»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="76" x="453.2017" y="111.8634">Notebook1</text></g><!--MD5=[27f0c296801bd43a1f85bde6e77e49ad]
+entity Notebook2Kernel--><g id="elem_Notebook2Kernel"><rect fill="#DFF2D1" height="62.9766" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="159" x="438.2017" y="159.84"/><rect fill="#DFF2D1" height="10" style="stroke:#181818;stroke-width:1.0;" width="15" x="577.2017" y="164.84"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="575.2017" y="166.84"/><rect fill="#DFF2D1" height="2" style="stroke:#181818;stroke-width:1.0;" width="4" x="575.2017" y="170.84"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="119" x="453.2017" y="193.3752">«Kernel Instance»</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="81" x="453.2017" y="209.8634">"Notebook2</text></g><!--MD5=[8d8fb78db1f7f4513498002f81e9743e]
+entity Notebook1--><g id="elem_Notebook1"><path d="M212.2017,77.84 L212.2017,109.3283 A2.5,2.5 0 0 0 214.7017,111.8283 L375.7017,111.8283 A2.5,2.5 0 0 0 378.2017,109.3283 L378.2017,85.34 L368.2017,75.34 L214.7017,75.34 A2.5,2.5 0 0 0 212.2017,77.84 " fill="#D9D9D9" style="stroke:#181818;stroke-width:1.0;"/><path d="M368.2017,75.34 L368.2017,82.84 A2.5,2.5 0 0 0 370.7017,85.34 L378.2017,85.34 " fill="#D9D9D9" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="146" x="222.2017" y="98.8752">Notebook1.ipynb File</text></g><!--MD5=[f77e7b6d69fbb52bb649a59d05901776]
+entity Notebook2--><g id="elem_Notebook2"><path d="M212.2017,161.84 L212.2017,193.3283 A2.5,2.5 0 0 0 214.7017,195.8283 L375.7017,195.8283 A2.5,2.5 0 0 0 378.2017,193.3283 L378.2017,169.34 L368.2017,159.34 L214.7017,159.34 A2.5,2.5 0 0 0 212.2017,161.84 " fill="#D9D9D9" style="stroke:#181818;stroke-width:1.0;"/><path d="M368.2017,159.34 L368.2017,166.84 A2.5,2.5 0 0 0 370.7017,169.34 L378.2017,169.34 " fill="#D9D9D9" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="146" x="222.2017" y="182.8752">Notebook2.ipynb File</text></g><!--MD5=[06edb24f9914f6522ab5e12c0eba6238]
+link Server to Notebook1--><g id="link_Server_Notebook1"><path d="M152.4217,93.34 C169.8917,93.34 188.7817,93.34 206.9117,93.34 " fill="none" id="Server-to-Notebook1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="212.0017,93.34,203.0017,89.34,207.0017,93.34,203.0017,97.34,212.0017,93.34" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[c7ef5ccc2679c3836444ca268242c1a4]
+link Server to Notebook2--><g id="link_Server_Notebook2"><path d="M139.6817,116.4 C172.1817,129.22 212.2317,145.01 243.4117,157.31 " fill="none" id="Server-to-Notebook2" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="248.3317,159.25,241.4236,152.2302,243.6795,157.4178,238.492,159.6737,248.3317,159.25" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[db1393b37c1f9d80da9a2e15560cfc15]
+link Server to Kernel--><g id="link_Server_Kernel"><path d="M152.3317,70.87 C171.5817,65.59 192.5317,60.57 212.2017,57.34 C381.1417,29.59 430.3417,6 597.2017,44.34 C617.5117,49.01 638.4817,58.33 656.0117,67.6 " fill="none" id="Server-to-Kernel" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="660.8617,70.21,654.8369,62.4189,656.4603,67.8378,651.0414,69.4612,660.8617,70.21" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[c65f8e0764c2442dcd8a494ada38c61a]
+link Notebook1 to Notebook1Kernel--><g id="link_Notebook1_Notebook1Kernel"><path d="M378.3117,93.34 C396.2117,93.34 415.1817,93.34 433.1517,93.34 " fill="none" id="Notebook1-to-Notebook1Kernel" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="438.1817,93.34,429.1817,89.34,433.1817,93.34,429.1817,97.34,438.1817,93.34" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[aae24b436de0c0ac3d82c9ebe464c133]
+link Notebook2 to Notebook2Kernel--><g id="link_Notebook2_Notebook2Kernel"><path d="M378.3117,182.55 C396.2117,183.69 415.1817,184.89 433.1517,186.03 " fill="none" id="Notebook2-to-Notebook2Kernel" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="438.1817,186.35,429.4512,181.7917,433.1916,186.0354,428.9479,189.7759,438.1817,186.35" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[cc5db17b7015e45e7f23b04b16c616b4]
+link Notebook1Kernel to Kernel--><g id="link_Notebook1Kernel_Kernel"><path d="M597.4317,93.34 C617.9717,93.34 639.2817,93.34 656.9917,93.34 " fill="none" id="Notebook1Kernel-Kernel" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/></g><!--MD5=[ad4c9f0e7a0b18fd98dc1ea3e0bce110]
+link Notebook2Kernel to Kernel--><g id="link_Notebook2Kernel_Kernel"><path d="M576.4817,159.79 C602.7217,145.47 633.1517,128.86 657.0217,115.82 " fill="none" id="Notebook2Kernel-Kernel" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/></g><!--MD5=[26b57047c50eed4d934c2164aa80c4da]
+@startuml
+left to right direction
+
+<style>
+rectangle {
+  BackGroundColor #dfd1f2
+  LineThickness 1
+  LineColor black
+}
+cloud {
+    BackGroundColor #dff2d1
+    LineThickness 1
+}
+component {
+    BackGroundColor #dff2d1
+    LineThickness 1
+}
+file {
+    BackGroundColor #d9d9d9
+    LineThickness 1
+}
+</style>
+
+cloud "Notebook Server" as Server
+component Kernel
+component "<<Kernel Instance>>\nNotebook1" as Notebook1Kernel
+component "<<Kernel Instance>>\n"Notebook2" as Notebook2Kernel
+file "Notebook1.ipynb File" as Notebook1
+file "Notebook2.ipynb File" as Notebook2
+
+Server -do-> Notebook1
+Server -do-> Notebook2
+Server -do-> Kernel
+
+Notebook1 -do-> Notebook1Kernel
+Notebook2 -do-> Notebook2Kernel
+
+Notebook1Kernel .. Kernel
+Notebook2Kernel .. Kernel
+@enduml
+
+PlantUML version 1.2022.5(Sat Apr 30 05:55:52 CDT 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

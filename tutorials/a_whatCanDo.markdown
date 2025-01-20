@@ -4,15 +4,36 @@ The purpose of this library is to help people with a grasp of JavaScript to leve
 
 Notebooks are a way to explore and experiment, in addition to write and explain ideas.
 
-(Essentially, they are data driven documents with both formatted text married next to code that can show some output)
+**All of the tutorials provided here, including this one, was written as a notebook and simply exported.**
 
-All of the tutorials provided here, including this one, was written as a notebook and simply exported.
+![Screenshot](img/started_jupyterSideBySide.jpg)
 
-This library is simply a way for you to handle common needs and get your footing:
+The document itself is a list of cells that can be either:
+* Text or Markdown (like this)
+* Or Code Results (NodeJS code in this case)
 
-* Loading and Exporting
-* Grouping and Aggregating
-* Visualizing and Charting
+![Screenshot of Animation](img/noiseFinal.gif)
+
+*We often include the code for illustration purposes in these tutorials, but many documents we write do not show them at all.*
+
+Code cells can render images, interactive charts, maps or even generated text based on data.
+
+![Screenshot showing generated markdown](img/started_generatedText.jpg)
+
+## This Library helps with the Coding Side of Things
+
+So you can focus on what you want to work on:
+
+* **Load**
+    * (ex: {@link module:file}, {@link module:datasets} or the {@tutorial e_gettingData} tutorial)
+* **Manipulate and Refine**
+    * (ex: {@link module:array}, {@link module:object}, or {@link module:set})
+* **Aggregate, Manipulate and Explore**
+    * (ex: {@link module:group}, {@link module:aggregate} or the {@tutorial f_dataframes} tutorial)
+* **Format / Visualize**
+    * (ex: {@link module:format}, {@link module:vega}, or the {@tutorial g_visualization} tutorial)
+* **Export**
+    * (ex: {@link TableGenerator}, or the {@tutorial h_exporting} tutorial)
 
 And as this uses [nriesco's iJavaScript Jupyter Kernel](http://n-riesco.github.io/ijavascript/), this can be one module of many npm modules as you grow.
 
@@ -36,8 +57,6 @@ Jupyter Lab (the latest interface for Jupyter), and many other notebooks are ins
 
 However, I've found quite a few people that would really get a benefit of working with Notebooks - but without having to also learn Python.
 
-While Python and JavaScript (often ECMA 262) are influencing one another - there are differences - and these can be challenging to deal with especially on deadlines.
-
 For those JavaScript Developers that are looking to better understand Python, we developed a [Python for JavaScript Developers book here](https://github.com/paulroth3d/python-for-js-developers) - pull requests always welcome.
 
 Additionally, [ObservableHQ](https://observablehq.com/tutorials) provides a really great experience for those familiar with JavaScript - [although it isn't technically JavaScript](https://observablehq.com/@observablehq/observables-not-javascript) and also worth a look.
@@ -45,16 +64,14 @@ Additionally, [ObservableHQ](https://observablehq.com/tutorials) provides a real
 For example: [Lionel Radisson's creative coding](https://observablehq.com/@makio135/creative-coding),
 and [many others](https://observablehq.com/explore)
 
+## At first glance, notebooks can seem like pretty documentation
+
 ```javascript
 utils = require('jupyter-ijavascript-utils');
 ['utils']
 ```
 
     [ 'utils' ]
-
-
-
-## At first glance, notebooks can seem like pretty documentation
 
 The notebook is written as a collection of `cells` that essentially are either:
 
@@ -80,6 +97,8 @@ When rendering the document, cells that are code are sent to the Kernel to ask w
 
 Jupyter by itself doesn't understand the code, it just passes it to a program that does - and this is called a 'Kernel'
 
+![Diagram](img/architecture_output6.svg)
+
 This allows Jupyter to work with all kinds of languages, like:
 
 * Ruby
@@ -87,9 +106,11 @@ This allows Jupyter to work with all kinds of languages, like:
 * Perl
 * C++
 
-[Or see the full list of current Kernels from Jupyter's website](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels)
+[See the full list of current Kernels from Jupyter's website](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels)
 
 Here, we assume we'll be using [nriesco's iJavaScript Kernel for Jupyter](https://github.com/n-riesco/ijavascript), as it provides JavaScript support for Jupyter.
+
+(For more, see the {@tutorial architecture} tutorial)
 
 ## Data Driven Notebooks
 

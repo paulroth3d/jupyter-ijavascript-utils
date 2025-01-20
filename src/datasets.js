@@ -145,8 +145,8 @@ module.exports.fetch = (library) => {
  * 
  * // use worldJSON as global variable
  */
-module.exports.fetchJSON = async function fetchJSON(targetAddress, options = {}) {
-  const response = await fetch(targetAddress, options);
+module.exports.fetchJSON = async function fetchJSON(targetAddress, options) {
+  const response = await fetch(targetAddress, options || {});
   if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
   return response.json();
 };

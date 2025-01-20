@@ -459,6 +459,8 @@ module.exports.htmlScript = function htmlScripts(
     if (!onReadyCode.endsWith(';')) {
       onReadyCode += ';';
     }
+  } else {
+    throw Error('ijsUtils.htmlScript: onReadyCode must be a string or function');
   }
 
   //-- the unique identifier for this run

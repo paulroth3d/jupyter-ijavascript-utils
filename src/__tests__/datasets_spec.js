@@ -95,6 +95,19 @@ global.describe('datasets', () => {
       global.expect(nodeFetch.mock.calls[0][0]).toBe(callURL);
       global.expect(nodeFetch.mock.calls[0][1]).toStrictEqual(callOptions);
     });
+    global.it('sends an empty options if options are not provided', () => {
+      const expected = { json: 'response' };
+      const callURL = 'https://www.google.com';
+      const callOptions = { options: true };
+      nodeFetch.responseMock.ok = true;
+      nodeFetch.responseMock.json.mockReturnValue(expected);
+
+      DatasetUtils.fetchJSON(callURL);
+
+      global.expect(nodeFetch).toHaveBeenCalled();
+      global.expect(nodeFetch.mock.calls[0][0]).toBe(callURL);
+      global.expect(nodeFetch.mock.calls[0][1]).toStrictEqual(callOptions);
+    });
     global.it('throws an error if the response is not okay', async () => {
       const expected = { json: 'response' };
       const callURL = 'https://www.google.com';
@@ -148,6 +161,19 @@ global.describe('datasets', () => {
       nodeFetch.responseMock.json.mockReturnValue(expected);
 
       DatasetUtils.fetchText(callURL, callOptions);
+
+      global.expect(nodeFetch).toHaveBeenCalled();
+      global.expect(nodeFetch.mock.calls[0][0]).toBe(callURL);
+      global.expect(nodeFetch.mock.calls[0][1]).toStrictEqual(callOptions);
+    });
+    global.it('defaults options if options are not passed', () => {
+      const expected = 'expected text';
+      const callURL = 'https://www.google.com';
+      const callOptions = { options: true };
+      nodeFetch.responseMock.ok = true;
+      nodeFetch.responseMock.json.mockReturnValue(expected);
+
+      DatasetUtils.fetchText(callURL);
 
       global.expect(nodeFetch).toHaveBeenCalled();
       global.expect(nodeFetch.mock.calls[0][0]).toBe(callURL);

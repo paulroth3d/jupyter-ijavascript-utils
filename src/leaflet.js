@@ -316,6 +316,8 @@ module.exports.renderMarkers = function renderMarkers(markers, mapOptions) {
       throw Error('leaflet.renderMarkers(markers, options): object markers must follow schema: ({ lat, lon, title? })');
     }
     cleanMarkers = markers.map(({ lat, lon, title }) => [lat, lon, title]);
+  } else {
+    throw Error('leaflet.renderMarkers(markers, options): object markers must follow schema: ({ lat, lon, title? })');
   }
 
   //-- will be executed as JavaScript - not Node

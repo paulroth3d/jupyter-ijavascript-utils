@@ -46,6 +46,96 @@ global.describe('tableGenerator', () => {
       global.expect(results.headers).toStrictEqual(expected.headers);
       global.expect(results.data).toStrictEqual(expected.data);
     });
+
+    global.describe('constructor', () => {
+      global.it('uses the constructor to initialize data', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats a null dataset as empty', () => {
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator(null)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats an empty constructor as null', () => {
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator()
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+    });
+    global.describe('data', () => {
+      global.it('uses data() to override the constructor', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: ['id', 'city', 'month', 'precip'],
+          data: [
+            [1, 'Seattle',  'Aug', 0.87],
+            [0, 'Seattle',  'Apr', 2.68],
+            [2, 'Seattle',  'Dec', 5.31],
+            [3, 'New York', 'Apr', 3.94],
+            [4, 'New York', 'Aug', 4.13],
+            [5, 'New York', 'Dec', 3.58],
+            [6, 'Chicago',  'Apr', 3.62],
+            [8, 'Chicago',  'Dec', 2.56],
+            [7, 'Chicago',  'Aug', 3.98]
+          ] });
+        const results = new TableGenerator(null)
+          .data(weather)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats a null dataset as empty', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator(weather)
+          .data(null)
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+      global.it('treats an empty data() call as empty', () => {
+        const weather = initializeWeather();
+        const expected = ({
+          headers: [],
+          data: []
+        });
+        const results = new TableGenerator(weather)
+          .data()
+          .prepare();
+        global.expect(results.headers).toStrictEqual(expected.headers);
+        global.expect(results.data).toStrictEqual(expected.data);
+      });
+    });
     global.describe('sortFn', () => {
       global.it('can sort a table', () => {
         const weather = initializeWeather();
@@ -534,7 +624,64 @@ state|IL   |IL    `;
         const results = new TableGenerator(weather)
           .styleTable('1px solid black')
           .generateHTML();
-        const expected = `<table cellspacing="0px" style="1px solid black">
+        const expected = `<table cellspacing="0px" style="1px solid black;">
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('does not duplicate semicolons', () => {
+        const weather = initializeSmallWeather();
+        const results = new TableGenerator(weather)
+          .styleTable('1px solid black;')
+          .generateHTML();
+        const expected = `<table cellspacing="0px" style="1px solid black;">
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('applies no style if styleTable is null', () => {
+        const weather = initializeSmallWeather();
+        const results = new TableGenerator(weather)
+          .styleTable('1px solid black;')
+          .styleTable(null)
+          .generateHTML();
+        const expected = `<table cellspacing="0px" >
 <tr >
 \t<th>id</th>
 \t<th>city</th>
@@ -588,6 +735,63 @@ state|IL   |IL    `;
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
       });
+      global.it('does not duplicate semicolons if provided in style', () => {
+        const weather = initializeSmallWeather();
+        const results = new TableGenerator(weather)
+          .styleHeader('1px solid black;')
+          .generateHTML();
+        const expected = `<table cellspacing="0px" >
+<tr style="1px solid black;">
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('does not provide a style if styleHeader is null', () => {
+        const weather = initializeSmallWeather();
+        const results = new TableGenerator(weather)
+          .styleHeader('1px solid black;')
+          .styleHeader(null)
+          .generateHTML();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
     });
     
     global.describe('styleRow', () => {
@@ -606,16 +810,81 @@ state|IL   |IL    `;
 \t<td >Aug</td>
 \t<td >0.87</td>
 </tr>
-<tr style="style:1">
+<tr style="dynamic-style: 1;">
 \t<td >0</td>
 \t<td >Seattle</td>
 \t<td >Apr</td>
 \t<td >2.68</td>
 </tr>
 </table>`;
-        const styleRowFn = ({ rowIndex }) => rowIndex % 2 === 0 ? '' : `style:${rowIndex}`;
+        const styleRowFn = ({ rowIndex }) => rowIndex % 2 === 0
+          ? ''
+          : `dynamic-style: ${rowIndex}`;
         const results = new TableGenerator(weather)
           .styleRow(styleRowFn)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('does not duplicate semicolons if included in styleRow', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr style="dynamic-style: 1;">
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ rowIndex }) => rowIndex % 2 === 0
+          ? ''
+          : `dynamic-style: ${rowIndex};`;
+        const results = new TableGenerator(weather)
+          .styleRow(styleRowFn)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('clears the style if styleRow is null', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ rowIndex }) => rowIndex % 2 === 0
+          ? ''
+          : `dynamic-style: ${rowIndex}`;
+        const results = new TableGenerator(weather)
+          .styleRow(styleRowFn)
+          .styleRow(null)
           .generateHTML();
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
@@ -639,14 +908,79 @@ state|IL   |IL    `;
 </tr>
 <tr >
 \t<td >0</td>
-\t<td style="style:1 ">Seattle</td>
+\t<td style="dynamic-style: 1;">Seattle</td>
 \t<td >Apr</td>
 \t<td >2.68</td>
 </tr>
 </table>`;
-        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1) ? `style:${rowIndex}` : '';
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1)
+          ? `dynamic-style: ${rowIndex}`
+          : '';
         const results = new TableGenerator(weather)
           .styleCell(styleRowFn)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('does not duplicate semicolons if provided in styleRow', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td style="dynamic-style: 1;">Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1)
+          ? `dynamic-style: ${rowIndex};`
+          : '';
+        const results = new TableGenerator(weather)
+          .styleCell(styleRowFn)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('clears the style if styleCell is null', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1)
+          ? `dynamic-style: ${rowIndex}`
+          : '';
+        const results = new TableGenerator(weather)
+          .styleCell(styleRowFn)
+          .styleCell(null)
           .generateHTML();
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
@@ -663,19 +997,21 @@ state|IL   |IL    `;
 \t<th>precip</th>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">1</td>
-\t<td style=" border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Aug</td>
-\t<td style=" border: 1px solid #AAA">0.87</td>
+\t<td style="border: 1px solid #aaa;">1</td>
+\t<td style="border: 1px solid #aaa;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Aug</td>
+\t<td style="border: 1px solid #aaa;">0.87</td>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">0</td>
-\t<td style="style:1 border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Apr</td>
-\t<td style=" border: 1px solid #AAA">2.68</td>
+\t<td style="border: 1px solid #aaa;">0</td>
+\t<td style="border: 1px solid #aaa; dynamic-style: 1;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Apr</td>
+\t<td style="border: 1px solid #aaa;">2.68</td>
 </tr>
 </table>`;
-        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1) ? `style:${rowIndex}` : '';
+        const styleRowFn = ({ rowIndex, columnIndex }) => (rowIndex % 2 === 1 && columnIndex === 1)
+          ? `dynamic-style: ${rowIndex}`
+          : '';
         const borderCSS = true;
         const results = new TableGenerator(weather)
           .styleCell(styleRowFn)
@@ -694,16 +1030,16 @@ state|IL   |IL    `;
 \t<th>precip</th>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">1</td>
-\t<td style=" border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Aug</td>
-\t<td style=" border: 1px solid #AAA">0.87</td>
+\t<td style="border: 1px solid #aaa;">1</td>
+\t<td style="border: 1px solid #aaa;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Aug</td>
+\t<td style="border: 1px solid #aaa;">0.87</td>
 </tr>
 <tr >
-\t<td style=" border: 1px solid #AAA">0</td>
-\t<td style=" border: 1px solid #AAA">Seattle</td>
-\t<td style=" border: 1px solid #AAA">Apr</td>
-\t<td style=" border: 1px solid #AAA">2.68</td>
+\t<td style="border: 1px solid #aaa;">0</td>
+\t<td style="border: 1px solid #aaa;">Seattle</td>
+\t<td style="border: 1px solid #aaa;">Apr</td>
+\t<td style="border: 1px solid #aaa;">2.68</td>
 </tr>
 </table>`;
         const borderCSS = true;
@@ -723,21 +1059,51 @@ state|IL   |IL    `;
 \t<th>precip</th>
 </tr>
 <tr >
-\t<td style=" border: 2px dotted blue">1</td>
-\t<td style=" border: 2px dotted blue">Seattle</td>
-\t<td style=" border: 2px dotted blue">Aug</td>
-\t<td style=" border: 2px dotted blue">0.87</td>
+\t<td style="border: 2px dotted blue;">1</td>
+\t<td style="border: 2px dotted blue;">Seattle</td>
+\t<td style="border: 2px dotted blue;">Aug</td>
+\t<td style="border: 2px dotted blue;">0.87</td>
 </tr>
 <tr >
-\t<td style=" border: 2px dotted blue">0</td>
-\t<td style=" border: 2px dotted blue">Seattle</td>
-\t<td style=" border: 2px dotted blue">Apr</td>
-\t<td style=" border: 2px dotted blue">2.68</td>
+\t<td style="border: 2px dotted blue;">0</td>
+\t<td style="border: 2px dotted blue;">Seattle</td>
+\t<td style="border: 2px dotted blue;">Apr</td>
+\t<td style="border: 2px dotted blue;">2.68</td>
 </tr>
 </table>`;
         const borderCSS = '2px dotted blue';
         const results = new TableGenerator(weather)
           .border(borderCSS)
+          .generateHTML();
+        // FileUtil.writeFileStd('./tmp/tmp', results);
+        global.expect(results).toBe(expected);
+      });
+      global.it('can clear the border', () => {
+        const weather = initializeSmallWeather();
+        const expected = `<table cellspacing="0px" >
+<tr >
+\t<th>id</th>
+\t<th>city</th>
+\t<th>month</th>
+\t<th>precip</th>
+</tr>
+<tr >
+\t<td >1</td>
+\t<td >Seattle</td>
+\t<td >Aug</td>
+\t<td >0.87</td>
+</tr>
+<tr >
+\t<td >0</td>
+\t<td >Seattle</td>
+\t<td >Apr</td>
+\t<td >2.68</td>
+</tr>
+</table>`;
+        const borderCSS = '2px dotted blue';
+        const results = new TableGenerator(weather)
+          .border(borderCSS)
+          .border(null)
           .generateHTML();
         // FileUtil.writeFileStd('./tmp/tmp', results);
         global.expect(results).toBe(expected);
