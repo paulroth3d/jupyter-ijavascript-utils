@@ -1,8 +1,8 @@
 /**
- * 2d Point
+ * 
  * @module graphics
  */
-class Point2d {
+class Vector2d {
   /**
    * x-coordinate
    * @type {Number}
@@ -38,7 +38,7 @@ class Point2d {
    */
   normalize() {
     const mag = this.magnitude();
-    return new Point2d(
+    return new Vector2d(
       this.x / mag,
       this.y / mag
     );
@@ -48,4 +48,4 @@ class Point2d {
     return (`{x: ${this.x}, y: ${this.y}`);
   }
 }
-module.exports.Point2d = Point2d;
+module.exports.Vector2d = Vector2d;

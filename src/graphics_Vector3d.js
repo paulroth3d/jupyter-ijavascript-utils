@@ -1,10 +1,10 @@
-const { Point2d } = require('./graphics_Point2d');
+const { Vector2d } = require('./graphics_Vector2d');
 
 /**
  * 3d Point
  * @module graphics
  */
-class Point3d extends Point2d {
+class Vector3d extends Vector2d {
   /**
    * z-coordinate
    * @type {Number}
@@ -21,6 +21,10 @@ class Point3d extends Point2d {
     this.z = z;
   }
 
+  /**
+   * Magnitude of the 
+   * @returns {Number} - [0:infinity)
+   */
   magnitude() {
     return Math.sqrt(
       this.x * this.x
@@ -35,7 +39,7 @@ class Point3d extends Point2d {
    */
   normalize() {
     const mag = this.magnitude();
-    return new Point2d(
+    return new Vector3d(
       this.x / mag,
       this.y / mag,
       this.z / mag
@@ -46,4 +50,4 @@ class Point3d extends Point2d {
     return (`{x: ${this.x}, y: ${this.y}, z: ${this.z}}`);
   }
 }
-module.exports.Point3d = Point3d;
+module.exports.Vector3d = Vector3d;
