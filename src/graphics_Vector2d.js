@@ -16,8 +16,7 @@ class Vector2d {
   y;
 
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.initialize(x, y);
   }
 
   initialize(x, y) {
@@ -47,5 +46,15 @@ class Vector2d {
   toString() {
     return (`{x: ${this.x}, y: ${this.y}`);
   }
+
+  toArray() {
+    return [this.x, this.y, this.z];
+  }
+
+  /*
+  interpolateTo(vector2d) => (pct) => Vector2d
+  add(vector2d) => vector2d
+  transform(matrix) => vector2d
+  */
 }
 module.exports.Vector2d = Vector2d;

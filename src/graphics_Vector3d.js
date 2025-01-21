@@ -49,5 +49,11 @@ class Vector3d extends Vector2d {
   toString() {
     return (`{x: ${this.x}, y: ${this.y}, z: ${this.z}}`);
   }
+
+  /*
+  interpolateTo(vector2d) => (pct) => Vector2d
+  add(vector2d) => vector2d
+  transform(matrix) => vector2d
+  */
 }
 module.exports.Vector3d = Vector3d;
