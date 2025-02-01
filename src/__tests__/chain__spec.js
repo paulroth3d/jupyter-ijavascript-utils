@@ -341,6 +341,13 @@ global.describe('Chain', () => {
       const result = chain(value).close();
       global.expect(result).toBe(expected);
     });
+    global.it('chains on closes', () => {
+      const value = 234;
+      const expected = 468;
+      const double = (v) => v + v;
+      const result = chain(value).close(double);
+      global.expect(result).toBe(expected);
+    });
   });
   global.describe('errorHandler', () => {
     const ORIGINAL_CONSOLE = global.console;

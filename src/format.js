@@ -43,6 +43,8 @@
  *   * {@link module:format.isEmptyValue|format.isEmptyValue} - determine if a value is not 'empty'
  * * Extracting values
  *   * {@link module:format.extractWords|format.extractWords} - to extract the words from a string
+ * * Making Printing Easier
+ *   * {@link module:format.clearOutput|format.clearOutput} - has the output cleared. Helpful for setting variables, or importing libraries.
  * 
  * @module format
  * @exports format

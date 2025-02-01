@@ -513,6 +513,7 @@ class ChainContainer {
 
   /**
    * Closes the chain and returns the current value.
+   * @param {Function} [functor = null] - optional function (similar to {@link module:chain.chain|chain.chain})
    * @returns {any}
    * @see {@link ChainContainer#chain}
    * @example
@@ -522,8 +523,22 @@ class ChainContainer {
    *   .close();
    * 
    * // 5
+   * 
+   * //-- or pass an optional function on close
+   * 
+   * doubler = (num) => num + num;
+   * 
+   * utils.chain(3)
+   *  .chain(doubler)
+   *  .close(doubler);
+   * // 12
+   * 
    */
-  close() {
+  close(functor) {
+    if ((typeof functor) === 'function') {
+      this.value = this.chain(functor).value;
+    }
+
     return this.value;
   }
 

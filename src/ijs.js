@@ -23,6 +23,10 @@ require('./_types/global');
  * * Rendering
  *   * {@link module:ijs.markdown|ijs.markdown} - Render output as markdown
  *   * {@link module:ijs.htmlScript|ijs.htmlScript} - Leverage external libraries like D3, Leaflet, etc.
+ * * Printing
+ *   * {@link module:ijs.noOutputNeeded|ijs.noOutputNeeded} - clears the output to declutter results (like importing libraries, or functions)
+ *   * {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks} - call at least once to allow pageBreaks when rendering PDFs
+ *   * {@link module:ijs.printPageBreak|ijs.printPageBreak} - call to print a page break when rendering PDFs
  * 
  * For example:
  * 
@@ -576,4 +580,85 @@ module.exports.htmlScript = function htmlScripts(
   context.$$.html(results);
 
   return results;
+};
+
+/**
+ * Clears the output.
+ * 
+ * (This is useful to put after importing libraries,
+ * or defining a list of functions)
+ */
+module.exports.noOutputNeeded = function clearOutput(outputText = '') {
+  //-- you must be in iJavaScript container to rendeer
+  const context = IJSUtils.detectContext();
+  
+  if (!context) {
+    return;
+  }
+
+  context.$$.text(outputText);
+};
+module.exports.clearOutput = module.exports.noOutputNeeded;
+
+/**
+ * Required to be called first - in order to write page-breaks in the html results.
+ * 
+ * (For Example:)
+ * 
+ * Assume you have the following cells:
+ * 
+ * ```
+ * * Some Text
+ * * utils.ijs.initializePageBreaks()
+ * * some other text
+ * * utils.ijs.printPageBreak();
+ * * end of document
+ * ```
+ * 
+ * When you print to HTML and then render to PDF, you'll see the following:
+ * 
+ * ```
+ * * Some Text
+ * * utils.ijs.initializePageBreaks()
+ * 
+ * //-- page break
+ * 
+ * * some other text
+ * * utils.ijs.printPageBreak();
+ * 
+ * //-- page break
+ * 
+ * * end of document
+ * ```
+ */
+module.exports.initializePageBreaks = function initializePageBreaks() {
+  //-- you must be in iJavaScript container to rendeer
+  const context = IJSUtils.detectContext();
+    
+  if (!context) {
+    return;
+  }
+
+  context.$$.html(`<style>
+    @media print {
+    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
+    }
+    </style>
+    <div class="pagebreak"></div>
+    `);
+};
+
+/**
+ * After the {@see module:ijs.initializePageBreaks|utils.ijs.initializePageBreaks} is called,
+ * this will create another page break.
+ */
+module.exports.printPageBreak = function printPageBreak() {
+  //-- you must be in iJavaScript container to rendeer
+  const context = IJSUtils.detectContext();
+  
+  if (!context) {
+    return;
+  }
+
+  context.$$.html('<div class="pagebreak"></div>');
 };

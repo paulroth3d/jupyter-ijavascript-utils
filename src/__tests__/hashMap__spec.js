@@ -333,4 +333,87 @@ global.describe('hashmap', () => {
       global.expect(decodingMap).not.toBe(encodingMap);
     });
   });
+
+  global.describe('getSet', () => {
+    global.it('can set a value', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialMap = new Map([
+        [key, defaultValue]
+      ]);
+      // const incrementValue = 1;
+
+      const functor = (value) => { // key, map) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      HashMapUtil.getSet(initialMap, key, functor);
+
+      const expected = 1;
+      const results = initialMap.get(key);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can increment a value', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialMap = new Map([
+        [key, defaultValue]
+      ]);
+      
+      const functor = (value) => { //, key, map) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      HashMapUtil.getSet(initialMap, key, functor);
+      HashMapUtil.getSet(initialMap, key, functor);
+
+      const expected = 2;
+      const results = initialMap.get(key);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can increment a value multiple times', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialMap = new Map([
+        [key, defaultValue]
+      ]);
+      
+      const functor = (value) => { //, key, map) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      HashMapUtil.getSet(initialMap, key, functor);
+      HashMapUtil.getSet(initialMap, key, functor);
+      HashMapUtil.getSet(initialMap, key, functor);
+      HashMapUtil.getSet(initialMap, key, functor);
+      HashMapUtil.getSet(initialMap, key, functor);
+
+      const expected = 5;
+      const results = initialMap.get(key);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can set a value', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialMap = new Map([
+        [key, defaultValue],
+        ['anotherValue', 10]
+      ]);
+      // const incrementValue = 1;
+
+      const functor = (value, _, map) => {
+        if (!value) return map.get('anotherValue');
+        return value + 1;
+      };
+
+      HashMapUtil.getSet(initialMap, key, functor);
+
+      const expected = 10;
+      const results = initialMap.get(key);
+      global.expect(results).toBe(expected);
+    });
+  });
 });

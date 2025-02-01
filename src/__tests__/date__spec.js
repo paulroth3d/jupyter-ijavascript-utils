@@ -115,10 +115,69 @@ global.describe('Date', () => {
         //-- when pulling the time from the database - it corrected it to local time for me
         //-- so what I have pulled down is actually in Central time
         //-- but I want instead to have the correct UTC time
+        const originalDate = new Date(Date.UTC(2024, 11, 26, 17, 0, 0));
+        const timezone = 'america/chicago';
+        const expected = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
+        const results = DateUtils.correctForTimezone(originalDate, timezone);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('us/pacific', () => {
+        //-- when pulling the time from the database - it corrected it to local time for me
+        //-- so what I have pulled down is actually in Central time
+        //-- but I want instead to have the correct UTC time
+        const originalDate = new Date(Date.UTC(2024, 11, 26, 19, 0, 0));
+        const timezone = 'us/pacific';
+        const expected = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
+        const results = DateUtils.correctForTimezone(originalDate, timezone);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('correctForOtherTimezone', () => {
+    global.describe('can correct for an other timezone', () => {
+      global.it('us/central + us/eastern', () => {
+        // const timeStr = '2025-02-01T15:15:00';
+        const d = new Date(Date.UTC(2025, 1, 1, 15, 15, 0));
+        const sourceTimezone = 'us/eastern';
+        const localTimezone = 'us/central';
+        const expected = new Date(Date.UTC(2025, 1, 1, 14, 15, 0));
+        const result = DateUtils.correctForOtherTimezone(
+          d,
+          sourceTimezone,
+          localTimezone
+        );
+        global.expect(result).toStrictEqual(expected);
+      });
+    });
+    global.describe('can correct from a parse', () => {
+      const dateStr = '2024-12-27 13:30:00';
+      const d = new Date(Date.parse(dateStr));
+      const sourceTimezone = 'us/eastern';
+      const localTimezone = 'us/central';
+      //-- EST is -5 hours from GMT,
+      //-- CST is -6 hours from GMT
+      //-- -1 hour difference 
+      const expected = new Date(Date.UTC(2024, 11, 27, 12, 30, 0));
+      const result = DateUtils.correctForOtherTimezone(
+        d,
+        sourceTimezone,
+        localTimezone
+      );
+      global.expect(result).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('epochShift', () => {
+    global.describe('can correct for timezone', () => {
+      global.it('america/chicago', () => {
+        //-- when pulling the time from the database - it corrected it to local time for me
+        //-- so what I have pulled down is actually in Central time
+        //-- but I want instead to have the correct UTC time
         const originalDate = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
-        const timeZone = 'america/chicago';
+        const timezone = 'america/chicago';
         const expected = new Date(Date.UTC(2024, 11, 26, 17, 0, 0));
-        const results = DateUtils.correctForTimezone(originalDate, timeZone);
+        const results = DateUtils.epochShift(originalDate, timezone);
         global.expect(results).toStrictEqual(expected);
       });
       global.it('us/pacific', () => {
@@ -126,27 +185,11 @@ global.describe('Date', () => {
         //-- so what I have pulled down is actually in Central time
         //-- but I want instead to have the correct UTC time
         const originalDate = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
-        const timeZone = 'us/pacific';
+        const timezone = 'us/pacific';
         const expected = new Date(Date.UTC(2024, 11, 26, 19, 0, 0));
-        const results = DateUtils.correctForTimezone(originalDate, timeZone);
+        const results = DateUtils.epochShift(originalDate, timezone);
         global.expect(results).toStrictEqual(expected);
       });
-    });
-  });
-
-  global.describe('epochShift', () => {
-    global.it('can shift time', () => {
-      //-- I got the correct time from the database as UTC
-      //-- but I want to shift the time - knowing full well that functions may behave differently
-
-      //-- when pulling the time from the database - it corrected it to local time for me
-      //-- so what I have pulled down is actually in Central time
-      //-- but I want instead to have the correct UTC time
-      const originalDate = new Date(Date.UTC(2024, 11, 26, 17, 0, 0));
-      const timeZone = 'america/chicago';
-      const expected = new Date(Date.UTC(2024, 11, 26, 11, 0, 0));
-      const results = DateUtils.epochShift(originalDate, timeZone);
-      global.expect(results).toStrictEqual(expected);
     });
   });
 
@@ -349,6 +392,29 @@ global.describe('Date', () => {
       const expected = '2024-12-27T14:30:00.000+01:00';
       const results = DateUtils.toLocalISO(dateA, 'europe/paris');
       global.expect(results).toStrictEqual(expected);
+    });
+  });
+
+  global.describe('toEpochShiftedISO', () => {
+    global.describe('iso date parsing works as expected', () => {
+      const d = new Date(Date.UTC(2025, 1, 1, 15, 22));
+      const expected = '2025-02-01T15:22:00.000Z';
+      const results = d.toISOString();
+      global.expect(results).toBe(expected);
+    });
+    global.describe('us/central', () => {
+      const d = new Date(Date.UTC(2025, 1, 1, 15, 22));
+      const timezone = 'us/central';
+      const expected = '2025-02-01T15:22:00.000-06:00';
+      const results = DateUtils.toEpochShiftedISO(d, timezone);
+      global.expect(results).toBe(expected);
+    });
+    global.describe('us/eastern', () => {
+      const d = new Date(Date.UTC(2025, 1, 1, 15, 22));
+      const timezone = 'us/eastern';
+      const expected = '2025-02-01T15:22:00.000-05:00';
+      const results = DateUtils.toEpochShiftedISO(d, timezone);
+      global.expect(results).toBe(expected);
     });
   });
 
