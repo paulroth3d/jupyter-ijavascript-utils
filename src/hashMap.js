@@ -84,7 +84,7 @@ module.exports.add = function add(map, key, value) {
  * @param {any} functor.key - the second argument is the key passed
  * @param {any} functor.map - the third argument is the map being acted upon
  * @param {any} [setKey = null] - optional separate key to use to set the updated value
- * @returns 
+ * @returns {Map}
  */
 module.exports.getSet = function getSet(map, key, functor, setKey = null) {
   const cleanSetKey = setKey || key;
