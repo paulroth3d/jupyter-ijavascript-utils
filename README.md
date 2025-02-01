@@ -54,6 +54,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.56 - 
 * 1.55 - #76, #77, #74, #78
 * 1.54 - additional Date logic, and formatting. #70 #71 #72
 * 1.53 - additional docs and examples for color/colour package.
