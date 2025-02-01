@@ -5,6 +5,7 @@ const FormatUtils = require('./format');
  * 
  * * Modifying
  *   * {@link module:hashMap.add|hashMap.add(map, key, value):Map} - Add a value to a map and return the Map
+ *   * {@link module:hashMap.update|hashMap.update(map, key, function)} - use a function to get/set a value on a map
  *   * {@link module:hashMap.union|hashMap.union(targetMap, additionalMap, canOverwrite)} - merges two maps and ignores or overwrites with conflicts
  * * Cloning
  *   * {@link module:hashMap.clone|hashMap.clone(map):Map} - Clones a given Map
@@ -49,6 +50,48 @@ module.exports.add = function add(map, key, value) {
   map.set(key, value);
   return map;
 };
+
+/**
+ * Use this for times where you want to update a value
+ * 
+ * ```
+ * key = 'somethingToIncrement';
+ * defaultValue = null;
+ * 
+ * const initialMap = new Map([
+ *   [key, defaultValue]
+ * ]);
+ * // Map([[ 'somethingToIncrement', null ]]);
+ * 
+ * const functor = (value) => { //, key, map) => {
+ *   if (!value) return 1;
+ *   return value + 1;
+ * };
+ * 
+ * HashMapUtil.getSet(initialMap, key, functor);
+ * HashMapUtil.getSet(initialMap, key, functor);
+ * HashMapUtil.getSet(initialMap, key, functor);
+ * HashMapUtil.getSet(initialMap, key, functor);
+ * HashMapUtil.getSet(initialMap, key, functor);
+ * 
+ * initialMap.get(key); // 5
+ * ```
+ * 
+ * @param {Map} map - map to get and set values from
+ * @param {any} key - they key to GET and SET the value (unless setKey is provided)
+ * @param {Function} functor - the function called with the arguments below - returning the value to set
+ * @param {any} functor.value - the first argument is the current value
+ * @param {any} functor.key - the second argument is the key passed
+ * @param {any} functor.map - the third argument is the map being acted upon
+ * @param {any} [setKey = null] - optional separate key to use to set the updated value
+ * @returns 
+ */
+module.exports.getSet = function getSet(map, key, functor, setKey = null) {
+  const cleanSetKey = setKey || key;
+  map.set(cleanSetKey, functor(map.get(key), key, map));
+  return map;
+};
+module.exports.update = module.exports.getSet;
 
 /**
  * Clones a Map
