@@ -6,7 +6,7 @@
  *   * {@link module:date.isValid|date.isValid(date)} - whether the date provided is an invalid date
  * * Parse
  *   * {@link module:date.parse|date.parse(String)} - parse a date and throw an exception if it is not a valid date
- * * TimeZones
+ * * Timezones
  *   * {@link module:date.toLocalISO|date.toLocalISO} - prints in 8601 format with timezone offset based on a tz entry - like america/chicago
  *   * {@link module:date.getTimezoneOffset|date.getTimezoneOffset(String)} - gets the number of milliseconds offset for a given timezone
  *   * {@link module:date.correctForTimezone|date.correctForTimezone(Date, String)} - meant to correct a date already off from UTC to the correct time
@@ -51,7 +51,7 @@
  * @exports date
  * @see {@link https://stackoverflow.com/questions/15141762/how-to-initialize-a-javascript-date-to-a-particular-time-zone}
  * @see {@link https://www.youtube.com/watch?v=2rnIHsqABfM&t=750s|epochShifting}
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTimeZones|MDN TimeZone Names}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTimezones|MDN Timezone Names}
  */
 module.exports = {};
 const DateUtils = module.exports;
@@ -181,7 +181,7 @@ module.exports.durationLong = function durationLong(epochDifference) {
 };
 
 /**
- * @typedef {Object} TimeZoneEntry
+ * @typedef {Object} TimezoneEntry
  * @property {String} tz - the name of the timezone
  * @property {Function} formatter - formats a date to that local timezone
  * @property {Number} epoch - the difference in milliseconds from that tz to UTC
@@ -189,22 +189,22 @@ module.exports.durationLong = function durationLong(epochDifference) {
  */
 
 /**
- * Collection of TimeZoneEntries by the tz string
+ * Collection of TimezoneEntries by the tz string
  * @private
- * @type {Map<String,TimeZoneEntry>}
+ * @type {Map<String,TimezoneEntry>}
  */
-module.exports.timeZoneOffsetMap = new Map();
+module.exports.timezoneOffsetMap = new Map();
 
 /**
- * Fetches or creates a TimeZoneEntry
+ * Fetches or creates a TimezoneEntry
  * @private
- * @param {String} timeZoneStr - tz database entry for the timezone
- * @returns {TimeZoneEntry}
+ * @param {String} timezoneStr - tz database entry for the timezone
+ * @returns {TimezoneEntry}
  */
-module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
-  const cleanTz = String(timeZoneStr).toLowerCase();
-  if (DateUtils.timeZoneOffsetMap.has(cleanTz)) {
-    return DateUtils.timeZoneOffsetMap.get(cleanTz);
+module.exports.getTimezoneEntry = function getTimezoneEntry(timezoneStr) {
+  const cleanTz = String(timezoneStr).toLowerCase();
+  if (DateUtils.timezoneOffsetMap.has(cleanTz)) {
+    return DateUtils.timezoneOffsetMap.get(cleanTz);
   }
   const d = new Date(Date.UTC(2025, 0, 1, 0, 0, 0));
 
@@ -239,7 +239,7 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
         result[type] = value;
         return result;
       }, {});
-    //   const impactedDate = new Date(d.toLocaleString('en-US', { timeZone: timeZoneStr }));
+    //   const impactedDate = new Date(d.toLocaleString('en-US', { timezone: timezoneStr }));
     const dateStr = `${dm.year}-${DateUtils.padTime(dm.month)}-${DateUtils.padTime(dm.day)}T${
       DateUtils.padTime(dm.hour)}:${DateUtils.padTime(dm.minute)}:${DateUtils.padTime(dm.second)}.${
       DateUtils.padTime(dm.fractionalSecond, 3)}`;
@@ -260,7 +260,7 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
 
   const result = ({ tz: cleanTz, formatter, epoch: diff, offset });
 
-  DateUtils.timeZoneOffsetMap.set(cleanTz, result);
+  DateUtils.timezoneOffsetMap.set(cleanTz, result);
 
   return result;
 };
@@ -274,69 +274,180 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timeZoneStr) {
  * See {@link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones|the list of TZ database time zones}
  * for the full list of options.
  * 
- * @param {String} timeZoneStr - a timezone string like "America/Toronto"
- * @returns {TimeZoneEntry} - the number of milliseconds between UTC and that timezone
+ * @param {String} timezoneStr - a timezone string like "America/Toronto"
+ * @returns {TimezoneEntry} - the number of milliseconds between UTC and that timezone
  */
-module.exports.getTimezoneOffset = function getTimezoneOffset(timeZoneStr) {
-  return DateUtils.getTimezoneEntry(timeZoneStr).epoch;
+module.exports.getTimezoneOffset = function getTimezoneOffset(timezoneStr) {
+  return DateUtils.getTimezoneEntry(timezoneStr).epoch;
 };
 
 /**
- * JavaScript always stores dates in UTC, but the data you imported may have lost the timezone information.
+ * CorrectForTimezone is the opposite of {@link module:date.epochShift|date.epochShift}.
+ * (This subtracts the timezone offset to a date, where the other adds the offset)
  * 
- * Use this to correct the timezone to the correct time UTC.
+ * Use this when a date string is read by javascript, BUT the timezone is not sent or passed.
  * 
- * For Example:
+ * For example, something VERY IMPORTANT happened at '2/1/2025, 2:15:41 PM EST', ISO '2025-02-01T20:15:41.000Z', epoch: 1738440941000.
+ * 
+ * But the dates from the database don't include the timezone.
+ * (Note that `Z` is conceptually equivalent of +0000)
+ * 
+ * If I create a date in javaScript WITHOUT the timezone, it assumes my local timezone.
  * 
  * ```
- * // the date we originally pulled from the database
- * // but thetimezone of the database was america/Toronto but not in UTC
- * dateStr = '2024-12-06 18:00';
+ * dTest = new Date('2025-02-01T20:15:41.000'); // -- DID NOT INCLUDE Timezone, so it assumes local timezone
+ * ({ epoch: dTest2.getTime(), iso: dTest.toISOString(), local: dTest.toLocaleString() });
  * 
- * // we may have done this:
- * myDate = new Date(dateStr);
+ * //-- time is INCORRECT, what should be the ISO time, is the local time.
+ * //  local: '2/1/2025, 8:15:41 PM', iso: '2025-02-02T02:15:41.000Z', epoch: 1738440941000
+ * ```
  * 
- * // but now calling toISOString() is incorrect
- * myDate.toISOString(); // '2024-12-06T18:00:00.0000' 
+ * It assumed that the local time was 8pm instead of that as the ISO / GMT time.
  * 
- * // it should be:
- * correctedDate = utils.date.correctForTimezone('america/Toronto');
- * correctedDate.toISOString(); // '2024-12-06T13:00:00.00.000' -- the correct time UTC
+ * To correct this, I just call epoch shift
+ * 
+ * ```
+ * dTest = new Date('2025-02-01T20:15:41.000'); // -- DID NOT INCLUDE Timezone, so it assumes local timezone
+ * dTest2 = utils.date.epochShift(dTest, 'us/central');  //-- correct for my local timezone
+ * ({ epoch: dTest2.getTime(), iso: dTest.toISOString(), local: dTest.toLocaleString() });
+ * 
+ * //-- time is CORRECT
+ * // local: '2/1/2025, 2:15:41 PM', iso: '2025-02-01T20:15:41.000Z', epoch: 1738440941000
  * ```
  * 
  * See {@link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones|the list of TZ database time zones}
  * for the full list of timezone options.
  * 
  * @param {Date} date - the date to be corrected in a new instance
- * @param {String} timeZoneStr - tz database name for the timezone
- * @returns {Date} - copy of the date corrected 
+ * @param {String} localTimezoneStr - tz database name for YOUR current machine's timezone
+ * @returns {Date} - new instance of a corrected date back to UTC
+ * @see {@link module:date.correctForOtherTimezone|date.correctForOtherTimezone} - if the date given is "local" but for another timezone
+ * @see {@link module:date.toLocalISO|date.toLocalISO} - if you want to print a date to another timezone
  */
-module.exports.correctForTimezone = function correctForTimezone(date, timeZoneStr) {
-  const { epoch } = DateUtils.getTimezoneEntry(timeZoneStr);
-  return new Date(date.getTime() + epoch);
-};
-
-/**
- * Epoch shift a date, so the utcDate is no longer correct,
- * but many other functions behave closer to expected.
- * 
- * See {@link https://stackoverflow.com/a/15171030|here why this might not be what you want}
- * 
- * @param {Date} date - date to shift
- * @param {String} timeZoneStr - the tz database name of the timezone
- * @returns {Date}
- * @see {@link module:date.toLocalISO|date.toLocalISO} - consider as an alternative.
- *    This prints the correct time, without updating the date object.
- */
-module.exports.epochShift = function epochShift(date, timeZoneStr) {
-  const { epoch } = DateUtils.getTimezoneEntry(timeZoneStr);
+module.exports.correctForTimezone = function correctForTimezone(date, localTimezoneStr) {
+  const { epoch } = DateUtils.getTimezoneEntry(localTimezoneStr);
   return new Date(date.getTime() - epoch);
 };
 
 /**
- * Prints a date in 8601 format to a timezone (with +H:MM offset)
+ * This helps you correct a "local date" from another timezone.
  * 
- * Consider this as an alternative to epochShifting.
+ * For example, if you got '2:15 PM' from a machine that is in eastern.
+ * 
+ * Combination of {@link module:date.correctForTimezone|date.correctForTimezone}
+ * and {@link module:date.epochShift|date.epochShift}
+ * 
+ * For example, say you got a timezone string like this: `2024-12-27 13:30:00`
+ * 
+ * You know the timezone of the source is in `us/eastern`, but you are in `us/central`.
+ * 
+ * If you just use `Date.parse(dateString), it assumes `1:30 Central` - not `1:30 Eastern`
+ * 
+ * We can correct it like this:
+ * 
+ * ```
+ * dateStr = '2024-12-27 13:30:00';
+ * d = new Date(Date.parse(dateStr));
+ * 
+ * //-- the source was from 'us/eastern' timezone (-0500)
+ * sourceTimezone = 'us/eastern';
+ * 
+ * //-- we are currently in 'us/central' timezone (-0600)
+ * //-- this matters because of the Date.parse() done before
+ * localTimezone = 'us/central'; // (change if yours is different)
+ * 
+ * utils.date.correctForOtherTimezone( d, sourceTimezone, localTimezone);
+ * 
+ * //-- correctly converted it to the correct local time
+ * // 2024-12-28T18:30:00.000Z
+ * ```
+ * 
+ * @param {Date``} date - the date to be corrected in a new instance
+ * @param {string} sourceTimezone - the timezone of the source information
+ * @param {string} localTimezone - the timezone of this local machine
+ * @returns {Date} - new date that is corrected to UTC
+ * @see {@link module:date.toLocalISO|date.toLocalISO} - if you want to print a date to another timezone
+ */
+module.exports.correctForOtherTimezone = function correctForTimezones(date, sourceTimezone, localTimezone) {
+  return DateUtils.correctForTimezone(
+    DateUtils.epochShift(date, sourceTimezone),
+    localTimezone
+  );
+};
+
+/**
+ * EpochShift is the opposite of {@link module:date.correctForTimezone|date.correctForTimezone}.
+ * (This adds the timezone offset, where the other subtracts the offset)
+ * 
+ * Use this if you somehow have a date that needs to be shifted by the timezone offset.
+ * 
+ * This is rarely useful in itself, but in combination with the {@link module:date.correctForTimezone|date.correctForTimezone}
+ * you can use this to correct for "local dates" but are in another timezone than you are in.
+ * 
+ * (For example, you got a local date for 2:15 PM EST, but your current computer is in CST)
+ * 
+ * JavaScript dates only have three ways of importing dates:
+ * 
+ * * Parse the date assuming local timezone
+ * * Parse the date using [ISO 8601 formats](https://www.iso.org/iso-8601-date-and-time-format.html)
+ *    * This option DOES provide an option for providing a timezone offset (ex: `-0500`)
+ * 
+ * Since this is the opposite of {@link module:date.correctForTimezone|date.correctForTimezone}, this can be useful.
+ * 
+ * But most likely, you'd like to use either:
+ * 
+ * * {@link module:date.correctForTimezone|date.correctForTimezone} or
+ * * {@link module:date.correctForTimezones|date.correctForTimezones}.
+ * 
+ * ---
+ * 
+ * Epoch shift a date, so the utcDate is no longer correct,
+ * but many other functions behave closer to expected.
+ * 
+ * Once you epoch shift the date, then time stored in the date is incorrect (because it always points to GMT)
+ * 
+ * For example, using `.toIsoString()` or anything with Intl.DateTimeFormat etc - will all give you incorrect results.
+ * 
+ * See {@link https://stackoverflow.com/a/15171030|here why this might not be what you want}
+ * 
+ * --
+ * 
+ * Sometimes though, some libraries use the "getMonth()", "getDate()" of the date, and do not support using timezones.
+ * 
+ * That is when this shines.
+ * 
+ * ```
+ * timeStamp = 1738437341000;
+ * d = new Date(timeStamp);
+ * d.toIsoString(); // 2025-02-01T19:15:41.000Z
+ * `current time is: ${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}` // 'current time is: 2025-2-1'
+ * 
+ * 
+ * ```
+ * 
+ * @param {Date} date - date to shift
+ * @param {String} timezoneStr - the tz database name of the timezone
+ * @returns {Date}
+ * @see {@link module:date.toEpochShiftedISO|date.toEpochShiftedISO} - this will print the
+ *    "local time" of an epoch shifted date.
+ * @see {@link module:date.toLocalISO|date.toLocalISO} - consider as an alternative.
+ *    This prints the correct time, without updating the date object.
+ * @see {@link module:date.correctForTimezone|date.correctForTimezone} - once shifted,
+ *    this allows you to shift a date back to GMT time.
+ */
+module.exports.epochShift = function epochShift(date, timezoneStr) {
+  const { epoch } = DateUtils.getTimezoneEntry(timezoneStr);
+  return new Date(date.getTime() + epoch);
+};
+
+/**
+ * Prints a date in 8601 format to a timezone (with +H:MM offset) using
+ * [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat).
+ * 
+ * The date accepted here is assumed to already have the internal clock set to GMT.
+ * 
+ * If you do epochShift, then use {@link module:date.toEpochShiftedISO|date.toEpochShiftedISO}
+ * and pass the timezone the timezone the date is epoch shifted to.
  * 
  * ```
  * d = Date.parse('2024-12-27 13:30:00');
@@ -346,12 +457,53 @@ module.exports.epochShift = function epochShift(date, timeZoneStr) {
  * ```
  * 
  * @param {Date} date - date to print
- * @param {String} timeZoneStr - the tz database name of the timezone
+ * @param {String} timezoneStr - the tz database name of the timezone
  * @returns {String} - ISO format with timezone offset
  */
-module.exports.toLocalISO = function toLocalISO(date, timeZoneStr) {
-  const { formatter, offset } = DateUtils.getTimezoneEntry(timeZoneStr);
+module.exports.toLocalISO = function toLocalISO(date, timezoneStr) {
+  const { formatter, offset } = DateUtils.getTimezoneEntry(timezoneStr);
   return `${formatter(date)}${offset}`;
+};
+
+module.exports.toIsoStringNoTimezone = function toIsoStringNoTimezone(date) {
+  return `${
+    date.getFullYear()
+  }-${
+    String(date.getMonth() + 1).padStart(2, '0')
+  }-${
+    String(date.getDate()).padStart(2, '0')
+  }T${
+    String(date.getHours()).padStart(2, '0')
+  }:${
+    String(date.getMinutes()).padStart(2, '0')
+  }:${
+    String(date.getSeconds()).padStart(2, '0')
+  }.${
+    String(date.getMilliseconds()).padStart(3, '0')
+  }`;
+};
+
+/**
+ * Print a date that has been epoch shifted.
+ * 
+ * Dates in JavaScript are always stored in GMT, although you can format it to different times with
+ * [Intl.DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat).
+ * 
+ * Once you epoch shift the date, then time stored in the date is incorrect (because it always points to GMT)
+ * 
+ * For example, using `.toIsoString()` or anything with Intl.DateTimeFormat etc - will all give you incorrect results.
+ * 
+ * If you want an ISO format for an epoch shifted date, you'll need something like this.
+ * 
+ * @param {Date} date - Date to Print
+ * @param {String} timezoneStr - the tz database name of the timezone the date is shifted to
+ * @returns {String} date in the format of `YYYY-MM-DDTHH:mm:SS.MMMM[+-]TZ`
+ * @see {@link module:date.correctForTimezone|date.correctForTimezone} - to shift the date back to GMT
+ * @see {@link module:date.toLocalISO|date.toLocalISO} - if the date is not epoch shifted as this uses Intl.DateTimeFormat
+ */
+module.exports.toEpochShiftedISO = function toEpochShiftedISO(date, timezoneStr) {
+  const { offset } = DateUtils.getTimezoneEntry(timezoneStr);
+  return `${DateUtils.toIsoStringNoTimezone(date)}${offset}`;
 };
 
 /**
@@ -421,7 +573,7 @@ module.exports.overwrite = function overwrite(dateToUpdate, newDateEpoch) {
  * @param {Number} [options.minutes=0] - number of minutes to add
  * @param {Number} [options.hours=0] - number of minutes to add 
  * @param {Number} [options.seconds=0] - number of seconds to add 
- * @returns {Date} -
+ * @returns {Date} - Date with the interval added in
  */
 module.exports.add = function add(dateValue, options = null) {
   if (!options) return dateValue;
@@ -756,7 +908,7 @@ class DateRange {
    * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
    * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
    * @param {*} inPlace 
-   * @returns 
+   * @returns {DateRange} - this DateRange if (inPlace=true), a new instance if (inPlace=false)
    */
   shiftStart(options, inPlace = false) {
     if (inPlace) {
@@ -798,7 +950,7 @@ class DateRange {
    * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
    * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
    * @param {*} inPlace 
-   * @returns 
+   * @returns {DateRange} - this DateRange if (inPlace=true), a new instance if (inPlace=false)
    */
   shiftEnd(options, inPlace = false) {
     if (inPlace) {
