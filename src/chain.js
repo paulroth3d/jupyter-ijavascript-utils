@@ -523,6 +523,16 @@ class ChainContainer {
    *   .close();
    * 
    * // 5
+   * 
+   * //-- or pass an optional function on close
+   * 
+   * doubler = (num) => num + num;
+   * 
+   * utils.chain(3)
+   *  .chain(doubler)
+   *  .close(doubler);
+   * // 12
+   * 
    */
   close(functor) {
     if ((typeof functor) === 'function') {

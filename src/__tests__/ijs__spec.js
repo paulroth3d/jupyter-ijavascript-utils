@@ -9,13 +9,14 @@ const IJSUtils = require('../ijs');
 
 // eslint-disable-next-line no-unused-vars
 const FileUtil = require('../file');
+// const { prepare } = require('@svgdotjs/svg.js');
 
 const removeIJSContext = () => {
   delete global.$$;
 };
 
 const createNewDisplay = (name) => {
-  const valueFn = (value) => `display:${name}:${(value)}`;
+  const valueFn = jest.fn((value) => `display:${name}:${(value)}`);
   const newDisplay = ({
     async: () => {},
     text: valueFn,
@@ -278,6 +279,101 @@ global.describe('codeBlockHelper', () => {
       //-- @TODO
       //-- (because it uses async AND it works in global,
       //-- every way I've tried to do this fails other tests...)
+    });
+  });
+
+  global.describe('noOutputNeeded', () => {
+    global.it('writes to text', () => {
+      prepareIJSContext();
+      try {
+        IJSUtils.noOutputNeeded('some text');
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+      global.expect(global.$$.text).toHaveBeenCalled();
+    });
+    global.it('prints the information provided', () => {
+      prepareIJSContext();
+      IJSUtils.noOutputNeeded('some text');
+      global.expect(global.$$.text).toHaveBeenCalled();
+      global.expect(global.$$.text).toHaveBeenCalledWith('some text');
+    });
+    global.it('writes to text even with no arguments', () => {
+      prepareIJSContext();
+      IJSUtils.noOutputNeeded();
+      global.expect(global.$$.text).toHaveBeenCalled();
+    });
+    global.it('still works even without IJS context', () => {
+      removeIJSContext();
+      try {
+        IJSUtils.noOutputNeeded();
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+  });
+
+  global.describe('initializePageBreaks', () => {
+    global.it('works even if no ijs context', () => {
+      removeIJSContext();
+      try {
+        IJSUtils.initializePageBreaks();
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+    global.describe('works with ijs context', () => {
+      global.it('calls html', () => {
+        prepareIJSContext();
+        IJSUtils.initializePageBreaks();
+        global.expect(global.$$.html).toHaveBeenCalled();
+      });
+      global.it('calls html with page break', () => {
+        prepareIJSContext();
+        IJSUtils.initializePageBreaks();
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('page-break-before');
+      });
+    });
+  });
+
+  global.describe('printPageBreak', () => {
+    global.it('works even if no ijs context', () => {
+      removeIJSContext();
+      try {
+        IJSUtils.printPageBreak();
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+    global.describe('works with ijs context', () => {
+      global.it('calls html', () => {
+        prepareIJSContext();
+        IJSUtils.printPageBreak();
+        global.expect(global.$$.html).toHaveBeenCalled();
+      });
+      global.it('calls html with page break', () => {
+        prepareIJSContext();
+        IJSUtils.printPageBreak();
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('pagebreak');
+      });
     });
   });
 });
