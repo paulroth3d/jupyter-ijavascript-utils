@@ -362,7 +362,7 @@ module.exports.correctForTimezone = function correctForTimezone(date, localTimez
  * // 2024-12-28T18:30:00.000Z
  * ```
  * 
- * @param {Date``} date - the date to be corrected in a new instance
+ * @param {Date} date - the date to be corrected in a new instance
  * @param {string} sourceTimezone - the timezone of the source information
  * @param {string} localTimezone - the timezone of this local machine
  * @returns {Date} - new date that is corrected to UTC
@@ -655,8 +655,9 @@ module.exports.startOfDay = function endOfDay(dateValue) {
  * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
  * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
  * @returns {Date[]} - collection of dates (count long)
- * @see {@link module:Date.add|utils.date.add}
- * @see {@link module:date.generateDateSequence} - finish at an endingDate instead of # of iterations
+ * @see {@link module:date.add|utils.date.add}
+ * @see {@link module:date.generateDateSequence|date.generateDateSequence} - finish at an endingDate instead of # of iterations
+ * @see {@link module:date~DateRange.fromList|DateRange.fromList} - to create Date Ranges from these dates.
  */
 module.exports.arrange = function arrange(startDate, count, options) {
   if (!DateUtils.isValid(startDate)) {
@@ -705,10 +706,11 @@ module.exports.arrange = function arrange(startDate, count, options) {
  * @param {Number} [options.years=0] - increments the calendar year (as opposed to adding 365.25 days)
  * @param {Number} [options.months=0] - increments the calendar month (as opposed to adding in 30 days)
  * @returns {Date[]} - sequence of dates from startDate to endDate
- * @see {@link module:Date.add|utils.date.add}
- * @see {@link module:date.arrange} - run a set of iterations instead of stopping at endDate
+ * @see {@link module:date.add|utils.date.add}
+ * @see {@link module:date.arrange|date.arrange} - run a set of iterations instead of stopping at endDate
+ * @see {@link module:date~DateRange.fromList|DateRange.fromList} - to create Date Ranges from these dates.
  */
-module.exports.generateDateSequence = function generateDateSequencde(startDate, endDate, options) {
+module.exports.generateDateSequence = function generateDateSequence(startDate, endDate, options) {
   const results = [];
 
   if (!DateUtils.isValid(startDate)) {
@@ -733,7 +735,28 @@ module.exports.generateDateSequence = function generateDateSequencde(startDate, 
 };
 
 /**
- * Represents a Range between two times
+ * Represents a Range between two timestamps.
+ * 
+ * * Creating Date Range
+ *   * {@link module:date~DateRange.fromList|fromList} - given a list of dates, make range bins for those dates.
+ *   * {@link module:date~DateRange#reinitialize|reinitialize} - initialize the dateRange in-place with new start/end dates
+ *   * {@link module:date~DateRange#shiftStart|shiftStart} - shifts the start of the range by hours,minutes,years, etc.
+ *   * {@link module:date~DateRange#shiftEnd|shiftEnd} - shifts the start of the range by hours,minutes,years, etc.
+ * 
+ * * Understanding the Date Range
+ *   * {@link module:date~DateRange#contains|contains} - if a date is within this range.
+ *   * {@link module:date~DateRange#startDate|startDate} - the starting date of the range
+ *   * {@link module:date~DateRange#endDate|endingDate} - the ending date of the range
+ *   * {@link module:date~DateRange.startAndEndOfDay|startAndEndOfDay} - Creates a DateRange covering the start and end of a day
+ *   * {@link module:date~DateRange#overlaps|overlaps} - whether this DateRange overlaps another DateRange
+ *   * {@link module:date~DateRange#isValid|isValid} - Whether the start and end times of this range are both valid dates
+ * * Durations
+ *   * {@link module:date~DateRange#duration|duration} - Epoch duration (milliseconds) between the start and end timestamps
+ *   * {@link module:date~DateRange#durationString|durationString} - creates a long duration description
+ *   * {@link module:date~DateRange#durationISO|durationISO} - returns the duration as a string formatted '0:01:00:00.0000'
+ * * String Representation
+ *   * {@link module:date~DateRange#toString|toString} - String conversion of the DateRange
+ *   * {@link module:date~DateRange#toLocaleString|toLocaleString} - Creates a locale string describing the DateRange
  */
 class DateRange {
   /**
@@ -771,12 +794,18 @@ class DateRange {
   * //  {start: 2025-03-01TT00:00:00, end: 2025-04-01TT00:00:00}]
   * ```
   * 
+  * (Note: you can also use {@link module:date.arrange|date.arrange} or
+  * {@link module:date.generateDateSequence|date.generateDateSequence}
+  * to come up with the list of those dates)
+  * 
   * (If gaps are desired - ex: April to May and next one June to July,
   * the simplest is to remove the dates from the resulting list.)
   * 
   * @param {Date[]} dateList - list of dates
   * @returns {DateRange[]} - list of dateList.length-1 dateRanges,
   *   where the end of the firstRange is the start of the next.
+  * @see {@link module:date.arrange|date.arrange} - to create dates by adding a value multiple times
+  * @see {@link module:date.generateDateSequence|date.generateDateSequence} - to create dates between a start and an end date
   */
   static fromList(dateSequence) {
     if (dateSequence.length < 2) return [];
@@ -817,6 +846,10 @@ class DateRange {
    * Creates a DateRange based on the start and end of the day UTC.
    * 
    * This is very useful for determining overlapping dates.
+   * 
+   * (Alternatively, you can define a list of dates, and use
+   * {@link module:date~DateRange.fromList|DateRange.fromList}
+   * to create the bins from those dates)
    * 
    * @param {Date} targetDate - date to use to find the start and end UTC for
    * @returns {DateRange}
