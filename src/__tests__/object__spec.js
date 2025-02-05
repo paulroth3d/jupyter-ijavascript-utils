@@ -540,6 +540,44 @@ describe('ObjectUtils', () => {
       global.expect(typeof result).toBe('object');
     });
   });
+  describe('renamePropertiesFromList', () => {
+    it('renames properties on an object', () => {
+      const dirtyObject = { first: 'john', last: 'doe' };
+      const originalKeys = ['first'];
+      const newKeys = ['first_name'];
+      const expected = { first_name: 'john', last: 'doe' };
+      const found = ObjectUtils.renamePropertiesFromList(dirtyObject, originalKeys, newKeys);
+      expect(found).toEqual(expected);
+      expect(found).not.toEqual(dirtyObject);
+    });
+    it('returns an empty object if renaming a null object', () => {
+      //-- don't put the result in the spec
+      // const expected = {};
+      const originalKeys = ['first'];
+      const newKeys = ['first_name'];
+      const result = ObjectUtils.renamePropertiesFromList(null, originalKeys, newKeys);
+      global.expect(result).toBeTruthy();
+      global.expect(typeof result).toBe('object');
+    });
+    it('returns an empty object if renaming a null object', () => {
+      //-- don't put the result in the spec
+      // const expected = {};
+      const originalKeys = ['first'];
+      const newKeys = ['first_name'];
+      const result = ObjectUtils.renamePropertiesFromList([null], originalKeys, newKeys);
+      global.expect(result).toBeTruthy();
+      global.expect(typeof result).toBe('object');
+    });
+    global.it('can use String replacement', () => {
+      const dirtyObject = { first: 'john', last: 'doe' };
+      const originalKeys = ObjectUtils.keys(dirtyObject);
+      const newKeys = Array.from(originalKeys).map((s) => `${s}_name`);
+      const expected = { first_name: 'john', last_name: 'doe' };
+      const found = ObjectUtils.renamePropertiesFromList(dirtyObject, originalKeys, newKeys);
+      expect(found).toEqual(expected);
+      expect(found).not.toEqual(dirtyObject);
+    });
+  });
   describe('multiple step test', () => {
     const expected = [
       { first_name: 'john', last_name: 'doe', current_occupation: 'developer' },

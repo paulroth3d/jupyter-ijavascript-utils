@@ -413,9 +413,32 @@ module.exports.cleanPropertyName = function cleanPropertyName(property) {
   return cleanProperty;
 };
 
-const renameObjectProperties = function renameObjectProperties(object, originalKeys, targetKeys) {
+/**
+ * Renames properties on an object with a list of original keys and new keys.
+ * 
+ * For example:
+ * 
+ * ```
+ * myData = [{ _time: '...', 'series001': 1, 'series002': 2 }];
+ * 
+ * originalKeys = utils.object.keys(myData);
+ * // ['series001', 'series002'];
+ * 
+ * myMap = new Map([['series001': 'Alpha'], ['series002', 'Bravo']]);
+ * newKeys = utils.format.replaceStrings(originalKeys, myMap);
+ * // ['Alpha', 'Bravo'];
+ * 
+ * utils.object.renamePropertiesFromList(myData, originalKeys, newKeys);
+ * // [{ _time: '...', 'Alpha': 1, 'Bravo': 2 }];
+ * 
+ * @param {Object[]} objects - objects to reassign - likely from a CSV
+ * @param {String[]} originalKeys - list of keys to change FROM
+ * @param {String[]} updatedKeys - list of keys to change TO
+ * @returns {Object[]}
+ */
+module.exports.renamePropertiesFromList = function renamePropertiesFromList(object, originalKeys, targetKeys) {
   const result = { ...object };
-  originalKeys.forEach((originalKey, index) => {
+  Array.from(originalKeys).forEach((originalKey, index) => {
     const targetKey = targetKeys[index];
     if (targetKey !== originalKey) {
       result[targetKey] = result[originalKey];
@@ -440,10 +463,10 @@ module.exports.renameProperties = function renameProperties(objects, propertyTra
 
   if (Array.isArray(objects)) {
     return objects.map(
-      (object) => renameObjectProperties(object, originalKeys, targetKeys)
+      (object) => ObjectUtils.renamePropertiesFromList(object, originalKeys, targetKeys)
     );
   }
-  return renameObjectProperties(objects, originalKeys, targetKeys);
+  return ObjectUtils.renamePropertiesFromList(objects, originalKeys, targetKeys);
 };
 
 const collapseSpecificObject = function collapseSpecificObject(sourceObj, targetObj, depth) {
