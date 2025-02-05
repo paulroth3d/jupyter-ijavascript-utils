@@ -74,7 +74,7 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
-* 1.56 - 
+* 1.56 - #84 (object.renamePropertiesFromList), #82 (date.getWeekday)
 * 1.55 - #76, #77, #74, #78
 * 1.54 - additional Date logic, and formatting. #70 #71 #72
 * 1.53 - additional docs and examples for {@link module:color|color/colour} package.
