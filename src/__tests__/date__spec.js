@@ -375,23 +375,152 @@ global.describe('Date', () => {
   });
 
   global.describe('toLocalISO', () => {
-    global.it('can convert a date to america/Chicago', () => {
-      const dateA = Date.parse('2024-12-27 13:30:00');
-      const expected = '2024-12-27T07:30:00.000-06:00';
-      const results = DateUtils.toLocalISO(dateA, 'america/Chicago');
-      global.expect(results).toStrictEqual(expected);
+    global.describe('without weekdays', () => {
+      global.it('can convert a date to america/Chicago', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T07:30:00.000-06:00';
+        const results = DateUtils.toLocalISO(dateA, 'america/Chicago');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to america/los_angeles', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T05:30:00.000-08:00';
+        const results = DateUtils.toLocalISO(dateA, 'america/Los_Angeles');
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to europe/paris', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T14:30:00.000+01:00';
+        const results = DateUtils.toLocalISO(dateA, 'europe/paris');
+        global.expect(results).toStrictEqual(expected);
+      });
     });
-    global.it('can convert a date to america/los_angeles', () => {
-      const dateA = Date.parse('2024-12-27 13:30:00');
-      const expected = '2024-12-27T05:30:00.000-08:00';
-      const results = DateUtils.toLocalISO(dateA, 'america/Los_Angeles');
-      global.expect(results).toStrictEqual(expected);
+    global.describe('explicitly without weekdays', () => {
+      global.it('can convert a date to america/Chicago', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T07:30:00.000-06:00';
+        const results = DateUtils.toLocalISO(dateA, 'america/Chicago', false);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to america/los_angeles', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T05:30:00.000-08:00';
+        const results = DateUtils.toLocalISO(dateA, 'america/Los_Angeles', false);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to europe/paris', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T14:30:00.000+01:00';
+        const results = DateUtils.toLocalISO(dateA, 'europe/paris', false);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
-    global.it('can convert a date to europe/paris', () => {
-      const dateA = Date.parse('2024-12-27 13:30:00');
-      const expected = '2024-12-27T14:30:00.000+01:00';
-      const results = DateUtils.toLocalISO(dateA, 'europe/paris');
-      global.expect(results).toStrictEqual(expected);
+    global.describe('explicitly with weekdays', () => {
+      global.it('can convert a date to america/Chicago', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T07:30:00.000-06:00 - Fri';
+        const results = DateUtils.toLocalISO(dateA, 'america/Chicago', true);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to america/los_angeles', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T05:30:00.000-08:00 - Fri';
+        const results = DateUtils.toLocalISO(dateA, 'america/Los_Angeles', true);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to europe/paris', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T14:30:00.000+01:00 - Fri';
+        const results = DateUtils.toLocalISO(dateA, 'europe/paris', true);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('localISOFormatter', () => {
+    global.describe('without weekdays', () => {
+      global.it('can convert a date to america/Chicago', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T07:30:00.000-06:00';
+        const formatter = DateUtils.localISOFormatter('america/Chicago');
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to america/los_angeles', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T05:30:00.000-08:00';
+        const formatter = DateUtils.localISOFormatter('america/Los_Angeles');
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to europe/paris', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T14:30:00.000+01:00';
+        const formatter = DateUtils.localISOFormatter('europe/paris');
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('explicitly without weekdays', () => {
+      global.it('can convert a date to america/Chicago', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T07:30:00.000-06:00';
+        const formatter = DateUtils.localISOFormatter('america/Chicago', false);
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to america/los_angeles', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T05:30:00.000-08:00';
+        const formatter = DateUtils.localISOFormatter('america/Los_Angeles', false);
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to europe/paris', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T14:30:00.000+01:00';
+        const formatter = DateUtils.localISOFormatter('europe/paris', false);
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('explicitly with weekdays', () => {
+      global.it('can convert a date to america/Chicago', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T07:30:00.000-06:00 - Fri';
+        const formatter = DateUtils.localISOFormatter('america/Chicago', true);
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to america/los_angeles', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T05:30:00.000-08:00 - Fri';
+        const formatter = DateUtils.localISOFormatter('america/Los_Angeles', true);
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can convert a date to europe/paris', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T14:30:00.000+01:00 - Fri';
+        const formatter = DateUtils.localISOFormatter('europe/paris', true);
+        const results = formatter(dateA);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('getWeekday', () => {
+    global.it('can get the date', () => {
+      const date = new Date('2025-01-15T06:00:00.000Z');
+      const expected = 'Wed';
+      const result = DateUtils.getWeekday(date, 'us/eastern');
+      global.expect(result).toBe(expected);
+    });
+    global.it('can get the date crossing date border', () => {
+      const date = new Date('2025-01-15T06:00:00.000Z');
+      const expected = 'Tue';
+      const result = DateUtils.getWeekday(date, 'us/pacific');
+      global.expect(result).toBe(expected);
     });
   });
 
@@ -511,6 +640,60 @@ global.describe('Date', () => {
         new DateUtils.DateRange(dates[2], dates[3])
       ];
       global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can initialize data', () => {
+      const dates = [new Date('2025-01-01'),
+        new Date('2025-02-01'),
+        new Date('2025-03-01'),
+        new Date('2025-04-01')];
+      
+      const dataGenerator = () => [];
+      const results = DateUtils.DateRange.fromList(dates, dataGenerator);
+
+      for (let i = 0; i < results.length; i += 1) {
+        global.expect(results[i].data).not.toBeNull();
+        global.expect(Array.isArray(results[i].data)).toBe(true);
+      }
+    });
+    global.it('count matches', () => {
+      const dates = [new Date('2025-01-01'),
+        new Date('2025-02-01'),
+        new Date('2025-03-01'),
+        new Date('2025-04-01')];
+      
+      const dataGenerator = () => [];
+      const results = DateUtils.DateRange.fromList(dates, dataGenerator);
+
+      dates.forEach((date) => results
+        .find((rl) => rl.contains(date))
+        .data.push(date));
+      
+      global.expect(results[0].data.length).toBe(2);
+      global.expect(results[1].data.length).toBe(1);
+      global.expect(results[2].data.length).toBe(1);
+    });
+    global.it('count matches doc example', () => {
+      const dates = [new Date('2025-01-01'),
+        new Date('2025-02-01'),
+        new Date('2025-03-01'),
+        new Date('2025-04-01')];
+      
+      const dataGenerator = () => [];
+      const results = DateUtils.DateRange.fromList(dates, dataGenerator);
+
+      dates.forEach((date) => results
+        .find((rl) => rl.contains(date))
+        .data.push(date));
+      
+      const expected = `2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z: has 2
+2025-02-01T00:00:00.000Z to 2025-03-01T00:00:00.000Z: has 1
+2025-03-01T00:00:00.000Z to 2025-04-01T00:00:00.000Z: has 1`;
+
+      const resultsStr = results
+        .map((rl) => `${rl.toString()}: has ${rl.data.length}`)
+        .join('\n');
+
+      global.expect(resultsStr).toStrictEqual(expected);
     });
     global.it('cannot create a list from an empty list', () => {
       const dates = [];

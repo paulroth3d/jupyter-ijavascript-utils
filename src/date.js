@@ -8,6 +8,7 @@
  *   * {@link module:date.parse|date.parse(String)} - parse a date and throw an exception if it is not a valid date
  * * Timezones
  *   * {@link module:date.toLocalISO|date.toLocalISO} - prints in 8601 format with timezone offset based on a tz entry - like america/chicago
+ *   * {@link module:date.localISOFormatter|date.localISOFormatter} - prints in 8601 format - slightly improved performance for large scale use
  *   * {@link module:date.getTimezoneOffset|date.getTimezoneOffset(String)} - gets the number of milliseconds offset for a given timezone
  *   * {@link module:date.correctForTimezone|date.correctForTimezone(Date, String)} - meant to correct a date already off from UTC to the correct time
  *   * {@link module:date.epochShift|date.epochShift(Date, String)} - offsets a date from UTC to a given time amount
@@ -181,11 +182,21 @@ module.exports.durationLong = function durationLong(epochDifference) {
 };
 
 /**
+ * Function that is passed a date for formatting
+ * 
+ * @callback dateFormatter
+ * @param {Date} dateToFormat - the date to format
+ */
+
+/**
  * @typedef {Object} TimezoneEntry
  * @property {String} tz - the name of the timezone
  * @property {Function} formatter - formats a date to that local timezone
  * @property {Number} epoch - the difference in milliseconds from that tz to UTC
  * @property {String} offset - ISO format for how many hours and minutes offset to UTC '+|-' HH:MMM 
+ * @property {dateFormatter} toLocalISO - formatter function that formats a date to local ISO
+ * @property {dateFormatter} toLocalISOWeekday - formatter function that formats a date to local ISO + weekday
+ * @property {dateFormatter} getWeekday - formatter function that determines the day of week for a date
  */
 
 /**
@@ -219,6 +230,12 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timezoneStr) {
     fractionalSecondDigits: 3,
     timeZone: cleanTz
   });
+
+  const dayOfWeekFormat = new Intl.DateTimeFormat('en-us', {
+    weekday: 'short',
+    timeZone: cleanTz
+  });
+  const getWeekday = (date) => dayOfWeekFormat.format(date);
 
   const getOffset = (dateValue) => {
     const dm = dtFormat.formatToParts(dateValue)
@@ -258,7 +275,10 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timezoneStr) {
   const diffMinutes = remainder.value;
   const offset = `${diffSign}${DateUtils.padTime(diffHours)}:${DateUtils.padTime(diffMinutes)}`;
 
-  const result = ({ tz: cleanTz, formatter, epoch: diff, offset });
+  const toLocalISO = (date) => `${formatter(date)}${offset}`;
+  const toLocalISOWeekday = (date) => `${formatter(date)}${offset} - ${getWeekday(date)}`;
+
+  const result = ({ tz: cleanTz, formatter, toLocalISO, toLocalISOWeekday, getWeekday, epoch: diff, offset });
 
   DateUtils.timezoneOffsetMap.set(cleanTz, result);
 
@@ -381,27 +401,14 @@ module.exports.correctForOtherTimezone = function correctForTimezones(date, sour
  * 
  * Use this if you somehow have a date that needs to be shifted by the timezone offset.
  * 
- * This is rarely useful in itself, but in combination with the {@link module:date.correctForTimezone|date.correctForTimezone}
- * you can use this to correct for "local dates" but are in another timezone than you are in.
+ * For example, if you have a time that is already in GMT, and want the date shifted by a timezone.
  * 
- * (For example, you got a local date for 2:15 PM EST, but your current computer is in CST)
- * 
- * JavaScript dates only have three ways of importing dates:
- * 
- * * Parse the date assuming local timezone
- * * Parse the date using [ISO 8601 formats](https://www.iso.org/iso-8601-date-and-time-format.html)
- *    * This option DOES provide an option for providing a timezone offset (ex: `-0500`)
- * 
- * Since this is the opposite of {@link module:date.correctForTimezone|date.correctForTimezone}, this can be useful.
- * 
- * But most likely, you'd like to use either:
- * 
- * * {@link module:date.correctForTimezone|date.correctForTimezone} or
- * * {@link module:date.correctForTimezones|date.correctForTimezones}.
+ * This is used internally for {@link module:date.correctForOtherTimezone|date.correctForOtherTimezone}
+ * if local dates are provided - but for a different timezone you yourself are not in.
  * 
  * ---
  * 
- * Epoch shift a date, so the utcDate is no longer correct,
+ * Epoch shift changes the internals of a JavaScript date, so the utcDate is no longer correct,
  * but many other functions behave closer to expected.
  * 
  * Once you epoch shift the date, then time stored in the date is incorrect (because it always points to GMT)
@@ -410,20 +417,8 @@ module.exports.correctForOtherTimezone = function correctForTimezones(date, sour
  * 
  * See {@link https://stackoverflow.com/a/15171030|here why this might not be what you want}
  * 
- * --
- * 
- * Sometimes though, some libraries use the "getMonth()", "getDate()" of the date, and do not support using timezones.
- * 
- * That is when this shines.
- * 
- * ```
- * timeStamp = 1738437341000;
- * d = new Date(timeStamp);
- * d.toIsoString(); // 2025-02-01T19:15:41.000Z
- * `current time is: ${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}` // 'current time is: 2025-2-1'
- * 
- * 
- * ```
+ * * {@link module:date.correctForTimezone|date.correctForTimezone} or
+ * * {@link module:date.correctForTimezones|date.correctForTimezones}.
  * 
  * @param {Date} date - date to shift
  * @param {String} timezoneStr - the tz database name of the timezone
@@ -456,13 +451,66 @@ module.exports.epochShift = function epochShift(date, timezoneStr) {
  * utils.date.toLocalISO(d, 'europe/paris'); //    '2024-12-27T14:30:00.000+01:00'
  * ```
  * 
+ * Sometimes it is helpful to have the weekday to make sense of things
+ * 
+ * ```
+ * utils.date.toLocalISO(d, 'america/Chicago', true); // '2024-12-27T07:30:00.000-06:00 FRI' 
+ * utils.date.toLocalISO(d, 'europe/paris', true); //    '2024-12-27T14:30:00.000+01:00 FRI'
+ * ```
+ * 
  * @param {Date} date - date to print
  * @param {String} timezoneStr - the tz database name of the timezone
+ * @param {Boolean} [includeWeekday=false] - whether to include the weekday
+ * @see {@link module:date.localISOFormatter|date.localISOFormatter} - if you're converting to string frequently
  * @returns {String} - ISO format with timezone offset
  */
-module.exports.toLocalISO = function toLocalISO(date, timezoneStr) {
-  const { formatter, offset } = DateUtils.getTimezoneEntry(timezoneStr);
-  return `${formatter(date)}${offset}`;
+module.exports.toLocalISO = function toLocalISO(date, timezoneStr, includeWeekday = false) {
+  if (includeWeekday) {
+    return DateUtils.getTimezoneEntry(timezoneStr).toLocalISOWeekday(date);
+  }
+  return DateUtils.getTimezoneEntry(timezoneStr).toLocalISO(date);
+};
+
+/**
+ * If repeatedly asking for a local time, use this method instead.
+ * 
+ * ```
+ * myDate = new Date('2025-01-15T06:00:00.000Z');
+ * centralFormatter = utils.date.localISOFormatter('us/central');
+ * centralFormatter(myDate); // '2025-01-15T00:00:00.000Z'
+ * ```
+ * 
+ * as opposed to
+ * 
+ * ```
+ * myDate = new Date('2025-01-15T06:00:00.000Z');
+ * utils.date.toLocalISO(myDate, 'us/central'); // '2025-01-15T00:00:00.000Z'
+ * ```
+ * 
+ * @param {String} timezoneStr 
+ * @returns {dateFormatter} - (date) => {String} 'yyyy-mm-ddThh:mm:ss.MMM[+-]TZOFFSET'
+ * @see {@link module:date.toLocalISO|date.toLocalISO}
+ */
+module.exports.localISOFormatter = function localISOFormatter(timezoneStr, includeWeekday = false) {
+  if (includeWeekday) {
+    return DateUtils.getTimezoneEntry(timezoneStr).toLocalISOWeekday;
+  }
+  return DateUtils.getTimezoneEntry(timezoneStr).toLocalISO;
+};
+
+/**
+ * Determines the weekday of a date
+ * @param {Date} date - date to print
+ * @param {String} timezoneStr - the tz database name of the timezone
+ * @returns {String} - Currently returns `en-us` formatted day of week of a date
+ * @see {@link module:date.toLocalISO|date.toLocalISO}
+ * @example
+ * date = new Date('2025-01-15T06:00:00.000Z');
+ * utils.date.getWeekday(date, 'us/pacific'); // Tue
+ * utils.date.getWeekday(date, 'us/eastern'); // Wed
+ */
+module.exports.getWeekday = function weekdayFormatter(date, timezoneStr) {
+  return DateUtils.getTimezoneEntry(timezoneStr).getWeekday(date);
 };
 
 module.exports.toIsoStringNoTimezone = function toIsoStringNoTimezone(date) {
@@ -772,11 +820,18 @@ class DateRange {
   endDate;
 
   /**
+   * Data attached to the DateTime
+   * @type {any}
+   */
+  data;
+
+  /**
    * @param {Date|String} startDate - the starting date
    * @param {Date|String} endDate - the ending date
+   * @param {any} [data] - any data to store
    */
-  constructor(startDate, endDate) {
-    this.reinitialize(startDate, endDate);
+  constructor(startDate, endDate, data = null) {
+    this.reinitialize(startDate, endDate, data);
   }
 
   /**
@@ -794,6 +849,31 @@ class DateRange {
   * //  {start: 2025-03-01TT00:00:00, end: 2025-04-01TT00:00:00}]
   * ```
   * 
+  * Often though, we want to remember something about the DateRange,
+  * like which dates that it collected.
+  * 
+  * ```
+  * arrayGenerator = function() { return [] };
+  * rangeList = utils.DateRange.fromList(dates, arrayGenerator);
+  * // [{start: 2025-01-01T00:00:00, end: 2025-02-01TT00:00:00},
+  * //  {start: 2025-02-01TT00:00:00, end: 2025-03-01TT00:00:00},
+  * //  {start: 2025-03-01TT00:00:00, end: 2025-04-01TT00:00:00}]
+  * 
+  * dates.forEach((date) => rangeList
+  *   .find(rl => rl.contains(date))
+  *   .data.push(date)
+  * );
+  * 
+  * rangeList
+  *   .map(rl => `${rl.toString()}: has ${rl.data.length}`)
+  *   .join('\n');
+  * 
+  * // 2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z: has 2
+  * // 2025-02-01T00:00:00.000Z to 2025-03-01T00:00:00.000Z: has 1
+  * // 2025-03-01T00:00:00.000Z to 2025-04-01T00:00:00.000Z: has 1
+  * 
+  * ```
+  * 
   * (Note: you can also use {@link module:date.arrange|date.arrange} or
   * {@link module:date.generateDateSequence|date.generateDateSequence}
   * to come up with the list of those dates)
@@ -802,18 +882,27 @@ class DateRange {
   * the simplest is to remove the dates from the resulting list.)
   * 
   * @param {Date[]} dateList - list of dates
+  * @param {Function} [dataCreationFn] - optional generator for data to be stored in each DataRange in the sequence
   * @returns {DateRange[]} - list of dateList.length-1 dateRanges,
   *   where the end of the firstRange is the start of the next.
   * @see {@link module:date.arrange|date.arrange} - to create dates by adding a value multiple times
   * @see {@link module:date.generateDateSequence|date.generateDateSequence} - to create dates between a start and an end date
   */
-  static fromList(dateSequence) {
+  static fromList(dateSequence, dataCreationFn) {
     if (dateSequence.length < 2) return [];
 
     const results = new Array(dateSequence.length - 2);
-    for (let i = 0; i < dateSequence.length - 1; i += 1) {
-      results[i] = new DateRange(dateSequence[i], dateSequence[i + 1]);
+
+    if (dataCreationFn) {
+      for (let i = 0; i < dateSequence.length - 1; i += 1) {
+        results[i] = new DateRange(dateSequence[i], dateSequence[i + 1], dataCreationFn());
+      }
+    } else {
+      for (let i = 0; i < dateSequence.length - 1; i += 1) {
+        results[i] = new DateRange(dateSequence[i], dateSequence[i + 1]);
+      }
     }
+    
     return results;
   }
 
@@ -824,8 +913,9 @@ class DateRange {
    * 
    * @param {Date|String} startDate - the starting date
    * @param {Date|String} endDate - the ending date
+   * @param {any} [data] - any data to store
    */
-  reinitialize(startDate, endDate) {
+  reinitialize(startDate, endDate, data = null) {
     const cleanStart = startDate instanceof Date
       ? startDate
       : new Date(Date.parse(startDate));
@@ -840,6 +930,8 @@ class DateRange {
       this.startDate = cleanStart;
       this.endDate = cleanEnd;
     }
+
+    this.data = data;
   }
 
   /**
