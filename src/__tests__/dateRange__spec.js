@@ -25,6 +25,33 @@ global.describe('DateRange', () => {
       global.expect(results.startDate).toStrictEqual(startTime);
       global.expect(results.endDate).toStrictEqual(startTime);
     });
+    global.it('can set data in constructor', () => {
+      const data = { first: 'last' };
+      const startTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const results = new DateRange(startTime, startTime, data);
+
+      const expected = { first: 'last' };
+
+      global.expect(results.startDate).toStrictEqual(startTime);
+      global.expect(results.endDate).toStrictEqual(startTime);
+      global.expect(results.data).toStrictEqual(expected);
+    });
+    global.it('can set data in constructor but not transformed', () => {
+      const data = { first: 'last' };
+      const startTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const results = new DateRange(startTime, startTime, data);
+
+      const expected = { first: 'last' };
+
+      global.expect(results.startDate).toStrictEqual(startTime);
+      global.expect(results.endDate).toStrictEqual(startTime);
+      
+      //-- is structured the same
+      global.expect(results.data).toStrictEqual(expected);
+      //-- but is the same object reference
+      global.expect(results.data).toBe(data);
+      global.expect(results.data).not.toBe(expected);
+    });
   });
 
   global.describe('reinitialize', () => {
@@ -69,6 +96,40 @@ global.describe('DateRange', () => {
 
       global.expect(results.startDate).toStrictEqual(newStart);
       global.expect(results.endDate).toStrictEqual(newEnd);
+    });
+    global.it('can set data', () => {
+      const data = { first: 'first' };
+      const startTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const results = new DateRange(startTime, startTime, data);
+      
+      const data2 = { first: 'last' };
+      results.reinitialize(startTime, startTime, data2);
+
+      const expected = { first: 'last' };
+
+      global.expect(results.startDate).toStrictEqual(startTime);
+      global.expect(results.endDate).toStrictEqual(startTime);
+      global.expect(results.data).toStrictEqual(expected);
+    });
+    global.it('can set data but not transformed', () => {
+      const data = { first: 'first' };
+      const startTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+      const results = new DateRange(startTime, startTime, data);
+      
+      const data2 = { first: 'last' };
+      results.reinitialize(startTime, startTime, data2);
+
+      const expected = { first: 'last' };
+
+      global.expect(results.startDate).toStrictEqual(startTime);
+      global.expect(results.endDate).toStrictEqual(startTime);
+      
+      //-- is structured the same
+      global.expect(results.data).toStrictEqual(expected);
+      //-- but is the same object reference
+      global.expect(results.data).not.toBe(data);
+      global.expect(results.data).toBe(data2);
+      global.expect(results.data).not.toBe(expected);
     });
   });
 
