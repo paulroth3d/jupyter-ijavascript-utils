@@ -26,6 +26,7 @@ const FormatUtils = require('./format');
  *   * {@link module:object.extractObjectProperties|extractObjectProperties(list, propertyNameOrFnMap)} - extracts multiple propertie or fn across all objects in list.
  * * Apply deep values safely
  *   * {@link module:object.assign|objAssign(object, property, value)} - Applies properties to an object in functional programming style.
+ *   * {@link module:object.getSet|getSet(object, property, functor)} - calls a function with the current value on an object, allowing for decrementing/incrementing/etc.
  *   * {@link module:object.augment|augment(object, augmentFn)} - Applies properties to an object similar to Map
  *   * {@link module:object.assignEntities|objAssignEntities(object, [property, value])} - Applies properties to an object using Array values - [key,value]
  *   * {@link module:object.setPropertyDefaults|setPropertyDefaults()} - sets values for objects that don't currently have the property
@@ -168,6 +169,53 @@ module.exports.assignEntities = function objAssignEntities(obj, entities) {
   return obj;
 };
 module.exports.objAssignEntities = module.exports.assignEntities;
+
+/**
+ * Use this for times where you want to update a value
+ * 
+ * 
+ * ```
+ * key = 'somethingToIncrement';
+ * defaultValue = null;
+ * 
+ * const initialObject = {};
+ * initialObject[key] = defaultValue;
+ * 
+ * // { somethingToIncrement: null }
+ * 
+ * const functor = (value) => { //, key, map) => {
+ *   if (!value) return 1;
+ *   return value + 1;
+ * };
+ * 
+ * utils.object.getSet(initialObject, key, functor);
+ * 
+ * // equivalent to
+ * // intitialObject[key] = intitialObject[key] ? initialObject[key] + 1 : 1`
+ * // but in a way that is repeatable across many values
+ * 
+ * utils.object.getSet(initialObject, key, functor);
+ * utils.object.getSet(initialObject, key, functor);
+ * utils.object.getSet(initialObject, key, functor);
+ * utils.object.getSet(initialObject, key, functor);
+ * 
+ * initialObject.get(key); // 5
+ * ```
+ * 
+ * @param {Map} map - map to get and set values from
+ * @param {any} key - they key to GET and SET the value (unless setKey is provided)
+ * @param {Function} functor - the function called with the arguments below - returning the value to set
+ * @param {any} functor.value - the first argument is the current value
+ * @param {any} functor.key - the second argument is the key passed
+ * @param {any} functor.map - the third argument is the map being acted upon
+ * @returns {Map}
+ */
+module.exports.getSet = function getSet(obj, field, functor) {
+  const currentValue = Object.hasOwn(obj, field) ? obj[field] : undefined;
+  obj[field] = functor(currentValue, field, obj);
+  return obj;
+};
+module.exports.update = module.exports.getSet;
 
 /**
  * Runs a map over a collection, and adds properties the the objects.
