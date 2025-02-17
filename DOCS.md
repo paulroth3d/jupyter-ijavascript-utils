@@ -74,6 +74,7 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
+* 1.58 - 
 * 1.57 - #86 - include examples on binning based on time series {@link https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/86|see more here}
     * #87 - add in {@link module:file.fileExists|file.fileExists} to make things easier for new people getting started
     * #89 - allow {@link module:array.resize|array.resize} to work with defaults, if zipping arrays of different sizes

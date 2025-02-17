@@ -54,6 +54,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.58 - 
 * 1.57 - #86 - include examples on binning based on time series
     * #87 - add in fileExists to make things easier for new people getting started
     * #89 - allow resizing arrays with defaults, if zipping arrays of different sizes
