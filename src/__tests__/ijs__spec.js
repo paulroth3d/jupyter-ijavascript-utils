@@ -4,6 +4,12 @@
 //-- unfortunately iJavaScript has a problem that we have to work with global variables.
 // const jest = require('jest');
 
+jest.mock('fs');
+
+const fs = require('fs');
+const fsExtra = require('fs-extra');
+const pino = require('pino');
+
 // const { UNIT_CHANNELS } = require('vega-lite/build/src/channel');
 const IJSUtils = require('../ijs');
 
@@ -45,7 +51,7 @@ const prepareIJSContext = () => {
   });
 };
 
-global.describe('codeBlockHelper', () => {
+global.describe('IJS', () => {
   const ORIGINAL_CONSOLE = global.console;
 
   global.beforeEach(() => {
@@ -373,6 +379,148 @@ global.describe('codeBlockHelper', () => {
 
         const [argText] = args;
         global.expect(argText).toContain('pagebreak');
+      });
+    });
+  });
+
+  global.describe('useCache', () => {
+    beforeEach(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    afterAll(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    global.it('normally has the IJavaScript context', () => {
+      global.expect(1 + 2).toBe(3);
+      global.expect(global.$$).not.toBeNull();
+      global.expect(typeof global.$$.text).toBe('function');
+    });
+    global.describe('can write the cache', () => {
+      global.it('can write to the cache', (done) => {
+        prepareIJSContext();
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const expensiveResults = { success: true, date: dateValue };
+        const expensiveFn = jest.fn(() => Promise.resolve(expensiveResults));
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        let result;
+        IJSUtils.useCache(true, cachePath, cacheFile, expensiveFn)
+          .then((results) => {
+            result = results;
+          })
+          .catch((err) => {
+            result = `Exception caught: ${err.message}`;
+          })
+          .finally(() => {
+            global.expect(result).toStrictEqual(expensiveResults);
+            done();
+          });
+      });
+      global.it('can write to the cache if there is a slash in the path', (done) => {
+        prepareIJSContext();
+        const cachePath = './tmp/';
+        const cacheFile = 'sampleFile';
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const expensiveResults = { success: true, date: dateValue };
+        const expensiveFn = jest.fn(() => Promise.resolve(expensiveResults));
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        let result;
+        IJSUtils.useCache(true, cachePath, cacheFile, expensiveFn)
+          .then((results) => {
+            result = results;
+          })
+          .catch((err) => {
+            result = `Exception caught: ${err.message}`;
+          })
+          .finally(() => {
+            global.expect(result).toStrictEqual(expensiveResults);
+            done();
+          });
+      });
+      global.it('can catch correctly if there is a failure thrown', async () => {
+        prepareIJSContext();
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+
+        // const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        // const expensiveResults = { success: true, date: dateValue };
+        const expectedMessage = 'expected exception';
+        const expensiveFn = () => {
+          throw Error('expected exception');
+          // return Promise.resolve(expensiveResults);
+        };
+        await expect(IJSUtils.useCache(true, cachePath, cacheFile, expensiveFn))
+          .rejects
+          .toThrow(expectedMessage);
+      });
+      global.it('throws an error if not in ijs', async () => {
+        prepareIJSContext();
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+        const expensiveFn = jest.fn(() => Promise.resolve({ success: true }));
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        global.expect(global.$$).not.toBeNull();
+  
+        removeIJSContext();
+        global.expect(global.$$).toBeUndefined();
+
+        const expectedMessage = 'IJSUtils.async must be run within iJavaScript. Otherwise, use normal async methods';
+        await expect(IJSUtils.useCache(true, cachePath, cacheFile, expensiveFn))
+          .rejects
+          .toThrow(expectedMessage);
+      });
+      /*
+      global.it('can throw an error gracefully', () => {
+        global.expect(() => {
+          IJSUtils.useCache2(true, 'cache', 'file', () => Promise.resolve('something'));
+        }).toThrow('Some Message');
+      });
+      */
+    });
+    global.describe('can read from the cache', () => {
+      global.it('can read from the cache', (done) => {
+        prepareIJSContext();
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const data = ({
+          date: dateValue,
+          series: 'a'
+        });
+        const dataJSON = JSON.stringify(data, null, 0);
+        const parsedJSON = JSON.parse(dataJSON, FileUtil.cacheDeserializer);
+
+        const expensiveFn = jest.fn(() => Promise.resolve(data));
+
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.readJsonSync.mockReturnValue(parsedJSON);
+
+        let result;
+        IJSUtils.useCache(false, cachePath, cacheFile, expensiveFn)
+          .then((results) => {
+            result = results;
+          })
+          .catch((err) => {
+            result = `Exception caught: ${err.message}`;
+          })
+          .finally(() => {
+            global.expect(result).toStrictEqual(data);
+            done();
+          });
       });
     });
   });

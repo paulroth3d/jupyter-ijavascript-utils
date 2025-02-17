@@ -30,6 +30,8 @@ const logger = require('./logger');
  * * checking files exist
  *   * {@link module:file.checkFile|checkFile(...paths)} - check if a file at a path exists
  *   * {@link module:file.fileExists|fileExists(filePath)} - check if a single file at a path exists
+ * * using a cache for long running executions
+ *   * {@link module:file.useCache|file.useCache()} - perform an expensive calculation and write to a cache, or read from the cache transparently
  * 
  * ---
  * 
@@ -97,6 +99,8 @@ const FileUtil = module.exports;
  * 
  * @param {string} filePath - path of the file to load
  * @param {Object} fsOptions - options to pass for fsRead (ex: { encoding: 'utf-8' })
+ * @param {Function} fsOptions.formatter - formatter to use when writing the JSON
+ * @param {String} fsOptions.encoding - the encoding to write the JSON out with
  * @example
  * const weather = [
  *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
@@ -118,7 +122,11 @@ const FileUtil = module.exports;
 module.exports.readJSON = function readJSON(filePath, fsOptions = {}) {
   const resolvedPath = path.resolve(filePath);
   const optionsDefaults = { encoding: 'utf-8' };
-  const cleanedOptions = { ...optionsDefaults, ...fsOptions };
+  let cleanedOptions = { ...optionsDefaults, ...fsOptions };
+
+  //-- unfortunately we cannot pass the formatter in addition, it must replace
+  //-- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+  if (cleanedOptions.formatter) cleanedOptions = cleanedOptions.formatter;
 
   /** @type {string} */
   let result;
@@ -228,12 +236,14 @@ module.exports.readFile = function readFile(filePath, fsOptions = {}) {
  */
 module.exports.writeJSON = function writeJSON(filePath, contents, fsOptions = {}) {
   //-- if it isn't desired, simply pass as a string.
-  const jsonContents = JSON.stringify(contents, null, 2);
   const optionsDefaults = { encoding: 'utf-8' };
   const cleanedOptions = { ...optionsDefaults, ...fsOptions };
   const isAppend = cleanedOptions.append === true;
   const prefix = cleanedOptions.prefix || '';
   const suffix = cleanedOptions.suffix || '';
+  const formatter = cleanedOptions.formatter || null;
+  const spacing = cleanedOptions.spacing || 2;
+  const jsonContents = JSON.stringify(contents, formatter, spacing);
 
   // const resolvedPath = path.resolve(filePath);
   try {
@@ -478,22 +488,91 @@ module.exports.fileExists = function fileExists(filePath) {
 };
 
 /*
- * Execute an async function if any of the files do not exist
- * @param {String[]} filePaths - list of paths of files to check that they exist
- * @param {*} fnIfFailed - async function tha will run - but only if any of the files are not found.
- */
-/*
-module.exports.ifNotExists = async function ifNotExists(filePaths, fnIfFailed) {
-  const filesNotFound = FileUtil.checkFile(filePaths);
-
-  let results;
-
-  if (filesNotFound) {
-    results = await fnIfFailed(filesNotFound);
-  } else {
-    results = null;
+//-- not needed - dates already serialize to iso Strings
+module.exports.cacheSerializer = (key, value) => {
+  if (key && (key === 'date' || key.endsWith('_date')) && (value instanceof Date)) {
+    return value.toISOString();
   }
+  return value;
+};
+*/
+
+module.exports.cacheDeserializer = (key, value) => {
+  if (key && (key === 'date' || key.endsWith('_date'))) {
+    return new Date(value);
+  }
+  return value;
+};
+
+/**
+ * For very long or time-intensive executions, sometimes it is better to cache the results
+ * than to execute them every single time.
+ * 
+ * Note that this works synchronously, and can be easier to use than if promises are involved.
+ * 
+ * As opposed to {@link module:ijs.useCache|ijs.useCache} - which works with promises.
+ * 
+ * ```
+ * shouldWrite = true; /// we will write to the cache with the results from the execution
+ * expensiveResults = utils.file.useCache(shouldWrite, './cache', 'expensive.json', () => {
+ *    const data = d3.csvParse(utils.file.readFile('./someFile.csv'))
+ *      .map(obj => ({ ...obj, date: Date.parse(obj.epoch) }));
+ *    
+ *    const earliestDate = utils.date.startOfDay( utils.agg.min(data, 'date') );
+ *    const lastDate = utils.date.endOfDay( utils.agg.max(data, 'date') );
+ * 
+ *    // binning or lots of other things.
+ * 
+ *    return finalResults;
+ * });
+ * 
+ * expensiveresults.length = 1023424;
+ * ```
+ * 
+ * but sometimes I would rather just skip to the end
+ * 
+ * ```
+ * shouldWrite = false; /// we will read from the cache instead,
+ * // everything else remains the same
+ * 
+ * expensiveResults = utils.file.useCache(shouldWrite, './cache', 'expensive.json', () => {
+ *    const data = d3.csvParse(utils.file.readFile('./someFile.csv'))
+ *      .map(obj => ({ ...obj, date: Date.parse(obj.epoch) }));
+ * 
+ *    //-- function can remain untouched,
+ *    //-- BUT nothing in here will be executed
+ *    //-- since we are reading from the cache
+ * });
+ * 
+ * //-- completely transparent to the runner
+ * expensiveresults.length = 1023424;
+ * ```
+ * 
+ * @param {Boolean} shouldWrite - whether we should write to the cache (true) or read from the cache (false)
+ * @param {String} cachePath - Path to the cache folder, ex: './cache'
+ * @param {String} cacheFile - Filename of the cache file to use for this execution, ex: 'ExecutionsPerMin.js'
+ * @param {Function} expensiveFn - function that returns the results to be stored in the cache
+ * @param {Object} fsOptions - options to use when writing or reading files
+ * @returns {any} - either the deserialized json from the cache or the results from the expensive function
+ * @see {@link module:file.readJSON|file.readJSON} - reads a local JSON file
+ * @see {@link module:file.writeJSON|file.writeJSON} - writes to a JSON file
+ * @see {@link module:ijs.useCache|ijs.useCache} - similar idea - but supports promises
+ */
+module.exports.useCache = function useCache(shouldWrite, cachePath, cacheFile, expensiveFn, fsOptions = null) {
+  const ensureEndsWithSlash = (str) => str.endsWith('/') ? str : `${str}/`;
+  const cacheFilePath = `${ensureEndsWithSlash(cachePath)}${cacheFile}`;
+  
+  if (!shouldWrite) {
+    const cleanOptions = { ...fsOptions, formatter: FileUtil.cacheDeserializer };
+    const results = FileUtil.readJSON(cacheFilePath, cleanOptions);
+    return results;
+  }
+
+  const results = expensiveFn();
+
+  const cleanOptions = { ...fsOptions, formatter: null }; // FileUtil.cacheSerializer not needed
+
+  FileUtil.writeJSON(cacheFilePath, results, cleanOptions);
 
   return results;
 };
-*/
