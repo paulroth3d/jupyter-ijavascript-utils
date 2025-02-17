@@ -1460,18 +1460,25 @@ module.exports.asyncWaitAndChain = (seconds, fn, rows) => {
  * 
  * utils.array.resize(categoryValues, 2); // ['rock', 'paper']
  * utils.array.resize(categoryValues, 7); // ['rock', 'paper', 'scissors',
- * 'rock', 'paper', 'scissors', 'rock];
+ * undefined, undefined, undefined, undefined];
  * ```
  * 
  * @param {Array} sourceList - array of values
- * @param {Number} length - new number of items in the list
+ * @param {Number} length - new length of the list
  */
-module.exports.resize = function resize(sourceList, length) {
+module.exports.resize = function resize(sourceList, length, defaultValue = undefined) {
   if (!sourceList || !Array.isArray(sourceList)) return [];
   if (length < 1 || sourceList.length < 1) return [];
-  return new Array(length)
-    .fill(0)
-    .map((_, index) => sourceList[index % sourceList.length]);
+
+  const result = new Array(length)
+    .fill(defaultValue);
+
+  sourceList.forEach((val, index) => {
+    if (index >= length) return;
+    result[index] = val;
+  });
+
+  return result;
 };
 
 /**
@@ -1532,9 +1539,9 @@ module.exports.zip = function zip(arrayLeft, arrayRight, ...rest) {
   if (cleanLeft.length === 0 && cleanRight.length === 0) {
     result = [[]];
   } else if (cleanLeft.length === 0) {
-    result = cleanRight.map((val) => Array.isArray(val) ? val : [val]);
+    result = cleanRight.map((val) => Array.isArray(val) ? val : (typeof val === 'string') ? [val] : [...val]);
   } else if (cleanRight.length === 0) {
-    result = cleanLeft.map((val) => Array.isArray(val) ? val : [val]);
+    result = cleanLeft.map((val) => Array.isArray(val) ? val : (typeof val === 'string') ? [val] : [...val]);
   } else {
     const cleanLeftLen = cleanLeft.length;
     const cleanRightLen = cleanRight.length;
