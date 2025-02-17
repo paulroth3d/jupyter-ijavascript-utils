@@ -29,6 +29,7 @@ const logger = require('./logger');
  *   * {@link module:file.matchFiles|matchFiles(path, matchingFn)} - find files or directories based on type of file or name
  * * checking files exist
  *   * {@link module:file.checkFile|checkFile(...paths)} - check if a file at a path exists
+ *   * {@link module:file.fileExists|fileExists(filePath)} - check if a single file at a path exists
  * 
  * ---
  * 
@@ -463,6 +464,17 @@ module.exports.checkFile = function checkFile(...files) {
   }
 
   return notFoundFiles;
+};
+
+/**
+ * Checks if a single file exists
+ * @param {String} filePath - path to check if the file exists.
+ * @returns {Boolean} - if the file exists (true) or not (false)
+ * @see {@link module:file.checkFile|file.checkFile} - if checking multiple files
+ */
+module.exports.fileExists = function fileExists(filePath) {
+  const resolvedPath = path.resolve(filePath);
+  return fs.existsSync(resolvedPath);
 };
 
 /*

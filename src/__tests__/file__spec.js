@@ -677,4 +677,72 @@ global.describe('FileUtil', () => {
       });
     });
   });
+
+  global.describe('checkFiles', () => {
+    beforeEach(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    afterAll(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    global.describe('with no files passed', () => {
+      global.it('fails if null is passed', () => {
+        global.expect(() => FileUtil.checkFile(null)).toThrow();
+      });
+      global.it('fails if null is passed with other valid arguments', () => {
+        fsExtra.existsSync.mockReturnValue(true);
+        global.expect(() => FileUtil.checkFile('./testFile', null)).toThrow();
+      });
+      global.it('returns null if no arguments passed', () => {
+        const expected = null;
+        const results = FileUtil.checkFile();
+        global.expect(results).toBe(expected);
+      });
+      global.it('returns null if empty array passed in first argument', () => {
+        const expected = null;
+        const results = FileUtil.checkFile([]);
+        global.expect(results).toBe(expected);
+      });
+    });
+    global.it('and file exists', () => {
+      const expected = true;
+
+      fsExtra.existsSync.mockReturnValue(true);
+
+      const results = FileUtil.fileExists(
+        './file1'
+      );
+      global.expect(results).toBe(expected);
+
+      //-- we are not actually calling file, but the mock
+      global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+      const call = fsExtra.existsSync.mock.calls[0][0];
+      global.expect(call).toContain('file1');
+    });
+
+    global.it('and file does not exist', () => {
+      //-- use actual path.resolve to make life easier
+      //-- but makes expected hard to use
+      // const expected = null;
+      fsExtra.existsSync.mockReturnValue(false);
+
+      const expected = false;
+
+      const results = FileUtil.fileExists(
+        './file1'
+      );
+      global.expect(results).toBe(expected);
+      
+      //-- we are not actually calling file, but the mock
+      global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+      const call = fsExtra.existsSync.mock.calls[0][0];
+      global.expect(call).toContain('file1');
+    });
+  });
 });
