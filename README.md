@@ -54,6 +54,11 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.57 - #86 - include examples on binning based on time series
+    * #87 - add in fileExists to make things easier for new people getting started
+    * #89 - allow resizing arrays with defaults, if zipping arrays of different sizes
+    * #90 - correct issue with timezone offsets, so it is no longer possible to get a timezone offset +24:00
+    * #92 - make it easier to handle big expensive calculations with a cache
 * 1.56 - #84 (object.renamePropertiesFromList), #82 (date.getWeekday)
 * 1.55 - #76, #77, #74, #78
 * 1.54 - additional Date logic, and formatting. #70 #71 #72

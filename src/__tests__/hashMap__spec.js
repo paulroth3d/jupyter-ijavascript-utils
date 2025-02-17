@@ -373,6 +373,23 @@ global.describe('hashmap', () => {
       const results = initialMap.get(key);
       global.expect(results).toBe(expected);
     });
+    global.it('can increment a value on an unknown key', () => {
+      const key = 'count';
+      // const defaultValue = null;
+      const initialMap = new Map();
+      
+      const functor = (value) => { //, key, map) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      HashMapUtil.getSet(initialMap, key, functor);
+      HashMapUtil.getSet(initialMap, key, functor);
+
+      const expected = 2;
+      const results = initialMap.get(key);
+      global.expect(results).toBe(expected);
+    });
     global.it('can increment a value multiple times', () => {
       const key = 'count';
       const defaultValue = null;

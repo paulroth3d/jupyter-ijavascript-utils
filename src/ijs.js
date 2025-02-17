@@ -2,6 +2,8 @@
 
 const uuid = require('uuid').v4;
 
+const FileUtil = require('./file');
+
 require('./_types/global');
 
 /**
@@ -27,6 +29,8 @@ require('./_types/global');
  *   * {@link module:ijs.noOutputNeeded|ijs.noOutputNeeded} - clears the output to declutter results (like importing libraries, or functions)
  *   * {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks} - call at least once to allow pageBreaks when rendering PDFs
  *   * {@link module:ijs.printPageBreak|ijs.printPageBreak} - call to print a page break when rendering PDFs
+ * * using a cache for long running executions
+ *   * {@link module:ijs.useCache|ijs.useCache()} - perform an expensive calculation and write to a cache, or read from the cache transparently
  * 
  * For example:
  * 
@@ -661,4 +665,103 @@ module.exports.printPageBreak = function printPageBreak() {
   }
 
   context.$$.html('<div class="pagebreak"></div>');
+};
+
+/**
+ * For very long or time-intensive executions, sometimes it is better to cache the results
+ * than to execute them every single time.
+ * 
+ * Note that this supports promises, and can be a bit harder to understand.
+ * 
+ * As opposed to {@link module:file.useCache|file.useCache} - which works synchronously
+ * 
+ * ```
+ * shouldWrite = true; /// we will write to the cache with the results from the execution
+ * utils.file.useCache(shouldWrite, './cache', 'expensive.json', () => {
+ *   //-- all the items to cache 
+ *   return Promise.resolve()
+ *      .then(() => ajax.retrieve(...))
+ *      .then((results) => {
+ *          const data = results
+ *            .map(obj => ({ ...obj, date: Date.parse(obj.epoch) }));
+ *          .. other things to do
+ *          return data;
+ *       });
+ * })
+ *   //-- using the information AFTER the expensive function or retrieval from cache
+ *   //-- this can ALSO be run in a subsequence cell
+ *   .then((results) => {
+ *      expensiveresults = results;
+ *      conosole.log(`expensiveResults.length: ${results.length}`);
+ *    });
+ * ```
+ * 
+ * but sometimes I would rather just skip to the end
+ * 
+ * ```
+ * shouldWrite = false; /// we will read from the cache instead,
+ * // everything else remains the same
+ * 
+ * utils.file.useCache(shouldWrite, './cache', 'expensive.json', () => {
+ *   //-- all the items to cache 
+ *   return Promise.resolve()
+ *     ... blah blah - none of this will get executed
+ * })
+ *   //-- using the information AFTER the expensive function or retrieval from cache
+ *   //-- this can ALSO be run in a subsequence cell
+ *   .then((results) => {
+ *      expensiveresults = results;
+ *      conosole.log(`expensiveResults.length: ${results.length}`);
+ *    });
+ * 
+ * //-- completely transparent to the runner
+ * expensiveresults.length = 1023424;
+ * ```
+ * 
+ * @param {Boolean} shouldWrite - whether we should write to the cache (true) or read from the cache (false)
+ * @param {String} cachePath - Path to the cache folder, ex: './cache'
+ * @param {String} cacheFile - Filename of the cache file to use for this execution, ex: 'ExecutionsPerMin.js'
+ * @param {Function} expensiveFn - function that returns the results to be stored in the cache
+ * @param {Object} fsOptions - options to use when writing or reading files
+ * @returns {any} - either the deserialized json from the cache or the results from the expensive function
+ * @see {@link module:file.readJSON|file.readJSON} - reads a local JSON file
+ * @see {@link module:file.writeJSON|file.writeJSON} - writes to a JSON file
+ * @see {@link module:file.useCache|file.useCache} - can be much easier than using promises
+ */
+module.exports.useCache = async function useCache(shouldWrite, cachePath, cacheFile, expensiveFn, fsOptions = null) {
+  const ensureEndsWithSlash = (str) => str.endsWith('/') ? str : `${str}/`;
+  const cacheFilePath = `${ensureEndsWithSlash(cachePath)}${cacheFile}`;
+  const context = IJSUtils.detectContext();
+
+  if (!shouldWrite) {
+    const cleanOptions = { ...fsOptions, formatter: FileUtil.cacheDeserializer };
+    //-- we read the info and be done with it
+    //context.console.log(`before retrieving cache:${cacheFilePath}`);
+    const results = FileUtil.readJSON(cacheFilePath, cleanOptions);
+    //context.console.log(`after retrieving cache`);
+    return Promise.resolve(results);
+  }
+
+  if (!context) {
+    throw (Error('IJSUtils.async must be run within iJavaScript. Otherwise, use normal async methods'));
+  }
+
+  context.$$.async();
+
+  try {
+    context.console.log('before starting expensive fn');
+    const results = await expensiveFn(context.$$, context.console);
+    context.console.log('AFTER starting expensive fn');
+
+    FileUtil.writeJSON(cacheFilePath, results);
+    // context.$$.sendResult('success');
+    return results;
+  } catch (err) {
+    context.console.error('error occurred');
+    context.console.error(err);
+    context.$$.sendResult(err);
+
+    // return Promise.reject(err);
+    throw err;
+  }
 };

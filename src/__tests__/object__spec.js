@@ -4527,4 +4527,100 @@ describe('ObjectUtils', () => {
       global.expect(results).toStrictEqual(expected);
     });
   });
+
+  global.describe('getSet', () => {
+    global.it('can set a value', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialObject = {};
+      initialObject[key] = defaultValue;
+      // const incrementValue = 1;
+
+      const functor = (value) => { // key, obj) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      ObjectUtils.getSet(initialObject, key, functor);
+
+      const expected = 1;
+      const results = initialObject[key];
+      global.expect(results).toBe(expected);
+    });
+    global.it('can increment a value', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialObject = {};
+      initialObject[key] = defaultValue;
+      
+      const functor = (value) => { //, key, obj) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      ObjectUtils.getSet(initialObject, key, functor);
+      ObjectUtils.getSet(initialObject, key, functor);
+
+      const expected = 2;
+      const results = initialObject[key];
+      global.expect(results).toBe(expected);
+    });
+    global.it('can increment a value on a new property', () => {
+      const key = 'count';
+      // const defaultValue = null;
+      const initialObject = {};
+      // initialObject[key] = defaultValue;
+      
+      const functor = (value) => { //, key, obj) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      ObjectUtils.getSet(initialObject, key, functor);
+      ObjectUtils.getSet(initialObject, key, functor);
+
+      const expected = 2;
+      const results = initialObject[key];
+      global.expect(results).toBe(expected);
+    });
+    global.it('can increment a value multiple times', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialObject = {};
+      initialObject[key] = defaultValue;
+      
+      const functor = (value) => { //, key, obj) => {
+        if (!value) return 1;
+        return value + 1;
+      };
+
+      ObjectUtils.getSet(initialObject, key, functor);
+      ObjectUtils.getSet(initialObject, key, functor);
+      ObjectUtils.getSet(initialObject, key, functor);
+      ObjectUtils.getSet(initialObject, key, functor);
+      ObjectUtils.getSet(initialObject, key, functor);
+
+      const expected = 5;
+      const results = initialObject[key];
+      global.expect(results).toBe(expected);
+    });
+    global.it('can set a value', () => {
+      const key = 'count';
+      const defaultValue = null;
+      const initialObject = {};
+      initialObject[key] = defaultValue;
+      initialObject.anotherValue = 10;
+
+      const functor = (value, _, obj) => {
+        if (!value) return obj.anotherValue;
+        return value + 1;
+      };
+
+      ObjectUtils.getSet(initialObject, key, functor);
+
+      const expected = 10;
+      const results = initialObject[key];
+      global.expect(results).toBe(expected);
+    });
+  });
 });

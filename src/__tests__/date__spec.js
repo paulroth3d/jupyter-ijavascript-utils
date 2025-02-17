@@ -435,6 +435,14 @@ global.describe('Date', () => {
         global.expect(results).toStrictEqual(expected);
       });
     });
+    global.describe('GMT', () => {
+      global.it('can convert a date to GMT', () => {
+        const dateA = Date.parse('2024-12-27 13:30:00');
+        const expected = '2024-12-27T13:30:00.000+00:00 - Fri';
+        const results = DateUtils.toLocalISO(dateA, 'GMT', true);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
   });
 
   global.describe('localISOFormatter', () => {

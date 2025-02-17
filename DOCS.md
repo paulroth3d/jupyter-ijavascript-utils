@@ -74,6 +74,11 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
+* 1.57 - #86 - include examples on binning based on time series {@link https://github.com/paulroth3d/jupyter-ijavascript-utils/issues/86|see more here}
+    * #87 - add in {@link module:file.fileExists|file.fileExists} to make things easier for new people getting started
+    * #89 - allow {@link module:array.resize|array.resize} to work with defaults, if zipping arrays of different sizes
+    * #90 - correct issue with timezone offsets, so it is no longer possible to get a timezone offset +24:00 from any of the localizations - like {@link module:date.toLocalISO|date.toLocalISO}
+    * #92 - make it easier to handle big expensive calculations with a cache, see {@link module:ijs.useCache|ijs.useCache()} and {@link module:file.useCache|file.useCache()}
 * 1.56 - #84 (object.renamePropertiesFromList), #82 (date.getWeekday)
 * 1.55 - #76, #77, #74, #78
 * 1.54 - additional Date logic, and formatting. #70 #71 #72

@@ -2432,18 +2432,32 @@ line3`;
         const results = ArrayUtils.zip(left, right);
         global.expect(results).toStrictEqual(expected);
       });
+      global.it('if the right is a set', () => {
+        const expected = [['john'], ['paul'], ['george'], ['ringo']];
+        const left = [];
+        const right = [new Set(['john']), ['paul'], ['george'], ['ringo']];
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
     global.describe('works if the right is empty', () => {
-      global.it('and the right is a single value', () => {
+      global.it('and the left is a single value', () => {
         const expected = [['john'], ['paul'], ['george'], ['ringo']];
         const left = first;
         const right = [];
         const results = ArrayUtils.zip(left, right);
         global.expect(results).toStrictEqual(expected);
       });
-      global.it('an the right is an array', () => {
+      global.it('an the left is an array', () => {
         const expected = [['john'], ['paul'], ['george'], ['ringo']];
         const left = expected;
+        const right = [];
+        const results = ArrayUtils.zip(left, right);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('an the left is a set', () => {
+        const expected = [['john'], ['paul'], ['george'], ['ringo']];
+        const left = [new Set(['john']), ['paul'], ['george'], ['ringo']];
         const right = [];
         const results = ArrayUtils.zip(left, right);
         global.expect(results).toStrictEqual(expected);
@@ -2530,8 +2544,13 @@ line3`;
       global.expect(result).toStrictEqual(expected);
     });
     global.it('can make a list larger', () => {
-      const expected = ['heart', 'club', 'spade', 'diamond', 'heart', 'club'];
+      const expected = ['heart', 'club', 'spade', 'diamond', undefined, undefined];
       const result = ArrayUtils.resize(baseList, 6);
+      global.expect(result).toStrictEqual(expected);
+    });
+    global.it('can make a list larger with a default', () => {
+      const expected = ['heart', 'club', 'spade', 'diamond', '--undefined', '--undefined'];
+      const result = ArrayUtils.resize(baseList, 6, '--undefined');
       global.expect(result).toStrictEqual(expected);
     });
     global.it('can make a list larger', () => {

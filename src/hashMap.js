@@ -83,12 +83,11 @@ module.exports.add = function add(map, key, value) {
  * @param {any} functor.value - the first argument is the current value
  * @param {any} functor.key - the second argument is the key passed
  * @param {any} functor.map - the third argument is the map being acted upon
- * @param {any} [setKey = null] - optional separate key to use to set the updated value
  * @returns {Map}
  */
-module.exports.getSet = function getSet(map, key, functor, setKey = null) {
-  const cleanSetKey = setKey || key;
-  map.set(cleanSetKey, functor(map.get(key), key, map));
+module.exports.getSet = function getSet(map, key, functor) {
+  const currentValue = map.has(key) ? map.get(key) : undefined;
+  map.set(key, functor(currentValue, key, map));
   return map;
 };
 module.exports.update = module.exports.getSet;

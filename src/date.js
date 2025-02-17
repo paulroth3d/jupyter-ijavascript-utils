@@ -266,7 +266,8 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timezoneStr) {
   
   const impactedDate = getOffset(d);
 
-  const diff = d.getTime() - impactedDate.getTime();
+  //-- avoid +24:00 or -24:00 - the number of seconds within a day
+  const diff = (d.getTime() - impactedDate.getTime()) % 86400000;
 
   const diffSign = diff > 0 ? '-' : '+';
   let remainder = DateUtils.divideRemainder(Math.abs(diff), DateUtils.TIME.HOUR);

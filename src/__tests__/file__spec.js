@@ -677,4 +677,212 @@ global.describe('FileUtil', () => {
       });
     });
   });
+
+  global.describe('checkFiles', () => {
+    beforeEach(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    afterAll(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    global.describe('with no files passed', () => {
+      global.it('fails if null is passed', () => {
+        global.expect(() => FileUtil.checkFile(null)).toThrow();
+      });
+      global.it('fails if null is passed with other valid arguments', () => {
+        fsExtra.existsSync.mockReturnValue(true);
+        global.expect(() => FileUtil.checkFile('./testFile', null)).toThrow();
+      });
+      global.it('returns null if no arguments passed', () => {
+        const expected = null;
+        const results = FileUtil.checkFile();
+        global.expect(results).toBe(expected);
+      });
+      global.it('returns null if empty array passed in first argument', () => {
+        const expected = null;
+        const results = FileUtil.checkFile([]);
+        global.expect(results).toBe(expected);
+      });
+    });
+    global.it('and file exists', () => {
+      const expected = true;
+
+      fsExtra.existsSync.mockReturnValue(true);
+
+      const results = FileUtil.fileExists(
+        './file1'
+      );
+      global.expect(results).toBe(expected);
+
+      //-- we are not actually calling file, but the mock
+      global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+      const call = fsExtra.existsSync.mock.calls[0][0];
+      global.expect(call).toContain('file1');
+    });
+
+    global.it('and file does not exist', () => {
+      //-- use actual path.resolve to make life easier
+      //-- but makes expected hard to use
+      // const expected = null;
+      fsExtra.existsSync.mockReturnValue(false);
+
+      const expected = false;
+
+      const results = FileUtil.fileExists(
+        './file1'
+      );
+      global.expect(results).toBe(expected);
+      
+      //-- we are not actually calling file, but the mock
+      global.expect(fsExtra.existsSync).toHaveBeenCalledTimes(1);
+
+      const call = fsExtra.existsSync.mock.calls[0][0];
+      global.expect(call).toContain('file1');
+    });
+  });
+
+  global.describe('cacheSerialize deserialize', () => {
+    global.it('can serialize an object with a date', () => {
+      const numberValue = 25;
+      const strValue = 'cuca';
+      const dateValue = new Date('2025-01-01T00:00:00.000Z');
+      const data = ({
+        date: dateValue,
+        dateButNot: dateValue,
+        value: numberValue,
+        str: strValue
+      });
+      const jsonStr = JSON.stringify(data, null, 0);
+      
+      //const parsed = JSON.parse(jsonStr);
+      const parsed = JSON.parse(jsonStr, FileUtil.cacheDeserializer);
+
+      global.expect(typeof parsed.date).toBe('object');
+      global.expect(typeof parsed.dateButNot).toBe('string');
+
+      global.expect(parsed.date).toStrictEqual(dateValue);
+      global.expect(parsed.dateButNot).toStrictEqual(dateValue.toISOString());
+
+      global.expect(parsed.value).toStrictEqual(numberValue);
+      global.expect(parsed.str).toStrictEqual(strValue);
+    });
+  });
+
+  global.describe('useCache', () => {
+    beforeEach(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    afterAll(() => {
+      fs.resetMock();
+      fsExtra.resetMock();
+      pino.mockInstance.resetMock();
+    });
+    global.describe('readJSON', () => {
+      global.it('reads a json with a resolved path', () => {
+        const shouldWrite = false;
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+        const expensiveFn = jest.fn(() => '{ "success": true }');
+        
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.readJsonSync.mockReturnValue({ success: true });
+  
+        const expected = { success: true };
+        const results = FileUtil.useCache(shouldWrite, cachePath, cacheFile, expensiveFn);
+  
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('reads a json a date in it', () => {
+        const shouldWrite = false;
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+        const expensiveFn = jest.fn(() => '{ "success": true }');
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const data = ({
+          date: dateValue,
+          series: 'a'
+        });
+        const dataJSON = JSON.stringify(data, null, 0);
+        const parsedJSON = JSON.parse(dataJSON, FileUtil.cacheDeserializer);
+        
+        fsExtra.existsSync.mockReturnValue(true);
+        fsExtra.readJsonSync.mockReturnValue(parsedJSON);
+  
+        const expected = data;
+        const results = FileUtil.useCache(shouldWrite, cachePath, cacheFile, expensiveFn);
+  
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('writeJSON', () => {
+      global.it('writes to the cache', () => {
+        const shouldWrite = true;
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const expensiveResults = { success: true, date: dateValue };
+        const expensiveResultsStr = JSON.stringify(expensiveResults, null, 2);
+        const expensiveFn = jest.fn(() => expensiveResults);
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        const cacheResults = FileUtil.useCache(shouldWrite, cachePath, cacheFile, expensiveFn);
+        // FileUtil.writeJSON(path, message);
+
+        global.expect(cacheResults).toStrictEqual(expensiveResults);
+
+        const result = fsExtra.writeFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expensiveResultsStr);
+      });
+      global.it('writes to the cache without a trailing slash', () => {
+        const shouldWrite = true;
+        const cachePath = './tmp';
+        const cacheFile = 'sampleFile';
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const expensiveResults = { success: true, date: dateValue };
+        const expensiveResultsStr = JSON.stringify(expensiveResults, null, 2);
+        const expensiveFn = jest.fn(() => expensiveResults);
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        const cacheResults = FileUtil.useCache(shouldWrite, cachePath, cacheFile, expensiveFn);
+        // FileUtil.writeJSON(path, message);
+
+        global.expect(cacheResults).toStrictEqual(expensiveResults);
+
+        const result = fsExtra.writeFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expensiveResultsStr);
+      });
+      global.it('writes to the cache with a trailing slash', () => {
+        const shouldWrite = true;
+        const cachePath = './tmp/';
+        const cacheFile = 'sampleFile';
+
+        const dateValue = new Date('2025-01-01T00:00:00.000Z');
+        const expensiveResults = { success: true, date: dateValue };
+        const expensiveResultsStr = JSON.stringify(expensiveResults, null, 2);
+        const expensiveFn = jest.fn(() => expensiveResults);
+
+        fsExtra.writeFileSync.mockReturnValue(true);
+
+        const cacheResults = FileUtil.useCache(shouldWrite, cachePath, cacheFile, expensiveFn);
+        // FileUtil.writeJSON(path, message);
+
+        global.expect(cacheResults).toStrictEqual(expensiveResults);
+
+        const result = fsExtra.writeFileSync.mock.calls[0][1];
+        global.expect(result).toBe(expensiveResultsStr);
+      });
+    });
+  });
 });
