@@ -4623,4 +4623,282 @@ describe('ObjectUtils', () => {
       global.expect(results).toBe(expected);
     });
   });
+
+  global.describe('keysWithinList', () => {
+    global.describe('can pass an array of fields', () => {
+      global.it('can find a subset of fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last'];
+        const expected = ['first', 'last'];
+        const results = ObjectUtils.keysWithinList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can find all fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'favouriteColor'];
+        const expected = ['first', 'last', 'favouriteColor'];
+        const results = ObjectUtils.keysWithinList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('does not find fields not in the list of objects', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'shoeSize'];
+        const expected = ['first', 'last'];
+        const results = ObjectUtils.keysWithinList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns an empty list if no fields are asked', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = [];
+        const expected = [];
+        const results = ObjectUtils.keysWithinList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns an empty list if no fields match', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['shoeSize'];
+        const expected = [];
+        const results = ObjectUtils.keysWithinList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can pass arguments individually', () => {
+      global.it('can find a subset of fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last'];
+        const expected = ['first', 'last'];
+        const results = ObjectUtils.keysWithinList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can find all fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'favouriteColor'];
+        const expected = ['first', 'last', 'favouriteColor'];
+        const results = ObjectUtils.keysWithinList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('does not find fields not in the list of objects', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'shoeSize'];
+        const expected = ['first', 'last'];
+        const results = ObjectUtils.keysWithinList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns an empty list if no fields are asked', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = [];
+        const expected = [];
+        const results = ObjectUtils.keysWithinList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns an empty list if no fields match', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['shoeSize'];
+        const expected = [];
+        const results = ObjectUtils.keysWithinList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('keysNotInList', () => {
+    global.describe('can pass an array of fields', () => {
+      global.it('can find a subset of fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last'];
+        const expected = ['favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can find all fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'favouriteColor'];
+        const expected = [];
+        const results = ObjectUtils.keysNotInList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('finds fields not in the list of objects', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'shoeSize'];
+        const expected = ['favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns all fields if no fields are asked', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = [];
+        const expected = ['first', 'last', 'favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns the list if no fields match', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['shoeSize'];
+        const expected = ['first', 'last', 'favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+    global.describe('can pass arguments individually', () => {
+      global.it('can find a subset of fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last'];
+        const expected = ['favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('can find all fields', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'favouriteColor'];
+        const expected = [];
+        const results = ObjectUtils.keysNotInList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('finds fields not in the list of objects', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['first', 'last', 'shoeSize'];
+        const expected = ['favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns all fields if no fields are asked', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = [];
+        const expected = ['first', 'last', 'favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+      global.it('returns the list if no fields match', () => {
+        const dataSet = [
+          { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+          { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+        ];
+        const fieldsToCheck = ['shoeSize'];
+        const expected = ['first', 'last', 'favouriteColor'];
+        const results = ObjectUtils.keysNotInList(dataSet, ...fieldsToCheck);
+        global.expect(results).toStrictEqual(expected);
+      });
+    });
+  });
+
+  global.describe('splitIntoDatums', () => {
+    global.it('can separate by multiple fields', () => {
+      const data = [
+        { category: 'A', source: 'chicago', x: 0.1, y: 0.6, z: 0.9 },
+        { category: 'B', source: 'springfield', x: 0.7, y: 0.2, z: 1.1 },
+        { category: 'C', source: 'winnetka', x: 0.6, y: 0.1, z: 0.2 }
+      ];
+      const fieldsToSplit = ['x', 'y', 'z'];
+      const expected = [
+        { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
+        { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
+        { category: 'A', source: 'chicago', series: 'z', value: 0.9 },
+        { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
+        { category: 'B', source: 'springfield', series: 'y', value: 0.2 },
+        { category: 'B', source: 'springfield', series: 'z', value: 1.1 },
+        { category: 'C', source: 'winnetka', series: 'x', value: 0.6 },
+        { category: 'C', source: 'winnetka', series: 'y', value: 0.1 },
+        { category: 'C', source: 'winnetka', series: 'z', value: 0.2 }
+      ];
+      const results = ObjectUtils.splitIntoDatums(data, fieldsToSplit);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can separate a single record', () => {
+      const data = [
+        { category: 'A', source: 'chicago', x: 0.1, y: 0.6, z: 0.9 }
+      ];
+      const fieldsToSplit = ['x', 'y', 'z'];
+      const expected = [
+        { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
+        { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
+        { category: 'A', source: 'chicago', series: 'z', value: 0.9 }
+      ];
+      const results = ObjectUtils.splitIntoDatums(data, fieldsToSplit);
+      global.expect(results.length).toBe(3);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('can separate by a single field', () => {
+      const data = [
+        { category: 'A', source: 'chicago', x: 0.1 },
+        { category: 'B', source: 'springfield', x: 0.7 },
+        { category: 'C', source: 'winnetka', x: 0.6 }
+      ];
+      const fieldsToSplit = ['x', 'y', 'z'];
+      const expected = [
+        { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
+        { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
+        { category: 'C', source: 'winnetka', series: 'x', value: 0.6 }
+      ];
+      const results = ObjectUtils.splitIntoDatums(data, fieldsToSplit);
+      global.expect(results).toStrictEqual(expected);
+    });
+    global.it('still works if passing fields that do not exist', () => {
+      const data = [
+        { category: 'A', source: 'chicago', x: 0.1 }
+      ];
+      const fieldsToSplit = ['x', 'y', 'z'];
+      const expected = [
+        { category: 'A', source: 'chicago', series: 'x', value: 0.1 }
+      ];
+      const results = ObjectUtils.splitIntoDatums(data, fieldsToSplit);
+      global.expect(results).toStrictEqual(expected);
+    });
+  });
 });
