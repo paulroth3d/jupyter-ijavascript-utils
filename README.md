@@ -54,6 +54,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.59 - 
 * 1.58 - 
     * #91 - add object.splitIntoDatums - to make working with datum libraries - like vega-lite - easier
     * #92 - make using the cache easier - as you can say to use the cache, and it will still work if the cache file does not exist yet.

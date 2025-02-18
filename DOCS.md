@@ -74,6 +74,7 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
+* 1.59 - 
 * 1.58 - 
     * #91 - add {@link module:object.splitIntoDatums|splitIntoDatums(collection, fieldsToSplitBy)} - to make working with datum libraries - like vega-lite - easier
     * #92 - make using the cache easier for {@link module:file.useCache|file.useCache()} - as you can say to use the cache, and it will still work if the cache file does not exist yet.
