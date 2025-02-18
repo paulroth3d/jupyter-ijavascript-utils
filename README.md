@@ -55,6 +55,9 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 # What's New 
 * 1.58 - 
+    * #91 - add object.splitIntoDatums - to make working with datum libraries - like vega-lite - easier
+    * #92 - make using the cache easier - as you can say to use the cache, and it will still work if the cache file does not exist yet.
+    * #93 / #94 - bug fixes
 * 1.57 - #86 - include examples on binning based on time series
     * #87 - add in fileExists to make things easier for new people getting started
     * #89 - allow resizing arrays with defaults, if zipping arrays of different sizes
