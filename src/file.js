@@ -99,7 +99,7 @@ const FileUtil = module.exports;
  * 
  * @param {string} filePath - path of the file to load
  * @param {Object} fsOptions - options to pass for fsRead (ex: { encoding: 'utf-8' })
- * @param {Function} fsOptions.formatter - formatter to use when writing the JSON
+ * @param {Function} fsOptions.reviver - reviver to use when writing the JSON
  * @param {String} fsOptions.encoding - the encoding to write the JSON out with
  * @example
  * const weather = [
@@ -122,11 +122,7 @@ const FileUtil = module.exports;
 module.exports.readJSON = function readJSON(filePath, fsOptions = {}) {
   const resolvedPath = path.resolve(filePath);
   const optionsDefaults = { encoding: 'utf-8' };
-  let cleanedOptions = { ...optionsDefaults, ...fsOptions };
-
-  //-- unfortunately we cannot pass the formatter in addition, it must replace
-  //-- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-  if (cleanedOptions.formatter) cleanedOptions = cleanedOptions.formatter;
+  const cleanedOptions = { ...optionsDefaults, ...fsOptions };
 
   /** @type {string} */
   let result;
@@ -231,6 +227,7 @@ module.exports.readFile = function readFile(filePath, fsOptions = {}) {
  * @param {Boolean} fsOptions.append - if true, will append the text to the file
  * @param {Boolean} fsOptions.prefix - string to add before writing the json, like an opening bracket '[' or comma ','
  * @param {Boolean} fsOptions.prefix - string to add before writing the json, like a closing bracket ']'
+ * @param {Function} fsOptions.replacer - function to use when writing JSON passed to stringify
  * @param {String} fsOptions.encoding - encoding to use when writing the file.
  * @see {@link module:file.readJSON|readJSON(filePath, fsOptions)} - for reading
  */
@@ -241,9 +238,9 @@ module.exports.writeJSON = function writeJSON(filePath, contents, fsOptions = {}
   const isAppend = cleanedOptions.append === true;
   const prefix = cleanedOptions.prefix || '';
   const suffix = cleanedOptions.suffix || '';
-  const formatter = cleanedOptions.formatter || null;
+  const replacer = cleanedOptions.replacer || null;
   const spacing = cleanedOptions.spacing || 2;
-  const jsonContents = JSON.stringify(contents, formatter, spacing);
+  const jsonContents = JSON.stringify(contents, replacer, spacing);
 
   // const resolvedPath = path.resolve(filePath);
   try {
@@ -498,7 +495,7 @@ module.exports.cacheSerializer = (key, value) => {
 */
 
 module.exports.cacheDeserializer = (key, value) => {
-  if (key && (key === 'date' || key.endsWith('_date'))) {
+  if (key && (key === 'date' || key.endsWith('_date') || key.endsWith('Date'))) {
     return new Date(value);
   }
   return value;
@@ -561,17 +558,18 @@ module.exports.cacheDeserializer = (key, value) => {
 module.exports.useCache = function useCache(shouldWrite, cachePath, cacheFile, expensiveFn, fsOptions = null) {
   const ensureEndsWithSlash = (str) => str.endsWith('/') ? str : `${str}/`;
   const cacheFilePath = `${ensureEndsWithSlash(cachePath)}${cacheFile}`;
+
+  const cacheExists = FileUtil.fileExists(cacheFilePath);
   
-  if (!shouldWrite) {
-    const cleanOptions = { ...fsOptions, formatter: FileUtil.cacheDeserializer };
+  if (cacheExists && !shouldWrite) {
+    const cleanOptions = { ...fsOptions, reviver: FileUtil.cacheDeserializer };
     const results = FileUtil.readJSON(cacheFilePath, cleanOptions);
     return results;
   }
 
   const results = expensiveFn();
 
-  const cleanOptions = { ...fsOptions, formatter: null }; // FileUtil.cacheSerializer not needed
-
+  const cleanOptions = fsOptions; // FileUtil.cacheSerializer not needed
   FileUtil.writeJSON(cacheFilePath, results, cleanOptions);
 
   return results;
