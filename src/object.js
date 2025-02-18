@@ -51,13 +51,14 @@ const FormatUtils = require('./format');
  *   * {@link module:object.flatten|flatten()} - creates dot notation properties (similar to arrow notation) of all child objects.
  *   * {@link module:object.expand|expand()}  - expands dot notation properties onto sub children (inverse of flatten)
  * * Create Map of objects by key
- *   * {@link module:object.mapByProperty|mapByProperty()} -
- *   * {@link module:group.by|group(collection, accessor)}
+ *   * {@link module:object.mapByProperty|mapByProperty()}
+ *   * {@link module:group.by|group.by(collection, accessor)}
  * * Convert collections of objects
  *   * {@link module:object.objectCollectionFromArray|objectCollectionFromArray} - convert rows/columns 2d array to objects
- *   * {@link module:object.objectCollectionToArray} - convert objects to a rows/columns 2d array
- *   * {@link module:object.objectCollectionFromDataFrameObject} - convert tensor object with each field as 1d array of values
- *   * {@link module:object.objectCollectionToDataFrameObject} - convert objects from a tensor object
+ *   * {@link module:object.objectCollectionToArray|objectCollectionToArray} - convert objects to a rows/columns 2d array
+ *   * {@link module:object.objectCollectionFromDataFrameObject|objectCollectionFromDataFrameObject} - convert tensor object with each field as 1d array of values
+ *   * {@link module:object.objectCollectionToDataFrameObject|objectCollectionToDataFrameObject} - convert objects from a tensor object
+ *   * {@link module:object.splitIntoDatums|splitIntoDatums(object, fieldsToSplitBy)} - separate objects into series by fields
  * 
  * @module object
  * @exports object
@@ -329,6 +330,78 @@ module.exports.keys = function keys(objOrArray = {}, maxRows = -1) {
     });
   }
   return Array.from(result);
+};
+
+/**
+ * Identifies which keys provided are also in objOrArray.
+ * 
+ * ```
+ * dataSet = [
+ *  { first: 'john', last: 'McCartney' },
+ *  { first: 'ringo', last: 'Starr' }
+ * ];
+ * 
+ * utils.object.keysWithinList(dataSet, 'first', 'last', 'favouriteColor');
+ * // ['first', 'last'] // no favouriteColor defined
+ * ```
+ * 
+ * Note you can also pass the list of keys as an array in the first argument
+ * 
+ * ```
+ * fieldsToCheck = ['first', 'last', 'favouriteColor'];
+ * utils.object.keysWithinList(dataSet, fieldsToCheck);
+ * // ['first', 'last']
+ * ```
+ * 
+ * @param {Object|Object[]} objOrArray - object or list of objects to identify the keys they have
+ * @param  {...String} listOfKeys - a list of keys to check if they are defined within objOrArray
+ * @returns {String[]} - list of keys that are both in the objOrArray or within listOfKeys
+ */
+module.exports.keysWithinList = function keysWithinList(objOrArray, ...listOfKeys) {
+  const cleanListOfKeys = listOfKeys.length > 0 && Array.isArray(listOfKeys[0])
+    ? listOfKeys[0]
+    : listOfKeys;
+  
+  const keySet = new Set(ObjectUtils.keys(objOrArray));
+  const keyIntersection = cleanListOfKeys.filter((keyToTest) => keySet.has(keyToTest));
+  return keyIntersection;
+};
+
+/**
+ * Identifies which other keys are defined that are not in the list provided.
+ * 
+ * This is quite helpful for dynamic APIs.
+ * 
+ * ```
+ * dataSet = [
+ *  { first: 'john', last: 'McCartney', favouriteColor: 'blue' },
+ *  { first: 'ringo', last: 'Starr', favouriteColor: 'red' }
+ * ];
+ * 
+ * utils.object.keysNotInList(dataSet, 'first', 'last', 'favouriteColor');
+ * // ['favouriteColor']
+ * ```
+ * 
+ * Note you can also pass the list of keys as an array in the first argument
+ * 
+ * ```
+ * fieldsToCheck = ['first', 'last', 'favouriteColor'];
+ * utils.object.keysNotInList(dataSet, fieldsToCheck);
+ * // ['favouriteColor']
+ * ```
+ * 
+ * @param {Object|Object[]} objOrArray - object or list of objects to identify the keys they have
+ * @param  {...String} listOfKeys - a list of keys to check if they are defined within objOrArray
+ * @returns {String[]} - list of keys that are both in the objOrArray or within listOfKeys
+ */
+module.exports.keysNotInList = function keysNotInList(objOrArray, ...listOfKeys) {
+  const setOfKeysToCheck = listOfKeys.length > 0 && Array.isArray(listOfKeys[0])
+    ? new Set(listOfKeys[0])
+    : new Set(listOfKeys);
+  
+  const keys = ObjectUtils.keys(objOrArray);
+  const keyIntersection = keys.filter((keyToTest) => !setOfKeysToCheck.has(keyToTest));
+  return keyIntersection;
 };
 
 /**
@@ -2169,4 +2242,93 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
     });
   });
   return dataFrameObject;
+};
+
+/**
+ * Some charting software (such as vega-lite) does not allow a single object to be used
+ * for multiple line series.
+ * 
+ * This is intended to help with that.
+ * 
+ * ```
+ * [
+ *   { category: 'A', source: 'chicago', x: 0.1, y: 0.6, z: 0.9 },
+ *   { category: 'B', source: 'springfield', x: 0.7, y: 0.2, z: 1.1 },
+ *   { category: 'C', source: 'winnetka', x: 0.6, y: 0.1, z: 0.2 }
+ * ]
+ * ```
+ * 
+ * must have a separate object for each x, y and z field for the A category.
+ * 
+ * ```
+ * utils.object.splitIntoDatums(category, ['x', 'y', 'z']);
+ * [
+ *   { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
+ *   { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
+ *   { category: 'A', source: 'chicago', series: 'z', value: 0.9 },
+ *   { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
+ *   { category: 'B', source: 'springfield', series: 'y', value: 0.2 },
+ *   { category: 'B', source: 'springfield', series: 'z', value: 1.1 },
+ *   { category: 'C', source: 'winnetka', series: 'x', value: 0.6 },
+ *   { category: 'C', source: 'winnetka', series: 'y', value: 0.1 },
+ *   { category: 'C', source: 'winnetka', series: 'z', value: 0.2 }
+ * ]
+ * ```
+ * 
+ * note that the fields NOT within the list of fields specified, are preserved
+ * in the denormalized objects...
+ * 
+ * while the fields listed are put into separate objects.
+ * 
+ * You can specify which fields that are generated in those new objects
+ * 
+ * ```
+ * utils.object.splitIntoDatums(category, ['x', 'y', 'z'], 'group', 'val');
+ * [
+ *   { category: 'A', source: 'chicago', group: 'x', val: 0.1 },
+ *   { category: 'A', source: 'chicago', group: 'y', val: 0.6 },
+ *   { category: 'A', source: 'chicago', group: 'z', val: 0.9 },
+ *   { category: 'B', source: 'springfield', group: 'x', val: 0.7 },
+ *   { category: 'B', source: 'springfield', group: 'y', val: 0.2 },
+ *   { category: 'B', source: 'springfield', group: 'z', val: 1.1 },
+ *   { category: 'C', source: 'winnetka', group: 'x', val: 0.6 },
+ *   { category: 'C', source: 'winnetka', group: 'y', val: 0.1 },
+ *   { category: 'C', source: 'winnetka', group: 'z', val: 0.2 }
+ * ]
+ * ```
+ * 
+ * @param {Object[]} objectCollection - collection
+ * @param {String[]} keysForEachSeries - fields that will each be a series spread across datum records
+ * @param {String} [seriesFieldName='series'] - the name of the field to indicate which series this datum is in
+ * @param {String} [valueFieldName='value'] - the name of the value for that datum
+ * @returns {Object} - list of objects x keysForEachSeries.length, where field within keysForEachSeries
+ *    are then individually assigned to a value, and series - to indicate which field is used.
+ */
+module.exports.splitIntoDatums = function splitIntoDatums(
+  collection,
+  keysToSplit,
+  seriesFieldName = 'series',
+  valueFieldName = 'value'
+) {
+  const keysToKeep = ObjectUtils.keysNotInList(collection, keysToSplit);
+  const keysToSeparate = ObjectUtils.keysWithinList(collection, keysToSplit);
+  const rowLength = keysToSeparate.length;
+
+  const results = new Array(collection.length * rowLength).fill(null);
+  collection.forEach((obj, objIndex) => {
+    const basis = {};
+    keysToKeep.forEach((key) => {
+      basis[key] = obj[key];
+    });
+
+    keysToSeparate.forEach((key, keyIndex) => {
+      const newRecord = { ...basis };
+      newRecord[seriesFieldName] = key;
+      newRecord[valueFieldName] = obj[key];
+      results[objIndex * rowLength + keyIndex] = newRecord;
+    });
+  });
+  
+  // return ({keysForSplitting, keysForKeeping});
+  return results;
 };

@@ -442,6 +442,12 @@ global.describe('Date', () => {
         const results = DateUtils.toLocalISO(dateA, 'GMT', true);
         global.expect(results).toStrictEqual(expected);
       });
+      global.it('can convert a midnight date to GMT', () => {
+        const dateA = Date.parse('2024-12-27 00:30:00');
+        const expected = '2024-12-27T00:30:00.000+00:00 - Fri';
+        const results = DateUtils.toLocalISO(dateA, 'GMT', true);
+        global.expect(results).toStrictEqual(expected);
+      });
     });
   });
 

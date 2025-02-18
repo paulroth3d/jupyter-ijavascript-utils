@@ -258,7 +258,7 @@ module.exports.getTimezoneEntry = function getTimezoneEntry(timezoneStr) {
       }, {});
     //   const impactedDate = new Date(d.toLocaleString('en-US', { timezone: timezoneStr }));
     const dateStr = `${dm.year}-${DateUtils.padTime(dm.month)}-${DateUtils.padTime(dm.day)}T${
-      DateUtils.padTime(dm.hour)}:${DateUtils.padTime(dm.minute)}:${DateUtils.padTime(dm.second)}.${
+      DateUtils.padTime(dm.hour % 24)}:${DateUtils.padTime(dm.minute)}:${DateUtils.padTime(dm.second)}.${
       DateUtils.padTime(dm.fractionalSecond, 3)}`;
     
     return dateStr;

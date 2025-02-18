@@ -26,7 +26,7 @@ require('./_types/global');
  *   * {@link module:ijs.markdown|ijs.markdown} - Render output as markdown
  *   * {@link module:ijs.htmlScript|ijs.htmlScript} - Leverage external libraries like D3, Leaflet, etc.
  * * Printing
- *   * {@link module:ijs.noOutputNeeded|ijs.noOutputNeeded} - clears the output to declutter results (like importing libraries, or functions)
+ *   * {@link module:ijs.clearOutput|ijs.clearOutput} - clears the output to declutter results (like importing libraries, or functions)
  *   * {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks} - call at least once to allow pageBreaks when rendering PDFs
  *   * {@link module:ijs.printPageBreak|ijs.printPageBreak} - call to print a page break when rendering PDFs
  * * using a cache for long running executions
@@ -592,7 +592,7 @@ module.exports.htmlScript = function htmlScripts(
  * (This is useful to put after importing libraries,
  * or defining a list of functions)
  */
-module.exports.noOutputNeeded = function clearOutput(outputText = '') {
+module.exports.clearOutput = function clearOutput(outputText = '') {
   //-- you must be in iJavaScript container to rendeer
   const context = IJSUtils.detectContext();
   
@@ -602,7 +602,7 @@ module.exports.noOutputNeeded = function clearOutput(outputText = '') {
 
   context.$$.text(outputText);
 };
-module.exports.clearOutput = module.exports.noOutputNeeded;
+module.exports.noOutputNeeded = module.exports.clearOutput;
 
 /**
  * Required to be called first - in order to write page-breaks in the html results.
