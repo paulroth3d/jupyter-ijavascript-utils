@@ -33,6 +33,7 @@ require('./_types/global');
  *          (so you can render them as you'd like)
  *   * {@link module:ijs.generatePageBreakHTML|ijs.generatePageBreakHTML} - generates the html that uses the styles to render pagebreaks
  *          (so you can render them as you'd like)
+ *   * {@link module:ijs.internalComment|ijs.internalComment} - render markdown, but be able to turn it off, prior to printing
  * * using a cache for long running executions
  *   * {@link module:ijs.useCache|ijs.useCache()} - perform an expensive calculation and write to a cache, or read from the cache transparently
  * 
