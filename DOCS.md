@@ -74,6 +74,9 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
+* 1.59 - 
+    * #95 - give control with page breaks. So we can render text before the page break (like for headers) - or even get the html used and render it how we want. (ex: {@link module:ijs.generatePageBreakStylesHTML|ijs.printPageBreak})
+    * #96 - Support {@link module:ijs.internalComment|ijs.internalComment} in notebooks (meaning it can render in markdown, but can be disabled when preparing to print)
 * 1.58 - 
     * #91 - add {@link module:object.splitIntoDatums|splitIntoDatums(collection, fieldsToSplitBy)} - to make working with datum libraries - like vega-lite - easier
     * #92 - make using the cache easier for {@link module:file.useCache|file.useCache()} - as you can say to use the cache, and it will still work if the cache file does not exist yet.

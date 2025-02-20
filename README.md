@@ -54,6 +54,9 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.59 - 
+    * #95 - give control with page breaks. So we can render text before the page break (like for headers) - or even get the html used and render it how we want.
+    * #96 - Support internal comments in notebooks (meaning it can render in markdown, but can be disabled when preparing to print)
 * 1.58 - 
     * #91 - add object.splitIntoDatums - to make working with datum libraries - like vega-lite - easier
     * #92 - make using the cache easier - as you can say to use the cache, and it will still work if the cache file does not exist yet.
