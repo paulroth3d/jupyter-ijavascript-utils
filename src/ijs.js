@@ -29,7 +29,7 @@ require('./_types/global');
  *   * {@link module:ijs.clearOutput|ijs.clearOutput} - clears the output to declutter results (like importing libraries, or functions)
  *   * {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks} - call at least once to allow pageBreaks when rendering PDFs
  *   * {@link module:ijs.printPageBreak|ijs.printPageBreak} - call to print a page break when rendering PDFs
- *   * {@link module:ijs.generatePageBreakStylesHTML|ijs.generatePageBreakStylesHTML} - generates the html used in to allow for pagebreaks
+ *   * {@link module:ijs.generatePageBreakStylesHTML|ijs.printPageBreak} - generates the html used in to allow for pagebreaks
  *          (so you can render them as you'd like)
  *   * {@link module:ijs.generatePageBreakHTML|ijs.generatePageBreakHTML} - generates the html that uses the styles to render pagebreaks
  *          (so you can render them as you'd like)

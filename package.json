@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.59.0",
+  "version": "1.60.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
@@ -23,7 +23,8 @@
     "doc": "npm run prep:docdash && node_modules/.bin/jsdoc -c ./jsdoc.json -u ./tutorials ./DOCS.md",
     "prep:docdash": "cp docResources/docdash/layout.tmpl node_modules/docdash/tmpl/layout.tmpl && rm -rf docResources/notebooks/node_modules",
     "open:coverage": "open ./coverage/lcov-report/index.html",
-    "open:docs": "open ./docs/index.html"
+    "open:docs": "open ./docs/index.html",
+    "open:binder": "open https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main"
   },
   "repository": {
     "type": "git",
