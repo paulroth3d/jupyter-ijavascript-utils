@@ -239,6 +239,8 @@ module.exports.detectIJS = function detectIJS() {
  * ![Screenshot of markdown](img/ijsMarkdown.png)
  * 
  * @param {String} markdownText - The markdown to be rendered
+ * @param {*} markdownText - the markdown text to render
+ * @param {Jupyter$$} [display] - the display to render the output to.
  * @example
  * 
  * utils.ijs.markdown(`# Overview
@@ -248,6 +250,33 @@ module.exports.markdown = function markdown(markdownText, display) {
   if (!IJSUtils.detectIJS()) return;
   const displayToUse = display || global.$$;
   displayToUse.mime({ 'text/markdown': markdownText });
+};
+
+/**
+ * Capture internal comments that can render as markdown (including images)
+ * but be turned off - so they are not rendered in the final output
+ * 
+ * ```
+ * utils.ijs.internalComment(true, `![Screenshot](localhost://path-to-file)`);
+ * ```
+ * 
+ * and then when preparing to ship, you don't include it
+ * 
+ * ```
+ * printable=true
+ * utils.ijs.internalComment(!printable, `![Screenshot](localhost://path-to-file)`);
+ * ```
+ * 
+ * @param {Boolean} shouldRender - whether the comment should be rendered to the output
+ * @param {String} markdownText - the markdown text to render
+ * @param {Jupyter$$} [display] - the display to render the output to.
+ */
+module.exports.internalComment = function internalComment(shouldRender, markdownText, display) {
+  if (!shouldRender) {
+    IJSUtils.clearOutput();
+  } else {
+    IJSUtils.markdown(markdownText, display);
+  }
 };
 
 /**

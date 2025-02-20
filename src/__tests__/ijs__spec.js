@@ -137,6 +137,48 @@ global.describe('IJS', () => {
     });
   });
 
+  global.describe('internalComment', () => {
+    global.it('prints markdown if in IJSContext', () => {
+      try {
+        IJSUtils.internalComment(true, '# Test');
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+    global.it('prints markdown if in IJSContext', () => {
+      try {
+        IJSUtils.internalComment(true, '# Test', global.$$);
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+
+    global.it('does not prints markdown if not in IJSContext', () => {
+      removeIJSContext();
+      try {
+        IJSUtils.internalComment(true, '# Test');
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+    global.it('does not prints markdown if not in IJSContext', () => {
+      removeIJSContext();
+      try {
+        IJSUtils.internalComment(true, '# Test', global.$$);
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+    global.it('does not print markdown if told not to', () => {
+      removeIJSContext();
+      try {
+        IJSUtils.internalComment(false, '# Test', global.$$);
+      } catch (err) {
+        global.expect(err).toBeNull();
+      }
+    });
+  });
+
   global.describe('listGlobals', () => {
     global.it('lists $$', () => {
       const results = IJSUtils.listGlobals();
