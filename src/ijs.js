@@ -29,6 +29,10 @@ require('./_types/global');
  *   * {@link module:ijs.clearOutput|ijs.clearOutput} - clears the output to declutter results (like importing libraries, or functions)
  *   * {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks} - call at least once to allow pageBreaks when rendering PDFs
  *   * {@link module:ijs.printPageBreak|ijs.printPageBreak} - call to print a page break when rendering PDFs
+ *   * {@link module:ijs.generatePageBreakStylesHTML|ijs.generatePageBreakStylesHTML} - generates the html used in to allow for pagebreaks
+ *          (so you can render them as you'd like)
+ *   * {@link module:ijs.generatePageBreakHTML|ijs.generatePageBreakHTML} - generates the html that uses the styles to render pagebreaks
+ *          (so you can render them as you'd like)
  * * using a cache for long running executions
  *   * {@link module:ijs.useCache|ijs.useCache()} - perform an expensive calculation and write to a cache, or read from the cache transparently
  * 
@@ -605,6 +609,36 @@ module.exports.clearOutput = function clearOutput(outputText = '') {
 module.exports.noOutputNeeded = module.exports.clearOutput;
 
 /**
+ * Returns the HTML used for generating pageBreaks within the library.
+ * 
+ * This gives you control over rendering the text together
+ * 
+ * ```
+ * utils.ijs.generatePageBreakStylesHTML();
+ * // <style>
+ * 
+ * //-- an identifier that can be used to find if this script exists on the page
+ * \/\* ID:___InitializePageBreaks___ \*\/
+ * 
+ * // @media print {
+ * // .pagebreak { page-break-before: always; }
+ * // }
+ * 
+ * // </style>
+ * ```
+ * 
+ * @returns {String} - the html styles tag used to allow for page breaks to be generated
+ */
+module.exports.generatePageBreakStylesHTML = function generatePageBreakStylesHTML() {
+  return `<style>
+/* ID:___InitializePageBreaks___ */
+@media print {
+.pagebreak { page-break-before: always; } /* page-break-after works, as well */
+}
+</style>`;
+};
+
+/**
  * Required to be called first - in order to write page-breaks in the html results.
  * 
  * (For Example:)
@@ -634,8 +668,26 @@ module.exports.noOutputNeeded = module.exports.clearOutput;
  * 
  * * end of document
  * ```
+ * 
+ * Note, sometimes you want to include a text prior to the page break,
+ * like mentioning that a page is left intentionally blank - or to identify
+ * this is the cell that has the style - so it shouldn't be removed prior to printing.
+ * 
+ * ```
+ * utils.ijs.initializePageBreaks('<h1>This page left intentionally blank</h1>');
+ * ```
+ * 
+ * Or, perhaps you always want a page break after defining the styles
+ * 
+ * ```
+ * utils.ijs.initializePageBreaks(null, utils.ijs.generatePageBreakHTML());
+ * ```
+ * 
+ * @param {String} [htmlToInjectBefore] - optional html text to include prior to the pageBreak
+ *      (This can be helpful like - page left intentionally blank)
+ * @param {String} [htmlToInjectAfter] - optional html text to include prior to the pageBreak
  */
-module.exports.initializePageBreaks = function initializePageBreaks() {
+module.exports.initializePageBreaks = function initializePageBreaks(htmlToInjectBefore, htmlToInjectAfter) {
   //-- you must be in iJavaScript container to rendeer
   const context = IJSUtils.detectContext();
     
@@ -643,20 +695,50 @@ module.exports.initializePageBreaks = function initializePageBreaks() {
     return;
   }
 
-  context.$$.html(`<style>
-    @media print {
-    .pagebreak { page-break-before: always; } /* page-break-after works, as well */
-    }
-    </style>
-    <div class="pagebreak"></div>
-    `);
+  const cleanInjectionPrior = htmlToInjectBefore || '';
+  const htmlToRender = IJSUtils.generatePageBreakStylesHTML();
+  const cleanInjectionAfter = htmlToInjectAfter || '';
+
+  context.$$.html(`
+${cleanInjectionPrior}
+${htmlToRender}
+${cleanInjectionAfter}`);
+};
+
+/**
+ * Generates the html used for creating a page break used by the library.
+ * 
+ * This gives you options about when and how to render it.
+ * 
+ * ```
+ * utils.ijs.generatePageBreakHTML();
+ * //-- uses the style defined in initializePageBreaks
+ * // <div class="pagebreak"></div>
+ * ```
+ * 
+ * For example, you can use this so you automatically have a page break after generating the styles
+ * 
+ * ```
+ * utils.ijs.initializePageBreaks(null, utils.ijs.generatePageBreakHTML());
+ * ```
+ * 
+ * @returns {String}
+ * @see {@link module:ijs.printPageBreak|ijs.printPageBreak}
+ * @see {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks}
+ */
+module.exports.generatePageBreakHTML = function generatePageBreakHTML() {
+  return '<div class="pagebreak"></div>';
 };
 
 /**
  * After the {@see module:ijs.initializePageBreaks|utils.ijs.initializePageBreaks} is called,
  * this will create another page break.
+ * 
+ * @param {String} [htmlToInjectBefore] - optional html text to include prior to the pageBreak
+ *      (This can be helpful like - page left intentionally blank)
+ * @param {String} [htmlToInjectAfter] - optional html text to include prior to the pageBreak
  */
-module.exports.printPageBreak = function printPageBreak() {
+module.exports.printPageBreak = function printPageBreak(htmlToInjectBefore, htmlToInjectAfter) {
   //-- you must be in iJavaScript container to rendeer
   const context = IJSUtils.detectContext();
   
@@ -664,7 +746,9 @@ module.exports.printPageBreak = function printPageBreak() {
     return;
   }
 
-  context.$$.html('<div class="pagebreak"></div>');
+  const htmlToRender = IJSUtils.generatePageBreakHTML();
+
+  context.$$.html(`${htmlToInjectBefore || ''}${htmlToRender}${htmlToInjectAfter || ''}`);
 };
 
 /**

@@ -319,6 +319,19 @@ global.describe('IJS', () => {
     });
   });
 
+  global.describe('generatePageBreakStylesHTML', () => {
+    global.it('returns text', () => {
+      const expected = `<style>
+/* ID:___InitializePageBreaks___ */
+@media print {
+.pagebreak { page-break-before: always; } /* page-break-after works, as well */
+}
+</style>`;
+      const results = IJSUtils.generatePageBreakStylesHTML();
+      global.expect(results).toBe(expected);
+    });
+  });
+
   global.describe('initializePageBreaks', () => {
     global.it('works even if no ijs context', () => {
       removeIJSContext();
@@ -348,6 +361,68 @@ global.describe('IJS', () => {
         const [argText] = args;
         global.expect(argText).toContain('page-break-before');
       });
+      global.it('can include text prior', () => {
+        const textToIncludePrior = '<h1>TextToIncludePrior</h1>';
+        const textToIncludeAfter = '<h1>TextToIncludeAfter</h1>';
+        prepareIJSContext();
+        IJSUtils.initializePageBreaks(textToIncludePrior, null);
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('page-break-before');
+        global.expect(argText).toContain(textToIncludePrior);
+        global.expect(argText).not.toContain(textToIncludeAfter);
+      });
+      global.it('can include text after', () => {
+        const textToIncludePrior = '<h1>TextToIncludePrior</h1>';
+        const textToIncludeAfter = '<h1>TextToIncludeAfter</h1>';
+        prepareIJSContext();
+        IJSUtils.initializePageBreaks(null, textToIncludeAfter);
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('page-break-before');
+        global.expect(argText).not.toContain(textToIncludePrior);
+        global.expect(argText).toContain(textToIncludeAfter);
+      });
+      global.it('can include text both before and after', () => {
+        const textToIncludePrior = '<h1>TextToIncludePrior</h1>';
+        const textToIncludeAfter = '<h1>TextToIncludeAfter</h1>';
+        prepareIJSContext();
+        IJSUtils.initializePageBreaks(textToIncludePrior, textToIncludeAfter);
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('page-break-before');
+        global.expect(argText).toContain(textToIncludePrior);
+        global.expect(argText).toContain(textToIncludeAfter);
+      });
+    });
+  });
+
+  global.describe('generatePageBreakHTML', () => {
+    global.it('returns text', () => {
+      const expected = '<div class="pagebreak"></div>';
+      const results = IJSUtils.generatePageBreakHTML();
+      global.expect(results).toBe(expected);
     });
   });
 
@@ -379,6 +454,59 @@ global.describe('IJS', () => {
 
         const [argText] = args;
         global.expect(argText).toContain('pagebreak');
+      });
+      global.it('can inject html prior', () => {
+        const textToIncludePrior = '<h1>TextToIncludePrior</h1>';
+
+        prepareIJSContext();
+        IJSUtils.printPageBreak(textToIncludePrior);
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('pagebreak');
+        global.expect(argText).toContain(textToIncludePrior);
+      });
+      global.it('can inject html after', () => {
+        const textToIncludeAfter = '<h1>TextToIncludeAfter</h1>';
+
+        prepareIJSContext();
+        IJSUtils.printPageBreak(null, textToIncludeAfter);
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('pagebreak');
+        global.expect(argText).toContain(textToIncludeAfter);
+      });
+      global.it('can inject html before and after', () => {
+        const textToIncludePrior = '<h1>TextToIncludePrior</h1>';
+        const textToIncludeAfter = '<h1>TextToIncludeAfter</h1>';
+
+        prepareIJSContext();
+        IJSUtils.printPageBreak(textToIncludePrior, textToIncludeAfter);
+        global.expect(global.$$).toBeTruthy();
+        global.expect(global.$$.html).toBeTruthy();
+        global.expect(global.$$.html.mock).toBeTruthy();
+        global.expect(global.$$.html.mock.calls).toBeTruthy();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const args = global.$$.html.mock.calls[0];
+
+        const [argText] = args;
+        global.expect(argText).toContain('pagebreak');
+        global.expect(argText).toContain(textToIncludePrior);
+        global.expect(argText).toContain(textToIncludeAfter);
       });
     });
   });
