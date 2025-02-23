@@ -22,16 +22,17 @@ const removeIJSContext = () => {
 };
 
 const createNewDisplay = (name) => {
-  const valueFn = jest.fn((value) => `display:${name}:${(value)}`);
+  const makeFn = (type) => jest.fn((value) => `${type}:${name}:${value}`);
   const newDisplay = ({
     async: () => {},
-    text: valueFn,
-    png: valueFn,
-    svg: valueFn,
-    html: valueFn,
-    jpg: valueFn,
-    mime: valueFn,
-    sendResults: valueFn
+    text: makeFn('text'),
+    png: makeFn('png'),
+    svg: makeFn('svg'),
+    html: makeFn('html'),
+    jpg: makeFn('jpg'),
+    mime: makeFn('mime'),
+    markdown: makeFn('markdown'),
+    sendResults: makeFn('sendResults')
   });
   return newDisplay;
 };
@@ -138,19 +139,99 @@ global.describe('IJS', () => {
   });
 
   global.describe('internalComment', () => {
-    global.it('prints markdown if in IJSContext', () => {
-      try {
-        IJSUtils.internalComment(true, '# Test');
-      } catch (err) {
-        global.expect(err).toBeNull();
-      }
+    global.beforeEach(() => {
+      prepareIJSContext();
     });
-    global.it('prints markdown if in IJSContext', () => {
-      try {
-        IJSUtils.internalComment(true, '# Test', global.$$);
-      } catch (err) {
-        global.expect(err).toBeNull();
-      }
+    global.afterEach(() => {
+      removeIJSContext();
+    });
+    global.describe('should render output', () => {
+      global.it('prints markdown if in IJSContext', () => {
+        try {
+          IJSUtils.internalComment(true, '# Test');
+        } catch (err) {
+          global.expect(err).toBeNull();
+        }
+      });
+      global.it('prints markdown if in IJSContext', () => {
+        try {
+          IJSUtils.internalComment(true, '# Test', global.$$);
+        } catch (err) {
+          global.expect(err).toBeNull();
+        }
+      });
+      global.it('should call markdown', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(true, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).toHaveBeenCalled();
+      });
+      global.it('should not call html', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(true, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.html).not.toHaveBeenCalled();
+      });
+      global.it('should have only one call to markdown', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(true, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.html).not.toHaveBeenCalled();
+
+        global.expect(global.$$.markdown.mock.calls.length).toEqual(1);
+      });
+      global.it('should include the comment requested', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(true, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.html).not.toHaveBeenCalled();
+
+        global.expect(global.$$.markdown.mock.calls.length).toEqual(1);
+        global.expect(global.$$.markdown.mock.calls[0][0]).toContain(commentStr);
+      });
+      global.it('should NOT include the text to remove the cell', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(true, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.html).not.toHaveBeenCalled();
+
+        const notToPrintStr = 'output-to-be-removed-from-printing';
+
+        global.expect(global.$$.markdown.mock.calls.length).toEqual(1);
+        global.expect(global.$$.markdown.mock.calls[0][0]).toContain(commentStr);
+        global.expect(global.$$.markdown.mock.calls[0][0]).not.toContain(notToPrintStr);
+      });
+    });
+    global.describe('should not render output if false', () => {
+      global.it('should not call markdown', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(false, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).not.toHaveBeenCalled();
+      });
+      global.it('should call html', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(false, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).not.toHaveBeenCalled();
+        global.expect(global.$$.html).toHaveBeenCalled();
+      });
+      global.it('should include the remove marker', () => {
+        const commentStr = 'This is some comment';
+        IJSUtils.internalComment(false, commentStr, global.$$);
+  
+        global.expect(global.$$.markdown).not.toHaveBeenCalled();
+        global.expect(global.$$.html).toHaveBeenCalled();
+  
+        const notToPrintStr = 'output-to-be-removed-from-printing';
+  
+        global.expect(global.$$.html.mock.calls.length).toEqual(1);
+        global.expect(global.$$.html.mock.calls[0][0]).toContain(notToPrintStr);
+      });
     });
 
     global.it('does not prints markdown if not in IJSContext', () => {
@@ -361,15 +442,15 @@ global.describe('IJS', () => {
     });
   });
 
-  global.describe('generatePageBreakStylesHTML', () => {
-    global.it('returns text', () => {
-      const expected = `<style>
-/* ID:___InitializePageBreaks___ */
-@media print {
-.pagebreak { page-break-before: always; } /* page-break-after works, as well */
-}
-</style>`;
-      const results = IJSUtils.generatePageBreakStylesHTML();
+  global.describe('markPositionInDocument', () => {
+    global.it('renders html', () => {
+      const elementId = 'marker-start';
+      const markerComment = 'Start of Marker';
+      // const innerHTML = null;
+      const testArguments = [elementId, markerComment];
+      const expected = `<!-- ##Start of Marker## -->
+<span id="marker-start">&nbsp;</span>`;
+      const results = IJSUtils.generatePositionMarkerHTML(...testArguments).trim();
       global.expect(results).toBe(expected);
     });
   });
@@ -691,6 +772,190 @@ global.describe('IJS', () => {
             global.expect(result).toStrictEqual(data);
             done();
           });
+      });
+    });
+  });
+
+  global.describe('clearOutput', () => {
+    global.beforeEach(() => {
+      prepareIJSContext();
+    });
+    global.afterEach(() => {
+      removeIJSContext();
+    });
+    global.afterAll(() => {
+      global.console = ORIGINAL_CONSOLE;
+    });
+    global.describe('does nothing if not in IJS', () => {
+      global.it('should be in ijs out of the box', () => {
+        global.expect(IJSUtils.detectIJS()).toBe(true);
+      });
+      global.it('is not in ijs if the context is removed', () => {
+        global.expect(IJSUtils.detectIJS()).toBe(true);
+
+        removeIJSContext();
+        
+        global.expect(IJSUtils.detectIJS()).toBe(false);
+      });
+      global.it('does not send to text if not in ijs', () => {
+        global.expect(IJSUtils.detectIJS()).toBe(true);
+
+        removeIJSContext();
+        
+        global.expect(IJSUtils.detectIJS()).toBe(false);
+
+        const textOutput = 'Text to find';
+        const htmlOutput = 'html to find';
+        const testArgs = [textOutput, htmlOutput];
+
+        IJSUtils.clearOutput(...testArgs);
+
+        //-- doesn't exist - so we can't tell it wasn't called
+        // global.expect(global.$$.text).not.toHaveBeenCalled();
+
+        //-- doesn't exist - so we can't tell it wasn't called
+        // global.expect(global.$$.html).not.toHaveBeenCalled();
+      });
+    });
+    global.describe('print text', () => {
+      global.it('prints to text if html is not provided', () => {
+        global.expect(IJSUtils.detectIJS()).toBe(true);
+
+        const textOutput = 'Text to find';
+        // const htmlOutput = 'html to find';
+        const testArgs = [textOutput];
+
+        IJSUtils.clearOutput(...testArgs);
+
+        global.expect(global.$$.text).toHaveBeenCalled();
+
+        global.expect(global.$$.text.mock.calls.length).toBe(1);
+        global.expect(global.$$.text.mock.calls[0][0]).toContain(textOutput);
+
+        global.expect(global.$$.html).not.toHaveBeenCalled();
+      });
+    });
+    global.describe('print html', () => {
+      global.it('prints to text if text is provided', () => {
+        global.expect(IJSUtils.detectIJS()).toBe(true);
+
+        const textOutput = 'Text to find';
+        const htmlOutput = 'html to find';
+        const testArgs = [textOutput, htmlOutput];
+
+        IJSUtils.clearOutput(...testArgs);
+
+        global.expect(global.$$.html).toHaveBeenCalled();
+
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+        global.expect(global.$$.html.mock.calls[0][0]).toContain(htmlOutput);
+
+        global.expect(global.$$.text).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  global.describe('markContent', () => {
+    global.describe('generates the output as expected', () => {
+      global.it('prints the element id', () => {
+        const elementId = 'test-element-id';
+        // const markerComment = 'some comment';
+        // const innerHTML = '<div class="text" />';
+        const testArgs = [elementId];
+
+        const results = IJSUtils.generatePositionMarkerHTML(...testArgs).trim();
+
+        global.expect(results).toContain(elementId);
+      });
+      global.it('prints the inner HTML', () => {
+        const elementId = 'test-element-id';
+        // const markerComment = 'some comment';
+        const innerHTML = '<div class="text" />';
+        const testArgs = [elementId, null, innerHTML];
+
+        const results = IJSUtils.generatePositionMarkerHTML(...testArgs).trim();
+
+        global.expect(results).toContain(elementId);
+        global.expect(results).toContain(innerHTML);
+      });
+      global.it('does not include any comment if not provided', () => {
+        const elementId = 'test-element-id';
+        // const markerComment = 'some comment';
+        // const innerHTML = '<div class="text" />';
+        const testArgs = [elementId];
+
+        const results = IJSUtils.generatePositionMarkerHTML(...testArgs).trim();
+
+        global.expect(results).toContain(elementId);
+        global.expect(results).not.toContain('<!--');
+      });
+      global.it('does include comment if one is provided', () => {
+        const elementId = 'test-element-id';
+        const markerComment = 'some comment';
+        // const innerHTML = '<div class="text" />';
+        const testArgs = [elementId, markerComment];
+
+        const results = IJSUtils.generatePositionMarkerHTML(...testArgs).trim();
+
+        global.expect(results).toContain(elementId);
+        global.expect(results).toContain('<!--');
+        global.expect(results).toContain(markerComment);
+      });
+    });
+    global.describe('markPositionInDocument', () => {
+      global.it('calls html', () => {
+        const elementId = 'test-element-id';
+        const markerComment = 'some comment';
+        const testArgs = [elementId, markerComment];
+
+        IJSUtils.markPositionInDocument(...testArgs);
+
+        global.expect(global.$$.html).toHaveBeenCalled();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+      });
+      global.it('calls html with the element and comment', () => {
+        const elementId = 'test-element-id';
+        const markerComment = 'some comment';
+        const testArgs = [elementId, markerComment];
+
+        IJSUtils.markPositionInDocument(...testArgs);
+
+        global.expect(global.$$.html).toHaveBeenCalled();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const results = global.$$.html.mock.calls[0][0];
+        global.expect(results).toContain(elementId);
+        global.expect(results).toContain(markerComment);
+      });
+    });
+    global.describe('markStartOfDocument', () => {
+      global.it('calls html with the element and comment', () => {
+        const elementId = 'ijsutils-start-of-content';
+        const markerComment = 'Start of content';
+        
+        IJSUtils.markStartOfContent();
+
+        global.expect(global.$$.html).toHaveBeenCalled();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const results = global.$$.html.mock.calls[0][0];
+        global.expect(results).toContain(elementId);
+        global.expect(results).toContain(markerComment);
+      });
+    });
+    global.describe('markEndOfDocument', () => {
+      global.it('calls html with the element and comment', () => {
+        const elementId = 'ijsutils-end-of-content';
+        const markerComment = 'End of content';
+        
+        IJSUtils.markEndOfContent();
+
+        global.expect(global.$$.html).toHaveBeenCalled();
+        global.expect(global.$$.html.mock.calls.length).toBe(1);
+
+        const results = global.$$.html.mock.calls[0][0];
+        global.expect(results).toContain(elementId);
+        global.expect(results).toContain(markerComment);
       });
     });
   });
