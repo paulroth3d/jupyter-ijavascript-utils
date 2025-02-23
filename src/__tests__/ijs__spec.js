@@ -442,7 +442,7 @@ global.describe('IJS', () => {
     });
   });
 
-  global.describe('markPositionInDocument', () => {
+  global.describe('markDocumentPosition', () => {
     global.it('renders html', () => {
       const elementId = 'marker-start';
       const markerComment = 'Start of Marker';
@@ -902,13 +902,13 @@ global.describe('IJS', () => {
         global.expect(results).toContain(markerComment);
       });
     });
-    global.describe('markPositionInDocument', () => {
+    global.describe('markDocumentPosition', () => {
       global.it('calls html', () => {
         const elementId = 'test-element-id';
         const markerComment = 'some comment';
         const testArgs = [elementId, markerComment];
 
-        IJSUtils.markPositionInDocument(...testArgs);
+        IJSUtils.markDocumentPosition(...testArgs);
 
         global.expect(global.$$.html).toHaveBeenCalled();
         global.expect(global.$$.html.mock.calls.length).toBe(1);
@@ -918,7 +918,7 @@ global.describe('IJS', () => {
         const markerComment = 'some comment';
         const testArgs = [elementId, markerComment];
 
-        IJSUtils.markPositionInDocument(...testArgs);
+        IJSUtils.markDocumentPosition(...testArgs);
 
         global.expect(global.$$.html).toHaveBeenCalled();
         global.expect(global.$$.html.mock.calls.length).toBe(1);

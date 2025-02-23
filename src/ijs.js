@@ -34,7 +34,7 @@ require('./_types/global');
  *   * {@link module:ijs.generatePageBreakHTML|ijs.generatePageBreakHTML} - generates the html that uses the styles to render pagebreaks
  *          (so you can render them as you'd like)
  *   * {@link module:ijs.internalComment|ijs.internalComment} - render markdown, but be able to turn it off, prior to printing
- *   * {@link module:ijs.markPositionInDocument|ijs.markPositionInDocument} - render something in html for post processing
+ *   * {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition} - render something in html for post processing
  *          (such as identifying the start of document and removing everything prior)
  *   * {@link module:ijs.markStartOfContent|ijs.markStartOfContent} - most comment mark - the start of content
  *   * {@link module:ijs.markEndOfContent|ijs.markEndOfContent} - most comment mark - the end of content
@@ -654,7 +654,7 @@ module.exports.noOutputNeeded = module.exports.clearOutput;
  * This could be useful for removing all cells and content prior from printing
  * when reviewing the html output.
  * 
- * @see {@link module:ijs.markPositionInDocument|ijs.markPositionInDocument}
+ * @see {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition}
  * @example
  * utils.ijs.markStartOfContent();
  * 
@@ -663,7 +663,7 @@ module.exports.noOutputNeeded = module.exports.clearOutput;
  * // <span id="ijsutils-start-of-content">&nbsp;</span>
  */
 module.exports.markStartOfContent = function markStartOfContent() {
-  IJSUtils.markPositionInDocument('ijsutils-start-of-content', 'Start of content. This could be used to remove everything prior from printing.');
+  IJSUtils.markDocumentPosition('ijsutils-start-of-content', 'Start of content. This could be used to remove everything prior from printing.');
 };
 
 /**
@@ -672,7 +672,7 @@ module.exports.markStartOfContent = function markStartOfContent() {
  * This could be useful for removing all cells and content after this point from printing
  * when reviewing the html output.
  * 
- * @see {@link module:ijs.markPositionInDocument|ijs.markPositionInDocument}
+ * @see {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition}
  * @example
  * utils.ijs.markEndOfContent();
  * 
@@ -681,7 +681,7 @@ module.exports.markStartOfContent = function markStartOfContent() {
  * // <span id="ijsutils-end-of-content">&nbsp;</span>
  */
 module.exports.markEndOfContent = function markEndOfContent() {
-  IJSUtils.markPositionInDocument('ijsutils-end-of-content', 'End of content. This could be used to remove everything after from printing.');
+  IJSUtils.markDocumentPosition('ijsutils-end-of-content', 'End of content. This could be used to remove everything after from printing.');
 };
 
 /**
@@ -714,7 +714,7 @@ ${!markerComment ? '' : `<!-- ##${markerComment}## -->`}
  * For example, within a Jupyter / Jupyter Lab Notebook:
  * 
  * ```
- * utils.ijs.markPositionInDocument('ijsutils-start-of-content', 'Remove this and everything above', '<h1>Start of content</h1>');
+ * utils.ijs.markDocumentPosition('ijsutils-start-of-content', 'Remove this and everything above', '<h1>Start of content</h1>');
  * 
  * //-- this will render a cell with the following:
  * // <!-- ##start of stuff## -->
@@ -747,7 +747,7 @@ ${!markerComment ? '' : `<!-- ##${markerComment}## -->`}
  * @see {@link module:ijs.markStartOfContent|ijs.markStartOfContent} 
  * @see {@link module:ijs.markEndOfContent|ijs.markEndOfContent} 
  */
-module.exports.markPositionInDocument = function markPositionInDocument(elementId, markerComment, innerHTML) {
+module.exports.markDocumentPosition = function markDocumentPosition(elementId, markerComment, innerHTML) {
   const resultHTML = IJSUtils.generatePositionMarkerHTML(elementId, markerComment, innerHTML);
 
   IJSUtils.clearOutput(null, resultHTML);
