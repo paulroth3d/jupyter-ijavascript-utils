@@ -29,11 +29,15 @@ require('./_types/global');
  *   * {@link module:ijs.clearOutput|ijs.clearOutput} - clears the output to declutter results (like importing libraries, or functions)
  *   * {@link module:ijs.initializePageBreaks|ijs.initializePageBreaks} - call at least once to allow pageBreaks when rendering PDFs
  *   * {@link module:ijs.printPageBreak|ijs.printPageBreak} - call to print a page break when rendering PDFs
- *   * {@link module:ijs.generatePageBreakStylesHTML|ijs.generatePageBreakStylesHTML} - generates the html used in to allow for pagebreaks
+ *   * {@link module:ijs.generatePageBreakStylesHTML|ijs.printPageBreak} - generates the html used in to allow for pagebreaks
  *          (so you can render them as you'd like)
  *   * {@link module:ijs.generatePageBreakHTML|ijs.generatePageBreakHTML} - generates the html that uses the styles to render pagebreaks
  *          (so you can render them as you'd like)
  *   * {@link module:ijs.internalComment|ijs.internalComment} - render markdown, but be able to turn it off, prior to printing
+ *   * {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition} - render something in html for post processing
+ *          (such as identifying the start of document and removing everything prior)
+ *   * {@link module:ijs.markStartOfContent|ijs.markStartOfContent} - most comment mark - the start of content
+ *   * {@link module:ijs.markEndOfContent|ijs.markEndOfContent} - most comment mark - the end of content
  * * using a cache for long running executions
  *   * {@link module:ijs.useCache|ijs.useCache()} - perform an expensive calculation and write to a cache, or read from the cache transparently
  * 
@@ -273,10 +277,12 @@ module.exports.markdown = function markdown(markdownText, display) {
  * @param {Jupyter$$} [display] - the display to render the output to.
  */
 module.exports.internalComment = function internalComment(shouldRender, markdownText, display) {
-  if (!shouldRender) {
-    IJSUtils.clearOutput();
+  if (!IJSUtils.detectIJS()) return;
+  const displayToUse = display || global.$$;
+  if (shouldRender) {
+    displayToUse.markdown(markdownText, display);
   } else {
-    IJSUtils.markdown(markdownText, display);
+    displayToUse.html('<span class="output-to-be-removed-from-printing">&nbsp;</span>');
   }
 };
 
@@ -626,7 +632,7 @@ module.exports.htmlScript = function htmlScripts(
  * (This is useful to put after importing libraries,
  * or defining a list of functions)
  */
-module.exports.clearOutput = function clearOutput(outputText = '') {
+module.exports.clearOutput = function clearOutput(outputText = '', outputHTML = '') {
   //-- you must be in iJavaScript container to rendeer
   const context = IJSUtils.detectContext();
   
@@ -634,9 +640,118 @@ module.exports.clearOutput = function clearOutput(outputText = '') {
     return;
   }
 
-  context.$$.text(outputText);
+  if (!outputHTML) {
+    context.$$.text(outputText);
+  } else {
+    context.$$.html(outputHTML);
+  }
 };
 module.exports.noOutputNeeded = module.exports.clearOutput;
+
+/**
+ * Marks the start of content.
+ * 
+ * This could be useful for removing all cells and content prior from printing
+ * when reviewing the html output.
+ * 
+ * @see {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition}
+ * @example
+ * utils.ijs.markStartOfContent();
+ * 
+ * //-- will render the following in the cell
+ * // <!-- ##Start of content. This could be used to remove everything prior from printing.## -->
+ * // <span id="ijsutils-start-of-content">&nbsp;</span>
+ */
+module.exports.markStartOfContent = function markStartOfContent() {
+  IJSUtils.markDocumentPosition('ijsutils-start-of-content', 'Start of content. This could be used to remove everything prior from printing.');
+};
+
+/**
+ * Marks the end of content.
+ * 
+ * This could be useful for removing all cells and content after this point from printing
+ * when reviewing the html output.
+ * 
+ * @see {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition}
+ * @example
+ * utils.ijs.markEndOfContent();
+ * 
+ * //-- will render the following in the cell
+ * // <!-- ##End of content. This could be used to remove everything after from printing.## -->
+ * // <span id="ijsutils-end-of-content">&nbsp;</span>
+ */
+module.exports.markEndOfContent = function markEndOfContent() {
+  IJSUtils.markDocumentPosition('ijsutils-end-of-content', 'End of content. This could be used to remove everything after from printing.');
+};
+
+/**
+ * Renders HTML that can be easily found in the HTML of an exported document.
+ * 
+ * This allows for simpler and consistent post-processing
+ * (such as which cells to remove prior to rendering to PDF)
+ * 
+ * @param {String} elementId - id of the element that could be found through document.querySelector
+ * @param {String} [markerComment] - Any additional text to put in an html comment
+ * @param {String} [innerHTML] - Optional text to be shown in the span (useful for making it easier to find)
+ * @returns {String} the html
+ * @private
+ */
+module.exports.generatePositionMarkerHTML = function generatePositionMarkerHTML(elementId, markerComment, innerHTML) {
+  const cleanInnerHTML = innerHTML || '&nbsp;';
+  const html = `
+${!markerComment ? '' : `<!-- ##${markerComment}## -->`}
+<span id="${elementId}">${cleanInnerHTML}</span>
+`;
+  return html;
+};
+
+/**
+ * Renders HTML that can be easily found in the HTML of an exported document.
+ * 
+ * This allows for simpler and consistent post-processing
+ * (such as which cells to remove prior to rendering to PDF)
+ * 
+ * For example, within a Jupyter / Jupyter Lab Notebook:
+ * 
+ * ```
+ * utils.ijs.markDocumentPosition('ijsutils-start-of-content', 'Remove this and everything above', '<h1>Start of content</h1>');
+ * 
+ * //-- this will render a cell with the following:
+ * // <!-- ##start of stuff## -->
+ * // <span id="ijsutils-start-of-content"><h1>Start of content</h1></span>
+ * ```
+ * 
+ * We can then look for that id within the output of the notebook.<br />
+ * (Like within a bookmarklet)
+ * 
+ * ```
+ * parentCell = document.querySelector('#ijsutils-start-of-content').closest('.jp-Cell');
+ * ```
+ * 
+ * and then remove it - and any cells before it
+ * 
+ * ```
+ * cellsToRemove = [];
+ * while(parentCell) {
+ *     cellsToRemove.push(parentCell);
+ *     parentCell = parentCell.previousElementSibling;
+ * }
+ * 
+ * //-- to remove them
+ * cellsToRemove.forEach((el) => el.remove())
+ * ```
+ * 
+ * @param {String} elementId - id of the element that could be found through document.querySelector
+ * @param {String} [markerComment] - Any additional text to put in an html comment
+ * @param {String} [innerHTML] - Optional text to be shown in the span (useful for making it easier to find)
+ * @see {@link module:ijs.markStartOfContent|ijs.markStartOfContent} 
+ * @see {@link module:ijs.markEndOfContent|ijs.markEndOfContent} 
+ */
+module.exports.markDocumentPosition = function markDocumentPosition(elementId, markerComment, innerHTML) {
+  const resultHTML = IJSUtils.generatePositionMarkerHTML(elementId, markerComment, innerHTML);
+
+  IJSUtils.clearOutput(null, resultHTML);
+};
 
 /**
  * Returns the HTML used for generating pageBreaks within the library.

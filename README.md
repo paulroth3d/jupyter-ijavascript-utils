@@ -54,6 +54,7 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.60 - Make post-processing of documents easier with ijs.utils.markDocumentPosition
 * 1.59 - 
     * #95 - give control with page breaks. So we can render text before the page break (like for headers) - or even get the html used and render it how we want.
     * #96 - Support internal comments in notebooks (meaning it can render in markdown, but can be disabled when preparing to print)

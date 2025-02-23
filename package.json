@@ -1,6 +1,6 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.59.0",
+  "version": "1.60.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
@@ -26,7 +26,8 @@
     "open:docs": "open ./docs/index.html",
     "webpack:clean": "echo 'TODO'",
     "webpack:build-dev": "webpack --mode development --config webpack.config.dev.js",
-    "webpack:build": "webpack --mode production --config webpack.config.prod.js"
+    "webpack:build": "webpack --mode production --config webpack.config.prod.js",
+    "open:binder": "open https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main"
   },
   "repository": {
     "type": "git",
