@@ -74,6 +74,7 @@ Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
 ## What's New
+* 1.61 -
 * 1.60 - Make post-processing of documents easier with {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition}
 * 1.59 - 
     * #95 - give control with page breaks. So we can render text before the page break (like for headers) - or even get the html used and render it how we want. (ex: {@link module:ijs.generatePageBreakStylesHTML|ijs.printPageBreak})
