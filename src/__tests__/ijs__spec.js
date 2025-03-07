@@ -31,7 +31,6 @@ const createNewDisplay = (name) => {
     html: makeFn('html'),
     jpg: makeFn('jpg'),
     mime: makeFn('mime'),
-    markdown: makeFn('markdown'),
     sendResults: makeFn('sendResults')
   });
   return newDisplay;
@@ -164,46 +163,48 @@ global.describe('IJS', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(true, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.mime).toHaveBeenCalled();
       });
       global.it('should not call html', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(true, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.mime).toHaveBeenCalled();
         global.expect(global.$$.html).not.toHaveBeenCalled();
       });
       global.it('should have only one call to markdown', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(true, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.mime).toHaveBeenCalled();
         global.expect(global.$$.html).not.toHaveBeenCalled();
 
-        global.expect(global.$$.markdown.mock.calls.length).toEqual(1);
+        global.expect(global.$$.mime.mock.calls.length).toEqual(1);
       });
       global.it('should include the comment requested', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(true, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.mime).toHaveBeenCalled();
         global.expect(global.$$.html).not.toHaveBeenCalled();
 
-        global.expect(global.$$.markdown.mock.calls.length).toEqual(1);
-        global.expect(global.$$.markdown.mock.calls[0][0]).toContain(commentStr);
+        global.expect(global.$$.mime.mock.calls.length).toEqual(1);
+        global.expect(global.$$.mime.mock.calls[0][0]).toHaveProperty('text/markdown');
+        global.expect(global.$$.mime.mock.calls[0][0]['text/markdown']).toBe(commentStr);
       });
       global.it('should NOT include the text to remove the cell', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(true, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).toHaveBeenCalled();
+        global.expect(global.$$.mime).toHaveBeenCalled();
         global.expect(global.$$.html).not.toHaveBeenCalled();
 
         const notToPrintStr = 'output-to-be-removed-from-printing';
 
-        global.expect(global.$$.markdown.mock.calls.length).toEqual(1);
-        global.expect(global.$$.markdown.mock.calls[0][0]).toContain(commentStr);
-        global.expect(global.$$.markdown.mock.calls[0][0]).not.toContain(notToPrintStr);
+        global.expect(global.$$.mime.mock.calls.length).toEqual(1);
+        global.expect(global.$$.mime.mock.calls[0][0]).toHaveProperty('text/markdown');
+        global.expect(global.$$.mime.mock.calls[0][0]['text/markdown']).toBe(commentStr);
+        global.expect(global.$$.mime.mock.calls[0][0]).not.toBe(notToPrintStr);
       });
     });
     global.describe('should not render output if false', () => {
@@ -211,20 +212,20 @@ global.describe('IJS', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(false, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).not.toHaveBeenCalled();
+        global.expect(global.$$.mime).not.toHaveBeenCalled();
       });
       global.it('should call html', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(false, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).not.toHaveBeenCalled();
+        global.expect(global.$$.mime).not.toHaveBeenCalled();
         global.expect(global.$$.html).toHaveBeenCalled();
       });
       global.it('should include the remove marker', () => {
         const commentStr = 'This is some comment';
         IJSUtils.internalComment(false, commentStr, global.$$);
   
-        global.expect(global.$$.markdown).not.toHaveBeenCalled();
+        global.expect(global.$$.mime).not.toHaveBeenCalled();
         global.expect(global.$$.html).toHaveBeenCalled();
   
         const notToPrintStr = 'output-to-be-removed-from-printing';

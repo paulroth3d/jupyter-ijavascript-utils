@@ -280,7 +280,7 @@ module.exports.internalComment = function internalComment(shouldRender, markdown
   if (!IJSUtils.detectIJS()) return;
   const displayToUse = display || global.$$;
   if (shouldRender) {
-    displayToUse.markdown(markdownText, display);
+    displayToUse.mime({ 'text/markdown': markdownText });
   } else {
     displayToUse.html('<span class="output-to-be-removed-from-printing">&nbsp;</span>');
   }
