@@ -1013,7 +1013,7 @@ class DateRange {
    * myRange.shiftStart({ days: 1 });
    * // { startDate: 2025-01-02, endDate: 2025-02-01 }
    * 
-   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-01 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * (Note that this defaults to immutable DateRanges,
@@ -1023,7 +1023,7 @@ class DateRange {
    * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
    * myRange.shiftStart({ days: 1 });
    * 
-   * myRange.toString(); // { startDate: 2025-01-02, endDate: 2025-02-01 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * @param {Object} options - options to shift the dateRange by, similar to {@link module:DateUtils.add|DateUtils.add}
@@ -1055,7 +1055,7 @@ class DateRange {
    * myRange.shiftEnd({ days: 1 });
    * // { startDate: 2025-01-01, endDate: 2025-02-02 }
    * 
-   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-01 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * (Note that this defaults to immutable DateRanges,
@@ -1065,7 +1065,7 @@ class DateRange {
    * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
    * myRange.shiftEnd({ days: 1 });
    * 
-   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-02 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * @param {Object} options - options to shift the dateRange by, similar to {@link module:DateUtils.add|DateUtils.add}
@@ -1097,7 +1097,7 @@ class DateRange {
    * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
-   * range.durationString(); // 1 hour in milliseconds; 1000 * 60 * 60;
+   * range.duration(); // 1 hour in milliseconds; 1000 * 60 * 60; 3600000
    * ```
    * 
    * @returns {Number}
@@ -1132,7 +1132,7 @@ class DateRange {
    * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
-   * range.durationString(); // '0:01:00:00.0000';
+   * range.durationISO(); // '0:01:00:00.000';
    * ```
    * 
    * @returns {String}
@@ -1144,6 +1144,16 @@ class DateRange {
 
   /**
    * Determines if both the startDate and endDate are valid dates.
+   * 
+   * ```
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
+   * invalidDate = new Date(Number.NaN);
+   * range = new utils.DateRange(durationA, durationB).isValid();     // true
+   * range = new utils.DateRange(invalidDate, durationB).isValid();   // false
+   * range = new utils.DateRange(durationA, invalidDate).isValid();   // false
+   * range = new utils.DateRange(invalidDate, invalidDate).isValid(); // false
+   * ```
    * 
    * @returns {Boolean}
    */
