@@ -622,17 +622,19 @@ module.exports.overwrite = function overwrite(dateToUpdate, newDateEpoch) {
  * @param {Number} [options.minutes=0] - number of minutes to add
  * @param {Number} [options.hours=0] - number of minutes to add 
  * @param {Number} [options.seconds=0] - number of seconds to add 
+ * @param {Number} [options.milliseconds=0] - number of milliseconds to add
  * @returns {Date} - Date with the interval added in
  */
 module.exports.add = function add(dateValue, options = null) {
   if (!options) return dateValue;
 
-  const { days = 0, minutes = 0, hours = 0, seconds = 0 } = options;
+  const { days = 0, minutes = 0, hours = 0, seconds = 0, milliseconds = 0 } = options;
   const result = new Date(dateValue.getTime()
     + DateUtils.TIME.DAY * days
     + DateUtils.TIME.HOUR * hours
     + DateUtils.TIME.MINUTE * minutes
-    + DateUtils.TIME.SECOND * seconds);
+    + DateUtils.TIME.SECOND * seconds
+    + DateUtils.TIME.MILLI * milliseconds);
   
   if (Object.hasOwn(options, 'years')) {
     result.setFullYear(result.getFullYear() + options.years);
