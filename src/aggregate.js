@@ -549,7 +549,7 @@ module.exports.first = function first(collection, accessor) {
  * @param {Array} collection -
  * @returns {Number}
  * @example
- * utils.aggregate.count([0.87, 2.68, 5.31, 3.94, 4.13, 3.58, 3.62, 2.56]);
+ * utils.aggregate.length([0.87, 2.68, 5.31, 3.94, 4.13, 3.58, 3.62, 2.56]);
  * // 8
  */
 module.exports.length = function length(collection) {
@@ -684,7 +684,7 @@ module.exports.countMap = function countMap(collection, accessor, uniquifierFn) 
  *   { station: 'A', timestamp: new Date(2022, 0, 2, 9, 30) },
  *   { station: 'B', timestamp: new Date(2022, 0, 2, 10, 0) },
  *   { station: 'A', timestamp: new Date(2022, 0, 3, 10, 0) },
- *   { station: 'B', timestamp: new Date(2022, 0, 3, 10, 0 }
+ *   { station: 'B', timestamp: new Date(2022, 0, 3, 10, 0) }
  * ]
  * utils.aggregate.count(series, 'timestamp', (d) => d.toISOString().slice(0, 10))
  * // { '2022-01-01': 3, '2022-01-02': 2, '2022-01-03': 2 }
@@ -744,7 +744,7 @@ module.exports.duplicates = function duplicates(collection, accessor, uniquifier
  * const superSet = new Set(['a', 'b', 'c']);
  * const data = [{ val: 'a' }, { val: 'b' }, { val: 'c' }, { val: 'd' }];
  * 
- * aggregate.notIn(data, 'val', superSet);
+ * utils.aggregate.notIn(data, 'val', superSet);
  * // Set('d')
  */
 module.exports.notIn = function notIn(collection, accessor, targetIterator) {
@@ -768,13 +768,13 @@ module.exports.notIn = function notIn(collection, accessor, targetIterator) {
  * @returns {Boolean} - whether the values in the array are truly unique
  * @example
  * let data = [{ val: 1 }, { val: 2 }, { val: 3 }, { val: 1 }];
- * aggregate.isUnique(data, 'val'); // false
+ * utils.aggregate.isUnique(data, 'val'); // false
  * 
  * let data = [{ val: 1 }, { val: 2 }, { val: 3 }];
- * aggregate.isUnique(data, 'val'); // true
+ * utils.aggregate.isUnique(data, 'val'); // true
  * 
  * data = ['a', 'b', 'c', 'd'];
- * aggregate.isUnique(data); // true
+ * utils.aggregate.isUnique(data); // true
  */
 module.exports.isUnique = function isUnique(collection, accessor) {
   const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(accessor);
@@ -981,7 +981,7 @@ module.exports.percentile_99 = function percentile(collection, accessor) {
  * // 0.87, 2.56, 2.68, 3.58, 3.62
  * 
  * //-- you can also combine values to make the values clearer, by passing a function
- * const monthPrecip = function (record) => `${record.month} (${record.precip})`;
+ * const monthPrecip = (record) => `${record.month} (${record.precip})`;
  * utils.aggregate.topValues(collection, 3, monthPrecip, '-precip');
  * // '2021-Oct (5.31)', '2021-Dec (4.13)', '2022-Mar (3.98)'
  * ```
@@ -998,7 +998,7 @@ module.exports.percentile_99 = function percentile(collection, accessor) {
  * 
  * //-- bottom 5 values
  * utils.aggregate.topValues(collection, 5, null, '');
- * // 
+ * // [0.87, 2.56, 2.68, 3.58, 3.62]
  * ```
  * 
  * @param {Array} collection - Collection of values we want to get the top values from
