@@ -127,8 +127,8 @@ module.exports.parse = (dateStr) => {
  * Prints the duration in ISO format: `D:HH:MM:SS.MMM`
  * 
  * ```
- * start = new Date(Date.ISO(2024, 12, 26, 12, 0, 0));
- * end = new Date(Date.ISO(2024, 12, 26, 13, 0, 0));
+ * start = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+ * end = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
  * 
  * duration = end.getTime() - start.getTime();
  * 
@@ -156,8 +156,8 @@ module.exports.durationISO = function durationISO(epochDifference) {
  * Prints the duration in long format: `D days, H hours, M minutes, S.MMM seconds`
  * 
  * ```
- * start = new Date(Date.ISO(2024, 12, 26, 12, 0, 0));
- * end = new Date(Date.ISO(2024, 12, 27, 13, 0, 0));
+ * start = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+ * end = new Date(Date.UTC(2024, 12, 27, 13, 0, 0));
  * 
  * duration = end.getTime() - start.getTime();
  * 
@@ -317,7 +317,7 @@ module.exports.getTimezoneOffset = function getTimezoneOffset(timezoneStr) {
  * 
  * ```
  * dTest = new Date('2025-02-01T20:15:41.000'); // -- DID NOT INCLUDE Timezone, so it assumes local timezone
- * ({ epoch: dTest2.getTime(), iso: dTest.toISOString(), local: dTest.toLocaleString() });
+ * ({ epoch: dTest.getTime(), iso: dTest.toISOString(), local: dTest.toLocaleString() });
  * 
  * //-- time is INCORRECT, what should be the ISO time, is the local time.
  * //  local: '2/1/2025, 8:15:41 PM', iso: '2025-02-02T02:15:41.000Z', epoch: 1738440941000
@@ -380,7 +380,7 @@ module.exports.correctForTimezone = function correctForTimezone(date, localTimez
  * utils.date.correctForOtherTimezone( d, sourceTimezone, localTimezone);
  * 
  * //-- correctly converted it to the correct local time
- * // 2024-12-28T18:30:00.000Z
+ * // 2024-12-27T18:30:00.000Z
  * ```
  * 
  * @param {Date} date - the date to be corrected in a new instance
@@ -611,7 +611,7 @@ module.exports.overwrite = function overwrite(dateToUpdate, newDateEpoch) {
  * 
  * ```
  * d = new Date('2024-12-26 6:00:00');
- * d30 = utils.date.add(d, { minutes: 30 }); // Date('2024-12-26 6:00:00')
+ * d30 = utils.date.add(d, { minutes: 30 }); // Date('2024-12-26 6:30:00')
  * ```
  * 
  * @param {Date} dateValue - date to add to
@@ -690,7 +690,6 @@ module.exports.startOfDay = function endOfDay(dateValue) {
  * //   ['2025-02-06 00:00:00')
  * //   ['2025-02-07 00:00:00')
  * //   ['2025-02-08 00:00:00')
- * //   ['2025-02-09 00:00:00')
  * // ]
  * ```
  * 
@@ -729,11 +728,11 @@ module.exports.arrange = function arrange(startDate, count, options) {
  * 
  * ```
  * const startDate = new Date('2025-02-02');
- * const endDate = new Date('2025-02-09 23:59:59.000');
+ * const endDate = new Date('2025-02-09 23:59:59.000+0');
  * // alternative
  * // endDate = utils.date.endOfDay(utils.date.add(startDate, { days; 7 }));
  * 
- * utils.date.arrange(startDate, endDate, { days: 1 });
+ * utils.date.generateDateSequence(startDate, endDate, { days: 1 });
  * //   ['2025-02-02 00:00:00.000'],
  * //   ['2025-02-03 00:00:00.000'],
  * //   ['2025-02-04 00:00:00.000'],
