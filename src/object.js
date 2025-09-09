@@ -123,7 +123,10 @@ module.exports.MAX_COLLAPSE_DEPTH = 50;
 /**
  * Assign a property to an object and return object
  * (allowing for functional programming assignments)
- * @example objAssign({}, 'name', 'john').name === 'john'
+ * @example
+ * simpleObj = utils.object.objAssign({}, 'name', 'john'); // { name: 'john' }
+ * 
+ * 
  * @param {Object} [obj={}] - object to assign the value to (or null for a new one)
  * @param {String} propertyName -
  * @param {any} value -
@@ -137,15 +140,46 @@ module.exports.assign = function objAssign(obj, propertyName, value, ...property
   }
 
   if (!obj) obj = {};
+  let result = { ...obj };
+  result[propertyName] = value; //eslint-disable-line no-param-reassign
+
+  if (propertyNameValues.length > 0) {
+    result = ObjectUtils.objAssign.apply(ObjectUtils, [result, ...propertyNameValues]);
+  }
+
+  return result;
+};
+module.exports.objAssign = module.exports.assign;
+
+/**
+ * Assign a property to an object and return object
+ * (allowing for functional programming assignments)
+ * @example
+ * simpleObj = utils.object.objAssign({}, 'name', 'john'); // { name: 'john' }
+ * 
+ * 
+ * @param {Object} [obj={}] - object to assign the value to (or null for a new one)
+ * @param {String} propertyName -
+ * @param {any} value -
+ * @returns {Object}
+ */
+module.exports.assignIP = function objAssignIP(obj, propertyName, value, ...propertyNameValues) {
+  if ((propertyName === null || propertyName === undefined)) {
+    throw Error('Expecting at least one property name to be passed');
+  } else if (typeof propertyName !== 'string') {
+    throw Error(`Property must be a string:${propertyName}`);
+  }
+
+  if (!obj) obj = {};
   obj[propertyName] = value; //eslint-disable-line no-param-reassign
 
   if (propertyNameValues.length > 0) {
-    ObjectUtils.objAssign.apply(ObjectUtils, [obj, ...propertyNameValues]);
+    ObjectUtils.objAssignIP.apply(ObjectUtils, [obj, ...propertyNameValues]);
   }
 
   return obj;
 };
-module.exports.objAssign = module.exports.assign;
+module.exports.objAssignIP = module.exports.assignIP;
 
 /**
  * Assigns multiple object entities [[property, value], [property, value], ...];
@@ -471,11 +505,11 @@ module.exports.cleanProperties2 = function cleanProperties2(objectsToBeCleaned) 
   const keys = ObjectUtils.keys(cleanedPropertyNames);
 
   const translation = keys.reduce((result, key) => ObjectUtils
-    .objAssign(result, cleanedPropertyNames[key], ObjectUtils.lightlyCleanProperty(key)), {});
+    .objAssignIP(result, cleanedPropertyNames[key], ObjectUtils.lightlyCleanProperty(key)), {});
   
   const values = (objectsToBeCleaned || [])
     .map((obj) => keys.reduce(
-      (result, key) => ObjectUtils.objAssign(result, cleanedPropertyNames[key], obj[key]),
+      (result, key) => ObjectUtils.objAssignIP(result, cleanedPropertyNames[key], obj[key]),
       {}
     ));
   
@@ -763,7 +797,7 @@ module.exports.selectObjectProperties = function selectObjectProperties(list, ..
 
   return targetList.map(
     (record) => cleanPropertyNames.reduce(
-      (result, prop) => ObjectUtils.objAssign(result, prop, record[prop]), {}
+      (result, prop) => ObjectUtils.objAssignIP(result, prop, record[prop]), {}
     )
   );
 };
@@ -1154,15 +1188,17 @@ module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value
  * // ['Seattle', 'New York', 'Chicago'];
  * 
  * //-- async process to geocode
- * geocodedCities = geocodeCity(cities);
- * // [{ city: 'Seattle', state: 'WA', country: 'USA' },
- * // { city: 'New York', state: 'NY', country: 'USA' },
- * // { city: 'Chicago', state: 'IL', country: 'USA' }]
+ * // geocodedCities = geocodeCity(cities);
+ * geocodedCities = [
+ *  { city: 'Seattle', state: 'WA', country: 'USA' },
+ *  { city: 'New York', state: 'NY', country: 'USA' },
+ *  { city: 'Chicago', state: 'IL', country: 'USA' }];
  * 
- * utils.applyPropertyValues(weather, 'geo', geocodedCities);
- *  [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
- *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
- *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * utils.object.applyPropertyValues(weather, 'geo', geocodedCities);
+ * // [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
+ * //  { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
+ * //  { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * ```
  * 
  * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
  * works best for if you are working with objects completely in memory.
@@ -1917,7 +1953,7 @@ module.exports.propertyInherit = function propertyInherit(source, ...properties)
   }
 
   const fn = (obj) => properties.reduce(
-    (result, propertyName) => ObjectUtils.objAssign(result, propertyName, obj[propertyName]),
+    (result, propertyName) => ObjectUtils.objAssignIP(result, propertyName, obj[propertyName]),
     {}
   );
 
@@ -2076,7 +2112,7 @@ module.exports.objectCollectionFromArray = function objectCollectionFromArray(ar
   /* eslint-disable arrow-body-style */
   const newData = cleanValues.map((row) => {
     return cleanHeaders.reduce((result, header, index) => {
-      return ObjectUtils.assign(result, header, row[index]);
+      return ObjectUtils.assignIP(result, header, row[index]);
     }, {});
   });
   /* eslint-enable arrow-body-style */

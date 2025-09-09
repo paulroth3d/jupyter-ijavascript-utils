@@ -38,11 +38,24 @@ describe('ObjectUtils', () => {
   });
 
   describe('objAssign', () => {
-    it('assigns a value on an existing object', () => {
+    it('can assign multiple values', () => {
       const expected = { first: 'john', last: 'doe' };
       let found = {};
-      found = ObjectUtils.objAssign(found, 'first', 'john');
-      found = ObjectUtils.objAssign(found, 'last', 'doe');
+      found = ObjectUtils.objAssign(found, 'first', 'john', 'last', 'doe');
+      expect(found).toEqual(expected);
+    });
+    it('assigns a value even on an empty object', () => {
+      const expected = { first: 'john' };
+      const found = ObjectUtils.objAssign(undefined, 'first', 'john');
+      expect(found).toEqual(expected);
+    });
+  });
+  describe('objAssignIP', () => {
+    it('assigns a value on an existing object', () => {
+      const expected = { first: 'john', last: 'doe' };
+      const found = {};
+      ObjectUtils.objAssignIP(found, 'first', 'john');
+      ObjectUtils.objAssignIP(found, 'last', 'doe');
       expect(found).toEqual(expected);
     });
     it('assigns a value even on an empty object', () => {
