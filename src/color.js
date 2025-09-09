@@ -177,6 +177,8 @@ module.exports.INTERPOLATION_STRATEGIES = {
  * 
  * ```
  * //-- same as utils.color.INTERPOLATION_STRATEGIES.linear;
+ * red = '#FF0000';
+ * green = '#00FF00';
  * linear = (a, b, pct) => a + (b - a) * pct;
  * format = utils.color.FORMATS.ARRAY;
  * utils.color.interpolate(red, green, 0, linear, format); // [255, 0, 0, 1]
@@ -334,9 +336,9 @@ module.exports.toHexA = function toHexA(target, optionalAlpha = 1) {
 module.exports.parseRGB = function parseRGB(rgbStr, optionalAlpha = 1) {
   if (!ColorUtils.COLOR_VALIDATION.isRGB(rgbStr)) return undefined;
 
-  const [r, g, b, a = optionalAlpha] = rgbStr.replace(/[^[0-9,]/g, '')
+  const [r, g, b, a = optionalAlpha] = rgbStr.replace(/[^[0-9,.]/g, '')
     .split(',')
-    .map((decStr) => Number.parseInt(decStr, 10));
+    .map((decStr, index) => index < 3 ? Number.parseInt(decStr, 10) : Number.parseFloat(decStr, 10));
   return [r, g, b, a];
 };
 
