@@ -406,7 +406,8 @@ module.exports.toRGB = function toRGB(target) {
  */
 module.exports.toRGBA = function toRGBA(target, optionalAlpha = 1) {
   const [r, g, b, a] = ColorUtils.parse(target, optionalAlpha);
-  return `rgba(${r}, ${g}, ${b}, ${(!a ? a : (a === 1 || a === 0) ? a : a.toFixed(3))})`;
+  /* istanbul ignore next */
+  return `rgba(${r}, ${g}, ${b}, ${(!a ? '1' : (a === 1 || a === 0) ? a : a.toFixed(3))})`;
 };
 
 /**

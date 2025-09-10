@@ -253,6 +253,24 @@ module.exports.getSet = function getSet(obj, field, functor) {
 module.exports.update = module.exports.getSet;
 
 /**
+ * Retrieves a property through a name of a property or a function
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} propertyOrFn - Name of the property or Function to return a value
+ * @returns {any} - property value or return value from the function
+ * @see {@link module:object.getSet|object.getSet()} - sets a value safely
+ * @example
+ * data = { id: '123', name: 'jim' };
+ * utils.object.get(data, 'name'); // 'jim'
+ * utils.object.get(data, (o) => o.id); // '123'
+ */
+module.exports.get = function get(obj, propertyOrFn) {
+  if (!propertyOrFn) throw new Error('object.mapByProperty: expects a propertyName');
+
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
+  return cleanedFunc(obj);
+};
+
+/**
  * Runs a map over a collection, and adds properties the the objects.
  * 
  * @param {Object | Array<Object>} objCollection - object or collection of objects to augment
@@ -273,7 +291,10 @@ module.exports.update = module.exports.getSet;
  * // by default `inPlace = false`, and data is not updated
  * data[0] // { source: 'A', value: 5 }
  * 
- * // if `inPlace = true`, then data would be updated
+ * // if `inPlace = true`
+ * utils.object.augment(data, (record) => ({ origin: 's_' + record.source }), true);
+ * 
+ * //... then the source data is updated
  * data[0] // { source: 'A', value: 5, origin: 's_A' }
  */
 module.exports.augment = function augment(objCollection, mappingFn, inPlace = false) {
@@ -490,7 +511,7 @@ const badData = [
   { '"name"': 'jane', num: '190', ' kind': ' c', '1st date': ' 2021-07-09T19:54:48+0100' },
   { '"name"': 'ringo', num: '190', ' kind': ' s', '1st date': ' 2021-07-08T17:00:32+0100' }
 ];
-const cleaned = objectUtils.cleanProperties2(badData);
+utils.object.cleanProperties2(badData);
 // {
 //   labels: { 1st_date: '1st date', kind: 'kind', num: 'num' },
 //   values: [
@@ -644,7 +665,9 @@ const collapseSpecificObject = function collapseSpecificObject(sourceObj, target
  * Collapse an object tree into a single object with all the properties.
  * @example
  * const targetObj = { make: 'Ford', model: 'F150', driver: {firstName:'John', lastName:'doe'}};
- * const collapsed - utils.collapse(targetObj);
+ * const collapsed = utils.object.collapse(targetObj);
+ * // { make: 'Ford', model: 'F150', firstName: 'John', lastName: 'doe' }
+ * 
  * console.log(`Hi ${collapsed.firstName}, how do you like your ${collapsed.model}?`);
  * // 'Hi John, how do you like your F150?
  * @param {Object} objectTree
@@ -919,7 +942,7 @@ module.exports.extractObjectProperty = function extractObjectProperty(list, prop
  *    item_sizes: [{ id: 'mio88645e98cd8ffc42e', price: 14.99 }]
  * }];
  * 
- * utils.object.extractObjectProperty(data, ['menu_item_id', 'item_sizes[0].price']);
+ * utils.object.extractObjectProperties(data, ['menu_item_id', 'item_sizes[0].price']);
  * // {
  * //   menu_item_id: ['mi88dc7bb31bc6104f1', 'mi8802b942e737df40d', 'mi88ff22662b0c0644a'],
  * //   'item_sizes[0].price': [ 16.09, 17.09, 14.99 ]
@@ -995,7 +1018,7 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
  *  name: 'john',
  *  courses: [{ name: 'econ-101' }]
  * }
- * utils.object.fetchObjectProperty(testObj,
+ * utils.object.fetchObjectProperties(testObj,
  *  { 'courseName': 'courses[0].?name', personName: 'name' });
  * // { courseName: 'econ-101', personName: 'john' }
  * ```
@@ -1049,7 +1072,10 @@ module.exports.fetchObjectProperties = function fetchObjectProperties(list, prop
  * testObj = {
  *  name: 'john',
  *  courses: [{ name: 'econ-101' }]
- * }
+ * };
+ * utils.object.fetchObjectProperty(testObj, 'courses[0].name');
+ * // 'econ-101'
+ * 
  * utils.object.fetchObjectProperty(testObj, 'courses[0].courseId');
  * // throws an error
  * 
@@ -1259,7 +1285,7 @@ module.exports.applyPropertyValues = function applyPropertyValues(objectList, pa
  *   {station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789'}
  * ];
  * 
- * utils.object.format(data, ({
+ * utils.object.formatProperties(data, ({
  *   //-- to a literal value
  *   type: 'C',
  *   //-- convert it to 'string', 'number' || 'float', 'int' || 'integer', 'boolean'
@@ -1282,7 +1308,7 @@ module.exports.applyPropertyValues = function applyPropertyValues(objectList, pa
  * ```
  * data = [{station: 'A', isFahreinheit: 'TRUE', offset: '2', temp: 99, type: 'F', descr: '0123456'}];
  * 
- * utils.object.format(data, ({
+ * utils.object.formatProperties(data, ({
  *   //-- convert it to 'string', 'number' || 'float', 'int' || 'integer', 'boolean'
  *   offset: 'number',
  *   isFahreinheit: 'boolean'
@@ -1565,17 +1591,17 @@ module.exports.propertyFromList = function propertyFromList(objectArray, propert
  *   { first: 'john', last: 'doe', age: 23 }, { first: 'jane', last: 'doe', age: 23 }, { first: 'jack', last: 'white', failure: 401 }
  * ];
  *
- * utils.findWithoutProperties(students, 'first', 'last', 'age');
+ * utils.object.findWithoutProperties(students, 'first', 'last', 'age');
  * // [{ first: 'jack', last: 'white', failure: 401 }]
  * 
- * utils.findWithoutProperties(students, 'failure');
+ * utils.object.findWithoutProperties(students, 'failure');
  * // [{ first: 'john', last: 'doe', age: 23 }, { first: 'jane', last: 'doe', age: 23 }] 
  * ```
  *
  * Please note, that we can check a single object:
  *
  * ```
- * utils.findWithoutProperties(students[0], 'failure');
+ * utils.object.findWithoutProperties(students[0], 'failure');
  * // []
  * ```
  * 
@@ -1614,15 +1640,18 @@ module.exports.findWithoutProperties = function findWithoutProperties(targetObj,
  *   { first: 'john', last: 'doe' }, { first: 'jane', last: 'doe' }, { first: 'jack', last: 'white', failure: 401 }
  * ];
  *
- * utils.findWithProperties(students, 'failure');
+ * utils.object.findWithProperties(students, 'failure');
  * // { first: 'jack', last: 'white', failure: 401 }
  * ```
  *
  * Please note, that we can check a single object:
  *
  * ```
- * utils.findWithProperties({ first: 'john', last: 'doe' }, 'failure');
- * // []
+ * utils.object.findWithProperties({ first: 'john', last: 'doe', failure: 'not found' }, 'failure');
+ * // [ { first: 'john', last: 'doe', failure: 'not found' } ] // matched because field was found
+ * 
+ * utils.object.findWithProperties({ first: 'john', last: 'doe' }, 'failure');
+ * // [] // not found
  * ```
  * 
  * @param {Object[]} objectsToCheck - the array of objects to check for the properties.

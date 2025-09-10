@@ -58,6 +58,17 @@ global.describe('ColorUtil', () => {
     [0, 0, 0, 1],
     { r: 0, g: 0, b: 0, a: 1 }
   );
+  const SEMI_OPAQUE_BLACK = new ColorInfo(
+    'opaqueBlack',
+    '#000000',
+    '#00000088',
+    '#000',
+    '#0008',
+    'rgb( 0, 0, 0)',
+    'rgba(0, 0, 0, 0.700)',
+    [0, 0, 0, 0.7],
+    { r: 0, g: 0, b: 0, a: 0.7 }
+  );
 
   /*
   const TRANS_WHITE = new ColorInfo(
@@ -767,6 +778,10 @@ global.describe('ColorUtil', () => {
 
         value = OPAQUE_COLOR.obj;
         expected = OPAQUE_COLOR.rgba;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = SEMI_OPAQUE_BLACK.rgba;
+        expected = SEMI_OPAQUE_BLACK.rgba;
         global.expect(ColorUtils[test](value)).toStrictEqual(expected);
       });
       global.it('can convert color array', () => {
