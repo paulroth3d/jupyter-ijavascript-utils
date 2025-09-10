@@ -326,7 +326,7 @@ module.exports.augment = function augment(objCollection, mappingFn, inPlace = fa
  * const data = [{ id: '123', name: 'jim' },
  *    { id: '456', name: 'mary' },
  *    { id: '789', name: 'sue' }];
- * mapByProperty(data, 'id');
+ * utils.object.mapByProperty(data, 'id');
  * // Map(
  * //      '123': { id: '123', name: 'jim' },
  * //      '456': { id: '456', name: 'mary' },
@@ -365,6 +365,7 @@ module.exports.mapByProperty = function mapByProperty(collection, propertyOrFn) 
  * result = { name: 'john', age: 23, score: 4.0 };
  * utils.object.keys(result)
  *    .map(key => `${key}:${result[key]}`);  //-- you can now run map methods on those keys
+ * // [ 'name:john', 'age:23', 'score:4' ]
  */
 module.exports.keys = function keys(objOrArray = {}, maxRows = -1) {
   if (!Array.isArray(objOrArray)) {
@@ -434,13 +435,16 @@ module.exports.keysWithinList = function keysWithinList(objOrArray, ...listOfKey
  * ];
  * 
  * utils.object.keysNotInList(dataSet, 'first', 'last', 'favouriteColor');
- * // ['favouriteColor']
+ * // [] // all fields found
+ * 
+ * utils.object.keysNotInList(dataSet, 'first', 'last');
+ * // ['favouriteColor'] // wasn't found in any object in the list
  * ```
  * 
  * Note you can also pass the list of keys as an array in the first argument
  * 
  * ```
- * fieldsToCheck = ['first', 'last', 'favouriteColor'];
+ * fieldsToCheck = ['first', 'last'];
  * utils.object.keysNotInList(dataSet, fieldsToCheck);
  * // ['favouriteColor']
  * ```
@@ -600,12 +604,13 @@ module.exports.cleanPropertyName = function cleanPropertyName(property) {
  * originalKeys = utils.object.keys(myData);
  * // ['series001', 'series002'];
  * 
- * myMap = new Map([['series001': 'Alpha'], ['series002', 'Bravo']]);
+ * myMap = new Map([['series001', 'Alpha'], ['series002', 'Bravo']]);
  * newKeys = utils.format.replaceStrings(originalKeys, myMap);
  * // ['Alpha', 'Bravo'];
  * 
  * utils.object.renamePropertiesFromList(myData, originalKeys, newKeys);
  * // [{ _time: '...', 'Alpha': 1, 'Bravo': 2 }];
+ * ```
  * 
  * @param {Object[]} objects - objects to reassign - likely from a CSV
  * @param {String[]} originalKeys - list of keys to change FROM
@@ -625,14 +630,38 @@ module.exports.renamePropertiesFromList = function renamePropertiesFromList(obje
 };
 
 /**
-   * Property Reassign - either against a single object or an array of objects
-   * @example renameProperties(
-   *  { '"first name"': 'john', '"last name"': 'doe' }, {'"first name"':'first_name'}
-   *  ).deepEquals({first_name: 'john', '"last name"': 'doe'})
-   * @param {Object[]} objects - objects to reassign - likely from a CSV
-   * @param {Object} propertyTranslations - where property:value is original:new
-   * @returns {Object[]}
-   */
+ * Property Reassign - either against a single object or an array of objects
+ * 
+ * ```
+ * records = { '"first name"': 'john', '"last name"': 'doe' };
+ * propertyTranslation = {
+ *    '"first name"':'first_name', //-- rename '"first name"' to 'first_name'
+ *    '"last name"': 'last_name'
+ * };
+ * 
+ * utils.object.renameProperties(records, propertyTranslation);
+ * // { first_name: 'john', last_name: 'doe' }
+ * ```
+ * 
+ * or apply across a list of objects
+ * 
+ * ```
+ * records = [
+ *  { '"first name"': 'jane', '"last name"': 'doe' },
+ *  { '"first name"': 'john', '"last name"': 'doe' }
+ * ];
+ * 
+ * utils.object.renameProperties(records, propertyTranslation);
+ * // [
+ * //   { first_name: 'jane', last_name: 'doe' },
+ * //   { first_name: 'john', last_name: 'doe' }
+ * // ]
+ * ```
+ * 
+ * @param {Object[]} objects - objects to reassign - likely from a CSV
+ * @param {Object} propertyTranslations - where property:value is original:new
+ * @returns {Object[]}
+ */
 module.exports.renameProperties = function renameProperties(objects, propertyTranslations) {
   const originalKeys = Object.keys(propertyTranslations);
   const targetKeys = Object.values(propertyTranslations);
@@ -1411,18 +1440,18 @@ module.exports.generateSchema = function generateSchema(targetObj) {
  * 
  * ```
  * utils.object.join(weather, 'city', cityLocations, (weather, city) => ({...weather, city}));
- * [
- *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, city:
- *     { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
- *   },
- *   null,
- *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, city:
- *     { city: 'New York', locationId: 2, lat: 40.7128, lon: 74.006 }
- *   },
- *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, city:
- *     { city: 'Chicago', locationId: 1, lat: 41.8781, lon: 87.6298 }
- *   }
- * ];
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, city:
+ * //     { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
+ * //   },
+ * //   null,
+ * //   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, city:
+ * //     { city: 'New York', locationId: 2, lat: 40.7128, lon: 74.006 }
+ * //   },
+ * //   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, city:
+ * //     { city: 'Chicago', locationId: 1, lat: 41.8781, lon: 87.6298 }
+ * //   }
+ * // ];
  * ```
  * 
  * or performing a translation / calculate the index instead of a property:
@@ -1510,7 +1539,7 @@ module.exports.join = function join(objectArray, indexField, targetMap, joinFn) 
  *   ['Seattle', { locationId: 3, city: 'Seattle', lat: 47.6062, lon: 122.3321 }]
  * ]);
  * 
- * utils.object.joinProperties(weather, 'city', cityLocations, 'lat', 'lon'));
+ * utils.object.joinProperties(weather, 'city', cityLocations, 'lat', 'lon');
  * // [
  * //    {id:1, city:'Seattle',  month:'Aug', precip:0.87, lat:47.6062, lon:122.3321 },
  * //    null,
@@ -1733,6 +1762,8 @@ module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, 
       }
     });
   });
+
+  return cleanTargets;
 };
 
 /**
@@ -1752,14 +1783,21 @@ module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, 
  *  { id: '500', age: '25', name: 'p5' }
  * ];
  * 
- * const numToString = (val) => String(val);
+ * const parseNum = (val) => Number.parseInt(val, 10);
  * 
- * const listMapProperties = utils.object.mapProperties(list, numToString, 'id', 'val');
+ * utils.object.mapProperties(list, parseNum, 'id', 'age');
+ * // [
+ * //   { id: 100, age: 21, name: 'p1' },  //-- note that id and age are now numbers
+ * //   { id: 200, age: 22, name: 'p2' },
+ * //   { id: 300, age: 23, name: 'p3' },
+ * //   { id: 400, age: 24, name: 'p4' },
+ * //   { id: 500, age: 25, name: 'p5' }
+ * // ]
  * 
- * const listMap = list.map((obj) => ({
+ * list.map((obj) => ({
  *  ...obj,
- *  id: numToString(obj.val),
- *  age: numToString(obj.val)
+ *  id: parseNum(obj.id),
+ *  age: parseNum(obj.age)
  * }));
  * ```
  * 
@@ -2215,7 +2253,7 @@ module.exports.objectCollectionToArray = function objectCollectionToArray(object
  *   precip: [0.87, 2.68, 5.31]
  * };
  * 
- * ObjectUtils.objectCollectionFromDataFrameObject(weather);
+ * utils.object.objectCollectionFromDataFrameObject(weather);
  * // [
  * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
  * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
@@ -2275,7 +2313,7 @@ module.exports.objectCollectionFromDataFrameObject = function objectCollectionFr
  *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
  * ];
  * 
- * ObjectUtils.objectCollectionToDataFrameObject(weather);
+ * utils.object.objectCollectionToDataFrameObject(weather);
  * // {
  * //   id: [1, 0, 2],
  * //   city: ['Seattle',  'Seattle', 'Seattle'],
@@ -2316,7 +2354,7 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
  * This is intended to help with that.
  * 
  * ```
- * [
+ * categories = [
  *   { category: 'A', source: 'chicago', x: 0.1, y: 0.6, z: 0.9 },
  *   { category: 'B', source: 'springfield', x: 0.7, y: 0.2, z: 1.1 },
  *   { category: 'C', source: 'winnetka', x: 0.6, y: 0.1, z: 0.2 }
@@ -2326,18 +2364,18 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
  * must have a separate object for each x, y and z field for the A category.
  * 
  * ```
- * utils.object.splitIntoDatums(category, ['x', 'y', 'z']);
- * [
- *   { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
- *   { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
- *   { category: 'A', source: 'chicago', series: 'z', value: 0.9 },
- *   { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
- *   { category: 'B', source: 'springfield', series: 'y', value: 0.2 },
- *   { category: 'B', source: 'springfield', series: 'z', value: 1.1 },
- *   { category: 'C', source: 'winnetka', series: 'x', value: 0.6 },
- *   { category: 'C', source: 'winnetka', series: 'y', value: 0.1 },
- *   { category: 'C', source: 'winnetka', series: 'z', value: 0.2 }
- * ]
+ * utils.object.splitIntoDatums(categories, ['x', 'y', 'z']);
+ * // [
+ * //   { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
+ * //   { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
+ * //   { category: 'A', source: 'chicago', series: 'z', value: 0.9 },
+ * //   { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
+ * //   { category: 'B', source: 'springfield', series: 'y', value: 0.2 },
+ * //   { category: 'B', source: 'springfield', series: 'z', value: 1.1 },
+ * //   { category: 'C', source: 'winnetka', series: 'x', value: 0.6 },
+ * //   { category: 'C', source: 'winnetka', series: 'y', value: 0.1 },
+ * //   { category: 'C', source: 'winnetka', series: 'z', value: 0.2 }
+ * // ]
  * ```
  * 
  * note that the fields NOT within the list of fields specified, are preserved
@@ -2348,18 +2386,18 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
  * You can specify which fields that are generated in those new objects
  * 
  * ```
- * utils.object.splitIntoDatums(category, ['x', 'y', 'z'], 'group', 'val');
- * [
- *   { category: 'A', source: 'chicago', group: 'x', val: 0.1 },
- *   { category: 'A', source: 'chicago', group: 'y', val: 0.6 },
- *   { category: 'A', source: 'chicago', group: 'z', val: 0.9 },
- *   { category: 'B', source: 'springfield', group: 'x', val: 0.7 },
- *   { category: 'B', source: 'springfield', group: 'y', val: 0.2 },
- *   { category: 'B', source: 'springfield', group: 'z', val: 1.1 },
- *   { category: 'C', source: 'winnetka', group: 'x', val: 0.6 },
- *   { category: 'C', source: 'winnetka', group: 'y', val: 0.1 },
- *   { category: 'C', source: 'winnetka', group: 'z', val: 0.2 }
- * ]
+ * utils.object.splitIntoDatums(categories, ['x', 'y', 'z'], 'group', 'val');
+ * // [
+ * //   { category: 'A', source: 'chicago', group: 'x', val: 0.1 },
+ * //   { category: 'A', source: 'chicago', group: 'y', val: 0.6 },
+ * //   { category: 'A', source: 'chicago', group: 'z', val: 0.9 },
+ * //   { category: 'B', source: 'springfield', group: 'x', val: 0.7 },
+ * //   { category: 'B', source: 'springfield', group: 'y', val: 0.2 },
+ * //   { category: 'B', source: 'springfield', group: 'z', val: 1.1 },
+ * //   { category: 'C', source: 'winnetka', group: 'x', val: 0.6 },
+ * //   { category: 'C', source: 'winnetka', group: 'y', val: 0.1 },
+ * //   { category: 'C', source: 'winnetka', group: 'z', val: 0.2 }
+ * // ]
  * ```
  * 
  * @param {Object[]} objectCollection - collection
