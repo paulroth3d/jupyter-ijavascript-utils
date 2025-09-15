@@ -63,18 +63,16 @@ const ArrayUtils = module.exports;
  * @type {Function}
  * @example
  * 
- * [3,5,1,2,4].sort(utils.sort.SIMPLE_ASCENDING))
- * //
- * [1,2,3,4,5]
+ * [3,5,1,2,4].sort(utils.array.SIMPLE_ASCENDING)
+ * // [1,2,3,4,5]
  */
 module.exports.SORT_ASCENDING = (a, b) => a === b ? 0 : a > b ? 1 : -1;
 
 /**
  * Simple descending sort function
  * @example
- * [3,5,1,2,4].sort(utils.sort.SIMPLE_ASCENDING))
- * //
- * [5,4,3,2,1]
+ * [3,5,1,2,4].sort(utils.array.SORT_DESCENDING)
+ * // [5,4,3,2,1]
  * @type {Function}
  */
 module.exports.SORT_DESCENDING = (a, b) => a === b ? 0 : a > b ? -1 : 1;
@@ -83,16 +81,17 @@ module.exports.SORT_DESCENDING = (a, b) => a === b ? 0 : a > b ? -1 : 1;
  * Creates a sort function based on fields of an object.
  * 
  * ```
- * sampleData = [{score: 200, name: 'jane'}, {score: 200, name: 'john'}]
+ * [{score: 200, name: 'jane'}, {score: 300, name: 'john'}, {score: 300, name: 'jonny'}];
  * // sort by score descending, and then by name ascending
- * sampleData.sort(utils.array.createSort('-score','name'))
+ * sampleData.sort(utils.array.createSort('-score','name'));
+ * // [{ score: 300, name: 'john' }, { score: 300, name: 'jonny' },{ score: 200, name: 'jane' }]
  * ```
  * 
  * @example
  * 
  * sampleData = [{i:4}, {v:2}, {v:1}, {v:3}];
  * sortedData = sampleData.sort(
- *    utils.createSort('-v')
+ *    utils.array.createSort('-v')
  * );
  * // [{v:4}, {v:3}, {v:2}, {v:1}]
  * 
@@ -427,16 +426,16 @@ module.exports.applyArrayValue = function applyArrayValue(collection, path, valu
  * cities = utils.object.extractObjectProperty('city');
  * // ['Seattle', 'New York', 'Chicago'];
  * 
- * //-- async process to geocode
- * geocodedCities = geocodeCity(cities);
- * // [{ city: 'Seattle', state: 'WA', country: 'USA' },
- * // { city: 'New York', state: 'NY', country: 'USA' },
- * // { city: 'Chicago', state: 'IL', country: 'USA' }]
+ * //-- get a separate dataset that needs to be joined, like geocodeCity(cities);
+ * geocodedCities = [{ city: 'Seattle', state: 'WA', country: 'USA' },
+ *   { city: 'New York', state: 'NY', country: 'USA' },
+ *   { city: 'Chicago', state: 'IL', country: 'USA' }];
  * 
- * utils.applyArrayValues(weather, 'geo', geocodedCities);
+ * utils.array.applyArrayValues(weather, 'geo', geocodedCities);
  * // [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
  * //  { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
  * //  { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * ```
  * 
  * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
  * works best for if you are working with objects completely in memory.
@@ -505,14 +504,14 @@ module.exports.size = function size(length, defaultValue) {
  * 
  * utils.array.arange(10, 1)
  *  .map((val) => `item ${val}`);
- * //
- * [
- *   'item 1', 'item 2',
- *   'item 3', 'item 4',
- *   'item 5', 'item 6',
- *   'item 7', 'item 8',
- *   'item 9', 'item 10'
- * ]
+ * 
+ * // [
+ * //   'item 1', 'item 2',
+ * //   'item 3', 'item 4',
+ * //   'item 5', 'item 6',
+ * //   'item 7', 'item 8',
+ * //   'item 9', 'item 10'
+ * // ]
  * @param {Number} length - the number of items toreturn
  * @param {Number} [start=0] - the starting number
  * @param {Number} [step=1] - the number to increment for each step
@@ -573,13 +572,13 @@ module.exports.arrayLength2d = function arrayLength2d(targetArray) {
  * @example
  * 
  * baseArray = [ 0, 1, 2, 3, 4 ];
- * utils.array.transpose(utils.array.arrange(5))
- * //
- * [ [ 0 ],
- *   [ 1 ],
- *   [ 2 ],
- *   [ 3 ],
- *   [ 4 ] ]
+ * utils.array.transpose(utils.array.arrange(5));
+ * 
+ * // [ [ 0 ],
+ * //   [ 1 ],
+ * //   [ 2 ],
+ * //   [ 3 ],
+ * //   [ 4 ] ]
  */
 module.exports.transpose = function transpose(matrix) {
   //-- fast fail
@@ -618,22 +617,22 @@ module.exports.transpose = function transpose(matrix) {
  * @example
  * 
  * baseArray = utils.array.arrange(12);
- * [
- *    0,  1, 2, 3, 4, 5,  6, 7, 8, 9, 10, 11
- * ]
+ * // [
+ * //    0,  1, 2, 3, 4, 5,  6, 7, 8, 9, 10, 11
+ * // ]
  * 
  * //-- reshape the 1d array based on 3 columns
  * newArray = utils.array.reshape(baseArray, 3)
- * [ [ 0, 1, 2 ],
- *   [ 3, 4, 5 ],
- *   [ 6, 7, 8 ],
- *   [ 9, 10, 11 ] ];
+ * // [ [ 0, 1, 2 ],
+ * //   [ 3, 4, 5 ],
+ * //   [ 6, 7, 8 ],
+ * //   [ 9, 10, 11 ] ];
  * 
  * //-- now reshape the 4x3 array to 3x4
  * utils.array.reshape(newArray, 4);
- * [ [ 0, 1, 2, 3 ],
- *   [ 4, 5, 6, 7 ],
- *   [ 8, 9, 10, 11 ] ]
+ * // [ [ 0, 1, 2, 3 ],
+ * //   [ 4, 5, 6, 7 ],
+ * //   [ 8, 9, 10, 11 ] ]
  */
 module.exports.reshape = function reshape(sourceArray, numColumns) {
   const results = [];
@@ -710,7 +709,7 @@ module.exports.clone = function clone(target) {
  * //   [ 3, 0 ], [ 3, 1 ], [ 3, 2 ], [ 3, 3 ]
  * // ]
  * 
- * myList.forEach((value, index) => {
+ * gridPositions.forEach((value, index) => {
  *   const [x, y] = gridPositions[index];
  *   console.log(`placing ${value} in row:${x}, column:${y}`);
  * });
@@ -779,41 +778,41 @@ module.exports.arangeMulti = module.exports.arrangeMulti;
  * isHeader1('This describes section A'); // false
  * 
  * indexedData = utils.array.indexify(data, isHeader1);
- * [
- *   { entry: 'Heading', section: [ 0 ], subIndex: 1 },
- *   { entry: '# Overview', section: [ 1 ], subIndex: 0 },
- *   {
- *     entry: 'This entire list is a hierarchy of data.',
- *     section: [ 1 ],
- *     subIndex: 1
- *   },
- *   { entry: '# Section A', section: [ 2 ], subIndex: 0 },
- *   { entry: 'This describes section A', section: [ 2 ], subIndex: 1 },
- *   { entry: '## SubSection 1', section: [ 2 ], subIndex: 2 },
- *   {
- *     entry: 'With a subsection belonging to Section A',
- *     section: [ 2 ],
- *     subIndex: 3
- *   },
- *   { entry: '## SubSection 2', section: [ 2 ], subIndex: 4 },
- *   {
- *     entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
- *     section: [ 2 ],
- *     subIndex: 5
- *   },
- *   { entry: '# Section B', section: [ 3 ], subIndex: 0 },
- *   {
- *     entry: 'With an entirely unrelated section B, that is sibling to Section A',
- *     section: [ 3 ],
- *     subIndex: 1
- *   },
- *   { entry: '## SubSection 1', section: [ 3 ], subIndex: 2 },
- *   {
- *     entry: 'And another subsection 1, but this time related to Section B.',
- *     section: [ 3 ],
- *     subIndex: 3
- *   }
- * ];
+ * // [
+ * //   { entry: 'Heading', section: [ 0 ], subIndex: 1 },
+ * //   { entry: '# Overview', section: [ 1 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'This entire list is a hierarchy of data.',
+ * //     section: [ 1 ],
+ * //     subIndex: 1
+ * //   },
+ * //   { entry: '# Section A', section: [ 2 ], subIndex: 0 },
+ * //   { entry: 'This describes section A', section: [ 2 ], subIndex: 1 },
+ * //   { entry: '## SubSection 1', section: [ 2 ], subIndex: 2 },
+ * //   {
+ * //     entry: 'With a subsection belonging to Section A',
+ * //     section: [ 2 ],
+ * //     subIndex: 3
+ * //   },
+ * //   { entry: '## SubSection 2', section: [ 2 ], subIndex: 4 },
+ * //   {
+ * //     entry: 'And another subsection sibling to SubSection 1, but also under Section A.',
+ * //     section: [ 2 ],
+ * //     subIndex: 5
+ * //   },
+ * //   { entry: '# Section B', section: [ 3 ], subIndex: 0 },
+ * //   {
+ * //     entry: 'With an entirely unrelated section B, that is sibling to Section A',
+ * //     section: [ 3 ],
+ * //     subIndex: 1
+ * //   },
+ * //   { entry: '## SubSection 1', section: [ 3 ], subIndex: 2 },
+ * //   {
+ * //     entry: 'And another subsection 1, but this time related to Section B.',
+ * //     section: [ 3 ],
+ * //     subIndex: 3
+ * //   }
+ * // ];
  * ```
  * 
  * Note that this only indexes elements by the first header.
@@ -924,8 +923,8 @@ module.exports.indexify = function indexify(source, ...sectionIndicatorFunctions
  * For example, say you got a string formatted like this:
  * 
  * ```
- * hardSpacedString = `
- * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * hardSpacedString = '' +
+ * `id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
  * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
  * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
  * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
@@ -976,8 +975,8 @@ module.exports.multiLineSubstr = function multiLineSubstr(target, start, length)
  * For example, say you got a string formatted like this:
  * 
  * ```
- * hardSpacedString = `
- * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * hardSpacedString = '' +
+ * `id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
  * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
  * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
  * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
@@ -1029,8 +1028,8 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
  * For example:
  * 
  * ```
- * hardSpacedString = `
- * id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
+ * hardSpacedString = '' +
+ * `id first_name last_name  city        email                        gender ip_address      airport_code car_model_year
  * -- ---------- ---------- ----------- ---------------------------- ------ --------------- ------------ --------------
  * 1  Thekla     Brokenshaw Chicago     tbrokenshaw0@kickstarter.com Female 81.118.170.238  CXI          2003          
  * 2  Lexi       Dugall     New York    ldugall1@fc2.com             Female 255.140.25.31   LBH          2005          
@@ -1072,7 +1071,7 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
  * cityStartingCharacter = substrPairs[3][0]; // 25
  * cityColumnLength = substrPairs[3][1]; // 12
  * 
- * cityData = ArrayUtils.multiLineSubstr(hardSpacedString, cityStartingCharacter, cityColumnLength);
+ * cityData = utils.array.multiLineSubstr(hardSpacedString, cityStartingCharacter, cityColumnLength);
  * // ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', 'Lainqu      ', 'Los Angeles ']
  * ```
  * 
@@ -1080,18 +1079,18 @@ module.exports.multiLineSubstring = function multiLineSubstring(target, startPos
  * 
  * ```
  * results = substrPairs.map(
- *  ([startingPos, length]) => ArrayUtils.multiLineSubstr(hardSpacedString, startingPos, length)
+ *  ([startingPos, length]) => utils.array.multiLineSubstr(hardSpacedString, startingPos, length)
  * );
  * 
- * [['id ', '-- ', '1  ', '2  ', '3  ', '4  ', '5  '],
- * ['first_name ', '---------- ', 'Thekla     ', 'Lexi       ', 'Shawna     ', 'Gin...', ...],
- * ['last_name  ', '---------- ', 'Brokenshaw ', 'Dugall     ', 'Burghill   ', 'Twe...', ...],
- * ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', ...],
- * ['email                        ', '---------------------------- ', 'tbrokenshaw0...', ...],
- * ['gender ', '------ ', 'Female ', 'Female ', 'Female ', 'Female ', 'Female '],
- * ['ip_address      ', '--------------- ', '81.118.170.238  ', '255.140.25.31   ', ...],
- * ['airport_code ', '------------ ', 'CXI          ', 'LBH          ', 'GBA       ...', ...],
- * ['car_model_year', '--------------', '2003          ', '2005          ', '2004  ...', ...]]
+ * // [['id ', '-- ', '1  ', '2  ', '3  ', '4  ', '5  '],
+ * // ['first_name ', '---------- ', 'Thekla     ', 'Lexi       ', 'Shawna     ', 'Gin...', ...],
+ * // ['last_name  ', '---------- ', 'Brokenshaw ', 'Dugall     ', 'Burghill   ', 'Twe...', ...],
+ * // ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', ...],
+ * // ['email                        ', '---------------------------- ', 'tbrokenshaw0...', ...],
+ * // ['gender ', '------ ', 'Female ', 'Female ', 'Female ', 'Female ', 'Female '],
+ * // ['ip_address      ', '--------------- ', '81.118.170.238  ', '255.140.25.31   ', ...],
+ * // ['airport_code ', '------------ ', 'CXI          ', 'LBH          ', 'GBA       ...', ...],
+ * // ['car_model_year', '--------------', '2003          ', '2005          ', '2004  ...', ...]]
  * ```
  * 
  * We can then transpose the array to give us the format we might expect (non DataFrame centric)
@@ -1154,17 +1153,17 @@ module.exports.multiStepReduce = function multiStepReduce(list, fn, initialValue
  * // [ 3, 11, 11, 12, 29, 7, 16, 13, 15 ];
  * 
  * 
- * results = utils.array.extractFromHardSpacedTable(str, columnWidths);
+ * results = utils.array.extractFromHardSpacedTable(hardSpacedString, columnWidths);
  * 
- * [['id ', '-- ', '1  ', '2  ', '3  ', '4  ', '5  '],
- * ['first_name ', '---------- ', 'Thekla     ', 'Lexi       ', 'Shawna     ', 'Gin...', ...],
- * ['last_name  ', '---------- ', 'Brokenshaw ', 'Dugall     ', 'Burghill   ', 'Twe...', ...],
- * ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', ...],
- * ['email                        ', '---------------------------- ', 'tbrokenshaw0...', ...],
- * ['gender ', '------ ', 'Female ', 'Female ', 'Female ', 'Female ', 'Female '],
- * ['ip_address      ', '--------------- ', '81.118.170.238  ', '255.140.25.31   ', ...],
- * ['airport_code ', '------------ ', 'CXI          ', 'LBH          ', 'GBA       ...', ...],
- * ['car_model_year', '--------------', '2003          ', '2005          ', '2004  ...', ...]]
+ * // [['id ', '-- ', '1  ', '2  ', '3  ', '4  ', '5  '],
+ * // ['first_name ', '---------- ', 'Thekla     ', 'Lexi       ', 'Shawna     ', 'Gin...', ...],
+ * // ['last_name  ', '---------- ', 'Brokenshaw ', 'Dugall     ', 'Burghill   ', 'Twe...', ...],
+ * // ['city        ', '----------- ', 'Chicago     ', 'New York    ', 'London      ', ...],
+ * // ['email                        ', '---------------------------- ', 'tbrokenshaw0...', ...],
+ * // ['gender ', '------ ', 'Female ', 'Female ', 'Female ', 'Female ', 'Female '],
+ * // ['ip_address      ', '--------------- ', '81.118.170.238  ', '255.140.25.31   ', ...],
+ * // ['airport_code ', '------------ ', 'CXI          ', 'LBH          ', 'GBA       ...', ...],
+ * // ['car_model_year', '--------------', '2003          ', '2005          ', '2004  ...', ...]]
  * ```
  * 
  * We can then transpose the array to give us the format we might expect (non DataFrame centric)
@@ -1458,9 +1457,11 @@ module.exports.asyncWaitAndChain = (seconds, fn, rows) => {
  * ```
  * categoryValues = ['rock', 'paper', 'scissors'];
  * 
+ * //-- resizes an array to be shorter - truncating
  * utils.array.resize(categoryValues, 2); // ['rock', 'paper']
- * utils.array.resize(categoryValues, 7); // ['rock', 'paper', 'scissors',
- * undefined, undefined, undefined, undefined];
+ * 
+ * //-- resizes an array to be longer - filling with undefined
+ * utils.array.resize(categoryValues, 7); // ['rock', 'paper', 'scissors', undefined, undefined, undefined, undefined];
  * ```
  * 
  * @param {Array} sourceList - array of values

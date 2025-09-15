@@ -126,14 +126,7 @@ module.exports.ELLIPSIS = '…';
  * 
  * Note: collapsing 
  * 
- * @param {any} value - the value to print
- * @param {Object} options - collection of options
- * @param {Boolean} options.collapseObjects - if true, typesof Object values are not expanded
- * @param {String} options.dateFormat - ('LOCAL'|'LOCAL_DATE','LOCAL_TIME','GMT','ISO','UTC','NONE')
- * @returns {string} - legible formatted value
- * @see #.DATE_FORMAT
- * @example
- * 
+ * ```
  * format = { dateFormat: utils.format.DATE_FORMAT.ISO };
  * utils.format.printValue( new Date(), format)
  * //2022-03-08T22:22:38.163Z
@@ -143,21 +136,28 @@ module.exports.ELLIPSIS = '…';
  * obj = { first: 'john', last: 'doe', classes: [23, 34], professor: { name: 'jane doe' }, dateTime: new Date(), aliases: new Set(['jdoe', 'j_doe'])}
  * new utils.TableGenerator([obj])
  *   .generateMarkdown();
+ * ```
  * 
- * //-- with many objects, this can get unweildy
  * first|last|classes|professor          |dateTime                |aliases                  
  * --   |--  |--     |--                 |--                      |--                       
  * john |doe |[23,34]|{"name":"jane doe"}|2022-03-08T22:50:03.632Z|"Set(\"jdoe\",\"j_doe\")"
  * 
+ * ```
  * new utils.TableGenerator([obj])
  *   .printOptions({ collapse: true, dateFormat: 'toLocaleDateString' })
  *   .generateMarkdown();
+ * ```
  * 
- * //-- a bit more easy to read
  * first|last|classes|professor      |dateTime|aliases     
  * --   |--  |--     |--             |--      |--          
  * john |doe |23,34  |[object Object]|3/8/2022|[object Set]
  * 
+ * @param {any} value - the value to print
+ * @param {Object} options - collection of options
+ * @param {Boolean} options.collapseObjects - if true, typesof Object values are not expanded
+ * @param {String} options.dateFormat - ('LOCAL'|'LOCAL_DATE','LOCAL_TIME','GMT','ISO','UTC','NONE')
+ * @returns {string} - legible formatted value
+ * @see #.DATE_FORMAT
  */
 module.exports.printValue = function printValue(value, options) {
   const {
@@ -291,19 +291,19 @@ module.exports.divideR = function divideR(numerator, denominator) {
  * @param {Number} milliseconds - Number of millisecond duration
  * @returns {Duration}
  * @example
- * d1 = new Date();
+ * d1 = new Date(Date.UTC(2022, 2, 8, 22, 55, 12));
  * // 2022-03-08T22:55:14.775Z
- * d2 = new Date(d1.getTime())
+ * d2 = new Date(Date.UTC(2022, 2, 8, 23, 00, 0));
  * // 2022-03-08T23:02:18.040Z
  * 
  * utils.format.millisecondDuration(d2.getTime() - d1.getTime())
  * // {
  * //   days: 0,
  * //   hours: 0,
- * //   minutes: 7,
- * //   seconds: 3,
- * //   milliseconds: 265,
- * //   epoch: 423265
+ * //   minutes: 4,
+ * //   seconds: 48,
+ * //   milliseconds: 0,
+ * //   epoch: 288000
  * // }
  */
 module.exports.millisecondDuration = function millisecondDuration(milliseconds) {
@@ -329,9 +329,9 @@ module.exports.millisecondDuration = function millisecondDuration(milliseconds) 
  * @param {Integer} [maxLen = 50] - the maximum length of str before getting ellipsified
  * @returns {String}
  * @example
- * format.ellipsify('longName') // 'longName' (as maxLen is 50)
- * format.ellipsify('longName', 8) // 'longName' (as maxLen is 8)
- * format.ellipsify('longName', 4) // 'long…' (as str is longer than maxLen)
+ * utils.format.ellipsify('longName') // 'longName' (as maxLen is 50)
+ * utils.format.ellipsify('longName', 8) // 'longName' (as maxLen is 8)
+ * utils.format.ellipsify('longName', 4) // 'long…' (as str is longer than maxLen)
  */
 module.exports.ellipsify = function ellipsify(str, maxLen) {
   const cleanStr = !str
@@ -364,18 +364,18 @@ module.exports.ellipsify = function ellipsify(str, maxLen) {
  * @see {@link module:format.clampDomain|clampDomain(value, [min, max])}
  * @example
  * 
- * format.mapDomain(-2, [0, 10], [0, 1])
+ * utils.format.mapDomain(-2, [0, 10], [0, 1])
  * // 0   - since it is below the minimum value
- * format.mapDomain(0, [0, 10], [0, 1])
+ * utils.format.mapDomain(0, [0, 10], [0, 1])
  * // 0   - since it is the minimum value
- * format.mapDomain(5, [0, 10], [0, 1])
+ * utils.format.mapDomain(5, [0, 10], [0, 1])
  * // 0.5 - since it is 5/10
- * format.mapDomain(12, [0, 10], [0, 1])
+ * utils.format.mapDomain(12, [0, 10], [0, 1])
  * // 1   - since it is above the maximum value
  * 
- * format.mapDomain(0.5, [0, 1], [0, 10])
- * format.mapDomain(0.5, [0, 1], [0, Math.PI + Math.PI])
+ * utils.format.mapDomain(0.5, [0, 1], [0, 10])
  * // 5 - since it is half of 0-1, and half of 1-10
+ * utils.format.mapDomain(0.5, [0, 1], [0, Math.PI + Math.PI])
  * // 3.1415 or Math.PI - since it is half of 2 PI
  */
 module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rangeMin = 0, rangeMax = 1]) {
@@ -459,20 +459,20 @@ module.exports.mapDomain = function mapDomain(val, [domainMin, domainMax], [rang
  * //-- array of 10 values
  * randomArray = ['a', 'b', 'c', 'd', 'e'];
  * 
- * format.mapArrayDomain(-1, randomArray, [0, 5]);
+ * utils.format.mapArrayDomain(-1, randomArray, [0, 5]);
  * // 'a'  - since it is below the minimum value
- * format.mapArrayDomain(6, randomArray, [0, 5]);
+ * utils.format.mapArrayDomain(6, randomArray, [0, 5]);
  * // 'e'   - since it is the minimum value
  * 
- * format.mapArrayDomain(0.9, randomArray, [0, 5]);
+ * utils.format.mapArrayDomain(0.9, randomArray, [0, 5]);
  * // 'a'
- * format.mapArrayDomain(1, randomArray, [0, 5]);
+ * utils.format.mapArrayDomain(1, randomArray, [0, 5]);
  * // 'b'
- * format.mapArrayDomain(2.5, randomArray, [0, 5]);
+ * utils.format.mapArrayDomain(2.5, randomArray, [0, 5]);
  * // 'c' 
  * 
  * //-- or leaving the domain of possible values value can be out:
- * format.mapArrayDomain(0.5, randomArray); // assumed [0, 1]
+ * utils.format.mapArrayDomain(0.5, randomArray); // assumed [0, 1]
  * // 'c'
  */
 module.exports.mapArrayDomain = function mapArrayDomain(val, targetArray, domain = null) {
@@ -517,26 +517,32 @@ module.exports.mapArrayDomain = function mapArrayDomain(val, targetArray, domain
  * @returns {Number} - (timeEpoch - startEpoch) / millisecondPeriod - number of periods 
  * 
  * @example
- * const startTime = new Date().getTime();
+ * startTime = new Date(Date.UTC(2025, 01, 01, 9, 00));
+ * nextTime = startTime;
  * 
- * format.timePeriod(1000)
+ * // utils.format.timePeriod(1000)
  * // 164955061.3 - using the current time and epoch starting point
- * 
- * format.timePeriod(1000, new Date().getTime(), startTime);
- * // 0.0 - using the starting point instead
  * 
  * // - wait 3 seconds
  * 
- * format.timePeriod(10000, new Date().getTime(), startTime); // 0.3
- * format.timePeriod(10000, null, startTime); // 0.3
+ * nextTime = utils.date.add(startTime, { seconds: 3, milliseconds: 500 });
+ * // 2025-02-01T09:00:03.500Z
+ *     
+ * utils.format.timePeriod(1000, nextTime, startTime);
+ * // 3.5 - using the starting point instead
  * 
  * // - wait another 14 seconds
  * 
- * format.timePeriod(10000, new Date().getTime(), startTime); // 1.7
+ * nextTime = utils.date.add(nextTime, { seconds: 14, milliseconds: 500 });
+ * // 2025-02-01T09:00:18.000Z
+ *     
+ * utils.format.timePeriod(1000, nextTime, startTime);
+ * // 18 - 1000 millisecond cycles elapsed
  * 
- * //-- wait 8 seconds
+ * //-- same time period but divided by 5 second intervals
  * 
- * format.timePeriod(10000, new Date().getTime(), startTime) // 2.5
+ * utils.format.timePeriod(5000, nextTime, startTime);
+ * // 3.6 - 5000 millisecond cycles elapsed
  */
 module.exports.timePeriod = function mapTime(millisecondPeriod, timeMilli = null, startMilli = null) {
   let updatedMilli = !timeMilli
@@ -561,15 +567,20 @@ module.exports.timePeriod = function mapTime(millisecondPeriod, timeMilli = null
  * @returns {Number} - percentage through the current millisecond period (0 <= x < 1)
  * 
  * @example
- * format.timePeriodPercent(10000, new Date().getTime()) // 0.3
+ * startTime = new Date(Date.UTC(2025, 01, 01, 9, 0, 0, 0));
+ * utils.format.timePeriodPercent(10000, startTime) // 0.0
  * 
  * //-- wait 14 seconds
+ * nextTime = utils.date.add(startTime, { seconds: 14 });
+ * // 2025-02-01T09:00:14.000Z
  * 
- * format.timePeriodPercent(10000, new Date().getTime()) // 0.7
+ * utils.format.timePeriodPercent(10000, nextTime) // 0.4
  * 
  * //-- wait 8 seconds
+ * nextTime = utils.date.add(nextTime, { seconds: 8 });
+ * // 2025-02-01T09:00:22.000Z
  * 
- * format.timePeriodPercent(10000, new Date().getTime()) // 0.5
+ * utils.format.timePeriodPercent(10000, nextTime) // 0.2
  */
 module.exports.timePeriodPercent = function mapEpochInPeriod(millisecondPeriod, timeEpoch = new Date().getTime()) {
   return (timeEpoch % millisecondPeriod) / millisecondPeriod;
@@ -631,9 +642,9 @@ module.exports.capitalize = function capitalize(str) {
  * @returns {String} - ex: 'John-Paul'
  * @see {@link module:format.capitalizeAll|capitalizeAll} - to capitalize all words in a string
  * @example
- * utils.format.capitalize('john'); // 'John'
- * utils.format.capitalize('john doe'); // 'John Doe'
- * utils.format.capitalize('john-paul'); // 'John-Paul'
+ * utils.format.capitalizeAll('john'); // 'John'
+ * utils.format.capitalizeAll('john doe'); // 'John Doe'
+ * utils.format.capitalizeAll('john-paul'); // 'John-Paul'
  */
 module.exports.capitalizeAll = function capitalizeAll(str) {
   return (str || '').split(/\b/)
@@ -694,9 +705,9 @@ module.exports.metricSIMap = new Map(FormatUtils.metricSI);
  * @param {String} compactStr - Compact Number String, like 100K, 2M, etc.
  * @returns {Number}
  * @example
- * utils.compactParse('1.2K'); // 1200
- * utils.compactParse('12');   // 12
- * utils.compactParse('299.8M')// 299800000
+ * utils.format.compactParse('1.2K'); // 1200
+ * utils.format.compactParse('12');   // 12
+ * utils.format.compactParse('299.8M')// 299800000
  */
 module.exports.compactParse = function compactParse(compactStr) {
   const match = (compactStr || '').match(/([\d.]+)([a-zA-Zμ])?/);
@@ -1055,14 +1066,14 @@ module.exports.parseNumber = function parseNumber(val, locale = 'en-US') {
  * @param {String} [lineSeparator='\n'] - separator for lines
  * @returns {String}
  * @example
- * str = '1\n2\n\3';
+ * str = '0\n1\n2\n3\n4\n5';
  * utils.format.limitLines(str, 2); // '1\n2'
  * 
- * str = '1\n2\n3';
- * utils.format.limitLines(str, 3, 2); // '2\n3'
+ * //-- only lines from 2 to 4
+ * utils.format.limitLines(str, 4, 2); // '2\n3'
  * 
- * str = '1\n2\n3';
- * utils.format.limitLines(str, undefined, 2); // '2\n3'
+ * //-- all lines after line 2
+ * utils.format.limitLines(str, undefined, 2); // '2\n3\n4\n5'
  */
 module.exports.limitLines = function limitLines(str, toLine, fromLine, lineSeparator) {
   const cleanStr = typeof str === 'string'
@@ -1091,14 +1102,22 @@ module.exports.limitLines = function limitLines(str, toLine, fromLine, lineSepar
  * @param {String} [lineSeparator='\n'] - separator for lines
  * @returns {String}
  * @example
- * str = '1\n2\n\3';
- * utils.format.limitLines(str, 2); // '1\n2'
+ * str = '0\n1\n2\n3\n4\n5';
+ * utils.format.consoleLines(str, 2);
+ * // 1
+ * // 2
  * 
- * str = '1\n2\n3';
- * utils.format.limitLines(str, 3, 2); // '2\n3'
+ * //-- only lines from 2 to 4
+ * utils.format.consoleLines(str, 4, 2);
+ * // 2
+ * // 3
  * 
- * str = '1\n2\n3';
- * utils.format.limitLines(str, undefined, 2); // '2\n3'
+ * //-- all lines after line 2
+ * utils.format.consoleLines(str, undefined, 2);
+ * //2
+ * //3
+ * //4
+ * //5
  */
 module.exports.consoleLines = function consoleLines(str, toLine, fromLine, lineSeparator) {
   console.log(FormatUtils.limitLines(str, toLine, fromLine, lineSeparator));
@@ -1309,17 +1328,17 @@ module.exports.replaceString = function replaceString(targetStr, stringTupletsOr
  * For example:
  * 
  * ```
- * strs = 'I am Modern "major-general".';
- * FormatUtils.extractWords(strs);
- * // ['I', 'am', 'Modern', 'major', 'general'];
+ * strs = 'I am a Modern "major-general".';
+ * utils.format.extractWords(strs);
+ * // ['I', 'am', 'a', 'Modern', 'major', 'general'];
  * ```
  * 
  * you can also include additional characters that will no longer be considered word boundaries.
  * 
  * ```
- * strs = 'I am Modern "major-general".';
- * FormatUtils.extractWords(strs);
- * // ['I', 'am', 'Modern', 'major-general'];
+ * strs = 'I am a Modern "major-general".';
+ * utils.format.extractWords(strs, '-');
+ * // ['I', 'am', 'a', 'Modern', 'major-general'];
  * ```
  * 
  * arrays of strings are also supported
@@ -1327,7 +1346,7 @@ module.exports.replaceString = function replaceString(targetStr, stringTupletsOr
  * ```
  * strs = ['letras mayúsculas de tamaño igual a las minúsculas',
  *  'الاختراع، ومايكل هارت'];
- * FormatUtils.extractWords(strs);
+ * utils.format.extractWords(strs);
  * // [ 'letras', 'mayúsculas', 'de', 'tamaño', 'igual', 'a', 'las', 'minúsculas', 'الاختراع', 'ومايكل', 'هارت'];
  * ```
  * 

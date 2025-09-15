@@ -123,7 +123,10 @@ module.exports.MAX_COLLAPSE_DEPTH = 50;
 /**
  * Assign a property to an object and return object
  * (allowing for functional programming assignments)
- * @example objAssign({}, 'name', 'john').name === 'john'
+ * @example
+ * simpleObj = utils.object.objAssign({}, 'name', 'john'); // { name: 'john' }
+ * 
+ * 
  * @param {Object} [obj={}] - object to assign the value to (or null for a new one)
  * @param {String} propertyName -
  * @param {any} value -
@@ -137,15 +140,46 @@ module.exports.assign = function objAssign(obj, propertyName, value, ...property
   }
 
   if (!obj) obj = {};
+  let result = { ...obj };
+  result[propertyName] = value; //eslint-disable-line no-param-reassign
+
+  if (propertyNameValues.length > 0) {
+    result = ObjectUtils.objAssign.apply(ObjectUtils, [result, ...propertyNameValues]);
+  }
+
+  return result;
+};
+module.exports.objAssign = module.exports.assign;
+
+/**
+ * Assign a property to an object and return object
+ * (allowing for functional programming assignments)
+ * @example
+ * simpleObj = utils.object.objAssign({}, 'name', 'john'); // { name: 'john' }
+ * 
+ * 
+ * @param {Object} [obj={}] - object to assign the value to (or null for a new one)
+ * @param {String} propertyName -
+ * @param {any} value -
+ * @returns {Object}
+ */
+module.exports.assignIP = function objAssignIP(obj, propertyName, value, ...propertyNameValues) {
+  if ((propertyName === null || propertyName === undefined)) {
+    throw Error('Expecting at least one property name to be passed');
+  } else if (typeof propertyName !== 'string') {
+    throw Error(`Property must be a string:${propertyName}`);
+  }
+
+  if (!obj) obj = {};
   obj[propertyName] = value; //eslint-disable-line no-param-reassign
 
   if (propertyNameValues.length > 0) {
-    ObjectUtils.objAssign.apply(ObjectUtils, [obj, ...propertyNameValues]);
+    ObjectUtils.objAssignIP.apply(ObjectUtils, [obj, ...propertyNameValues]);
   }
 
   return obj;
 };
-module.exports.objAssign = module.exports.assign;
+module.exports.objAssignIP = module.exports.assignIP;
 
 /**
  * Assigns multiple object entities [[property, value], [property, value], ...];
@@ -219,6 +253,24 @@ module.exports.getSet = function getSet(obj, field, functor) {
 module.exports.update = module.exports.getSet;
 
 /**
+ * Retrieves a property through a name of a property or a function
+ * @param {Object[]} collection - collection of objects
+ * @param {Function | String} propertyOrFn - Name of the property or Function to return a value
+ * @returns {any} - property value or return value from the function
+ * @see {@link module:object.getSet|object.getSet()} - sets a value safely
+ * @example
+ * data = { id: '123', name: 'jim' };
+ * utils.object.get(data, 'name'); // 'jim'
+ * utils.object.get(data, (o) => o.id); // '123'
+ */
+module.exports.get = function get(obj, propertyOrFn) {
+  if (!propertyOrFn) throw new Error('object.mapByProperty: expects a propertyName');
+
+  const cleanedFunc = ObjectUtils.evaluateFunctionOrProperty(propertyOrFn);
+  return cleanedFunc(obj);
+};
+
+/**
  * Runs a map over a collection, and adds properties the the objects.
  * 
  * @param {Object | Array<Object>} objCollection - object or collection of objects to augment
@@ -239,7 +291,10 @@ module.exports.update = module.exports.getSet;
  * // by default `inPlace = false`, and data is not updated
  * data[0] // { source: 'A', value: 5 }
  * 
- * // if `inPlace = true`, then data would be updated
+ * // if `inPlace = true`
+ * utils.object.augment(data, (record) => ({ origin: 's_' + record.source }), true);
+ * 
+ * //... then the source data is updated
  * data[0] // { source: 'A', value: 5, origin: 's_A' }
  */
 module.exports.augment = function augment(objCollection, mappingFn, inPlace = false) {
@@ -271,7 +326,7 @@ module.exports.augment = function augment(objCollection, mappingFn, inPlace = fa
  * const data = [{ id: '123', name: 'jim' },
  *    { id: '456', name: 'mary' },
  *    { id: '789', name: 'sue' }];
- * mapByProperty(data, 'id');
+ * utils.object.mapByProperty(data, 'id');
  * // Map(
  * //      '123': { id: '123', name: 'jim' },
  * //      '456': { id: '456', name: 'mary' },
@@ -310,6 +365,7 @@ module.exports.mapByProperty = function mapByProperty(collection, propertyOrFn) 
  * result = { name: 'john', age: 23, score: 4.0 };
  * utils.object.keys(result)
  *    .map(key => `${key}:${result[key]}`);  //-- you can now run map methods on those keys
+ * // [ 'name:john', 'age:23', 'score:4' ]
  */
 module.exports.keys = function keys(objOrArray = {}, maxRows = -1) {
   if (!Array.isArray(objOrArray)) {
@@ -379,13 +435,16 @@ module.exports.keysWithinList = function keysWithinList(objOrArray, ...listOfKey
  * ];
  * 
  * utils.object.keysNotInList(dataSet, 'first', 'last', 'favouriteColor');
- * // ['favouriteColor']
+ * // [] // all fields found
+ * 
+ * utils.object.keysNotInList(dataSet, 'first', 'last');
+ * // ['favouriteColor'] // wasn't found in any object in the list
  * ```
  * 
  * Note you can also pass the list of keys as an array in the first argument
  * 
  * ```
- * fieldsToCheck = ['first', 'last', 'favouriteColor'];
+ * fieldsToCheck = ['first', 'last'];
  * utils.object.keysNotInList(dataSet, fieldsToCheck);
  * // ['favouriteColor']
  * ```
@@ -456,7 +515,7 @@ const badData = [
   { '"name"': 'jane', num: '190', ' kind': ' c', '1st date': ' 2021-07-09T19:54:48+0100' },
   { '"name"': 'ringo', num: '190', ' kind': ' s', '1st date': ' 2021-07-08T17:00:32+0100' }
 ];
-const cleaned = objectUtils.cleanProperties2(badData);
+utils.object.cleanProperties2(badData);
 // {
 //   labels: { 1st_date: '1st date', kind: 'kind', num: 'num' },
 //   values: [
@@ -471,11 +530,11 @@ module.exports.cleanProperties2 = function cleanProperties2(objectsToBeCleaned) 
   const keys = ObjectUtils.keys(cleanedPropertyNames);
 
   const translation = keys.reduce((result, key) => ObjectUtils
-    .objAssign(result, cleanedPropertyNames[key], ObjectUtils.lightlyCleanProperty(key)), {});
+    .objAssignIP(result, cleanedPropertyNames[key], ObjectUtils.lightlyCleanProperty(key)), {});
   
   const values = (objectsToBeCleaned || [])
     .map((obj) => keys.reduce(
-      (result, key) => ObjectUtils.objAssign(result, cleanedPropertyNames[key], obj[key]),
+      (result, key) => ObjectUtils.objAssignIP(result, cleanedPropertyNames[key], obj[key]),
       {}
     ));
   
@@ -545,12 +604,13 @@ module.exports.cleanPropertyName = function cleanPropertyName(property) {
  * originalKeys = utils.object.keys(myData);
  * // ['series001', 'series002'];
  * 
- * myMap = new Map([['series001': 'Alpha'], ['series002', 'Bravo']]);
+ * myMap = new Map([['series001', 'Alpha'], ['series002', 'Bravo']]);
  * newKeys = utils.format.replaceStrings(originalKeys, myMap);
  * // ['Alpha', 'Bravo'];
  * 
  * utils.object.renamePropertiesFromList(myData, originalKeys, newKeys);
  * // [{ _time: '...', 'Alpha': 1, 'Bravo': 2 }];
+ * ```
  * 
  * @param {Object[]} objects - objects to reassign - likely from a CSV
  * @param {String[]} originalKeys - list of keys to change FROM
@@ -570,14 +630,38 @@ module.exports.renamePropertiesFromList = function renamePropertiesFromList(obje
 };
 
 /**
-   * Property Reassign - either against a single object or an array of objects
-   * @example renameProperties(
-   *  { '"first name"': 'john', '"last name"': 'doe' }, {'"first name"':'first_name'}
-   *  ).deepEquals({first_name: 'john', '"last name"': 'doe'})
-   * @param {Object[]} objects - objects to reassign - likely from a CSV
-   * @param {Object} propertyTranslations - where property:value is original:new
-   * @returns {Object[]}
-   */
+ * Property Reassign - either against a single object or an array of objects
+ * 
+ * ```
+ * records = { '"first name"': 'john', '"last name"': 'doe' };
+ * propertyTranslation = {
+ *    '"first name"':'first_name', //-- rename '"first name"' to 'first_name'
+ *    '"last name"': 'last_name'
+ * };
+ * 
+ * utils.object.renameProperties(records, propertyTranslation);
+ * // { first_name: 'john', last_name: 'doe' }
+ * ```
+ * 
+ * or apply across a list of objects
+ * 
+ * ```
+ * records = [
+ *  { '"first name"': 'jane', '"last name"': 'doe' },
+ *  { '"first name"': 'john', '"last name"': 'doe' }
+ * ];
+ * 
+ * utils.object.renameProperties(records, propertyTranslation);
+ * // [
+ * //   { first_name: 'jane', last_name: 'doe' },
+ * //   { first_name: 'john', last_name: 'doe' }
+ * // ]
+ * ```
+ * 
+ * @param {Object[]} objects - objects to reassign - likely from a CSV
+ * @param {Object} propertyTranslations - where property:value is original:new
+ * @returns {Object[]}
+ */
 module.exports.renameProperties = function renameProperties(objects, propertyTranslations) {
   const originalKeys = Object.keys(propertyTranslations);
   const targetKeys = Object.values(propertyTranslations);
@@ -610,7 +694,9 @@ const collapseSpecificObject = function collapseSpecificObject(sourceObj, target
  * Collapse an object tree into a single object with all the properties.
  * @example
  * const targetObj = { make: 'Ford', model: 'F150', driver: {firstName:'John', lastName:'doe'}};
- * const collapsed - utils.collapse(targetObj);
+ * const collapsed = utils.object.collapse(targetObj);
+ * // { make: 'Ford', model: 'F150', firstName: 'John', lastName: 'doe' }
+ * 
  * console.log(`Hi ${collapsed.firstName}, how do you like your ${collapsed.model}?`);
  * // 'Hi John, how do you like your F150?
  * @param {Object} objectTree
@@ -763,7 +849,7 @@ module.exports.selectObjectProperties = function selectObjectProperties(list, ..
 
   return targetList.map(
     (record) => cleanPropertyNames.reduce(
-      (result, prop) => ObjectUtils.objAssign(result, prop, record[prop]), {}
+      (result, prop) => ObjectUtils.objAssignIP(result, prop, record[prop]), {}
     )
   );
 };
@@ -885,7 +971,7 @@ module.exports.extractObjectProperty = function extractObjectProperty(list, prop
  *    item_sizes: [{ id: 'mio88645e98cd8ffc42e', price: 14.99 }]
  * }];
  * 
- * utils.object.extractObjectProperty(data, ['menu_item_id', 'item_sizes[0].price']);
+ * utils.object.extractObjectProperties(data, ['menu_item_id', 'item_sizes[0].price']);
  * // {
  * //   menu_item_id: ['mi88dc7bb31bc6104f1', 'mi8802b942e737df40d', 'mi88ff22662b0c0644a'],
  * //   'item_sizes[0].price': [ 16.09, 17.09, 14.99 ]
@@ -961,7 +1047,7 @@ module.exports.extractObjectProperties = function extractObjectProperties(list, 
  *  name: 'john',
  *  courses: [{ name: 'econ-101' }]
  * }
- * utils.object.fetchObjectProperty(testObj,
+ * utils.object.fetchObjectProperties(testObj,
  *  { 'courseName': 'courses[0].?name', personName: 'name' });
  * // { courseName: 'econ-101', personName: 'john' }
  * ```
@@ -1015,7 +1101,10 @@ module.exports.fetchObjectProperties = function fetchObjectProperties(list, prop
  * testObj = {
  *  name: 'john',
  *  courses: [{ name: 'econ-101' }]
- * }
+ * };
+ * utils.object.fetchObjectProperty(testObj, 'courses[0].name');
+ * // 'econ-101'
+ * 
  * utils.object.fetchObjectProperty(testObj, 'courses[0].courseId');
  * // throws an error
  * 
@@ -1154,15 +1243,17 @@ module.exports.applyPropertyValue = function applyPropertyValue(obj, path, value
  * // ['Seattle', 'New York', 'Chicago'];
  * 
  * //-- async process to geocode
- * geocodedCities = geocodeCity(cities);
- * // [{ city: 'Seattle', state: 'WA', country: 'USA' },
- * // { city: 'New York', state: 'NY', country: 'USA' },
- * // { city: 'Chicago', state: 'IL', country: 'USA' }]
+ * // geocodedCities = geocodeCity(cities);
+ * geocodedCities = [
+ *  { city: 'Seattle', state: 'WA', country: 'USA' },
+ *  { city: 'New York', state: 'NY', country: 'USA' },
+ *  { city: 'Chicago', state: 'IL', country: 'USA' }];
  * 
- * utils.applyPropertyValues(weather, 'geo', geocodedCities);
- *  [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
- *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
- *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * utils.object.applyPropertyValues(weather, 'geo', geocodedCities);
+ * // [{ id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, geo: { city: 'Seattle', state: 'WA', country: 'USA' } },
+ * //  { id: 3, city: 'New York', month: 'Apr', precip: 3.94, geo: { city: 'New York', state: 'NY', country: 'USA' } },
+ * //  { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, geo: { city: 'Chicago', state: 'IL', country: 'USA' } }];
+ * ```
  * 
  * Note that traditional [Array.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
  * works best for if you are working with objects completely in memory.
@@ -1223,7 +1314,7 @@ module.exports.applyPropertyValues = function applyPropertyValues(objectList, pa
  *   {station: 'A', isFahreinheit: 'false', offset: '3', temp: 100, type: 'F', descr: '0123456789'}
  * ];
  * 
- * utils.object.format(data, ({
+ * utils.object.formatProperties(data, ({
  *   //-- to a literal value
  *   type: 'C',
  *   //-- convert it to 'string', 'number' || 'float', 'int' || 'integer', 'boolean'
@@ -1246,7 +1337,7 @@ module.exports.applyPropertyValues = function applyPropertyValues(objectList, pa
  * ```
  * data = [{station: 'A', isFahreinheit: 'TRUE', offset: '2', temp: 99, type: 'F', descr: '0123456'}];
  * 
- * utils.object.format(data, ({
+ * utils.object.formatProperties(data, ({
  *   //-- convert it to 'string', 'number' || 'float', 'int' || 'integer', 'boolean'
  *   offset: 'number',
  *   isFahreinheit: 'boolean'
@@ -1349,18 +1440,18 @@ module.exports.generateSchema = function generateSchema(targetObj) {
  * 
  * ```
  * utils.object.join(weather, 'city', cityLocations, (weather, city) => ({...weather, city}));
- * [
- *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, city:
- *     { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
- *   },
- *   null,
- *   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, city:
- *     { city: 'New York', locationId: 2, lat: 40.7128, lon: 74.006 }
- *   },
- *   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, city:
- *     { city: 'Chicago', locationId: 1, lat: 41.8781, lon: 87.6298 }
- *   }
- * ];
+ * // [
+ * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, city:
+ * //     { city: 'Seattle', locationId: 3, lat: 47.6062, lon: 122.3321 }
+ * //   },
+ * //   null,
+ * //   { id: 3, city: 'New York', month: 'Apr', precip: 3.94, city:
+ * //     { city: 'New York', locationId: 2, lat: 40.7128, lon: 74.006 }
+ * //   },
+ * //   { id: 6, city: 'Chicago',  month: 'Apr', precip: 3.62, city:
+ * //     { city: 'Chicago', locationId: 1, lat: 41.8781, lon: 87.6298 }
+ * //   }
+ * // ];
  * ```
  * 
  * or performing a translation / calculate the index instead of a property:
@@ -1448,7 +1539,7 @@ module.exports.join = function join(objectArray, indexField, targetMap, joinFn) 
  *   ['Seattle', { locationId: 3, city: 'Seattle', lat: 47.6062, lon: 122.3321 }]
  * ]);
  * 
- * utils.object.joinProperties(weather, 'city', cityLocations, 'lat', 'lon'));
+ * utils.object.joinProperties(weather, 'city', cityLocations, 'lat', 'lon');
  * // [
  * //    {id:1, city:'Seattle',  month:'Aug', precip:0.87, lat:47.6062, lon:122.3321 },
  * //    null,
@@ -1529,17 +1620,17 @@ module.exports.propertyFromList = function propertyFromList(objectArray, propert
  *   { first: 'john', last: 'doe', age: 23 }, { first: 'jane', last: 'doe', age: 23 }, { first: 'jack', last: 'white', failure: 401 }
  * ];
  *
- * utils.findWithoutProperties(students, 'first', 'last', 'age');
+ * utils.object.findWithoutProperties(students, 'first', 'last', 'age');
  * // [{ first: 'jack', last: 'white', failure: 401 }]
  * 
- * utils.findWithoutProperties(students, 'failure');
+ * utils.object.findWithoutProperties(students, 'failure');
  * // [{ first: 'john', last: 'doe', age: 23 }, { first: 'jane', last: 'doe', age: 23 }] 
  * ```
  *
  * Please note, that we can check a single object:
  *
  * ```
- * utils.findWithoutProperties(students[0], 'failure');
+ * utils.object.findWithoutProperties(students[0], 'failure');
  * // []
  * ```
  * 
@@ -1578,15 +1669,18 @@ module.exports.findWithoutProperties = function findWithoutProperties(targetObj,
  *   { first: 'john', last: 'doe' }, { first: 'jane', last: 'doe' }, { first: 'jack', last: 'white', failure: 401 }
  * ];
  *
- * utils.findWithProperties(students, 'failure');
+ * utils.object.findWithProperties(students, 'failure');
  * // { first: 'jack', last: 'white', failure: 401 }
  * ```
  *
  * Please note, that we can check a single object:
  *
  * ```
- * utils.findWithProperties({ first: 'john', last: 'doe' }, 'failure');
- * // []
+ * utils.object.findWithProperties({ first: 'john', last: 'doe', failure: 'not found' }, 'failure');
+ * // [ { first: 'john', last: 'doe', failure: 'not found' } ] // matched because field was found
+ * 
+ * utils.object.findWithProperties({ first: 'john', last: 'doe' }, 'failure');
+ * // [] // not found
  * ```
  * 
  * @param {Object[]} objectsToCheck - the array of objects to check for the properties.
@@ -1668,6 +1762,8 @@ module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, 
       }
     });
   });
+
+  return cleanTargets;
 };
 
 /**
@@ -1687,14 +1783,21 @@ module.exports.setPropertyDefaults = function setPropertyDefaults(targetObject, 
  *  { id: '500', age: '25', name: 'p5' }
  * ];
  * 
- * const numToString = (val) => String(val);
+ * const parseNum = (val) => Number.parseInt(val, 10);
  * 
- * const listMapProperties = utils.object.mapProperties(list, numToString, 'id', 'val');
+ * utils.object.mapProperties(list, parseNum, 'id', 'age');
+ * // [
+ * //   { id: 100, age: 21, name: 'p1' },  //-- note that id and age are now numbers
+ * //   { id: 200, age: 22, name: 'p2' },
+ * //   { id: 300, age: 23, name: 'p3' },
+ * //   { id: 400, age: 24, name: 'p4' },
+ * //   { id: 500, age: 25, name: 'p5' }
+ * // ]
  * 
- * const listMap = list.map((obj) => ({
+ * list.map((obj) => ({
  *  ...obj,
- *  id: numToString(obj.val),
- *  age: numToString(obj.val)
+ *  id: parseNum(obj.id),
+ *  age: parseNum(obj.age)
  * }));
  * ```
  * 
@@ -1917,7 +2020,7 @@ module.exports.propertyInherit = function propertyInherit(source, ...properties)
   }
 
   const fn = (obj) => properties.reduce(
-    (result, propertyName) => ObjectUtils.objAssign(result, propertyName, obj[propertyName]),
+    (result, propertyName) => ObjectUtils.objAssignIP(result, propertyName, obj[propertyName]),
     {}
   );
 
@@ -2076,7 +2179,7 @@ module.exports.objectCollectionFromArray = function objectCollectionFromArray(ar
   /* eslint-disable arrow-body-style */
   const newData = cleanValues.map((row) => {
     return cleanHeaders.reduce((result, header, index) => {
-      return ObjectUtils.assign(result, header, row[index]);
+      return ObjectUtils.assignIP(result, header, row[index]);
     }, {});
   });
   /* eslint-enable arrow-body-style */
@@ -2150,7 +2253,7 @@ module.exports.objectCollectionToArray = function objectCollectionToArray(object
  *   precip: [0.87, 2.68, 5.31]
  * };
  * 
- * ObjectUtils.objectCollectionFromDataFrameObject(weather);
+ * utils.object.objectCollectionFromDataFrameObject(weather);
  * // [
  * //   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87 },
  * //   { id: 0, city: 'Seattle',  month: 'Apr', precip: 2.68 },
@@ -2210,7 +2313,7 @@ module.exports.objectCollectionFromDataFrameObject = function objectCollectionFr
  *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31 }
  * ];
  * 
- * ObjectUtils.objectCollectionToDataFrameObject(weather);
+ * utils.object.objectCollectionToDataFrameObject(weather);
  * // {
  * //   id: [1, 0, 2],
  * //   city: ['Seattle',  'Seattle', 'Seattle'],
@@ -2251,7 +2354,7 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
  * This is intended to help with that.
  * 
  * ```
- * [
+ * categories = [
  *   { category: 'A', source: 'chicago', x: 0.1, y: 0.6, z: 0.9 },
  *   { category: 'B', source: 'springfield', x: 0.7, y: 0.2, z: 1.1 },
  *   { category: 'C', source: 'winnetka', x: 0.6, y: 0.1, z: 0.2 }
@@ -2261,18 +2364,18 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
  * must have a separate object for each x, y and z field for the A category.
  * 
  * ```
- * utils.object.splitIntoDatums(category, ['x', 'y', 'z']);
- * [
- *   { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
- *   { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
- *   { category: 'A', source: 'chicago', series: 'z', value: 0.9 },
- *   { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
- *   { category: 'B', source: 'springfield', series: 'y', value: 0.2 },
- *   { category: 'B', source: 'springfield', series: 'z', value: 1.1 },
- *   { category: 'C', source: 'winnetka', series: 'x', value: 0.6 },
- *   { category: 'C', source: 'winnetka', series: 'y', value: 0.1 },
- *   { category: 'C', source: 'winnetka', series: 'z', value: 0.2 }
- * ]
+ * utils.object.splitIntoDatums(categories, ['x', 'y', 'z']);
+ * // [
+ * //   { category: 'A', source: 'chicago', series: 'x', value: 0.1 },
+ * //   { category: 'A', source: 'chicago', series: 'y', value: 0.6 },
+ * //   { category: 'A', source: 'chicago', series: 'z', value: 0.9 },
+ * //   { category: 'B', source: 'springfield', series: 'x', value: 0.7 },
+ * //   { category: 'B', source: 'springfield', series: 'y', value: 0.2 },
+ * //   { category: 'B', source: 'springfield', series: 'z', value: 1.1 },
+ * //   { category: 'C', source: 'winnetka', series: 'x', value: 0.6 },
+ * //   { category: 'C', source: 'winnetka', series: 'y', value: 0.1 },
+ * //   { category: 'C', source: 'winnetka', series: 'z', value: 0.2 }
+ * // ]
  * ```
  * 
  * note that the fields NOT within the list of fields specified, are preserved
@@ -2283,18 +2386,18 @@ module.exports.objectCollectionToDataFrameObject = function objectCollectionToDa
  * You can specify which fields that are generated in those new objects
  * 
  * ```
- * utils.object.splitIntoDatums(category, ['x', 'y', 'z'], 'group', 'val');
- * [
- *   { category: 'A', source: 'chicago', group: 'x', val: 0.1 },
- *   { category: 'A', source: 'chicago', group: 'y', val: 0.6 },
- *   { category: 'A', source: 'chicago', group: 'z', val: 0.9 },
- *   { category: 'B', source: 'springfield', group: 'x', val: 0.7 },
- *   { category: 'B', source: 'springfield', group: 'y', val: 0.2 },
- *   { category: 'B', source: 'springfield', group: 'z', val: 1.1 },
- *   { category: 'C', source: 'winnetka', group: 'x', val: 0.6 },
- *   { category: 'C', source: 'winnetka', group: 'y', val: 0.1 },
- *   { category: 'C', source: 'winnetka', group: 'z', val: 0.2 }
- * ]
+ * utils.object.splitIntoDatums(categories, ['x', 'y', 'z'], 'group', 'val');
+ * // [
+ * //   { category: 'A', source: 'chicago', group: 'x', val: 0.1 },
+ * //   { category: 'A', source: 'chicago', group: 'y', val: 0.6 },
+ * //   { category: 'A', source: 'chicago', group: 'z', val: 0.9 },
+ * //   { category: 'B', source: 'springfield', group: 'x', val: 0.7 },
+ * //   { category: 'B', source: 'springfield', group: 'y', val: 0.2 },
+ * //   { category: 'B', source: 'springfield', group: 'z', val: 1.1 },
+ * //   { category: 'C', source: 'winnetka', group: 'x', val: 0.6 },
+ * //   { category: 'C', source: 'winnetka', group: 'y', val: 0.1 },
+ * //   { category: 'C', source: 'winnetka', group: 'z', val: 0.2 }
+ * // ]
  * ```
  * 
  * @param {Object[]} objectCollection - collection

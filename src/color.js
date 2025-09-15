@@ -177,6 +177,8 @@ module.exports.INTERPOLATION_STRATEGIES = {
  * 
  * ```
  * //-- same as utils.color.INTERPOLATION_STRATEGIES.linear;
+ * red = '#FF0000';
+ * green = '#00FF00';
  * linear = (a, b, pct) => a + (b - a) * pct;
  * format = utils.color.FORMATS.ARRAY;
  * utils.color.interpolate(red, green, 0, linear, format); // [255, 0, 0, 1]
@@ -212,7 +214,7 @@ module.exports.interpolationStrategy = ColorUtils.INTERPOLATION_STRATEGIES.linea
  * green = `#0F0`;
  * 
  * utils.color.parseHex(red, 0.5); // [255, 0, 0, 0.5];
- * utils.color.parseHex(transparenRed); // [255, 0, 0, 1];
+ * utils.color.parseHex(transparentRed); // [255, 0, 0, 1];
  * utils.color.parseHex(green); // [0, 255, 0, 1];
  * ```
  * 
@@ -231,7 +233,7 @@ module.exports.parseHex3 = function parseHex3(hexStr, optionalAlpha = 1) {
   const [r, g, b, a = alphaDefault] = hexStr.match(/[a-fA-F0-9]/g)
     .map((hexPair) => Number.parseInt(hexPair, 16))
     .map((num) => num * 16 + num);
-  const cleanedA = (a / 255);
+  const cleanedA = (a / 255.0);
   return [r, g, b, cleanedA];
 };
 
@@ -310,7 +312,7 @@ module.exports.toHex = function toHex(target) {
 module.exports.toHexA = function toHexA(target, optionalAlpha = 1) {
   const [r, g, b, a] = ColorUtils.parse(target, optionalAlpha);
   const hexOut = (num) => num.toString(16).padStart(2, '0');
-  return `#${hexOut(r)}${hexOut(g)}${hexOut(b)}${hexOut(a * 255)}`;
+  return `#${hexOut(r)}${hexOut(g)}${hexOut(b)}${hexOut(Math.round(a * 255))}`;
 };
 
 /**
@@ -322,8 +324,8 @@ module.exports.toHexA = function toHexA(target, optionalAlpha = 1) {
  * red = `rgb(255, 0, 0, 1)`;
  * green = `rgb(0, 255, 0)`;
  * 
- * utils.color.parse(red, 0.9); // [255, 0, 0, 0.9];
- * utils.color.parse(green); // [0, 255, 0, 1];
+ * utils.color.parse(red); // [255, 0, 0];
+ * utils.color.parse(green, 0.9); // [0, 255, 0, 0.9];
  * ```
  * 
  * @param {String} rgbStr - string
@@ -334,9 +336,9 @@ module.exports.toHexA = function toHexA(target, optionalAlpha = 1) {
 module.exports.parseRGB = function parseRGB(rgbStr, optionalAlpha = 1) {
   if (!ColorUtils.COLOR_VALIDATION.isRGB(rgbStr)) return undefined;
 
-  const [r, g, b, a = optionalAlpha] = rgbStr.replace(/[^[0-9,]/g, '')
+  const [r, g, b, a = optionalAlpha] = rgbStr.replace(/[^[0-9,.]/g, '')
     .split(',')
-    .map((decStr) => Number.parseInt(decStr, 10));
+    .map((decStr, index) => index < 3 ? Number.parseInt(decStr, 10) : Number.parseFloat(decStr, 10));
   return [r, g, b, a];
 };
 
@@ -372,9 +374,9 @@ module.exports.parseRGBA = module.exports.parseRGB;
  * green = { r: 0, g: 255, b: 0, a: 0.5};
  * blue = 'rgb(0, 0, 255, 1)';
  * 
- * utils.color.toHex(red); // `rgb(255, 0, 0)`
- * utils.color.toHex(green); // `rgb(0, 255, 0)`
- * utils.color.toHex(blue); // `rgb(0, 0, 255)`
+ * utils.color.toHex(red); // `#ff0000`
+ * utils.color.toHex(green); // `#00ff00`
+ * utils.color.toHex(blue); // `#0000ff`
  * ```
  * 
  * @param {string|array|object} target - any of the Formats provided
@@ -404,7 +406,8 @@ module.exports.toRGB = function toRGB(target) {
  */
 module.exports.toRGBA = function toRGBA(target, optionalAlpha = 1) {
   const [r, g, b, a] = ColorUtils.parse(target, optionalAlpha);
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
+  /* istanbul ignore next */
+  return `rgba(${r}, ${g}, ${b}, ${(!a ? '1' : (a === 1 || a === 0) ? a : a.toFixed(3))})`;
 };
 
 /**
@@ -427,7 +430,7 @@ module.exports.toRGBA = function toRGBA(target, optionalAlpha = 1) {
  * @returns {Array} - array of format [r:Number[0-255], g: Number[0-255], b: Number[0-255], a: Number[0-1]]
  * @see {@link module:color.FORMATS|color.FORMATS}
  */
-module.exports.parseColorArray = function parseColorArray(targetArray, optionalAlpha) {
+module.exports.parseColorArray = function parseColorArray(targetArray, optionalAlpha = 1.0) {
   if (!Array.isArray(targetArray)) return undefined;
   const [r, g, b, a = optionalAlpha] = targetArray;
   return [r, g, b, a];
@@ -466,7 +469,7 @@ module.exports.toColorArray = function toColorArray(target, optionalAlpha = 1) {
  * ```
  * red = { r: 255, g: 0, b: 0 };
  * green = { r: 0, g: 255, b: 0, a: 1};
- * transparentBlue: { r: 0, g: 0, b: 255, a: 0};
+ * transparentBlue = { r: 0, g: 0, b: 255, a: 0};
  * 
  * utils.color.parseColorObject(red, 0.5); // [255, 0, 0, 0.5];
  * utils.color.parseColorObject(red); // [255, 0, 0, 1];
@@ -536,7 +539,7 @@ module.exports.toColorObject = function toColorObject(target, optionalAlpha = 1)
  * green = { r: 0, g: 255, b: 0};
  * blue = 'rgb(0, 0, 255, 1)';
  * 
- * utils.color.parse(red); // [255, 0, 0, 128]
+ * utils.color.parse(red); // [255, 0, 0, 0.53]
  * utils.color.parse(green); // [0, 255, 0, 1]
  * utils.color.parse(blue); // [0, 0, 255, 1]
  * ```
@@ -565,9 +568,9 @@ module.exports.parse = function parse(target, optionalAlpha = 1) {
  * green = { r: 0, g: 255, b: 0, a: 0.5};
  * blue = 'rgb(0, 0, 255, 1)';
  * 
- * utils.color.convert(red, color.FORMATS.OBJECT); // { r: 255, g: 0, b: 0, a: 0.5 }
- * utils.color.convert(green, color.FORMATS.ARRAY); // [0, 255, 0, 0.5]
- * utils.color.convert(blue, color.FORMATS.HEXA); // `#0000FFFF`
+ * utils.color.convert(red, utils.color.FORMATS.OBJECT); // { r: 255, g: 0, b: 0, a: 0.5 }
+ * utils.color.convert(green, utils.color.FORMATS.ARRAY); // [0, 255, 0, 0.5]
+ * utils.color.convert(blue, utils.color.FORMATS.HEXA); // `#0000FFFF`
  * ```
  * 
  * NOTE: you can also set the default format on the color utility,
@@ -722,6 +725,22 @@ module.exports.interpolator = function interpolator(
  * ```
  * black = `#000000`;
  * white = `#FFFFFF`;
+ * 
+ * categoricalColors = utils.color.generateSequence(black, white, 5);
+ * // [[ 0, 0, 0, 1 ],
+ * //   [ 64, 64, 64, 1 ],
+ * //   [ 128, 128, 128, 1 ],
+ * //   [ 191, 191, 191, 1 ],
+ * //   [ 255, 255, 255, 1 ]]
+ * ```
+ * 
+ * Note that the default format of the colors produced can be set by the default
+ * 
+ * ```
+ * black = `#000000`;
+ * white = `#FFFFFF`;
+ * 
+ * utils.color.defaultFormat = 'HEX';
  * 
  * categoricalColors = utils.color.generateSequence(black, white, 5);
  * // [' #000000' ,' #404040' ,' #808080' ,' #bfbfbf' ,' #ffffff' ]

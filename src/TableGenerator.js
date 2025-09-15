@@ -1751,7 +1751,7 @@ class TableGenerator {
     const prepResults = this.prepare();
     const results = {};
     const createFrameList = () => new Array(prepResults.data.length).fill(undefined);
-    prepResults.headers.forEach((header) => ObjectUtils.assign(results, header, createFrameList()));
+    prepResults.headers.forEach((header) => ObjectUtils.assignIP(results, header, createFrameList()));
 
     prepResults.data.forEach((row, rowIndex) => {
       row.forEach((value, valIndex) => {

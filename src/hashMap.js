@@ -40,7 +40,7 @@ const HashMapUtil = module.exports;
  * const keys = [...Object.keys(objectToMap)];
  * // ['key1', 'key2', 'key3'];
  * 
- * const result = keys.reduce(
+ * keys.reduce(
  *  (result, key) => utils.hashMap.add(result, key, objectToMap[key]),
  *  new Map()
  * );
@@ -68,11 +68,11 @@ module.exports.add = function add(map, key, value) {
  *   return value + 1;
  * };
  * 
- * HashMapUtil.getSet(initialMap, key, functor);
- * HashMapUtil.getSet(initialMap, key, functor);
- * HashMapUtil.getSet(initialMap, key, functor);
- * HashMapUtil.getSet(initialMap, key, functor);
- * HashMapUtil.getSet(initialMap, key, functor);
+ * utils.hashMap.getSet(initialMap, key, functor);
+ * utils.hashMap.getSet(initialMap, key, functor);
+ * utils.hashMap.getSet(initialMap, key, functor);
+ * utils.hashMap.getSet(initialMap, key, functor);
+ * utils.hashMap.getSet(initialMap, key, functor);
  * 
  * initialMap.get(key); // 5
  * ```
@@ -115,8 +115,8 @@ module.exports.clone = function clone(target) {
  * If allowOverwrite is true, then values found in additionalMap will take priority in case of conflicts.
  * 
  * ```
- * const targetMap = new Map([['first', 'John'], ['amount': 100]]);
- * const additionalMap = new Map([['last': 'Doe'], ['amount': 200]]);
+ * const targetMap = new Map([['first', 'John'], ['amount', 100]]);
+ * const additionalMap = new Map([['last', 'Doe'], ['amount', 200]]);
  * 
  * utils.hashMap.union(targetMap, additionalMap, true);
  * // Map([['first', 'John'], ['last', 'Doe'], ['amount', 200]]);
@@ -125,8 +125,8 @@ module.exports.clone = function clone(target) {
  * If allowOverwrite is false, then values found in targetMap will take priority in case of conflicts.
  * 
  * ```
- * const targetMap = new Map([['first', 'John'], ['amount': 100]]);
- * const additionalMap = new Map([['last': 'Doe'], ['amount': 200]]);
+ * const targetMap = new Map([['first', 'John'], ['amount', 100]]);
+ * const additionalMap = new Map([['last', 'Doe'], ['amount', 200]]);
  * 
  * utils.hashMap.union(targetMap, additionalMap);
  * utils.hashMap.union(targetMap, additionalMap, false);
@@ -162,7 +162,7 @@ module.exports.union = function union(targetMap, additionalMap, allowOverwrite) 
  * 
  * ```
  * const target = new Map([['first', 1], ['second', 2]]);
- * HashMapUtil.stringify(target);
+ * utils.hashMap.stringify(target);
  * // '{"dataType":"Map","value":[["first",1],["second",2]]}'
  * ```
  * 
@@ -203,7 +203,7 @@ module.exports.stringify = function stringify(map, indentation) {
  * We can convert it to an Object as follows:
  * 
  * ```
- * const targetMap = utils.hashMap.toObject(targetObject)
+ * utils.hashMap.toObject(targetMap)
  * // { first: 1, second: 2, third: 3 };
  * ```
  * 
@@ -239,7 +239,7 @@ module.exports.toObject = function toObject(target) {
  * We can convert it to a Map as follows:
  * 
  * ```
- * const targetMap = utils.hashMap.fromObject(targetObject)
+ * utils.hashMap.fromObject(targetObject)
  * // new Map([['first', 1], ['second', 2], ['third', 3]]);
  * ```
  * 
@@ -264,8 +264,8 @@ module.exports.fromObject = function fromObject(target) {
  * Simple and safe Map accessing function.
  * 
  * ```
- * styleMap = new Map(['1', 'background-color: #FF0000'], ['2', 'background-color: #00FF00']]);
- * styleFn = utils.map.mappingFn(styleMap, 'background-color: #aaaaaa');
+ * styleMap = new Map([['1', 'background-color: #FF0000'], ['2', 'background-color: #00FF00']]);
+ * styleFn = utils.hashMap.mappingFn(styleMap, 'background-color: #aaaaaa');
  * 
  * styleFn('1'); // 'background-color: #FF0000';
  * styleFn('2'); // 'background-color: #00FF00';
@@ -291,7 +291,7 @@ module.exports.mappingFn = function mappingFn(map, defaultValue = '') {
  * encodingMap = new Map([[' ', '%20'],['\\n', '%0A'],['\\t', '%09']]);
  * encodingMap.get(' '); // '%20'
  * 
- * decodingMap = utils.map.reverse(encodingMap);
+ * decodingMap = utils.hashMap.reverse(encodingMap);
  * decodingMap.get('%20'); // ' '
  * ```
  * 

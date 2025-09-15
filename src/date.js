@@ -127,8 +127,8 @@ module.exports.parse = (dateStr) => {
  * Prints the duration in ISO format: `D:HH:MM:SS.MMM`
  * 
  * ```
- * start = new Date(Date.ISO(2024, 12, 26, 12, 0, 0));
- * end = new Date(Date.ISO(2024, 12, 26, 13, 0, 0));
+ * start = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+ * end = new Date(Date.UTC(2024, 12, 26, 13, 0, 0));
  * 
  * duration = end.getTime() - start.getTime();
  * 
@@ -156,8 +156,8 @@ module.exports.durationISO = function durationISO(epochDifference) {
  * Prints the duration in long format: `D days, H hours, M minutes, S.MMM seconds`
  * 
  * ```
- * start = new Date(Date.ISO(2024, 12, 26, 12, 0, 0));
- * end = new Date(Date.ISO(2024, 12, 27, 13, 0, 0));
+ * start = new Date(Date.UTC(2024, 12, 26, 12, 0, 0));
+ * end = new Date(Date.UTC(2024, 12, 27, 13, 0, 0));
  * 
  * duration = end.getTime() - start.getTime();
  * 
@@ -317,7 +317,7 @@ module.exports.getTimezoneOffset = function getTimezoneOffset(timezoneStr) {
  * 
  * ```
  * dTest = new Date('2025-02-01T20:15:41.000'); // -- DID NOT INCLUDE Timezone, so it assumes local timezone
- * ({ epoch: dTest2.getTime(), iso: dTest.toISOString(), local: dTest.toLocaleString() });
+ * ({ epoch: dTest.getTime(), iso: dTest.toISOString(), local: dTest.toLocaleString() });
  * 
  * //-- time is INCORRECT, what should be the ISO time, is the local time.
  * //  local: '2/1/2025, 8:15:41 PM', iso: '2025-02-02T02:15:41.000Z', epoch: 1738440941000
@@ -380,7 +380,7 @@ module.exports.correctForTimezone = function correctForTimezone(date, localTimez
  * utils.date.correctForOtherTimezone( d, sourceTimezone, localTimezone);
  * 
  * //-- correctly converted it to the correct local time
- * // 2024-12-28T18:30:00.000Z
+ * // 2024-12-27T18:30:00.000Z
  * ```
  * 
  * @param {Date} date - the date to be corrected in a new instance
@@ -611,7 +611,7 @@ module.exports.overwrite = function overwrite(dateToUpdate, newDateEpoch) {
  * 
  * ```
  * d = new Date('2024-12-26 6:00:00');
- * d30 = utils.date.add(d, { minutes: 30 }); // Date('2024-12-26 6:00:00')
+ * d30 = utils.date.add(d, { minutes: 30 }); // Date('2024-12-26 6:30:00')
  * ```
  * 
  * @param {Date} dateValue - date to add to
@@ -622,17 +622,19 @@ module.exports.overwrite = function overwrite(dateToUpdate, newDateEpoch) {
  * @param {Number} [options.minutes=0] - number of minutes to add
  * @param {Number} [options.hours=0] - number of minutes to add 
  * @param {Number} [options.seconds=0] - number of seconds to add 
+ * @param {Number} [options.milliseconds=0] - number of milliseconds to add
  * @returns {Date} - Date with the interval added in
  */
 module.exports.add = function add(dateValue, options = null) {
   if (!options) return dateValue;
 
-  const { days = 0, minutes = 0, hours = 0, seconds = 0 } = options;
+  const { days = 0, minutes = 0, hours = 0, seconds = 0, milliseconds = 0 } = options;
   const result = new Date(dateValue.getTime()
     + DateUtils.TIME.DAY * days
     + DateUtils.TIME.HOUR * hours
     + DateUtils.TIME.MINUTE * minutes
-    + DateUtils.TIME.SECOND * seconds);
+    + DateUtils.TIME.SECOND * seconds
+    + DateUtils.TIME.MILLI * milliseconds);
   
   if (Object.hasOwn(options, 'years')) {
     result.setFullYear(result.getFullYear() + options.years);
@@ -690,7 +692,6 @@ module.exports.startOfDay = function endOfDay(dateValue) {
  * //   ['2025-02-06 00:00:00')
  * //   ['2025-02-07 00:00:00')
  * //   ['2025-02-08 00:00:00')
- * //   ['2025-02-09 00:00:00')
  * // ]
  * ```
  * 
@@ -729,11 +730,11 @@ module.exports.arrange = function arrange(startDate, count, options) {
  * 
  * ```
  * const startDate = new Date('2025-02-02');
- * const endDate = new Date('2025-02-09 23:59:59.000');
+ * const endDate = new Date('2025-02-09 23:59:59.000+0');
  * // alternative
  * // endDate = utils.date.endOfDay(utils.date.add(startDate, { days; 7 }));
  * 
- * utils.date.arrange(startDate, endDate, { days: 1 });
+ * utils.date.generateDateSequence(startDate, endDate, { days: 1 });
  * //   ['2025-02-02 00:00:00.000'],
  * //   ['2025-02-03 00:00:00.000'],
  * //   ['2025-02-04 00:00:00.000'],
@@ -1013,7 +1014,7 @@ class DateRange {
    * myRange.shiftStart({ days: 1 });
    * // { startDate: 2025-01-02, endDate: 2025-02-01 }
    * 
-   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-01 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * (Note that this defaults to immutable DateRanges,
@@ -1023,7 +1024,7 @@ class DateRange {
    * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
    * myRange.shiftStart({ days: 1 });
    * 
-   * myRange.toString(); // { startDate: 2025-01-02, endDate: 2025-02-01 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * @param {Object} options - options to shift the dateRange by, similar to {@link module:DateUtils.add|DateUtils.add}
@@ -1055,7 +1056,7 @@ class DateRange {
    * myRange.shiftEnd({ days: 1 });
    * // { startDate: 2025-01-01, endDate: 2025-02-02 }
    * 
-   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-01 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * (Note that this defaults to immutable DateRanges,
@@ -1065,7 +1066,7 @@ class DateRange {
    * myRange = new utils.DateRange('2025-01-01', '2025-02-01');
    * myRange.shiftEnd({ days: 1 });
    * 
-   * myRange.toString(); // { startDate: 2025-01-01, endDate: 2025-02-02 }
+   * myRange.toString(); // '2025-01-01T00:00:00.000Z to 2025-02-01T00:00:00.000Z'
    * ```
    * 
    * @param {Object} options - options to shift the dateRange by, similar to {@link module:DateUtils.add|DateUtils.add}
@@ -1097,7 +1098,7 @@ class DateRange {
    * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
-   * range.durationString(); // 1 hour in milliseconds; 1000 * 60 * 60;
+   * range.duration(); // 1 hour in milliseconds; 1000 * 60 * 60; 3600000
    * ```
    * 
    * @returns {Number}
@@ -1132,7 +1133,7 @@ class DateRange {
    * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
    * range = new utils.DateRange(durationA, durationB);
    * 
-   * range.durationString(); // '0:01:00:00.0000';
+   * range.durationISO(); // '0:01:00:00.000';
    * ```
    * 
    * @returns {String}
@@ -1144,6 +1145,16 @@ class DateRange {
 
   /**
    * Determines if both the startDate and endDate are valid dates.
+   * 
+   * ```
+   * durationA = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
+   * durationB = new Date(Date.UTC(2024, 11, 26, 13, 0, 0));
+   * invalidDate = new Date(Number.NaN);
+   * range = new utils.DateRange(durationA, durationB).isValid();     // true
+   * range = new utils.DateRange(invalidDate, durationB).isValid();   // false
+   * range = new utils.DateRange(durationA, invalidDate).isValid();   // false
+   * range = new utils.DateRange(invalidDate, invalidDate).isValid(); // false
+   * ```
    * 
    * @returns {Boolean}
    */
