@@ -58,6 +58,17 @@ global.describe('ColorUtil', () => {
     [0, 0, 0, 1],
     { r: 0, g: 0, b: 0, a: 1 }
   );
+  const SEMI_OPAQUE_BLACK = new ColorInfo(
+    'opaqueBlack',
+    '#000000',
+    '#00000088',
+    '#000',
+    '#0008',
+    'rgb( 0, 0, 0)',
+    'rgba(0, 0, 0, 0.700)',
+    [0, 0, 0, 0.7],
+    { r: 0, g: 0, b: 0, a: 0.7 }
+  );
 
   /*
   const TRANS_WHITE = new ColorInfo(
@@ -423,6 +434,64 @@ global.describe('ColorUtil', () => {
         expected = undefined;
         global.expect(ColorUtils[test](value)).toStrictEqual(expected);
       });
+      global.it('can parse rgbA', () => {
+        const test = 'parseRGBA';
+        let value;
+        let expected;
+
+        value = OPAQUE_COLOR.hex;
+        expected = undefined;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.hexa;
+        expected = undefined;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.hex3;
+        expected = undefined;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.hex3a;
+        expected = undefined;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.rgb;
+        expected = OPAQUE_COLOR.arr;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.rgba;
+        expected = OPAQUE_COLOR.arr;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.arr;
+        expected = undefined;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = OPAQUE_COLOR.obj;
+        expected = undefined;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+      });
+      global.it('can parse rgba with alphas', () => {
+        const test = 'parseRGB';
+        let value;
+        let expected;
+
+        value = 'rgba(255, 255, 255, 1)';
+        expected = [255, 255, 255, 1];
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = 'rgba(255, 255, 255, 0.5)';
+        expected = [255, 255, 255, 0.5];
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = 'rgba(255, 255, 255, 0)';
+        expected = [255, 255, 255, 0];
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = 'rgba(249.9, 255, 255, 0)';
+        expected = [249, 255, 255, 0];
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+      });
       global.it('can parse color arrays', () => {
         const test = 'parseColorArray';
         let value;
@@ -709,6 +778,10 @@ global.describe('ColorUtil', () => {
 
         value = OPAQUE_COLOR.obj;
         expected = OPAQUE_COLOR.rgba;
+        global.expect(ColorUtils[test](value)).toStrictEqual(expected);
+
+        value = SEMI_OPAQUE_BLACK.rgba;
+        expected = SEMI_OPAQUE_BLACK.rgba;
         global.expect(ColorUtils[test](value)).toStrictEqual(expected);
       });
       global.it('can convert color array', () => {

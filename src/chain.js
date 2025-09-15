@@ -87,7 +87,9 @@
  * ```
  * results = [{ userId: 'abc123' }, { userId: 'xyz987' }];
  * 
- * activeUsers = chain(results)
+ * // joining to existing collection of users
+ * 
+ * activeUsers = utils.chain(results)
  *  .chainMap((record) => users.get(record.userId))
  *  .chainForEach(record => record.status =  'active')
  *  .chain(records => d3.csv.format(records))
@@ -104,7 +106,7 @@
  *  + 'and%20I%20quote%20the%20fights%0AHistorical%0AFrom%20Marath'
  *  + 'on%20to%20Waterloo%2C%20in%20order%20categorical';
  * 
- * chain(badStr)
+ * utils.chain(badStr)
  *     .chain(decodeURIComponent)
  *     .chain(v => v.split('\n'))
  *     // .debug()                  // check the values along the way
@@ -190,7 +192,7 @@ class ChainContainer {
    * value = 2;
    * plus2 = (value) => value + 2;
    * 
-   * chain(value)
+   * utils.chain(value)
    *  .chain(plus2) // 2 + 2
    *  .chain(plus2) // 4 + 2
    *  .debug()
@@ -210,7 +212,7 @@ class ChainContainer {
    *  + 'and%20I%20quote%20the%20fights%0AHistorical%0AFrom%20Marath'
    *  + 'on%20to%20Waterloo%2C%20in%20order%20categorical';
    * 
-   * chain(badStr)
+   * utils.chain(badStr)
    *     .chain(decodeURIComponent)
    *     .chain(v => v.split('\n'))
    *     // .debug()                  // check the values along the way
@@ -338,7 +340,7 @@ class ChainContainer {
    * filterOdd(2); // [2]
    * filterOdd(1); // []
    * 
-   * chain([1, 2, 3, 4, 5])
+   * utils.chain([1, 2, 3, 4, 5])
    *  .chainFlatMap(filterOdd)
    *  .close();
    * 
@@ -359,7 +361,7 @@ class ChainContainer {
    * Assuming that value is an array, this maps fn to filter the results in the array.
    * 
    * ```
-   * chain([1,2,3,4])
+   * utils.chain([1,2,3,4])
    *    .chainFilter((value) => value < 3)
    *    .close();
    * // [1, 2]
@@ -412,7 +414,7 @@ class ChainContainer {
    * value = 2;
    * plus2 = (value) => value + 2;
    * 
-   * chain(value)
+   * utils.chain(value)
    *  .chain(plus2) // 2 + 2
    *  .chain(plus2) // 4 + 2
    *  .debug()
@@ -443,7 +445,7 @@ class ChainContainer {
    * ```
    * results = [{ userId: 'abc123' }, { userId: 'xyz987' }];
    * 
-   * activeUsers = chain(results)
+   * activeUsers = utils.chain(results)
    *  .chainMap((record) => users.get(record.userId))
    *  .chainForEach(record => record.status =  'active')
    *  .chain(records => d3.csv.format(records))
@@ -472,7 +474,7 @@ class ChainContainer {
    *   throw Error('Custom Error');
    * };
    * 
-   * chain(2)
+   * utils.chain(2)
    *   .errorHandler(flipSwitch)
    *   .chain((value) => value + 2)
    *   .chain(throwError);
@@ -642,7 +644,7 @@ class ChainContainer {
  * Very helpful for taking values and then progressively working on them,
  * instead of continually wrapping deeper in method calls.
  * 
- * Calling `chain(3)` - gives an object you can then chain calls against:
+ * Calling `utils.chain(3)` - gives an object you can then chain calls against:
  * 
  * * {@link ChainContainer#close|.close()} - gets the value of the current chain
  * * {@link ChainContainer#chain|.chain(function)} - where it is passed the value, and returns a new Chain with that value.
@@ -720,7 +722,7 @@ class ChainContainer {
  * ```
  * results = [{ userId: 'abc123' }, { userId: 'xyz987' }];
  * 
- * activeUsers = chain(results)
+ * activeUsers = utils.chain(results)
  *  .chainMap((record) => users.get(record.userId))
  *  .chainForEach(record => record.status =  'active')
  *  .chain(records => d3.csv.format(records))
@@ -737,7 +739,7 @@ class ChainContainer {
  *  + 'and%20I%20quote%20the%20fights%0AHistorical%0AFrom%20Marath'
  *  + 'on%20to%20Waterloo%2C%20in%20order%20categorical';
  * 
- * chain(badStr)
+ * utils.chain(badStr)
  *     .chain(decodeURIComponent)
  *     .chain(v => v.split('\n'))
  *     // .debug()                  // check the values along the way

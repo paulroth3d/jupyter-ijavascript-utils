@@ -244,6 +244,13 @@ global.describe('Date', () => {
         const results = DateUtils.add(originalTime, options);
         global.expect(results).toStrictEqual(expected);
       });
+      global.it('5 milliseconds', () => {
+        const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0, 0));
+        const expected     = new Date(Date.UTC(2024, 11, 26, 12, 0, 0, 500));
+        const options = { milliseconds: 500 };
+        const results = DateUtils.add(originalTime, options);
+        global.expect(results).toStrictEqual(expected);
+      });
       global.it('1 year', () => {
         const originalTime = new Date(Date.UTC(2024, 11, 26, 12, 0, 0));
         const expected     = new Date(Date.UTC(2025, 11, 26, 12, 0, 0));

@@ -38,17 +38,46 @@ describe('ObjectUtils', () => {
   });
 
   describe('objAssign', () => {
-    it('assigns a value on an existing object', () => {
+    it('can assign multiple values', () => {
       const expected = { first: 'john', last: 'doe' };
       let found = {};
-      found = ObjectUtils.objAssign(found, 'first', 'john');
-      found = ObjectUtils.objAssign(found, 'last', 'doe');
+      found = ObjectUtils.objAssign(found, 'first', 'john', 'last', 'doe');
       expect(found).toEqual(expected);
     });
     it('assigns a value even on an empty object', () => {
       const expected = { first: 'john' };
       const found = ObjectUtils.objAssign(undefined, 'first', 'john');
       expect(found).toEqual(expected);
+    });
+  });
+  describe('objAssignIP', () => {
+    global.it('assigns a value on an existing object', () => {
+      const expected = { first: 'john', last: 'doe' };
+      const found = {};
+      ObjectUtils.objAssignIP(found, 'first', 'john');
+      ObjectUtils.objAssignIP(found, 'last', 'doe');
+      expect(found).toEqual(expected);
+    });
+    global.it('can assign multiple values at the same time', () => {
+      const expected = { first: 'john', last: 'doe' };
+      const found = {};
+      ObjectUtils.objAssignIP(found, 'first', 'john', 'last', 'doe');
+      expect(found).toEqual(expected);
+    });
+    global.it('assigns a value even on an empty object', () => {
+      const expected = { first: 'john' };
+      const found = ObjectUtils.objAssignIP(undefined, 'first', 'john');
+      expect(found).toEqual(expected);
+    });
+    global.it('assigns a value on an existing object', () => {
+      const data = { first: 'john', last: 'doe' };
+      const propName = null;
+      const propValue = 23;
+      const expected = 'Expecting at least one property name to be passed';
+
+      global.expect(() => {
+        ObjectUtils.objAssignIP(data, propName, propValue);
+      }).toThrow(expected);
     });
   });
   describe('propertyObj', () => {
@@ -4621,6 +4650,22 @@ describe('ObjectUtils', () => {
       const expected = 10;
       const results = initialObject[key];
       global.expect(results).toBe(expected);
+    });
+  });
+  global.describe('get', () => {
+    global.it('can get a value', () => {
+      const data = { first: 'john', last: 'doe' };
+      const accessor = 'first';
+      const expected = 'john';
+      const results = ObjectUtils.get(data, accessor);
+      global.expect(results).toBe(expected);
+    });
+    global.it('can get a value', () => {
+      const data = { first: 'john', last: 'doe' };
+      const accessor = null;
+      const expected = 'object.mapByProperty: expects a propertyName';
+
+      global.expect(() => ObjectUtils.get(data, accessor)).toThrow(expected);
     });
   });
 

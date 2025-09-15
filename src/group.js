@@ -172,7 +172,6 @@ module.exports.by = function by(collection, prop, ...rest) {
  * @see {@link module:group.by|group.by(collection, fields, ...)} - to group records
  * 
  * @example
- * const data = [
  * weather = [
  *   { id: 1, city: 'Seattle',  month: 'Aug', precip: 0.87, dateTime: new Date(2020, 7, 1)  , year: 2020},
  *   { id: 2, city: 'Seattle',  month: 'Dec', precip: 5.31, dateTime: new Date(2020, 11, 1) , year: 2020},
@@ -233,7 +232,7 @@ module.exports.rollup = function rollup(collection, reducer, prop, ...fields) {
  *   { city: 'Chicago', min: 2.56, max: 3.98, avg: 3.387 }
  * ]
  * 
- * separateByFields(aggregateWeather, 'min', 'max', 'avg')
+ * utils.group.separateByFields(aggregateWeather, 'min', 'max', 'avg');
  * 
  * //-- gives
  * [
@@ -286,7 +285,7 @@ module.exports.separateByFields = function separateByFields(collection, ...field
  * ];
  * 
  * athletesByName = utils.group.index(athletes, 'name');
- * facts.map(({about: name, ...rest}) => ({...rest, name, ...athletesByName.get(name)}))
+ * facts.map(({about: name, ...rest}) => ({...rest, name, ...athletesByName.get(name)}));
  * 
  * // [
  * //   {
