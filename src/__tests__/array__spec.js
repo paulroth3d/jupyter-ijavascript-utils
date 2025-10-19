@@ -1742,6 +1742,10 @@ line3`;
 
       result = itr.next();
       global.expect(result.value).toBe(5);
+      global.expect(result.done).toBe(false);
+
+      result = itr.next();
+      global.expect(result.value).toBe(undefined);
       global.expect(result.done).toBe(true);
     });
     global.it('get duplicate the iterator', () => {
@@ -1759,8 +1763,12 @@ line3`;
       global.expect(result.value).toBe(1);
 
       result = itr2.next();
-      global.expect(result.done).toBe(true);
+      global.expect(result.done).toBe(false);
       global.expect(result.value).toBe(2);
+
+      result = itr2.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(undefined);
     });
     global.it('can iterate over an empty list', () => {
       const values = [];
@@ -1778,8 +1786,12 @@ line3`;
       global.expect(result.value).toBe(0);
 
       result = itr.next();
-      global.expect(result.done).toBe(true);
+      global.expect(result.done).toBe(false);
       global.expect(result.value).toBe(1);
+
+      result = itr.next();
+      global.expect(result.done).toBe(true);
+      global.expect(result.value).toBe(undefined);
     });
     global.it('can go past the end of the array', () => {
       const values = new Set([0, 1]);
@@ -1790,15 +1802,146 @@ line3`;
       global.expect(result.value).toBe(0);
 
       result = itr.next();
-      global.expect(result.done).toBe(true);
+      global.expect(result.done).toBe(false);
       global.expect(result.value).toBe(1);
 
       result = itr.next();
       global.expect(result.done).toBe(true);
       global.expect(result.value).toBe(undefined);
     });
+    global.it('has the the last item in the list as undefined', () => {
+      const values = [0, 1, 2, 3, 4, 5];
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      itr.next();
+      itr.next();
+      itr.next();
+      itr.next();
+
+      let result = itr.next();
+  
+      //-- this is needed for for loops to work as expected...
+      result = itr.peek.next();
+      global.expect(result.value).toBe(5);
+      global.expect(result.done).toBe(false);
+
+      result = itr.peek.next();
+      global.expect(result.value).toBe(undefined);
+      global.expect(result.done).toBe(true);
+    });
+    global.it('for loops work', () => {
+      const values = [0, 1, 2, 3, 4, 5];
+      const itr = new ArrayUtils.PeekableArrayIterator(values);
+
+      const expected = [0, 1, 2, 3, 4, 5];
+      const results = [];
+
+      for (const i of itr) {
+        results.push(i);
+      }
+
+      global.expect(results).toStrictEqual(expected);
+    });
     global.describe('can peek at values', () => {
       global.it('without messing up the main iterator', () => {
+        const values = [0, 1, 2, 3, 4, 5];
+        const itr = new ArrayUtils.PeekableArrayIterator(values);
+  
+        let result = itr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(0);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(1);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(2);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(3);
+  
+        result = itr.peek.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(4);
+  
+        result = itr.peek.next();
+        global.expect(result.value).toBe(5);
+        global.expect(result.done).toBe(false);
+  
+        result = itr.peek.next();
+        global.expect(result.value).toBe(undefined);
+        global.expect(result.done).toBe(true);
+  
+        result = itr.peek.next();
+        global.expect(result.value).toBe(undefined);
+        global.expect(result.done).toBe(true);
+  
+        result = itr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(1);
+      });
+      global.it('can use peekItr', () => {
+        const source = [0, 1, 2, 3, 4, 5];
+        const itr = new ArrayUtils.PeekableArrayIterator(source);
+
+        itr.next();
+        itr.next();
+
+        let result = itr.next();
+        global.expect(result.value).toBe(2);
+        global.expect(result.done).toBe(false);
+
+        const peekItr = itr.peekItr();
+        result = peekItr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(3);
+
+        result = peekItr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(4);
+
+        result = peekItr.next();
+        global.expect(result.done).toBe(false);
+        global.expect(result.value).toBe(5);
+
+        result = peekItr.next();
+        global.expect(result.done).toBe(true);
+        global.expect(result.value).toBe(undefined);
+      });
+      global.it('can use iterator for loop', () => {
+        const source = [0, 1, 2, 3, 4, 5];
+        const itr = new ArrayUtils.PeekableArrayIterator(source);
+
+        itr.next();
+        itr.next();
+
+        const expectedResults = [2, 3, 4, 5];
+        const resultList = [];
+
+        for (const i of itr) {
+          resultList.push(i);
+        }
+        global.expect(resultList).toStrictEqual(expectedResults);
+      });
+      global.it('can use peek for loop', () => {
+        const source = [0, 1, 2, 3, 4, 5];
+        const itr = new ArrayUtils.PeekableArrayIterator(source);
+
+        itr.next();
+        itr.next();
+
+        const expectedResults = [2, 3, 4, 5];
+        const resultList = [];
+
+        for (const i of itr.peek) {
+          resultList.push(i);
+        }
+        global.expect(resultList).toStrictEqual(expectedResults);
+      });
+      global.it('can use peekItr', () => {
         const values = [0, 1, 2, 3, 4, 5];
         const itr = new ArrayUtils.PeekableArrayIterator(values);
   
