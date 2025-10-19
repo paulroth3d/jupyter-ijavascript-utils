@@ -1210,9 +1210,7 @@ module.exports.extractFromHardSpacedTable = function extractFromHardSpacedTable(
 /**
  * Create an iterator for an array that allows for peeking next values.
  * 
- * @see https://www.npmjs.com/package/peekable-array-iterator
- * @example
- * 
+ * ```
  * source = [0, 1, 2, 3, 4, 5];
  * 
  * // also quite helpful for document.querySelector(...)
@@ -1221,22 +1219,26 @@ module.exports.extractFromHardSpacedTable = function extractFromHardSpacedTable(
  * console.log(itr.next()); // { done: false, value: 0 }
  * 
  * //-- peek without moving the iterator
- * const peekItr = itr.peek();
- * console.log(peekItr.next()); // { done: false, value: 1 }
- * console.log(peekItr.next()); // { done: false, value: 2 }
- * console.log(peekItr.next()); // { done: false, value: 3 }
- * console.log(peekItr.next()); // { done: false, value: 4 }
- * console.log(peekItr.next()); // { done: true, value: 5 }
+ * console.log(itr.peek.next()); // { done: false, value: 1 }
+ * console.log(itr.peek.next()); // { done: false, value: 2 }
+ * console.log(itr.peek.next()); // { done: false, value: 3 }
+ * console.log(itr.peek.next()); // { done: false, value: 4 }
+ * console.log(itr.peek.next()); // { done: true, value: 5 }
  * 
  * //-- move the main iterator
  * console.log(itr.next()); // { done: false, value: 1 }
+ * ```
  * 
  * Of course, for each will always work
- * or
- * for (let i of new utils.array.PeekableArrayIterator(list)) {
+ * 
+ * ```
+ * for (let i of new utils.array.PeekableArrayIterator(source)) {
  *   console.log(i);
  * }
  * // 1\n2\n3\n4\n5
+ * ```
+ * 
+ * @see https://www.npmjs.com/package/peekable-array-iterator
  */
 class PeekableArrayIterator {
   /**
@@ -1261,9 +1263,12 @@ class PeekableArrayIterator {
       }
       return undefined;
     })();
+    this.peekItr = function peekItr() {
+      return this.peek;
+    };
 
     this.i += 1;
-    return { done: this.i >= this.array.length - 1, value: this.array[this.i] };
+    return { done: this.i >= this.array.length, value: this.array[this.i] };
   }
   /* eslint-enable wrap-iife */
 }

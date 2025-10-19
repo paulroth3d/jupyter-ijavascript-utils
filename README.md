@@ -54,6 +54,8 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
 # What's New 
+* 1.62 - Update to Array.peekableIterator to include peekItr() as sugar for .peek
+* 1.61 - Docs Updated
 * 1.60 - Make post-processing of documents easier with ijs.utils.markDocumentPosition
 * 1.59 - 
     * #95 - give control with page breaks. So we can render text before the page break (like for headers) - or even get the html used and render it how we want.
@@ -131,6 +133,42 @@ found under the [docResources/notebooks](https://github.com/paulroth3d/jupyter-i
 (Note that if you wish to `require` additional packages - like `jupyter-ijavascript-utils`,
 simply create a package in the folder you will run the `jupyter lab` command
 - such as the sample one under [docResources/notebooks/package.json](https://github.com/paulroth3d/jupyter-ijavascript-utils/blob/main/docResources/notebooks/package.json))
+
+## Converting Local Functions to a Local Library
+
+Often - Jupyter is not the best place to do development, and folks would like to develop in their own favourite IDE.
+
+You can write local modules (ex: `lib.js`) relative to your notebook, and then use `require('./lib')` to access them in your notebook. (see the section below on ESM Modules)
+
+NOTE: re-running the require will use a `cached version` of your module, and `may not reflect changes you just made`.
+
+(For this and other reasons, it can be helpful to have a `version` attribute to your module - to ensure the latest code is accessible)
+
+There typically are two options:
+
+* re-run the entire notebook
+
+* use a "cache bypass" only for your local library. ex: [https://www.npmjs.com/package/import-fresh](import-fresh)
+
+Using a cache bypass is fairly simple, and behaves somethng similar to this:
+
+```
+utils = reqire('jupyter-ijavascript-utils');
+importFresh = require('import-fresh');
+// other imports go here
+
+//-- clear the output so it doesn't pollute with nonsense we don't care about.
+utils.ijs.clearOutput();
+```
+
+and then load your module in a separate cell:
+
+```
+lib = importFresh('./lib');
+lib.version; // 1.0.0
+```
+
+and if you change your library, you can then just rn tat cell again
 
 ## ESM Modules + D3
 
