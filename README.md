@@ -53,7 +53,16 @@ This is not intended to be the only way to accomplish many of these tasks, and a
 
 ![Screenshot of example notebook](docResources/img/mainExampleNotebook.png)
 
+## NOTE - iJavaScript Stalemate
+
+iJavaScript currently requires node v20 to run, and fails on versions higher due to zeromq issues [See bug 297 on iJavaScript](https://github.com/n-riesco/ijavascript/issues/297)
+
+Additionally, vega has now moved to ESM Modules - [vega versions](https://www.npmjs.com/package/vega?activeTab=versions), and [vega-lite versions](https://www.npmjs.com/package/vega-lite?activeTab=versions)
+
+iJavaScript only supports ESM Modules with [esm-hook](https://www.npmjs.com/package/esm-hook) - [see issue 210](https://github.com/n-riesco/ijavascript/issues/210)
+
 # What's New 
+* 1.64 - using the latest version of vega/vega-lite prior to ESM update
 * 1.62 - Update to Array.peekableIterator to include peekItr() as sugar for .peek
 * 1.61 - Docs Updated
 * 1.60 - Make post-processing of documents easier with ijs.utils.markDocumentPosition
