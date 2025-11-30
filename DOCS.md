@@ -73,7 +73,16 @@ and can try right in your browser.
 Give it a try here:
 [![Binder:what can I do with this](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/paulroth3d/jupyter-ijavascript-utils/main?labpath=example.ipynb)
 
+## NOTE - iJavaScript Stalemate
+
+iJavaScript currently requires node v20 to run, and fails on versions higher due to zeromq issues [See bug 297 on iJavaScript](https://github.com/n-riesco/ijavascript/issues/297)
+
+Additionally, vega has now moved to ESM Modules - [vega versions](https://www.npmjs.com/package/vega?activeTab=versions), and [vega-lite versions](https://www.npmjs.com/package/vega-lite?activeTab=versions)
+
+iJavaScript only supports ESM Modules with [esm-hook](https://www.npmjs.com/package/esm-hook) - [see issue 210](https://github.com/n-riesco/ijavascript/issues/210)
+
 ## What's New
+* 1.64 - using the latest version of vega/vega-lite prior to ESM update
 * 1.62 - Update to Array.peekableIterator to include peekItr() as sugar for .peek
 * 1.61 - Docs Updated
 * 1.60 - Make post-processing of documents easier with {@link module:ijs.markDocumentPosition|ijs.markDocumentPosition}

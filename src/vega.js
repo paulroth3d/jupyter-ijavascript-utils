@@ -1,3 +1,5 @@
+require('esm-hook');
+
 const Vega = require('vega');
 const VegaLite = require('vega-lite');
 const VegaLiteApi = require('vega-lite-api');

@@ -1,3 +1,5 @@
+require('esm-hook');
+
 const aggregate = require('./aggregate');
 const array = require('./array');
 const base64 = require('./base64');
