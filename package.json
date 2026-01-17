@@ -1,9 +1,10 @@
 {
   "name": "jupyter-ijavascript-utils",
-  "version": "1.64.0",
+  "version": "1.65.0",
   "description": "Utilities for working with iJavaScript - a Jupyter Kernel",
   "homepage": "https://jupyter-ijavascript-utils.onrender.com/",
   "license": "MIT",
+  "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
     "prebuild": "npm run lint && npm run test:coverage",

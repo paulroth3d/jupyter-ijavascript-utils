@@ -62,6 +62,7 @@ Additionally, vega has now moved to ESM Modules - [vega versions](https://www.np
 iJavaScript only supports ESM Modules with [esm-hook](https://www.npmjs.com/package/esm-hook) - [see issue 210](https://github.com/n-riesco/ijavascript/issues/210)
 
 # What's New 
+* 1.65 - update module type to explicitly state commonJS
 * 1.64 - using the latest version of vega/vega-lite prior to ESM update
 * 1.62 - Update to Array.peekableIterator to include peekItr() as sugar for .peek
 * 1.61 - Docs Updated
